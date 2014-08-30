@@ -1,0 +1,16 @@
+KGT: Kate's Grammar Tool
+
+Railroad Syntax Diagrams
+
+
+http://www-cgi.uni-regensburg.de/~brf09510/grammartypes.html
+
+
+TODO: explain source organisation, particularly for SID's generated .h files overwriting each other
+describe this more as a translator than a compiler. because the IR matches both the input and output in structure
+
+
+TODO: "unexpected EOF" message
+
+TODO: centralise xerror() to prefix "kgt: "
+

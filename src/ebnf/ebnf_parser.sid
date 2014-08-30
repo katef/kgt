@@ -1,0 +1,182 @@
+/* $Id$ */
+
+/*
+ * Extended Backus-Naur Form Parser
+ * As defined by ISO/IEC 14977:1996(E)
+ *
+ * TODO: postfix * (esp for groups, versus individual terms)
+ * TODO: - subtraction thingies
+ * TODO: names with spaces (<concaternate-name>(list-of-names))
+ * TODO: multiplicative 3 * term stuff
+ */
+
+%types%
+
+	STRING;
+	NUMBER;
+
+	/* AST elements */
+	PRODUCTION;
+	TERM;
+	ALT;
+
+%terminals%
+
+	!error;
+	!unrecognised;
+
+	equals;
+	alt;
+	sep;
+	!except;
+
+	star;
+	cat;
+	!opt;
+
+	start-group;
+	end-group;
+	start-opt;
+	end-opt;
+	start-star;
+	end-star;
+
+	empty;
+	name: () -> (:STRING);
+	literal: () -> (:STRING);
+	number: () -> (:NUMBER);
+
+%productions%
+
+	<make-empty-term>: () -> (:TERM);
+	<make-literal-term>: (:STRING) -> (:TERM);
+	<make-production-term>: (:STRING) -> (:TERM);
+	<make-alt>: (:TERM) -> (:ALT);
+	<make-production>: (:STRING, :ALT) -> (:PRODUCTION);
+	<make-empty-production>: () -> (:PRODUCTION);
+
+	<make-star-group>: (:ALT) -> (:TERM);
+	<make-opt-group>: (:ALT) -> (:TERM);
+	<make-alt-group>: (:ALT) -> (:TERM);
+
+	<set-repeat>: (:TERM, :NUMBER) -> ();
+
+	<add-term-to-list>: (:TERM, :TERM) -> ();
+	<add-alt-to-list>: (:ALT, :ALT) -> ();
+	<add-production-to-list>: (:PRODUCTION, :PRODUCTION) -> ();
+
+	<err-expected-alt>;
+	<err-expected-sep>;
+	<err-expected-equals>;
+	<err-unhandled>;
+
+	list-of-terms: () -> (:TERM);
+	list-of-alts: () -> (:ALT);
+
+
+	term: () -> (t :TERM) = {
+		empty;
+		t = <make-empty-term>;
+	||
+		l = literal;
+		t = <make-literal-term>(l);
+	||
+		n = name;
+		t = <make-production-term>(n);
+	};
+
+	factor: () -> (t :TERM) = {
+		t = term;
+	||
+		start-star;
+		a = list-of-alts;
+		end-star;
+
+		t = <make-star-group>(a);
+	||
+		start-opt;
+		a = list-of-alts;
+		end-opt;
+
+		t = <make-opt-group>(a);
+	||
+		start-group;
+		a = list-of-alts;
+		end-group;
+
+		t = <make-alt-group>(a);
+	};
+
+	repeatable-factor: () -> (t :TERM) = {
+		t = factor;
+	||
+		n = number;
+		star;
+		t = factor;
+		<set-repeat>(t, n);
+	};
+
+	list-of-terms: () -> (l :TERM) = {
+		l = repeatable-factor;
+	||
+		l = repeatable-factor;
+		cat;
+		t = list-of-terms;
+		<add-term-to-list>(t, l);
+	};
+
+	list-of-alts: () -> (l :ALT) = {
+		t = list-of-terms;
+		l = <make-alt>(t);
+	||
+		t = list-of-terms;
+
+		{
+			alt;
+		##
+			<err-expected-alt>;
+		};
+
+		a = list-of-alts;
+		l = <make-alt>(t);
+		<add-alt-to-list>(a, l);
+	};
+
+	production: () -> (p :PRODUCTION) = {
+		n = name;
+
+		{
+			equals;
+		##
+			<err-expected-equals>;
+		};
+
+		a = list-of-alts;
+		p = <make-production>(n, a);
+
+		{
+			sep;
+		##
+			<err-expected-sep>;
+		};
+	};
+
+	list-of-productions: () -> (l :PRODUCTION) = {
+		l = production;
+	||
+		l = production;
+		p = list-of-productions();
+		<add-production-to-list>(p, l);
+	};
+
+	ebnf-grammar: () -> (l :PRODUCTION) = {
+		l = list-of-productions;
+	##
+		l = <make-empty-production>;
+		<err-unhandled>;
+	};
+
+%entry%
+
+	ebnf-grammar;
+

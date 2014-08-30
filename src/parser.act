@@ -1,0 +1,221 @@
+/* $Id$ */
+
+/*
+ * Shared parser actions
+ */
+
+%prefixes%
+
+	terminal = tok_;
+	function = prod_;
+
+%maps%
+
+	STRING -> map_string;
+	NUMBER -> map_number;
+
+	TERM -> map_term;
+	ALT -> map_alt;
+	PRODUCTION -> map_production;
+
+%header% @{
+
+	#include <stdlib.h>
+	#include <string.h>
+	#include <assert.h>
+	#include <ctype.h>
+
+	#include "../io.h"
+	#include "../ast.h"
+	#include "../main.h"
+	#include "../tokens.h"
+
+	/* See main.c */
+	extern int act_currenttoken;
+	extern int act_read_token(void);
+
+	int act_savedtoken;
+
+	/* Interfaces required by SID's generated parser */
+	#define ERROR_TERMINAL   @$error
+	#define CURRENT_TERMINAL act_currenttoken
+	#define ADVANCE_LEXER    do { act_currenttoken = act_read_token(); } while (0)
+	#define SAVE_LEXER(t)    do { act_savedtoken = act_currenttoken; act_currenttoken = (t); } while (0)
+	#define RESTORE_LEXER    do { act_currenttoken = act_savedtoken; } while (0)
+
+	/* See %maps% */
+	typedef const char * map_string;
+	typedef unsigned int map_number;
+
+	typedef struct ast_term * map_term;
+	typedef struct ast_alt * map_alt;
+	typedef struct ast_production * map_production;
+
+	static void expected(const char *msg) {
+		if (msg == NULL) {
+			xerror("syntax error on line %u", io_line);
+		} else {
+			xerror("syntax error on line %u: expected %s", io_line, msg);
+		}
+	}
+
+	static void rtrim(char *s) {
+		char *p = s + strlen(s) - 1;
+
+		assert(strlen(s) > 0);
+
+		while (p >= s && isspace((unsigned char) *p)) {
+			*p-- = '\0';
+		}
+	}
+
+@}, @{
+
+@};
+
+%assignments%
+
+%parameter-assignments%
+
+%result-assignments%
+
+%terminals%
+
+	name: () -> (s :STRING) = @{
+		assert(strlen(io_buffer) > 0);
+		assert(!isspace((unsigned char) io_buffer[0]));
+		rtrim(io_buffer);
+		@s = xstrdup(io_buffer);
+		io_flush();
+	@};
+
+	literal: () -> (s :STRING) = @{
+		assert(strlen(io_buffer) > 0);
+		@s = xstrdup(io_buffer);
+		io_flush();
+	@};
+
+	number: () -> (n :NUMBER) = @{
+		assert(strlen(io_buffer) > 0);
+
+		if (strlen(io_buffer) > 5) {
+			xerror("numeric literals may be 5 digits maximum");
+		}
+
+		@n = atoi(io_buffer);
+		io_flush();
+	@};
+
+%actions%
+
+	/* TODO: big pile of error messages */
+
+
+	<make-empty-term>: () -> (t :TERM) = @{
+		@t = xmalloc(sizeof *@t);
+		@t->type = TYPE_EMPTY;
+		@t->repeat = 1;
+		@t->next = NULL;
+	@};
+
+	<make-literal-term>: (l :STRING) -> (t :TERM) = @{
+		@t = xmalloc(sizeof *@t);
+		@t->type = TYPE_TERMINAL;	/* TODO rename to literal or vice-versa, perhaps */
+		@t->u.literal = @l;
+		@t->repeat = 1;
+		@t->next = NULL;
+	@};
+
+	<make-production-term>: (n :STRING) -> (t :TERM) = @{
+		@t = xmalloc(sizeof *@t);
+		@t->type = TYPE_PRODUCTION;
+		@t->u.name = @n;
+		@t->repeat = 1;
+		@t->next = NULL;
+	@};
+
+	<make-alt>: (t :TERM) -> (a :ALT) = @{
+		@a = xmalloc(sizeof *@a);
+		@a->terms = @t;
+		@a->next = NULL;
+	@};
+
+	<make-production>: (n :STRING, a :ALT) -> (p :PRODUCTION) = @{
+		@p = xmalloc(sizeof *@p);
+		@p->name = @n;
+		@p->alts = @a;
+		@p->next = NULL;
+	@};
+
+	<make-empty-production>: () -> (p :PRODUCTION) = @{
+		@p = NULL;
+	@};
+
+
+	<make-star-group>: (a :ALT) -> (t :TERM) = @{
+		@t = xmalloc(sizeof *@t);
+		@t->type = TYPE_GROUP;
+		@t->u.group = xmalloc(sizeof *@t->u.group);
+		@t->u.group->kleene = KLEENE_STAR;
+		@t->u.group->alts = @a;
+	@};
+
+	<make-opt-group>: (a :ALT) -> (t :TERM) = @{
+		@t = xmalloc(sizeof *@t);
+		@t->type = TYPE_GROUP;
+		@t->u.group = xmalloc(sizeof *@t->u.group);
+		@t->u.group->kleene = KLEENE_OPTIONAL;
+		@t->u.group->alts = @a;
+	@};
+
+	<make-alt-group>: (a :ALT) -> (t :TERM) = @{
+		@t = xmalloc(sizeof *@t);
+		@t->type = TYPE_GROUP;
+		@t->u.group = xmalloc(sizeof *@t->u.group);
+		@t->u.group->kleene = KLEENE_GROUP;
+		@t->u.group->alts = @a;
+	@};
+
+
+	<set-repeat>: (t :TERM, n :NUMBER) -> () = @{
+		assert(@n > 0);
+		@t->repeat = @n;
+	@};
+
+
+	<add-term-to-list>: (l :TERM, t :TERM) -> () = @{
+		assert(@t->next == NULL);
+		@t->next = @l;
+	@};
+
+	<add-alt-to-list>: (l :ALT, a :ALT) -> () = @{
+		assert(@a->next == NULL);
+		@a->next = @l;
+	@};
+
+	<add-production-to-list>: (l :PRODUCTION, p :PRODUCTION) -> () = @{
+		assert(@p->next == NULL);
+		@p->next = @l;
+	@};
+
+
+	<err-expected-alt> = @{
+		expected("alternative separator");
+	@};
+
+	<err-expected-sep> = @{
+		expected("alternative separator");
+	@};
+
+	<err-expected-equals> = @{
+		expected("production assignment");
+	@};
+
+	<err-unhandled> = @{
+		expected(NULL);
+	@};
+
+%trailer% @{
+@}, @{
+@};
+

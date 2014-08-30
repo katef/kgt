@@ -1,0 +1,17 @@
+<syntax> ::= <rule> | <rule> <syntax>
+
+<rule> ::= "<" <rule-name> ">" "::=" <expression> <line-end>
+
+<expression> ::= <list> | <list> "|" <expression>
+
+<line-end> ::= <EOL> | <line-end>
+
+<list> ::= <term> | <term> <list>
+
+<term> ::= <literal> | "<" <rule-name> ">"
+
+<literal> ::= '"' <text> '"' | "'" <text> "'"
+
+
+
+

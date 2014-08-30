@@ -1,0 +1,129 @@
+/* $Id$ */
+
+/*
+ * Backus-Naur Form Parser
+ */
+
+%types%
+
+	STRING;
+	!NUMBER;
+
+	/* AST elements */
+	PRODUCTION;
+	TERM;
+	ALT;
+
+%terminals%
+
+	!error;
+	!unrecognised;
+
+	equals;
+	alt;
+	sep;
+	!except;
+
+	empty;
+	name: () -> (:STRING);
+	literal: () -> (:STRING);
+	!number: () -> (:NUMBER);
+
+%productions%
+
+	<make-empty-term>: () -> (:TERM);
+	<make-literal-term>: (:STRING) -> (:TERM);
+	<make-production-term>: (:STRING) -> (:TERM);
+	<make-alt>: (:TERM) -> (:ALT);
+	<make-production>: (:STRING, :ALT) -> (:PRODUCTION);
+	<make-empty-production>: () -> (:PRODUCTION);
+
+	!<make-star-group>: (:ALT) -> (:TERM);
+	!<make-opt-group>: (:ALT) -> (:TERM);
+	!<make-alt-group>: (:ALT) -> (:TERM);
+
+	!<set-repeat>: (:TERM, :NUMBER) -> ();
+
+	<add-term-to-list>: (:TERM, :TERM) -> ();
+	<add-alt-to-list>: (:ALT, :ALT) -> ();
+	<add-production-to-list>: (:PRODUCTION, :PRODUCTION) -> ();
+
+	<err-expected-alt>;
+	<err-expected-sep>;
+	<err-expected-equals>;
+	<err-unhandled>;
+
+	term: () -> (t :TERM) = {
+		empty;
+		t = <make-empty-term>;
+	||
+		l = literal;
+		t = <make-literal-term>(l);
+	||
+		n = name;
+		t = <make-production-term>(n);
+	};
+
+	list-of-terms: () -> (l :TERM) = {
+		l = term;
+	||
+		l = term;
+		t = list-of-terms;
+		<add-term-to-list>(t, l);
+	};
+
+	list-of-alts: () -> (l :ALT) = {
+		t = list-of-terms;
+		l = <make-alt>(t);
+	||
+		t = list-of-terms;
+
+		{
+			alt;
+		##
+			<err-expected-alt>;
+		};
+
+		a = list-of-alts;
+		l = <make-alt>(t);
+		<add-alt-to-list>(a, l);
+	};
+
+	production: () -> (p :PRODUCTION) = {
+		n = name;
+
+		{
+			equals;
+		##
+			<err-expected-equals>;
+		};
+
+		a = list-of-alts;
+		p = <make-production>(n, a);
+
+		{
+			sep;
+		##
+			<err-expected-sep>;
+		};
+	};
+
+	list-of-productions: () -> (l :PRODUCTION) = {
+		l = production;
+	||
+		l = production;
+		p = list-of-productions();
+		<add-production-to-list>(p, l);
+	};
+
+	bnf-grammar: () -> (l :PRODUCTION) = {
+		l = list-of-productions;
+	##
+		l = <make-empty-production>;
+		<err-unhandled>;
+	};
+
+%entry%
+
+	bnf-grammar;
+
