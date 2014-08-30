@@ -4,6 +4,8 @@
  * Kate's Grammar Tool.
  */
 
+#define _POSIX_C_SOURCE 2
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
