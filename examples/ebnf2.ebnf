@@ -1,0 +1,15 @@
+
+syntax     = [ title ] "{" { production } "}" [ comment ] .
+production = identifier "=" expression ( "." | ";" ) .
+expression = term { "|" term } .
+term       = factor { factor } .
+factor     = identifier
+           | literal
+           | "[" expression "]"
+           | "(" expression ")"
+           | "{" expression "}" .
+identifier = character { character } .
+title      = literal .
+comment    = literal .
+literal    = "'" character { character } "'"
+           | '"' character { character } '"' .
