@@ -30,6 +30,8 @@ typedef struct ast_production * map_production;
 
 #include "sid/sid_output.h"
 
+#include "trd/trd_output.h"
+
 #include "io.h"
 #include "ast.h"
 #include "main.h"
@@ -41,7 +43,8 @@ enum language {
 	LANG_BNF,
 	LANG_WSN,
 	LANG_EBNF,
-	LANG_SID
+	LANG_SID,
+	LANG_TRD
 } input, output;
 
 union {
@@ -121,6 +124,8 @@ static enum language languageopt(const char *optarg) {
 		return LANG_EBNF;
 	} else if (0 == strcasecmp(optarg, "SID")) {
 		return LANG_SID;
+	} else if (0 == strcasecmp(optarg, "TRD")) {
+		return LANG_TRD;
 	}
 
 	xerror("unrecognised language");
@@ -203,6 +208,10 @@ int main(int argc, char *argv[]) {
 
 	case LANG_SID:
 		sid_output(grammar);
+		break;
+
+	case LANG_TRD:
+		trd_output(grammar);
 		break;
 
 	default:

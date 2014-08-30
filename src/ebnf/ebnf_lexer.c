@@ -281,7 +281,7 @@ ebnf_next_single(struct ebnf_state *state)
 				goto start; /* leaf */
 			}
 
-		case '`': {
+		case '\'': {
 				/* ACTION <io_literal> */
 				{
 					ZTTERMINAL ZT1;
@@ -426,7 +426,7 @@ ebnf_next(struct ebnf_state *state)
 				return ebnf_next_double(state);
 			}
 
-		case '`': {
+		case '\'': {
 				return ebnf_next_single(state);
 			}
 

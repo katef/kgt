@@ -1,7 +1,7 @@
 # $Id$
 
 TARGETS = main.o io.o
-ARCHIVES = bnf/bnf.a wsn/wsn.a ebnf/ebnf.a sid/sid.a
+ARCHIVES = bnf/bnf.a wsn/wsn.a ebnf/ebnf.a sid/sid.a trd/trd.a
 
 LEXI = lexi
 LEXIFLAGS = -a
@@ -26,6 +26,9 @@ ebnf/ebnf.a: ebnf/ebnf_lexer.lxi ebnf/ebnf_parser.sid parser.act
 
 sid/sid.a:
 	$(CD) sid && $(MAKE)
+
+trd/trd.a:
+	$(CD) trd && $(MAKE)
 
 main.c: $(ARCHIVES)
 
