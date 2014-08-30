@@ -17,27 +17,18 @@
 
 static void output_alts(struct ast_alt *alts);
 
-static void output_group(struct ast_group *group) {
+static void
+output_group(struct ast_group *group)
+{
 	const char *s, *e;
 
 	assert(group->kleene != KLEENE_CROSS);
 
 	switch (group->kleene) {
-	case KLEENE_STAR:
-		s = "ZeroOrMore("; e = ")";
-		break;
-
-	case KLEENE_CROSS:
-		s = "OneOrMore("; e = ")";
-		break;
-
-	case KLEENE_GROUP:
-		s = "Sequence("; e = ")";
-		break;
-
-	case KLEENE_OPTIONAL:
-		s = "Optional("; e = ")";
-		break;
+	case KLEENE_STAR:     s = "ZeroOrMore("; e = ")"; break;
+	case KLEENE_CROSS:    s = "OneOrMore("; e = ")";  break;
+	case KLEENE_GROUP:    s = "Sequence("; e = ")";   break;
+	case KLEENE_OPTIONAL: s = "Optional("; e = ")";   break;
 	}
 
 	printf("%s", s);
@@ -47,7 +38,9 @@ static void output_group(struct ast_group *group) {
 	printf("%s", e);
 }
 
-static void output_term(struct ast_term *term) {
+static void
+output_term(struct ast_term *term)
+{
 	switch (term->type) {
 	case TYPE_EMPTY:
 		fputs("Skip()", stdout);
@@ -82,10 +75,12 @@ static void output_term(struct ast_term *term) {
 	}
 }
 
-static void output_alt(struct ast_alt *alt) {
+static void
+output_alt(struct ast_alt *alt)
+{
 	struct ast_term *term;
 
-	for (term = alt->terms; term; term = term->next) {
+	for (term = alt->terms; term != NULL; term = term->next) {
 		output_term(term);
 
 		if (term->next != NULL) {
@@ -94,7 +89,9 @@ static void output_alt(struct ast_alt *alt) {
 	}
 }
 
-static void output_alts(struct ast_alt *alts) {
+static void
+output_alts(struct ast_alt *alts)
+{
 	struct ast_alt *alt;
 
 	if (alts->next == NULL) {
@@ -103,7 +100,7 @@ static void output_alts(struct ast_alt *alts) {
 		/* TODO: indent */
 		printf("Choice(0,\n");
 
-		for (alt = alts; alt; alt = alt->next) {
+		for (alt = alts; alt != NULL; alt = alt->next) {
 			printf("\t\t");
 
 			output_alt(alt);
@@ -117,7 +114,9 @@ static void output_alts(struct ast_alt *alts) {
 	}
 }
 
-static void output_production(struct ast_production *production) {
+static void
+output_production(struct ast_production *production)
+{
 	printf("add('%s', Diagram(\n\t", production->name);
 
 	output_alts(production->alts);
@@ -125,10 +124,12 @@ static void output_production(struct ast_production *production) {
 	printf("));\n\n");
 }
 
-void trd_output(struct ast_production *grammar) {
+void
+trd_output(struct ast_production *grammar)
+{
 	struct ast_production *p;
 
-	for (p = grammar; p; p = p->next) {
+	for (p = grammar; p != NULL; p = p->next) {
 		output_production(p);
 	}
 }

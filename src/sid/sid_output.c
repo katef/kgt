@@ -14,11 +14,15 @@
 #include "../ast.h"
 #include "../main.h"
 
-static void output_section(const char *section) {
+static void
+output_section(const char *section)
+{
 	printf("\n%%%s%%\n\n", section);
 }
 
-static void output_term(struct ast_term *term) {
+static void
+output_term(struct ast_term *term)
+{
 	assert(term->type != TYPE_GROUP);
 	/* TODO: can output groups as [ ... ] local rules with a stub to call them X times? */
 
@@ -41,36 +45,44 @@ static void output_term(struct ast_term *term) {
 	}
 }
 
-static void output_alt(struct ast_alt *alt) {
+static void
+output_alt(struct ast_alt *alt)
+{
 	struct ast_term *term;
 
-	for (term = alt->terms; term; term = term->next) {
+	for (term = alt->terms; term != NULL; term = term->next) {
 		output_term(term);
 	}
 
 	printf("\n");
 }
 
-static void output_production(struct ast_production *production) {
+static void
+output_production(struct ast_production *production)
+{
 	struct ast_alt *alt;
 
-	alt = production->alts;
 	printf("\t%s = {\n\t\t", production->name);
 	output_alt(alt);
 
-	for (alt = alt->next; alt; alt = alt->next) {
-		printf("\t||\n\t\t");
+	for (alt = production->alts; alt != NULL; alt = alt->next) {
 		output_alt(alt);
+
+		if (alt->next != NULL) {
+			printf("\t||\n\t\t");
+		}
 	}
 
 	printf("\t};\n\n");
 }
 
-static struct ast_production *is_defined(struct ast_production *grammar, const char *name) {
+static struct ast_production *
+is_defined(struct ast_production *grammar, const char *name)
+{
 	struct ast_production *p;
 
-	for (p = grammar; p; p = p->next) {
-		if (strcmp(p->name, name) == 0) {
+	for (p = grammar; p != NULL; p = p->next) {
+		if (0 == strcmp(p->name, name)) {
 			return p;
 		}
 	}
@@ -78,40 +90,41 @@ static struct ast_production *is_defined(struct ast_production *grammar, const c
 	return NULL;
 }
 
-static int is_equal(struct ast_term *a, struct ast_term *b) {
+static int
+is_equal(struct ast_term *a, struct ast_term *b)
+{
 	if (a->type != b->type) {
 		return 0;
 	}
 
 	switch (a->type) {
-	case TYPE_PRODUCTION:
-		return strcmp(a->u.name, b->u.name) == 0;
-
-	case TYPE_TERMINAL:
-		return strcmp(a->u.literal, b->u.literal) == 0;
+	case TYPE_PRODUCTION: return 0 == strcmp(a->u.name,    b->u.name);
+	case TYPE_TERMINAL:   return 0 == strcmp(a->u.literal, b->u.literal);
 	}
 }
 
-static void output_terminals(struct ast_production *grammar) {
+static void
+output_terminals(struct ast_production *grammar)
+{
 	struct ast_production *p;
 	struct ast_term *found = NULL;
 
 	/* List terminals */
-	for (p = grammar; p; p = p->next) {
+	for (p = grammar; p != NULL; p = p->next) {
 		struct ast_alt *alt;
 
-		for (alt = p->alts; alt; alt = alt->next) {
+		for (alt = p->alts; alt != NULL; alt = alt->next) {
 			struct ast_term *term;
 			struct ast_term *t;
 
-			for (term = alt->terms; term; term = term->next) {
+			for (term = alt->terms; term != NULL; term = term->next) {
 				const char *name;
 
 				if (term->type == TYPE_PRODUCTION && is_defined(grammar, term->u.name)) {
 					continue;
 				}
 
-				for (t = found; t; t = t->next) {
+				for (t = found; t != NULL; t = t->next) {
 					if (is_equal(t, term)) {
 						break;
 					}
@@ -135,7 +148,7 @@ static void output_terminals(struct ast_production *grammar) {
 		struct ast_term *next;
 		struct ast_term *t;
 
-		for (t = found; t; t = next) {
+		for (t = found; t != NULL; t = next) {
 			next = t->next;
 			printf("\t");
 			output_term(t);
@@ -145,7 +158,9 @@ static void output_terminals(struct ast_production *grammar) {
 	}
 }
 
-void sid_output(struct ast_production *grammar) {
+void
+sid_output(struct ast_production *grammar)
+{
 	struct ast_production *p;
 
 	output_section("types");
@@ -158,7 +173,7 @@ void sid_output(struct ast_production *grammar) {
 
 	/* TODO list production declartations */
 
-	for (p = grammar; p; p = p->next) {
+	for (p = grammar; p != NULL; p = p->next) {
 		output_production(p);
 	}
 

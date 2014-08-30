@@ -9,7 +9,7 @@
 
 /* BEGINNING OF HEADER */
 
-#line 74 "../parser.act"
+#line 78 "../parser.act"
 
 
 #line 16 "bnf_parser.h"
@@ -19,7 +19,7 @@
 extern void prod_bnf_Hgrammar(map_production *);
 /* BEGINNING OF TRAILER */
 
-#line 220 "../parser.act"
+#line 224 "../parser.act"
 
 #line 25 "bnf_parser.h"
 

@@ -12,7 +12,9 @@
 
 #include "../ast.h"
 
-static void output_term(struct ast_term *term) {
+static void
+output_term(struct ast_term *term)
+{
 	assert(term->type != TYPE_GROUP);
 	/* TODO: semantic checks ought to find if we can output to this language; groups cannot */
 
@@ -35,35 +37,42 @@ static void output_term(struct ast_term *term) {
 	}
 }
 
-static void output_alt(struct ast_alt *alt) {
+static void
+output_alt(struct ast_alt *alt)
+{
 	struct ast_term *term;
 
-	for (term = alt->terms; term; term = term->next) {
+	for (term = alt->terms; term != NULL; term = term->next) {
 		output_term(term);
 	}
 
 	printf("\n");
 }
 
-static void output_production(struct ast_production *production) {
+static void
+output_production(struct ast_production *production)
+{
 	struct ast_alt *alt;
 
-	alt = production->alts;
 	printf("<%s> ::=", production->name);
-	output_alt(alt);
 
-	for (alt = alt->next; alt; alt = alt->next) {
-		printf("\t|");
+	for (alt = production->alts; alt != NULL; alt = alt->next) {
 		output_alt(alt);
+
+		if (alt->next != NULL) {
+			printf("\t|");
+		}
 	}
 
 	printf("\n");
 }
 
-void bnf_output(struct ast_production *grammar) {
+void
+bnf_output(struct ast_production *grammar)
+{
 	struct ast_production *p;
 
-	for (p = grammar; p; p = p->next) {
+	for (p = grammar; p != NULL; p = p->next) {
 		output_production(p);
 	}
 }

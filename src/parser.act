@@ -51,7 +51,9 @@
 	typedef struct ast_alt * map_alt;
 	typedef struct ast_production * map_production;
 
-	static void expected(const char *msg) {
+	static void
+	expected(const char *msg)
+	{
 		if (msg == NULL) {
 			xerror("syntax error on line %u", io_line);
 		} else {
@@ -59,7 +61,9 @@
 		}
 	}
 
-	static void rtrim(char *s) {
+	static void
+	rtrim(char *s)
+	{
 		char *p = s + strlen(s) - 1;
 
 		assert(strlen(s) > 0);

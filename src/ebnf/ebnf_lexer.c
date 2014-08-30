@@ -14,6 +14,7 @@
 
 
 
+	#include <assert.h>
 	#include <stdio.h>
 	#include <stdlib.h>
 
@@ -41,7 +42,9 @@
 	/*
 	 * Lexi's interface to get a character from our input stream.
 	 */
-	static int lexi_getchar(struct bnf_state *state) {
+	static int
+	lexi_getchar(struct bnf_state *state)
+	{
 		int c;
 
 		assert(state != NULL);
@@ -281,7 +284,7 @@ ebnf_next_single(struct ebnf_state *state)
 				goto start; /* leaf */
 			}
 
-		case '\'': {
+		case '`': {
 				/* ACTION <io_literal> */
 				{
 					ZTTERMINAL ZT1;
@@ -426,7 +429,7 @@ ebnf_next(struct ebnf_state *state)
 				return ebnf_next_double(state);
 			}
 
-		case '\'': {
+		case '`': {
 				return ebnf_next_single(state);
 			}
 

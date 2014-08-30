@@ -14,46 +14,46 @@
 
 static void output_term(struct ast_term *term);
 
-static void output_group_alt(struct ast_alt *alt) {
+static void
+output_group_alt(struct ast_alt *alt)
+{
 	struct ast_term *term;
 
-	for (term = alt->terms; term; term = term->next) {
+	for (term = alt->terms; term != NULL; term = term->next) {
 		output_term(term);
 	}
 }
 
-static void output_group(struct ast_group *group) {
+static void
+output_group(struct ast_group *group)
+{
 	char s, e;
 	struct ast_alt *alt;
 
 	assert(group->kleene != KLEENE_CROSS);
 
 	switch (group->kleene) {
-	case KLEENE_STAR:
-		s = '{'; e = '}';
-		break;
-
-	case KLEENE_GROUP:
-		s = '('; e = ')';
-		break;
-
-	case KLEENE_OPTIONAL:
-		s = '['; e = ']';
-		break;
+	case KLEENE_STAR:     s = '{'; e = '}'; break;
+	case KLEENE_GROUP:    s = '('; e = ')'; break;
+	case KLEENE_OPTIONAL: s = '['; e = ']'; break;
 	}
 
 	printf(" %c", s);
 
-	output_group_alt(group->alts);
-	for (alt = group->alts->next; alt; alt = alt->next) {
-		printf(" |");
+	for (alt = group->alts; alt != NULL; alt = alt->next) {
 		output_group_alt(alt);
+
+		if (alt->next != NULL) {
+			printf(" |");
+		}
 	}
 
 	printf(" %c", e);
 }
 
-static void output_term(struct ast_term *term) {
+static void
+output_term(struct ast_term *term)
+{
 	switch (term->type) {
 	case TYPE_EMPTY:
 		fputs(" \"\"", stdout);
@@ -84,22 +84,26 @@ static void output_term(struct ast_term *term) {
 	}
 }
 
-static void output_alt(struct ast_alt *alt) {
+static void
+output_alt(struct ast_alt *alt)
+{
 	struct ast_term *term;
 
-	for (term = alt->terms; term; term = term->next) {
+	for (term = alt->terms; term != NULL; term = term->next) {
 		output_term(term);
 	}
 }
 
-static void output_production(struct ast_production *production) {
+static void
+output_production(struct ast_production *production)
+{
 	struct ast_alt *alt;
 
 	alt = production->alts;
 	printf("%s =", production->name);
 	output_alt(alt);
 
-	for (alt = alt->next; alt; alt = alt->next) {
+	for (alt = alt->next; alt != NULL; alt = alt->next) {
 		printf("\n\t|");
 		output_alt(alt);
 	}
@@ -107,10 +111,12 @@ static void output_production(struct ast_production *production) {
 	printf(" .\n\n");
 }
 
-void wsn_output(struct ast_production *grammar) {
+void
+wsn_output(struct ast_production *grammar)
+{
 	struct ast_production *p;
 
-	for (p = grammar; p; p = p->next) {
+	for (p = grammar; p != NULL; p = p->next) {
 		output_production(p);
 	}
 }

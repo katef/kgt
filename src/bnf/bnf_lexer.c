@@ -14,6 +14,7 @@
 
 
 
+	#include <assert.h>
 	#include <stdio.h>
 	#include <stdlib.h>
 
@@ -41,7 +42,9 @@
 	/*
 	 * Lexi's interface to get a character from our input stream.
 	 */
-	static int lexi_getchar(struct bnf_state *state) {
+	static int
+	lexi_getchar(struct bnf_state *state)
+	{
 		int c;
 
 		assert(state != NULL);

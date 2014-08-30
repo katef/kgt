@@ -15,46 +15,46 @@
 
 static void output_term(struct ast_term *term);
 
-static void output_group_alt(struct ast_alt *alt) {
+static void
+output_group_alt(struct ast_alt *alt)
+{
 	struct ast_term *term;
 
-	for (term = alt->terms; term; term = term->next) {
+	for (term = alt->terms; term != NULL; term = term->next) {
 		output_term(term);
 	}
 }
 
-static void output_group(struct ast_group *group) {
-	char s, e;
+static void
+output_group(struct ast_group *group)
+{
 	struct ast_alt *alt;
+	char s, e;
 
 	assert(group->kleene != KLEENE_CROSS);
 
 	switch (group->kleene) {
-	case KLEENE_STAR:
-		s = '{'; e = '}';
-		break;
-
-	case KLEENE_GROUP:
-		s = '('; e = ')';
-		break;
-
-	case KLEENE_OPTIONAL:
-		s = '['; e = ']';
-		break;
+	case KLEENE_STAR:     s = '{'; e = '}'; break;
+	case KLEENE_GROUP:    s = '('; e = ')'; break;
+	case KLEENE_OPTIONAL: s = '['; e = ']'; break;
 	}
 
 	printf(" %c", s);
 
-	output_group_alt(group->alts);
-	for (alt = group->alts->next; alt; alt = alt->next) {
-		printf(" |");
+	for (alt = group->alts; alt != NULL; alt = alt->next) {
 		output_group_alt(alt);
+
+		if (alt->next != NULL) {
+			printf(" |");
+		}
 	}
 
 	printf(" %c", e);
 }
 
-static void output_term(struct ast_term *term) {
+static void
+output_term(struct ast_term *term)
+{
 	if (term->repeat > 1) {
 		printf(" %u *", term->repeat);
 	}
@@ -89,10 +89,12 @@ static void output_term(struct ast_term *term) {
 	}
 }
 
-static void output_alt(struct ast_alt *alt) {
+static void
+output_alt(struct ast_alt *alt)
+{
 	struct ast_term *term;
 
-	for (term = alt->terms; term; term = term->next) {
+	for (term = alt->terms; term != NULL; term = term->next) {
 		output_term(term);
 
 		if (term->next) {
@@ -101,25 +103,30 @@ static void output_alt(struct ast_alt *alt) {
 	}
 }
 
-static void output_production(struct ast_production *production) {
+static void
+output_production(struct ast_production *production)
+{
 	struct ast_alt *alt;
 
-	alt = production->alts;
 	printf("%s =", production->name);
-	output_alt(alt);
 
-	for (alt = alt->next; alt; alt = alt->next) {
-		printf("\n\t|");
+	for (alt = production->alts; alt != NULL; alt = alt->next) {
 		output_alt(alt);
+
+		if (alt->next != NULL) {
+			printf("\n\t|");
+		}
 	}
 
 	printf(";\n\n");
 }
 
-void ebnf_output(struct ast_production *grammar) {
+void
+ebnf_output(struct ast_production *grammar)
+{
 	struct ast_production *p;
 
-	for (p = grammar; p; p = p->next) {
+	for (p = grammar; p != NULL; p = p->next) {
 		output_production(p);
 	}
 }
