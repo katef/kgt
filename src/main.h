@@ -9,7 +9,7 @@
 
 #include <stddef.h>
 
-int act_read_token(void);
+int act_next(void);
 
 void *xmalloc(size_t size);
 char *xstrdup(const char *s);

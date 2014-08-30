@@ -83,20 +83,20 @@ void xerror(const char *msg, ...) {
 	exit(EXIT_FAILURE);
 }
 
-int act_read_token(void) {
+int act_next(void) {
 	int t;
 
 	switch (input) {
 	case LANG_BNF:
-		t = bnf_read_token(&state.bnf_state);
+		t = bnf_next(&state.bnf_state);
 		break;
 
 	case LANG_WSN:
-		t = wsn_read_token(&state.wsn_state);
+		t = wsn_next(&state.wsn_state);
 		break;
 
 	case LANG_EBNF:
-		t = ebnf_read_token(&state.ebnf_state);
+		t = ebnf_next(&state.ebnf_state);
 		break;
 	}
 
@@ -168,19 +168,19 @@ int main(int argc, char *argv[]) {
 	switch (input) {
 	case LANG_BNF:
 		bnf_init(&state.bnf_state);
-		act_currenttoken = act_read_token();
+		act_currenttoken = act_next();
 		prod_bnf_Hgrammar(&grammar);
 		break;
 
 	case LANG_WSN:
 		wsn_init(&state.wsn_state);
-		act_currenttoken = act_read_token();
+		act_currenttoken = act_next();
 		prod_wsn_Hgrammar(&grammar);
 		break;
 
 	case LANG_EBNF:
 		ebnf_init(&state.ebnf_state);
-		act_currenttoken = act_read_token();
+		act_currenttoken = act_next();
 		prod_ebnf_Hgrammar(&grammar);
 		break;
 

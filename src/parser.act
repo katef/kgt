@@ -32,14 +32,14 @@
 
 	/* See main.c */
 	extern int act_currenttoken;
-	extern int act_read_token(void);
+	extern int act_next(void);
 
 	int act_savedtoken;
 
 	/* Interfaces required by SID's generated parser */
 	#define ERROR_TERMINAL   @$error
 	#define CURRENT_TERMINAL act_currenttoken
-	#define ADVANCE_LEXER    do { act_currenttoken = act_read_token(); } while (0)
+	#define ADVANCE_LEXER    do { act_currenttoken = act_next(); } while (0)
 	#define SAVE_LEXER(t)    do { act_savedtoken = act_currenttoken; act_currenttoken = (t); } while (0)
 	#define RESTORE_LEXER    do { act_currenttoken = act_savedtoken; } while (0)
 

@@ -13,13 +13,13 @@ HEADERS = @{
 	#include "../main.h"
 	#include "../tokens.h"
 
+	#include LEXI_HEADER
 
 	/*
 	 * Interfaces for the generated lexer.
 	 */
-	#define lct_unknown_token tok_unrecognised
 
-	typedef enum tok lct_tok;
+	typedef enum tok ZTTERMINAL;
 
 
 	FILE *io_fin;
@@ -33,12 +33,16 @@ HEADERS = @{
 	/*
 	 * Lexi's interface to get a character from our input stream.
 	 */
-	static int lct_getchar(void) {
+	static int lexi_getchar(struct bnf_state *state) {
 		int c;
+
+		assert(state != NULL);
+
+		(void) state;
 
 		c = getc(io_fin);
 		if (c == EOF) {
-			return LEXI_EOF;
+			return EOF;
 		}
 
 		if (c == '\n') {
@@ -57,9 +61,6 @@ TRAILERS = @{
 @},@{
 
 @};
-
-
-MAP TERMINAL -> lct_tok;
 
 
 /*
