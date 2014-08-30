@@ -1,9 +1,5 @@
 /* $Id$ */
 
-/*
- * Main support interfaces.
- */
-
 #ifndef KGT_MAIN_H
 #define KGT_MAIN_H
 

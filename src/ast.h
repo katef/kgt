@@ -1,11 +1,5 @@
 /* $Id$ */
 
-/*
- * Grammar Abstract Syntax Tree.
- *
- * TODO: this is not very abstract!
- */
-
 #ifndef KGT_AST_H
 #define KGT_AST_H
 
@@ -21,8 +15,8 @@ struct ast_group {
 	enum {
 		KLEENE_STAR,    /* * */
 		KLEENE_CROSS,   /* + */
-		KLEENE_GROUP,	/* grouping for alts (nor is this!) */
-		KLEENE_OPTIONAL /* ? (not actually a kleene operator!) */
+		KLEENE_GROUP,	/* grouping for alts (not actually a kleene operator) */
+		KLEENE_OPTIONAL /* ? (nor is this!) */
 	} kleene;
 
 	struct ast_alt *alts;

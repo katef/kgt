@@ -1,9 +1,5 @@
 /* $Id$ */
 
-/*
- * Input/Output Interfaces.
- */
-
 #ifndef KGT_IO_H
 #define KGT_IO_H
 

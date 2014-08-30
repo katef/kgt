@@ -4,7 +4,7 @@
  * Extended Backus-Naur Form Output
  * As defined by ISO/IEC 14977:1996(E)
  *
- * TODO: fprintf(fout), instead opf stdout
+ * TODO: fprintf(fout), instead of stdout
  */
 
 #include <stdio.h>

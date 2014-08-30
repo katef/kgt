@@ -1,10 +1,5 @@
 /* $Id$ */
 
-/*
- * Token values. These are centralised for all parsers.
- * Each value represents one lexeme.
- */
-
 #ifndef KGT_TOKENS_H
 #define KGT_TOKENS_H
 

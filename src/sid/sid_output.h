@@ -1,9 +1,5 @@
 /* $Id$ */
 
-/*
- * SID Output.
- */
-
 #ifndef KGT_SID_OUTPUT_H
 #define KGT_SID_OUTPUT_H
 

@@ -1,9 +1,5 @@
 /* $Id$ */
 
-/*
- * Wirth Syntax Notation Output.
- */
-
 #ifndef KGT_WSN_OUTPUT_H
 #define KGT_WSN_OUTPUT_H
 

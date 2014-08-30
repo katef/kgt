@@ -4,7 +4,7 @@
  * Tab Atkins Jr. Railroad Diagram Output.
  * See https://github.com/tabatkins/railroad-diagrams
  *
- * TODO: fprintf(fout), instead opf stdout
+ * TODO: fprintf(fout), instead of stdout
  */
 
 #include <stdio.h>

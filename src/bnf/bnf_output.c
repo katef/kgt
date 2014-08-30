@@ -3,7 +3,7 @@
 /*
  * Backus-Naur Form Output.
  *
- * TODO: fprintf(fout), instead opf stdout
+ * TODO: fprintf(fout), instead of stdout
  */
 
 #include <stdio.h>

@@ -1,9 +1,5 @@
 /* $Id$ */
 
-/*
- * Kate's Grammar Tool.
- */
-
 #define _POSIX_C_SOURCE 2
 
 #include <stdlib.h>
