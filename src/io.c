@@ -12,6 +12,7 @@
 #include "io.h"
 #include "main.h"
 #include "tokens.h"
+#include "xalloc.h"
 
 FILE *io_fin;
 unsigned int io_line;
