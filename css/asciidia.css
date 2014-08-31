@@ -1,0 +1,29 @@
+svg {
+	shape-rendering: auto;
+}
+
+rect, path {
+	fill: none;
+}
+
+line, rect, path {
+	stroke: black;
+	stroke-width: 1pt;
+}
+
+text {
+	font-family: monospace;
+	font-size: 10pt;
+	text-anchor: left;
+	font-weight: normal;
+}
+
+path.arrow {
+	fill: black;
+	stroke: none;
+}
+
+rect.terminal {
+	fill: #ddf;
+}
+
