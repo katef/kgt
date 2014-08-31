@@ -79,18 +79,24 @@ xusage(void)
 static enum language
 languageopt(const char *optarg)
 {
-	if (0 == strcmp(optarg, "bnf")) {
-		return LANG_BNF;
-	} else if (0 == strcmp(optarg, "wsn")) {
-		return LANG_WSN;
-	} else if (0 == strcmp(optarg, "ebnf")) {
-		return LANG_EBNF;
-	} else if (0 == strcmp(optarg, "sid")) {
-		return LANG_SID;
-	} else if (0 == strcmp(optarg, "trd")) {
-		return LANG_TRD;
-	} else if (0 == strcmp(optarg, "dot")) {
-		return LANG_DOT;
+	size_t i;
+
+	struct {
+		enum language lang;
+		const char *name;
+	} a[] = {
+		{ LANG_BNF,  "bnf"  },
+		{ LANG_WSN,  "wsn"  },
+		{ LANG_EBNF, "ebnf" },
+		{ LANG_SID,  "sid"  },
+		{ LANG_TRD,  "trd"  },
+		{ LANG_DOT,  "dot"  }
+	};
+
+	for (i = 0; i < sizeof a / sizeof *a; i++) {
+		if (0 == strcmp(optarg, a[i].name)) {
+			return a[i].lang;
+		}
 	}
 
 	xerror("unrecognised language");
