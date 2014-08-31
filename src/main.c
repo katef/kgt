@@ -79,17 +79,17 @@ xusage(void)
 static enum language
 languageopt(const char *optarg)
 {
-	if (0 == strcasecmp(optarg, "BNF")) {
+	if (0 == strcmp(optarg, "bnf")) {
 		return LANG_BNF;
-	} else if (0 == strcasecmp(optarg, "WSN")) {
+	} else if (0 == strcmp(optarg, "wsn")) {
 		return LANG_WSN;
-	} else if (0 == strcasecmp(optarg, "EBNF")) {
+	} else if (0 == strcmp(optarg, "ebnf")) {
 		return LANG_EBNF;
-	} else if (0 == strcasecmp(optarg, "SID")) {
+	} else if (0 == strcmp(optarg, "sid")) {
 		return LANG_SID;
-	} else if (0 == strcasecmp(optarg, "TRD")) {
+	} else if (0 == strcmp(optarg, "trd")) {
 		return LANG_TRD;
-	} else if (0 == strcasecmp(optarg, "DOT")) {
+	} else if (0 == strcmp(optarg, "dot")) {
 		return LANG_DOT;
 	}
 
