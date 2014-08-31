@@ -29,6 +29,8 @@ typedef struct ast_production * map_production;
 
 #include "dot/dot_output.h"
 
+#include "rrd/rrd_output.h"
+
 #include "io.h"
 #include "ast.h"
 #include "tokens.h"
@@ -42,7 +44,8 @@ enum lang {
 	LANG_EBNF,
 	LANG_SID,
 	LANG_TRD,
-	LANG_DOT
+	LANG_DOT,
+	LANG_RRD
 } input, output;
 
 union {
@@ -90,7 +93,8 @@ lang(const char *optarg)
 		{ LANG_EBNF, "ebnf" },
 		{ LANG_SID,  "sid"  },
 		{ LANG_TRD,  "trd"  },
-		{ LANG_DOT,  "dot"  }
+		{ LANG_DOT,  "dot"  },
+		{ LANG_RRD,  "rrd"  },
 	};
 
 	for (i = 0; i < sizeof a / sizeof *a; i++) {
@@ -174,6 +178,7 @@ main(int argc, char *argv[])
 	case LANG_SID:  sid_output (grammar); break;
 	case LANG_TRD:  trd_output (grammar); break;
 	case LANG_DOT:  dot_output (grammar); break;
+	case LANG_RRD:  rrd_output (grammar); break;
 
 	default:
 		fprintf(stderr, "Unsupported output language\n");
