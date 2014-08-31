@@ -9,7 +9,7 @@
 
 /* BEGINNING OF HEADER */
 
-#line 78 "../parser.act"
+#line 79 "../parser.act"
 
 
 #line 16 "ebnf_parser.h"
@@ -19,7 +19,7 @@
 extern void prod_ebnf_Hgrammar(map_production *);
 /* BEGINNING OF TRAILER */
 
-#line 224 "../parser.act"
+#line 225 "../parser.act"
 
 #line 25 "ebnf_parser.h"
 

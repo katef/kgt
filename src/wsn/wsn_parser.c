@@ -9,7 +9,7 @@
 
 /* BEGINNING OF HEADER */
 
-#line 40 "../parser.act"
+#line 41 "../parser.act"
 
 
 	#include <stdlib.h>
@@ -21,6 +21,7 @@
 	#include "../ast.h"
 	#include "../main.h"
 	#include "../tokens.h"
+	#include "../xalloc.h"
 
 	/* See main.c */
 	extern int act_currenttoken;
@@ -65,7 +66,7 @@
 		}
 	}
 
-#line 69 "wsn_parser.c"
+#line 70 "wsn_parser.c"
 
 
 #ifndef ERROR_TERMINAL
@@ -114,7 +115,7 @@ prod_factor(map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-alt-group */
 			{
-#line 176 "../parser.act"
+#line 177 "../parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_GROUP;
@@ -122,7 +123,7 @@ prod_factor(map_term *ZOt)
 		(ZIt)->u.group->kleene = KLEENE_GROUP;
 		(ZIt)->u.group->alts = (ZIa);
 	
-#line 126 "wsn_parser.c"
+#line 127 "wsn_parser.c"
 			}
 			/* END OF ACTION: make-alt-group */
 		}
@@ -145,7 +146,7 @@ prod_factor(map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-opt-group */
 			{
-#line 168 "../parser.act"
+#line 169 "../parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_GROUP;
@@ -153,7 +154,7 @@ prod_factor(map_term *ZOt)
 		(ZIt)->u.group->kleene = KLEENE_OPTIONAL;
 		(ZIt)->u.group->alts = (ZIa);
 	
-#line 157 "wsn_parser.c"
+#line 158 "wsn_parser.c"
 			}
 			/* END OF ACTION: make-opt-group */
 		}
@@ -176,7 +177,7 @@ prod_factor(map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-star-group */
 			{
-#line 160 "../parser.act"
+#line 161 "../parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_GROUP;
@@ -184,7 +185,7 @@ prod_factor(map_term *ZOt)
 		(ZIt)->u.group->kleene = KLEENE_STAR;
 		(ZIt)->u.group->alts = (ZIa);
 	
-#line 188 "wsn_parser.c"
+#line 189 "wsn_parser.c"
 			}
 			/* END OF ACTION: make-star-group */
 		}
@@ -300,12 +301,12 @@ prod_55(map_production *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-production-to-list */
 			{
-#line 201 "../parser.act"
+#line 202 "../parser.act"
 
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIp);
 	
-#line 309 "wsn_parser.c"
+#line 310 "wsn_parser.c"
 			}
 			/* END OF ACTION: add-production-to-list */
 		}
@@ -347,11 +348,11 @@ prod_56(map_term *ZIt, map_alt *ZOl)
 				{
 					/* BEGINNING OF ACTION: err-expected-alt */
 					{
-#line 208 "../parser.act"
+#line 209 "../parser.act"
 
 		expected("alternative separator");
 	
-#line 355 "wsn_parser.c"
+#line 356 "wsn_parser.c"
 					}
 					/* END OF ACTION: err-expected-alt */
 				}
@@ -365,23 +366,23 @@ prod_56(map_term *ZIt, map_alt *ZOl)
 			}
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 142 "../parser.act"
+#line 143 "../parser.act"
 
 		(ZIl) = xmalloc(sizeof *(ZIl));
 		(ZIl)->terms = (*ZIt);
 		(ZIl)->next = NULL;
 	
-#line 375 "wsn_parser.c"
+#line 376 "wsn_parser.c"
 			}
 			/* END OF ACTION: make-alt */
 			/* BEGINNING OF ACTION: add-alt-to-list */
 			{
-#line 196 "../parser.act"
+#line 197 "../parser.act"
 
 		assert((ZIl)->next == NULL);
 		(ZIl)->next = (ZIa);
 	
-#line 385 "wsn_parser.c"
+#line 386 "wsn_parser.c"
 			}
 			/* END OF ACTION: add-alt-to-list */
 		}
@@ -390,13 +391,13 @@ prod_56(map_term *ZIt, map_alt *ZOl)
 		{
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 142 "../parser.act"
+#line 143 "../parser.act"
 
 		(ZIl) = xmalloc(sizeof *(ZIl));
 		(ZIl)->terms = (*ZIt);
 		(ZIl)->next = NULL;
 	
-#line 400 "wsn_parser.c"
+#line 401 "wsn_parser.c"
 			}
 			/* END OF ACTION: make-alt */
 		}
@@ -428,12 +429,12 @@ prod_57(map_term *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-term-to-list */
 			{
-#line 191 "../parser.act"
+#line 192 "../parser.act"
 
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIt);
 	
-#line 437 "wsn_parser.c"
+#line 438 "wsn_parser.c"
 			}
 			/* END OF ACTION: add-term-to-list */
 		}
@@ -460,14 +461,14 @@ prod_term(map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-empty-term */
 			{
-#line 119 "../parser.act"
+#line 120 "../parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_EMPTY;
 		(ZIt)->repeat = 1;
 		(ZIt)->next = NULL;
 	
-#line 471 "wsn_parser.c"
+#line 472 "wsn_parser.c"
 			}
 			/* END OF ACTION: make-empty-term */
 		}
@@ -478,19 +479,19 @@ prod_term(map_term *ZOt)
 
 			/* BEGINNING OF EXTRACT: literal */
 			{
-#line 98 "../parser.act"
+#line 99 "../parser.act"
 
 		assert(strlen(io_buffer) > 0);
 		ZIl = xstrdup(io_buffer);
 		io_flush();
 	
-#line 488 "wsn_parser.c"
+#line 489 "wsn_parser.c"
 			}
 			/* END OF EXTRACT: literal */
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-literal-term */
 			{
-#line 126 "../parser.act"
+#line 127 "../parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_TERMINAL;	/* TODO rename to literal or vice-versa, perhaps */
@@ -498,7 +499,7 @@ prod_term(map_term *ZOt)
 		(ZIt)->repeat = 1;
 		(ZIt)->next = NULL;
 	
-#line 502 "wsn_parser.c"
+#line 503 "wsn_parser.c"
 			}
 			/* END OF ACTION: make-literal-term */
 		}
@@ -509,7 +510,7 @@ prod_term(map_term *ZOt)
 
 			/* BEGINNING OF EXTRACT: name */
 			{
-#line 92 "../parser.act"
+#line 93 "../parser.act"
 
 		assert(strlen(io_buffer) > 0);
 		assert(!isspace((unsigned char) io_buffer[0]));
@@ -517,13 +518,13 @@ prod_term(map_term *ZOt)
 		ZIn = xstrdup(io_buffer);
 		io_flush();
 	
-#line 521 "wsn_parser.c"
+#line 522 "wsn_parser.c"
 			}
 			/* END OF EXTRACT: name */
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-production-term */
 			{
-#line 134 "../parser.act"
+#line 135 "../parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_PRODUCTION;
@@ -531,7 +532,7 @@ prod_term(map_term *ZOt)
 		(ZIt)->repeat = 1;
 		(ZIt)->next = NULL;
 	
-#line 535 "wsn_parser.c"
+#line 536 "wsn_parser.c"
 			}
 			/* END OF ACTION: make-production-term */
 		}
@@ -565,7 +566,7 @@ prod_production(map_production *ZOp)
 		case (tok_name):
 			/* BEGINNING OF EXTRACT: name */
 			{
-#line 92 "../parser.act"
+#line 93 "../parser.act"
 
 		assert(strlen(io_buffer) > 0);
 		assert(!isspace((unsigned char) io_buffer[0]));
@@ -573,7 +574,7 @@ prod_production(map_production *ZOp)
 		ZIn = xstrdup(io_buffer);
 		io_flush();
 	
-#line 577 "wsn_parser.c"
+#line 578 "wsn_parser.c"
 			}
 			/* END OF EXTRACT: name */
 			break;
@@ -597,11 +598,11 @@ prod_production(map_production *ZOp)
 			{
 				/* BEGINNING OF ACTION: err-expected-equals */
 				{
-#line 216 "../parser.act"
+#line 217 "../parser.act"
 
 		expected("production assignment");
 	
-#line 605 "wsn_parser.c"
+#line 606 "wsn_parser.c"
 				}
 				/* END OF ACTION: err-expected-equals */
 			}
@@ -615,14 +616,14 @@ prod_production(map_production *ZOp)
 		}
 		/* BEGINNING OF ACTION: make-production */
 		{
-#line 148 "../parser.act"
+#line 149 "../parser.act"
 
 		(ZIp) = xmalloc(sizeof *(ZIp));
 		(ZIp)->name = (ZIn);
 		(ZIp)->alts = (ZIa);
 		(ZIp)->next = NULL;
 	
-#line 626 "wsn_parser.c"
+#line 627 "wsn_parser.c"
 		}
 		/* END OF ACTION: make-production */
 		/* BEGINNING OF INLINE: 51 */
@@ -641,11 +642,11 @@ prod_production(map_production *ZOp)
 			{
 				/* BEGINNING OF ACTION: err-expected-sep */
 				{
-#line 212 "../parser.act"
+#line 213 "../parser.act"
 
 		expected("alternative separator");
 	
-#line 649 "wsn_parser.c"
+#line 650 "wsn_parser.c"
 				}
 				/* END OF ACTION: err-expected-sep */
 			}
@@ -681,20 +682,20 @@ ZL1:;
 	{
 		/* BEGINNING OF ACTION: make-empty-production */
 		{
-#line 155 "../parser.act"
+#line 156 "../parser.act"
 
 		(ZIl) = NULL;
 	
-#line 689 "wsn_parser.c"
+#line 690 "wsn_parser.c"
 		}
 		/* END OF ACTION: make-empty-production */
 		/* BEGINNING OF ACTION: err-unhandled */
 		{
-#line 220 "../parser.act"
+#line 221 "../parser.act"
 
 		expected(NULL);
 	
-#line 698 "wsn_parser.c"
+#line 699 "wsn_parser.c"
 		}
 		/* END OF ACTION: err-unhandled */
 	}
@@ -704,8 +705,8 @@ ZL0:;
 
 /* BEGINNING OF TRAILER */
 
-#line 223 "../parser.act"
+#line 224 "../parser.act"
 
-#line 710 "wsn_parser.c"
+#line 711 "wsn_parser.c"
 
 /* END OF FILE */

@@ -1,6 +1,6 @@
 # $Id$
 
-TARGETS = main.o io.o
+TARGETS = main.o io.o xalloc.o
 ARCHIVES = bnf/bnf.a wsn/wsn.a ebnf/ebnf.a sid/sid.a trd/trd.a dot/dot.a
 
 LEXI = lexi

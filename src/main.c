@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include <stdarg.h>
 
 /* See %maps% - This is given for the entry point into the grammar */
 /* TODO: how to do this nicely? permit more complex types for SID's .act files? */
@@ -51,45 +50,6 @@ union {
 	struct wsn_state  wsn_state;
 	struct ebnf_state ebnf_state;
 } state;
-
-void *
-xmalloc(size_t size)
-{
-	void *new;
-
-	new = malloc(size);
-	if (new == NULL) {
-		perror("malloc");
-		exit(EXIT_FAILURE);
-	}
-
-	return new;
-}
-
-char *
-xstrdup(const char *s)
-{
-	char *new;
-
-	new = xmalloc(strlen(s) + 1);
-	return strcpy(new, s);
-}
-
-void
-xerror(const char *msg, ...)
-{
-	va_list ap;
-
-	fprintf(stderr, "kgt: ");
-
-	va_start(ap, msg);
-	vfprintf(stderr, msg, ap);
-	va_end(ap);
-
-	fputc('\n', stderr);
-
-	exit(EXIT_FAILURE);
-}
 
 int
 act_next(void)

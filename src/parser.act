@@ -29,6 +29,7 @@
 	#include "../ast.h"
 	#include "../main.h"
 	#include "../tokens.h"
+	#include "../xalloc.h"
 
 	/* See main.c */
 	extern int act_currenttoken;
