@@ -9,18 +9,20 @@
 
 /* BEGINNING OF HEADER */
 
-#line 79 "../parser.act"
+#line 80 "../parser.act"
 
 
-#line 16 "wsn_parser.h"
+	int act_next(void);
+
+#line 18 "wsn_parser.h"
 
 /* BEGINNING OF FUNCTION DECLARATIONS */
 
 extern void prod_wsn_Hgrammar(map_production *);
 /* BEGINNING OF TRAILER */
 
-#line 225 "../parser.act"
+#line 226 "../parser.act"
 
-#line 25 "wsn_parser.h"
+#line 27 "wsn_parser.h"
 
 /* END OF FILE */

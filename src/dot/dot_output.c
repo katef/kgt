@@ -13,7 +13,6 @@
 #include <ctype.h>
 
 #include "../ast.h"
-#include "../main.h"
 
 static void output_alt(struct ast_production *grammar, struct ast_alt *alt);
 

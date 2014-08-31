@@ -13,7 +13,6 @@
 #include <assert.h>
 
 #include "../ast.h"
-#include "../main.h"
 
 static void output_alts(struct ast_alt *alts);
 

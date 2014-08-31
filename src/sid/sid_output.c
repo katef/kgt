@@ -12,7 +12,6 @@
 #include <assert.h>
 
 #include "../ast.h"
-#include "../main.h"
 
 static void
 output_section(const char *section)

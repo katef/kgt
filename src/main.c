@@ -31,7 +31,6 @@ typedef struct ast_production * map_production;
 
 #include "io.h"
 #include "ast.h"
-#include "main.h"
 #include "tokens.h"
 #include "xalloc.h"
 

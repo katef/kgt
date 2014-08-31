@@ -19,7 +19,6 @@
 	#include <stdlib.h>
 
 	#include "../io.h"
-	#include "../main.h"
 	#include "../tokens.h"
 	#include "../xalloc.h"
 
