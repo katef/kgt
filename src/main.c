@@ -28,6 +28,8 @@ typedef struct ast_production * map_production;
 
 #include "trd/trd_output.h"
 
+#include "dot/dot_output.h"
+
 #include "io.h"
 #include "ast.h"
 #include "main.h"
@@ -40,7 +42,8 @@ enum language {
 	LANG_WSN,
 	LANG_EBNF,
 	LANG_SID,
-	LANG_TRD
+	LANG_TRD,
+	LANG_DOT
 } input, output;
 
 union {
@@ -126,6 +129,8 @@ languageopt(const char *optarg)
 		return LANG_SID;
 	} else if (0 == strcasecmp(optarg, "TRD")) {
 		return LANG_TRD;
+	} else if (0 == strcasecmp(optarg, "DOT")) {
+		return LANG_DOT;
 	}
 
 	xerror("unrecognised language");
@@ -202,6 +207,7 @@ main(int argc, char *argv[])
 	case LANG_EBNF: ebnf_output(grammar); break;
 	case LANG_SID:  sid_output (grammar); break;
 	case LANG_TRD:  trd_output (grammar); break;
+	case LANG_DOT:  dot_output (grammar); break;
 
 	default:
 		fprintf(stderr, "Unsupported output language\n");

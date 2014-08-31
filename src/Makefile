@@ -1,7 +1,7 @@
 # $Id$
 
 TARGETS = main.o io.o
-ARCHIVES = bnf/bnf.a wsn/wsn.a ebnf/ebnf.a sid/sid.a trd/trd.a
+ARCHIVES = bnf/bnf.a wsn/wsn.a ebnf/ebnf.a sid/sid.a trd/trd.a dot/dot.a
 
 LEXI = lexi
 LEXIFLAGS = -a
@@ -30,6 +30,9 @@ sid/sid.a:
 trd/trd.a:
 	$(CD) trd && $(MAKE)
 
+dot/dot.a:
+	$(CD) dot && $(MAKE)
+
 main.c: $(ARCHIVES)
 
 clean:
@@ -38,4 +41,6 @@ clean:
 	$(CD) wsn && $(MAKE) clean
 	$(CD) ebnf && $(MAKE) clean
 	$(CD) sid && $(MAKE) clean
+	$(CD) trd && $(MAKE) clean
+	$(CD) dot && $(MAKE) clean
 
