@@ -37,7 +37,7 @@ typedef struct ast_production * map_production;
 
 int act_currenttoken;
 
-enum language {
+enum lang {
 	LANG_BNF,
 	LANG_WSN,
 	LANG_EBNF,
@@ -77,13 +77,13 @@ xusage(void)
 	exit(EXIT_FAILURE);
 }
 
-static enum language
-languageopt(const char *optarg)
+static enum lang
+lang(const char *optarg)
 {
 	size_t i;
 
 	struct {
-		enum language lang;
+		enum lang lang;
 		const char *name;
 	} a[] = {
 		{ LANG_BNF,  "bnf"  },
@@ -117,11 +117,11 @@ main(int argc, char *argv[])
 		while ((c = getopt(argc, argv, "hl:e:")) != -1) {
 			switch (c) {
 			case 'l':
-				input = languageopt(optarg);
+				input = lang(optarg);
 				break;
 
 			case 'e':
-				output = languageopt(optarg);
+				output = lang(optarg);
 				break;
 
 			case '?':
