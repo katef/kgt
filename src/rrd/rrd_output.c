@@ -13,6 +13,7 @@
 #include "../ast.h"
 
 #include "rrd.h"
+#include "rrd_beautify.h"
 
 void print_indent(FILE *f, int n) {
 	int i;
@@ -83,7 +84,6 @@ void rrd_output(struct ast_production *grammar) {
 
 	for (p = grammar; p; p = p->next) {
 		struct node *rrd;
-		void rrd_beautify(struct node *);
 		assert(ast_to_rrd(p, &rrd) && "AST transformation failed somehow");
 		printf("%s:\n", p->name);
 		rrd_beautify(rrd);
