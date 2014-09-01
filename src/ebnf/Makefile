@@ -1,34 +1,22 @@
-# $Id$
+.include "../../share/mk/top.mk"
 
-CC = tcc
-CFLAGS = -Xp
+SRC += src/ebnf/ebnf_lexer.c
+SRC += src/ebnf/ebnf_parser.c
+SRC += src/ebnf/ebnf_output.c
 
-TARGETS = ebnf_lexer.o ebnf_parser.o ebnf_output.o
+# LEXIFLAGS = -t tok_ -p ebnf_
 
-LEXI = lexi
-LEXIFLAGS = -t tok_ -p ebnf_
+PART += ebnf
 
-SID = sid
-SIDFLAGS = -s no-terminals -s no-numeric-terminals
+.for src in ${SRC:Msrc/ebnf/benf_lexer.c}
+CFLAGS_${src} += -D LEXI_HEADER='"ebnf_lexer.h"'
+DFLAGS_${src} += -D LEXI_HEADER='"ebnf_lexer.h"'
+.endfor
 
-REMOVE = rm -f
+${BUILD}/lib/ebnf_lexer.o: ebnf_lexer.h
 
-ebnf.a: $(TARGETS)
-	$(AR) rc ebnf.a $(TARGETS)
-	$(RANLIB) ebnf.a
-
-ebnf_lexer.o: ebnf_lexer.h
-
-ebnf_lexer.c: ebnf_lexer.lxi ../lexer.lct ebnf_parser.h
-	$(LEXI) $(LEXIFLAGS) -l c ebnf_lexer.lxi ../lexer.lct ebnf_lexer.c
-	sed -i 's/LEXI_HEADER/"ebnf_lexer.h"/' ${.TARGET}
-
-ebnf_lexer.h: ebnf_lexer.lxi ../lexer.lct ebnf_parser.h
-	$(LEXI) $(LEXIFLAGS) -l h ebnf_lexer.lxi ../lexer.lct ebnf_lexer.h
-
-ebnf_parser.c ebnf_parser.h: ebnf_parser.sid ../parser.act
-	$(SID) $(SIDFLAGS) ebnf_parser.sid ../parser.act ebnf_parser.c ebnf_parser.h
-
-clean:
-	$(REMOVE) ebnf.a ebnf_lexer.c ebnf_lexer.h ebnf_parser.c ebnf_parser.h $(TARGETS)
+.for src in ${SRC:Msrc/ebnf/*.c}
+${BUILD}/lib/ebnf.o:    ${BUILD}/${src:R}.o
+${BUILD}/lib/ebnf.opic: ${BUILD}/${src:R}.opic
+.endfor
 

@@ -1,50 +1,22 @@
-# $Id$
+.include "../share/mk/top.mk"
 
-TARGETS = main.o io.o xalloc.o
-ARCHIVES = bnf/bnf.a wsn/wsn.a ebnf/ebnf.a sid/sid.a trd/trd.a dot/dot.a rrd/rrd.a
+SRC += src/main.c
+SRC += src/io.c
+SRC += src/xalloc.c
 
-LEXI = lexi
-LEXIFLAGS = -a
+PROG += kgt
 
-REMOVE = rm -f
-CD = cd
+# XXX: ${SRC:Msrc/*.c} matches src/xyz/*.c which is not what we want
+#.for src in ${SRC:Msrc/*.c}
+#${BUILD}/bin/kgt: ${BUILD}/${src:R}.o
+#.endfor
 
-CC = tcc
-CFLAGS = -Xp -Ysystem	# TODO: -Yposix
+${BUILD}/bin/kgt: ${BUILD}/src/main.o
+${BUILD}/bin/kgt: ${BUILD}/src/io.o
+${BUILD}/bin/kgt: ${BUILD}/src/xalloc.o
 
-kgt: $(TARGETS) $(ARCHIVES)
-	$(CC) $(CFLAGS) -o kgt $(TARGETS) $(ARCHIVES)
-
-bnf/bnf.a: bnf/bnf_lexer.lxi bnf/bnf_parser.sid parser.act
-	$(CD) bnf && $(MAKE)
-
-wsn/wsn.a: wsn/wsn_lexer.lxi wsn/wsn_parser.sid parser.act
-	$(CD) wsn && $(MAKE)
-
-ebnf/ebnf.a: ebnf/ebnf_lexer.lxi ebnf/ebnf_parser.sid parser.act
-	$(CD) ebnf && $(MAKE)
-
-sid/sid.a:
-	$(CD) sid && $(MAKE)
-
-trd/trd.a:
-	$(CD) trd && $(MAKE)
-
-dot/dot.a:
-	$(CD) dot && $(MAKE)
-
-rrd/rrd.a:
-	$(CD) rrd && $(MAKE)
-
-main.c: $(ARCHIVES)
-
-clean:
-	$(REMOVE) kgt $(TARGETS)
-	$(CD) bnf && $(MAKE) clean
-	$(CD) wsn && $(MAKE) clean
-	$(CD) ebnf && $(MAKE) clean
-	$(CD) sid && $(MAKE) clean
-	$(CD) trd && $(MAKE) clean
-	$(CD) dot && $(MAKE) clean
-	$(CD) rrd && $(MAKE) clean
+.for part in ${PART:Mbnf} ${PART:Mebnf} ${PART:Msid} ${PART:Mtrd} \
+	${PART:Mdot} ${PART:Mrrd} ${PART:Mwsn}
+${BUILD}/bin/kgt: ${BUILD}/lib/${part}.o
+.endfor
 

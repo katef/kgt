@@ -1,34 +1,22 @@
-# $Id$
+.include "../../share/mk/top.mk"
 
-CC = tcc
-CFLAGS = -Xp
+SRC += src/wsn/wsn_lexer.c
+SRC += src/wsn/wsn_parser.c
+SRC += src/wsn/wsn_output.c
 
-TARGETS = wsn_lexer.o wsn_parser.o wsn_output.o
+# LEXIFLAGS = -t tok_ -p wsn_
 
-LEXI = lexi
-LEXIFLAGS = -t tok_ -p wsn_
+PART += wsn
 
-SID = sid
-SIDFLAGS = -s no-terminals -s no-numeric-terminals
+.for src in ${SRC:Msrc/wsn/wsn_lexer.c}
+CFLAGS_${src} += -D LEXI_HEADER='"wsn_lexer.h"'
+DFLAGS_${src} += -D LEXI_HEADER='"wsn_lexer.h"'
+.endfor
 
-REMOVE = rm -f
+${BUILD}/lib/wsn_lexer.o: wsn_lexer.h
 
-wsn.a: $(TARGETS)
-	$(AR) rc wsn.a $(TARGETS)
-	$(RANLIB) wsn.a
-
-wsn_lexer.o: wsn_lexer.h
-
-wsn_lexer.c: wsn_lexer.lxi ../lexer.lct wsn_parser.h
-	$(LEXI) $(LEXIFLAGS) -l c wsn_lexer.lxi ../lexer.lct wsn_lexer.c
-	sed -i 's/LEXI_HEADER/"wsn_lexer.h"/' ${.TARGET}
-
-wsn_lexer.h: wsn_lexer.lxi ../lexer.lct wsn_parser.h
-	$(LEXI) $(LEXIFLAGS) -l h wsn_lexer.lxi ../lexer.lct wsn_lexer.h
-
-wsn_parser.c wsn_parser.h: wsn_parser.sid ../parser.act
-	$(SID) $(SIDFLAGS) wsn_parser.sid ../parser.act wsn_parser.c wsn_parser.h
-
-clean:
-	$(REMOVE) wsn.a wsn_lexer.c wsn_lexer.h wsn_parser.c wsn_parser.h $(TARGETS)
+.for src in ${SRC:Msrc/wsn/*.c}
+${BUILD}/lib/wsn.o:    ${BUILD}/${src:R}.o
+${BUILD}/lib/wsn.opic: ${BUILD}/${src:R}.opic
+.endfor
 

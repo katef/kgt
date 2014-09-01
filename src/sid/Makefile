@@ -1,16 +1,13 @@
-# $Id$
+.include "../../share/mk/top.mk"
 
-CC = tcc
-CFLAGS = -Xp
+SRC += src/sid/sid_output.c
 
-TARGETS = sid_output.o
+# LEXIFLAGS = -t tok_ -p sid_
 
-REMOVE = rm -f
+PART += sid
 
-sid.a: $(TARGETS)
-	$(AR) rc sid.a $(TARGETS)
-	$(RANLIB) sid.a
-
-clean:
-	$(REMOVE) sid.a $(TARGETS)
+.for src in ${SRC:Msrc/sid/*.c}
+${BUILD}/lib/sid.o:    ${BUILD}/${src:R}.o
+${BUILD}/lib/sid.opic: ${BUILD}/${src:R}.opic
+.endfor
 

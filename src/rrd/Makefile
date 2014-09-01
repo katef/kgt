@@ -1,16 +1,15 @@
-# $Id: Makefile 18 2014-08-30 21:13:15Z kate $
+.include "../../share/mk/top.mk"
 
-CC = tcc
-CFLAGS = -Xp
+SRC += src/rrd/rrd_transform.c
+SRC += src/rrd/rrd_beautify.c
+SRC += src/rrd/rrd_output.c
 
-TARGETS = rrd_transform.o rrd_beautify.o rrd_output.o
+# LEXIFLAGS = -t tok_ -p rrd_
 
-REMOVE = rm -f
+PART += rrd
 
-rrd.a: $(TARGETS)
-	$(AR) rc rrd.a $(TARGETS)
-	$(RANLIB) rrd.a
-
-clean:
-	$(REMOVE) rrd.a $(TARGETS)
+.for src in ${SRC:Msrc/rrd/*.c}
+${BUILD}/lib/rrd.o:    ${BUILD}/${src:R}.o
+${BUILD}/lib/rrd.opic: ${BUILD}/${src:R}.opic
+.endfor
 

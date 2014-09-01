@@ -1,16 +1,13 @@
-# $Id$
+.include "../../share/mk/top.mk"
 
-CC = tcc
-CFLAGS = -Xp
+SRC += src/trd/trd_output.c
 
-TARGETS = trd_output.o
+# LEXIFLAGS = -t tok_ -p trd_
 
-REMOVE = rm -f
+PART += trd
 
-trd.a: $(TARGETS)
-	$(AR) rc trd.a $(TARGETS)
-	$(RANLIB) trd.a
-
-clean:
-	$(REMOVE) trd.a $(TARGETS)
+.for src in ${SRC:Msrc/trd/*.c}
+${BUILD}/lib/trd.o:    ${BUILD}/${src:R}.o
+${BUILD}/lib/trd.opic: ${BUILD}/${src:R}.opic
+.endfor
 

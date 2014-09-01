@@ -1,16 +1,15 @@
-# $Id$
+.include "../../share/mk/top.mk"
 
-CC = tcc
-CFLAGS = -Xp
+SRC += src/dot/dot_output.c
 
-TARGETS = dot_output.o
+# LEXIFLAGS = -t tok_ -p dot_
 
-REMOVE = rm -f
+PART += dot
 
-dot.a: $(TARGETS)
-	$(AR) rc dot.a $(TARGETS)
-	$(RANLIB) dot.a
+${BUILD}/lib/dot_lexer.o: dot_lexer.h
 
-clean:
-	$(REMOVE) dot.a $(TARGETS)
+.for src in ${SRC:Msrc/dot/*.c}
+${BUILD}/lib/dot.o:    ${BUILD}/${src:R}.o
+${BUILD}/lib/dot.opic: ${BUILD}/${src:R}.opic
+.endfor
 
