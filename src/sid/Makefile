@@ -2,8 +2,6 @@
 
 SRC += src/sid/sid_output.c
 
-# LEXIFLAGS = -t tok_ -p sid_
-
 PART += sid
 
 .for src in ${SRC:Msrc/sid/*.c}

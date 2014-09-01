@@ -4,8 +4,6 @@ SRC += src/rrd/rrd_transform.c
 SRC += src/rrd/rrd_beautify.c
 SRC += src/rrd/rrd_output.c
 
-# LEXIFLAGS = -t tok_ -p rrd_
-
 PART += rrd
 
 .for src in ${SRC:Msrc/rrd/*.c}

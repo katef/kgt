@@ -2,8 +2,6 @@
 
 SRC += src/trd/trd_output.c
 
-# LEXIFLAGS = -t tok_ -p trd_
-
 PART += trd
 
 .for src in ${SRC:Msrc/trd/*.c}
