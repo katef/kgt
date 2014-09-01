@@ -1,6 +1,6 @@
 .include "../../share/mk/top.mk"
 
-SRC += src/sid/sid_output.c
+SRC += src/sid/output.c
 
 PART += sid
 

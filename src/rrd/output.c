@@ -13,7 +13,7 @@
 #include "../ast.h"
 
 #include "rrd.h"
-#include "rrd_beautify.h"
+#include "beautify.h"
 
 void print_indent(FILE *f, int n) {
 	int i;

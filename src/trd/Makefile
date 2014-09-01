@@ -1,6 +1,6 @@
 .include "../../share/mk/top.mk"
 
-SRC += src/trd/trd_output.c
+SRC += src/trd/output.c
 
 PART += trd
 

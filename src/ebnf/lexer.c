@@ -22,7 +22,7 @@
 	#include "../tokens.h"
 	#include "../xalloc.h"
 
-	#include "ebnf_lexer.h"
+	#include "lexer.h"
 
 	/*
 	 * Interfaces for the generated lexer.

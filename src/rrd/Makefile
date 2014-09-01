@@ -1,8 +1,8 @@
 .include "../../share/mk/top.mk"
 
-SRC += src/rrd/rrd_transform.c
-SRC += src/rrd/rrd_beautify.c
-SRC += src/rrd/rrd_output.c
+SRC += src/rrd/transform.c
+SRC += src/rrd/beautify.c
+SRC += src/rrd/output.c
 
 PART += rrd
 

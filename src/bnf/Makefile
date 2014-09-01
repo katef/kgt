@@ -1,19 +1,19 @@
 .include "../../share/mk/top.mk"
 
-SRC += src/bnf/bnf_lexer.c
-SRC += src/bnf/bnf_parser.c
-SRC += src/bnf/bnf_output.c
+SRC += src/bnf/lexer.c
+SRC += src/bnf/parser.c
+SRC += src/bnf/output.c
 
 # LEXIFLAGS = -t tok_ -p bnf_
 
 PART += bnf
 
-.for src in ${SRC:Msrc/bnf/bnf_lexer.c}
-CFLAGS_${src} += -D LEXI_HEADER='"bnf_lexer.h"'
-DFLAGS_${src} += -D LEXI_HEADER='"bnf_lexer.h"'
+.for src in ${SRC:Msrc/bnf/lexer.c}
+CFLAGS_${src} += -D LEXI_HEADER='"lexer.h"'
+DFLAGS_${src} += -D LEXI_HEADER='"lexer.h"'
 .endfor
 
-${BUILD}/src/bnf/bnf_lexer.o: src/bnf/bnf_lexer.h
+${BUILD}/src/bnf/lexer.o: src/bnf/lexer.h
 
 .for src in ${SRC:Msrc/bnf/*.c}
 ${BUILD}/lib/bnf.o:    ${BUILD}/${src:R}.o
@@ -21,13 +21,13 @@ ${BUILD}/lib/bnf.opic: ${BUILD}/${src:R}.opic
 .endfor
 
 
-#bnf_lexer.c: bnf_lexer.lxi ../lexer.lct bnf_parser.h
-#	$(LEXI) $(LEXIFLAGS) -l c bnf_lexer.lxi ../lexer.lct bnf_lexer.c
-#	sed -i 's/LEXI_HEADER/"bnf_lexer.h"/' ${.TARGET}
+#lexer.c: lexer.lxi ../lexer.lct parser.h
+#	$(LEXI) $(LEXIFLAGS) -l c lexer.lxi ../lexer.lct lexer.c
+#	sed -i 's/LEXI_HEADER/"lexer.h"/' ${.TARGET}
 #
-#bnf_lexer.h: bnf_lexer.lxi ../lexer.lct bnf_parser.h
-#	$(LEXI) $(LEXIFLAGS) -l h bnf_lexer.lxi ../lexer.lct bnf_lexer.h
+#lexer.h: lexer.lxi ../lexer.lct parser.h
+#	$(LEXI) $(LEXIFLAGS) -l h lexer.lxi ../lexer.lct lexer.h
 #
-#bnf_parser.c bnf_parser.h: bnf_parser.sid ../parser.act
-#	$(SID) $(SIDFLAGS) bnf_parser.sid ../parser.act bnf_parser.c bnf_parser.h
+#parser.c parser.h: parser.sid ../parser.act
+#	$(SID) $(SIDFLAGS) parser.sid ../parser.act parser.c parser.h
 

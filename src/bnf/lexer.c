@@ -22,7 +22,7 @@
 	#include "../tokens.h"
 	#include "../xalloc.h"
 
-	#include "wsn_lexer.h"
+	#include "lexer.h"
 
 	/*
 	 * Interfaces for the generated lexer.
@@ -63,26 +63,26 @@
 		return c;
 	}
 
-int wsn_readchar(struct wsn_state *state) {
+int bnf_readchar(struct bnf_state *state) {
 	if (state->buffer_index) {
-		return wsn_pop(state);
+		return bnf_pop(state);
 	}
 
 	return lexi_getchar(state);
 }
-void wsn_push(struct wsn_state *state, const int c) {
+void bnf_push(struct bnf_state *state, const int c) {
 	assert(state);
 	assert((size_t) state->buffer_index < sizeof state->buffer / sizeof *state->buffer);
 	state->buffer[state->buffer_index++] = c;
 }
 
-int wsn_pop(struct wsn_state *state) {
+int bnf_pop(struct bnf_state *state) {
 	assert(state);
 	assert(state->buffer_index > 0);
 	return state->buffer[--state->buffer_index];
 }
 
-void wsn_flush(struct wsn_state *state) {
+void bnf_flush(struct bnf_state *state) {
 	state->buffer_index = 0;
 }
 
@@ -95,17 +95,17 @@ typedef uint8_t lookup_type;
 typedef unsigned char lookup_type;
 #endif
 static lookup_type lookup_tab[] = {
-	   0,    0,    0,    0,    0,    0,    0,    0,    0,  0x1,  0x1,    0, 
-	   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0, 
-	   0,    0,    0,    0,    0,    0,    0,    0,  0x1,    0,    0,    0, 
 	   0,    0,    0,    0,    0,    0,    0,    0,    0,  0x2,    0,    0, 
-	 0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,    0,    0, 
-	   0,    0,    0,    0,    0,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2, 
-	 0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2, 
-	 0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,    0,    0,    0,    0,  0x2, 
-	   0,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2, 
-	 0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2,  0x2, 
-	 0x2,  0x2,  0x2,    0,    0,    0,    0,    0,    0,    0,    0,    0, 
+	   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0, 
+	   0,    0,    0,    0,    0,    0,    0,    0,  0x2,    0,    0,    0, 
+	   0,    0,    0,    0,    0,    0,    0,    0,    0,  0x1,    0,    0, 
+	 0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,    0,    0, 
+	   0,    0,    0,    0,    0,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1, 
+	 0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1, 
+	 0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,    0,    0,    0,    0,  0x1, 
+	   0,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1, 
+	 0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1,  0x1, 
+	 0x1,  0x1,  0x1,    0,    0,    0,    0,    0,    0,    0,    0,    0, 
 	   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0, 
 	   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0, 
 	   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0, 
@@ -120,9 +120,9 @@ static lookup_type lookup_tab[] = {
 };
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ - 0L) >= 199901L
-bool wsn_group(enum wsn_groups group, int c) {
+bool bnf_group(enum bnf_groups group, int c) {
 #else
-int wsn_group(enum wsn_groups group, int c) {
+int bnf_group(enum bnf_groups group, int c) {
 #endif
 	if (c == LEXI_EOF) {
 		return 0;
@@ -133,54 +133,24 @@ int wsn_group(enum wsn_groups group, int c) {
 
 /* PRE-PASS ANALYSERS */
 
-void wsn_init(struct wsn_state *state) {
-	state->zone = wsn_next;
+void bnf_init(struct bnf_state *state) {
+	state->zone = bnf_next;
 	state->buffer_index = 0;
 }
 /* ZONES PASS ANALYSER PROTOTYPES */
 
-static int wsn_next_identifier(struct wsn_state *state);
-static int wsn_next_literal(struct wsn_state *state);
+static int bnf_next_double(struct bnf_state *state);
+static int bnf_next_single(struct bnf_state *state);
+static int bnf_next_name(struct bnf_state *state);
 /* MAIN PASS ANALYSERS */
 
 
-/* MAIN PASS ANALYSER for identifier */
+/* MAIN PASS ANALYSER for double */
 static int
-wsn_next_identifier(struct wsn_state *state)
+bnf_next_double(struct bnf_state *state)
 {
 	start: {
-		int c0 = wsn_readchar(state);
-		if (c0 == LEXI_EOF) {
-			/* ACTION <err_unexpected_eof> */
-			{
-
-	xerror("unexpected EOF on line %d", io_line);
-			}
-			/* END ACTION <err_unexpected_eof> */
-			goto start; /* leaf */
-		}
-		if (!wsn_group(wsn_group_character, c0)) {
-			wsn_push(state, c0);
-			return tok_name;
-		}
-
-		/* DEFAULT */
-		/* ACTION <io_push> */
-		{
-
-	io_push(c0);
-		}
-		/* END ACTION <io_push> */
-		goto start; /* DEFAULT */
-	}
-}
-
-/* MAIN PASS ANALYSER for literal */
-static int
-wsn_next_literal(struct wsn_state *state)
-{
-	start: {
-		int c0 = wsn_readchar(state);
+		int c0 = bnf_readchar(state);
 		switch (c0) {
 		case LEXI_EOF: {
 				/* ACTION <err_unexpected_eof> */
@@ -193,17 +163,6 @@ wsn_next_literal(struct wsn_state *state)
 			}
 
 		case '"': {
-				int c1 = wsn_readchar(state);
-				if (c1 == '"') {
-					/* ACTION <io_push> */
-					{
-
-	io_push(c0);
-					}
-					/* END ACTION <io_push> */
-					goto start; /* leaf */
-				}
-				wsn_push(state, c1);
 				/* ACTION <io_literal> */
 				{
 					ZTTERMINAL ZT1;
@@ -227,46 +186,119 @@ wsn_next_literal(struct wsn_state *state)
 	}
 }
 
+/* MAIN PASS ANALYSER for single */
+static int
+bnf_next_single(struct bnf_state *state)
+{
+	start: {
+		int c0 = bnf_readchar(state);
+		switch (c0) {
+		case LEXI_EOF: {
+				/* ACTION <err_unexpected_eof> */
+				{
+
+	xerror("unexpected EOF on line %d", io_line);
+				}
+				/* END ACTION <err_unexpected_eof> */
+				goto start; /* leaf */
+			}
+
+		case '\'': {
+				/* ACTION <io_literal> */
+				{
+					ZTTERMINAL ZT1;
+
+	ZT1 = io_literal();
+					return ZT1;
+				}
+				/* END ACTION <io_literal> */
+			}
+
+		}
+
+		/* DEFAULT */
+		/* ACTION <io_push> */
+		{
+
+	io_push(c0);
+		}
+		/* END ACTION <io_push> */
+		goto start; /* DEFAULT */
+	}
+}
+
+/* MAIN PASS ANALYSER for name */
+static int
+bnf_next_name(struct bnf_state *state)
+{
+	start: {
+		int c0 = bnf_readchar(state);
+		switch (c0) {
+		case LEXI_EOF: {
+				/* ACTION <err_unexpected_eof> */
+				{
+
+	xerror("unexpected EOF on line %d", io_line);
+				}
+				/* END ACTION <err_unexpected_eof> */
+				goto start; /* leaf */
+			}
+
+		case '>': {
+				return tok_name;
+			}
+
+		}
+		if (bnf_group(bnf_group_character, c0)) {
+			/* ACTION <io_push> */
+			{
+
+	io_push(c0);
+			}
+			/* END ACTION <io_push> */
+			goto start; /* leaf */
+		}
+
+		/* DEFAULT */
+		/* ACTION <err_unexpected_character> */
+		{
+
+	xerror("unexpected character \"%c\" on line %d", c0, io_line);
+		}
+		/* END ACTION <err_unexpected_character> */
+		goto start; /* DEFAULT */
+	}
+}
+
 /* MAIN PASS ANALYSER for global zone */
 int
-wsn_next(struct wsn_state *state)
+bnf_next(struct bnf_state *state)
 {
-	if (state->zone != wsn_next)
+	if (state->zone != bnf_next)
 		return state->zone(state);
 	start: {
-		int c0 = wsn_readchar(state);
-		if (wsn_group(wsn_group_white, c0)) goto start;
+		int c0 = bnf_readchar(state);
+		if (bnf_group(bnf_group_white, c0)) goto start;
 		switch (c0) {
-		case ')': {
-				return tok_end_Hgroup;
-			}
-
-		case '(': {
-				return tok_start_Hgroup;
-			}
-
-		case ']': {
-				return tok_end_Hopt;
-			}
-
-		case '[': {
-				return tok_start_Hopt;
-			}
-
-		case '}': {
-				return tok_end_Hstar;
-			}
-
-		case '{': {
-				return tok_start_Hstar;
-			}
-
 		case '"': {
-				return wsn_next_literal(state);
+				return bnf_next_double(state);
 			}
 
-		case '.': {
-				return tok_sep;
+		case '\'': {
+				return bnf_next_single(state);
+			}
+
+		case '<': {
+				return bnf_next_name(state);
+			}
+
+		case '\n': {
+				int c1 = bnf_readchar(state);
+				if (c1 == '\n') {
+					return tok_sep;
+				}
+				bnf_push(state, c1);
+				goto start; /* leaf */
 			}
 
 		case LEXI_EOF: {
@@ -277,19 +309,19 @@ wsn_next(struct wsn_state *state)
 				return tok_alt;
 			}
 
-		case '=': {
-				return tok_equals;
+		case ':': {
+				int c1 = bnf_readchar(state);
+				if (c1 == ':') {
+					int c2 = bnf_readchar(state);
+					if (c2 == '=') {
+						return tok_equals;
+					}
+					bnf_push(state, c2);
+				}
+				bnf_push(state, c1);
 			}
+			break;
 
-		}
-		if (wsn_group(wsn_group_character, c0)) {
-			/* ACTION <io_push> */
-			{
-
-	io_push(c0);
-			}
-			/* END ACTION <io_push> */
-			return wsn_next_identifier(state);
 		}
 
 		/* DEFAULT */

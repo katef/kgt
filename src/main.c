@@ -11,25 +11,25 @@
 /* TODO: how to do this nicely? permit more complex types for SID's .act files? */
 typedef struct ast_production * map_production;
 
-#include "bnf/bnf_lexer.h"
-#include "bnf/bnf_parser.h"
-#include "bnf/bnf_output.h"
+#include "bnf/lexer.h"
+#include "bnf/parser.h"
+#include "bnf/output.h"
 
-#include "wsn/wsn_lexer.h"
-#include "wsn/wsn_parser.h"
-#include "wsn/wsn_output.h"
+#include "wsn/lexer.h"
+#include "wsn/parser.h"
+#include "wsn/output.h"
 
-#include "ebnf/ebnf_lexer.h"
-#include "ebnf/ebnf_parser.h"
-#include "ebnf/ebnf_output.h"
+#include "ebnf/lexer.h"
+#include "ebnf/parser.h"
+#include "ebnf/output.h"
 
-#include "sid/sid_output.h"
+#include "sid/output.h"
 
-#include "trd/trd_output.h"
+#include "trd/output.h"
 
-#include "dot/dot_output.h"
+#include "dot/output.h"
 
-#include "rrd/rrd_output.h"
+#include "rrd/output.h"
 
 #include "io.h"
 #include "ast.h"
