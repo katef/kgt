@@ -17,7 +17,7 @@
 void print_indent(FILE *f, int n) {
 	int i;
 	for (i = 0; i < n; i++) {
-		fprintf(f, "	");
+		fprintf(f, "    ");
 	}
 }
 

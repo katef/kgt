@@ -22,7 +22,9 @@ struct bnode {
 };
 
 static void b_push(struct bnode **list, struct node *v) {
-	struct bnode bn = { v, *list };
+	struct bnode bn;
+	bn.v = v;
+	bn.next = *list;
 	*list = xmalloc(sizeof bn);
 	**list = bn;
 }
@@ -63,22 +65,27 @@ static int process_loop_leaf(struct node_loop *loop, struct bnode *bp) {
 }
 
 static void loop_switch_sides(int suflen, struct node_loop *loop, struct bnode **rl) {
-	/* XXX this leaves sequences with only one node in them
-	 * the transformer avoids doing that, this probably should as well... */
 	int i;
-	struct node_list *seq = node_create(NT_LIST);
 	struct node *v, **n;
 
-	seq->type = LIST_SEQUENCE;
-	seq->list = 0;
-	n = &seq->list;
-	node_free(loop->forward);
-	loop->forward = &seq->node;
+	if (suflen > 1) {
+		struct node_list *seq = node_create(NT_LIST);
+		seq->type = LIST_SEQUENCE;
+		seq->list = 0;
+		n = &seq->list;
+		node_free(loop->forward);
+		loop->forward = &seq->node;
 
-	for(i = 0; i < suflen; i++) {
+		for(i = 0; i < suflen; i++) {
+			b_pop(rl, &v);
+			v->next = *n;
+			*n = v;
+		}
+	} else {
+		node_free(loop->forward);
 		b_pop(rl, &v);
-		v->next = *n;
-		*n = v;
+		v->next = 0;
+		loop->forward = v;
 	}
 
 	if (b_pop(rl, &v)) {
@@ -87,6 +94,15 @@ static void loop_switch_sides(int suflen, struct node_loop *loop, struct bnode *
 		struct node *nothing = node_create(NT_NOTHING);
 		node_free(loop->backward);
 		loop->backward = nothing;
+	}
+
+	if (loop->backward->type == NT_LIST) {
+		struct node_list *back = (struct node_list *)loop->backward;
+		if (!back->list->next) {
+			loop->backward = back->list;
+			back->list = 0;
+			node_free(&back->node);
+		}
 	}
 }
 
@@ -128,6 +144,8 @@ static int process_loop(struct node_loop *loop, struct bnode *bp) {
 		return process_loop_list(loop, bp);
 	if (loop->backward->type == NT_LEAF)
 		return process_loop_leaf(loop, bp);
+
+	return 0;
 }
 
 static int visit_sequence(void *arg, int depth, struct node_list *n) {
