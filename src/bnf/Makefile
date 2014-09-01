@@ -13,7 +13,7 @@ CFLAGS_${src} += -D LEXI_HEADER='"bnf_lexer.h"'
 DFLAGS_${src} += -D LEXI_HEADER='"bnf_lexer.h"'
 .endfor
 
-${BUILD}/lib/bnf_lexer.o: bnf_lexer.h
+${BUILD}/src/bnf/bnf_lexer.o: src/bnf/bnf_lexer.h
 
 .for src in ${SRC:Msrc/bnf/*.c}
 ${BUILD}/lib/bnf.o:    ${BUILD}/${src:R}.o

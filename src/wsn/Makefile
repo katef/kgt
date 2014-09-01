@@ -13,7 +13,7 @@ CFLAGS_${src} += -D LEXI_HEADER='"wsn_lexer.h"'
 DFLAGS_${src} += -D LEXI_HEADER='"wsn_lexer.h"'
 .endfor
 
-${BUILD}/lib/wsn_lexer.o: wsn_lexer.h
+${BUILD}/src/wsn/wsn_lexer.o: src/wsn/wsn_lexer.h
 
 .for src in ${SRC:Msrc/wsn/*.c}
 ${BUILD}/lib/wsn.o:    ${BUILD}/${src:R}.o
