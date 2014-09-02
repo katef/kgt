@@ -68,13 +68,13 @@ param_type_list
 	= param_list ["," "..."]
 	.
 param_list
-	= [param_list ","] param_decl
+	= {param_decl ","} param_decl
 	.
 param_decl
 	= decl_specs [(declarator|abstract_declarator)]
 	.
 id_list
-	= [id_list ","] id
+	= {id ","} id
 	.
 initializer
 	= assignment_exp
@@ -82,7 +82,7 @@ initializer
 	| "{" initializer_list "," "}"
 	.
 initializer_list
-	= [initializer_list ","] initializer
+	= {initializer ","} initializer
 	.
 type_name
 	= spec_qualifier_list [abstract_declarator]
@@ -117,7 +117,7 @@ compound_stat
 	= "{" [decl_list] [stat_list] "}"
 	.
 stat_list
-	= [stat_list] stat
+	= {stat} stat
 	.
 selection_stat
 	= "if"     "(" exp ")" stat ["else" stat]
