@@ -56,7 +56,7 @@ direct_declarator
 	= id
 	| "(" declarator ")"
 	| direct_declarator "[" [const_exp] "]"
-	| direct_declarator "(" [(param_type_list|id_list)] ")"
+	| direct_declarator "(" [param_type_list|id_list] ")"
 	.
 pointer
 	= "*" [type_qualifier_list] [pointer]
@@ -71,7 +71,7 @@ param_list
 	= {param_decl ","} param_decl
 	.
 param_decl
-	= decl_specs [(declarator|abstract_declarator)]
+	= decl_specs [declarator|abstract_declarator]
 	.
 id_list
 	= {id ","} id
