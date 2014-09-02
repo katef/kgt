@@ -1,7 +1,6 @@
 
 translation_unit
-	= external_decl
-	| translation_unit external_decl
+	= [translation_unit] external_decl
 	.
 external_decl
 	= function_definition
@@ -10,17 +9,11 @@ external_decl
 function_definition
 	= [decl_specs] declarator [decl_list] compound_stat
 	.
-decl
-	= decl_specs [init_declarator_list] ";"
-	.
 decl_list
-	= [decl_list] decl
+	= [decl_list] decl_specs [init_declarator_list] ";"
 	.
 decl_specs
-	= storage_class_spec [decl_specs]
-	| type_spec          [decl_specs]
-	| type_qualifier     [decl_specs]
-	| type_qualifier
+	= (storage_class_spec|type_spec|type_qualifier) [decl_specs]
 	.
 storage_class_spec
 	= "auto" | "register" | "static" | "extern" | "typedef"
@@ -36,42 +29,25 @@ type_qualifier
 	= "const" | "volatile"
 	.
 struct_or_union_spec
-	= struct_or_union [id] "{" struct_decl_list "}"
-	| struct_or_union id
-	.
-struct_or_union
-	= "struct" | "union"
+	= ("struct"|"union") (id | [id] "{" struct_decl_list "}")
 	.
 struct_decl_list
-	= [struct_decl_list] struct_decl
+	= [struct_decl_list] spec_qualifier_list struct_declarator_list ";"
 	.
 init_declarator_list
-	= [init_declarator_list ","] init_declarator
-	.
-init_declarator
-	= declarator ["=" initializer]
-	.
-struct_decl
-	= spec_qualifier_list struct_declarator_list ";"
+	= [init_declarator_list ","] declarator ["=" initializer]
 	.
 spec_qualifier_list
-	= type_spec [spec_qualifier_list]
-	| type_qualifier [spec_qualifier_list]
+	= (type_spec | type_qualifier) [spec_qualifier_list]
 	.
 struct_declarator_list
-	= [struct_declarator_list ","] struct_declarator
-	.
-struct_declarator
-	= ( declarator | [declarator] ":" const_exp )
+	= [struct_declarator_list ","] ( declarator | [declarator] ":" const_exp )
 	.
 enum_spec
 	= "enum" ( id | [id] "{" enumerator_list "}" )
 	.
 enumerator_list
-	= [ enumerator_list "," ] enumerator
-	.
-enumerator
-	= id [ "=" const_exp ]
+	= [ enumerator_list "," ] id [ "=" const_exp ]
 	.
 declarator
 	= [pointer] direct_declarator
@@ -114,14 +90,11 @@ type_name
 abstract_declarator
 	= pointer
 	| pointer direct_abstract_declarator
-	|      direct_abstract_declarator
+	|         direct_abstract_declarator
 	.
 direct_abstract_declarator
 	= "(" abstract_declarator ")"
-	| [direct_abstract_declarator] "[" const_exp "]"
-	| [direct_abstract_declarator] "["           "]"
-	| [direct_abstract_declarator] "(" param_type_list ")"
-	| [direct_abstract_declarator] "("                 ")"
+	| [direct_abstract_declarator] ("[" const_exp "]"|"[" "]"|"(" [param_type_list] ")")
 	.
 typedef_name
 	= id
