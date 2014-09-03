@@ -173,6 +173,7 @@
 
 	wsn: () -> (l :ast_production) = {
 		l = list-of-productions;
+		EOF;
 	##
 		l = <make-empty-production>;
 		<err-syntax>;
