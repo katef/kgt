@@ -16,6 +16,8 @@
 #include "beautify.h"
 #include "render.h"
 
+int beautify = 1;
+
 static void print_indent(FILE *f, int n) {
 	int i;
 	for (i = 0; i < n; i++) {
@@ -88,7 +90,7 @@ static void print_repr(struct node **n) {
 	node_walk(n, &rrd_print, 1, stdout);
 }
 
-void rrd_output(struct ast_production *grammar, int beautify) {
+void rrd_output(struct ast_production *grammar) {
 	struct ast_production *p;
 
 	for (p = grammar; p; p = p->next) {

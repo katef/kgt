@@ -5,6 +5,8 @@
 
 #include "../ast.h"
 
-void rrd_output(struct ast_production *, int);
+extern int beautify;
+
+void rrd_output(struct ast_production *);
 
 #endif

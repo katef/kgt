@@ -24,15 +24,21 @@
 #include "ast.h"
 #include "xalloc.h"
 
-enum lang {
-	LANG_BNF,
-	LANG_WSN,
-	LANG_EBNF,
-	LANG_SID,
-	LANG_TRD,
-	LANG_DOT,
-	LANG_RRD
-} input, output;
+struct lang {
+	const char *name;
+	struct ast_production *(*in)(int (*f)(void *), void *);
+	void (*out)(struct ast_production *);
+} lang[] = {
+	{ "bnf",  bnf_input,  bnf_output  },
+	{ "wsn",  wsn_input,  wsn_output  },
+	{ "ebnf", ebnf_input, ebnf_output },
+	{ "sid",  NULL,       sid_output  },
+	{ "trd",  NULL,       trd_output  },
+	{ "dot",  NULL,       dot_output  },
+	{ "rrd",  NULL,       rrd_output  }
+};
+
+struct lang *in, *out;
 
 static void
 xusage(void)
@@ -53,54 +59,36 @@ kgt_fgetc(void *opaque)
 	return fgetc(f);
 }
 
-static enum lang
-lang(const char *optarg)
+static struct lang *
+findlang(const char *s)
 {
 	size_t i;
 
-	struct {
-		enum lang lang;
-		const char *name;
-	} a[] = {
-		{ LANG_BNF,  "bnf"  },
-		{ LANG_WSN,  "wsn"  },
-		{ LANG_EBNF, "ebnf" },
-		{ LANG_SID,  "sid"  },
-		{ LANG_TRD,  "trd"  },
-		{ LANG_DOT,  "dot"  },
-		{ LANG_RRD,  "rrd"  },
-	};
-
-	for (i = 0; i < sizeof a / sizeof *a; i++) {
-		if (0 == strcmp(optarg, a[i].name)) {
-			return a[i].lang;
+	for (i = 0; i < sizeof lang / sizeof *lang; i++) {
+		if (0 == strcmp(s, lang[i].name)) {
+			return &lang[i];
 		}
 	}
 
-	xerror("unrecognised language");
+	fprintf(stderr, "Unsupported language: %s\n", s);
+	exit(EXIT_FAILURE);
 }
 
 int
 main(int argc, char *argv[])
 {
-	struct ast_production *grammar;
-	int beautify = 1;
+	struct ast_production *g;
 
-	input = LANG_BNF;
-	output = input;
+	in  = findlang("bnf");
+	out = in;
 
 	{
 		int c;
 
 		while ((c = getopt(argc, argv, "hnl:e:")) != -1) {
 			switch (c) {
-			case 'l':
-				input = lang(optarg);
-				break;
-
-			case 'e':
-				output = lang(optarg);
-				break;
+			case 'l': in  = findlang(optarg); break;
+			case 'e': out = findlang(optarg); break;
 
 			case 'n':
 				beautify = 0;
@@ -120,27 +108,9 @@ main(int argc, char *argv[])
 		}
 	}
 
-	switch (input) {
-	case LANG_BNF:  grammar = bnf_input (kgt_fgetc, stdin); break;
-	case LANG_WSN:  grammar = wsn_input (kgt_fgetc, stdin); break;
-	case LANG_EBNF: grammar = ebnf_input(kgt_fgetc, stdin); break;
+	g = in->in(kgt_fgetc, stdin);
 
-	default:
-		fprintf(stderr, "Unsupported input language\n");
-	}
-
-	switch (output) {
-	case LANG_BNF:  bnf_output (grammar); break;
-	case LANG_WSN:  wsn_output (grammar); break;
-	case LANG_EBNF: ebnf_output(grammar); break;
-	case LANG_SID:  sid_output (grammar); break;
-	case LANG_TRD:  trd_output (grammar); break;
-	case LANG_DOT:  dot_output (grammar); break;
-	case LANG_RRD:  rrd_output (grammar, beautify); break;
-
-	default:
-		fprintf(stderr, "Unsupported output language\n");
-	}
+	out->out(g);
 
 	return EXIT_SUCCESS;
 }
