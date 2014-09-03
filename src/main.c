@@ -9,10 +9,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/* See %maps% - This is given for the entry point into the grammar */
-/* TODO: how to do this nicely? permit more complex types for SID's .act files? */
-typedef struct ast_production * map_production;
-
 #include "bnf/input.h"
 #include "wsn/input.h"
 #include "ebnf/input.h"
