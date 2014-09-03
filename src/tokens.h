@@ -4,29 +4,29 @@
 #define KGT_TOKENS_H
 
 enum tok {
-	tok_error,	/* for SID */
-	tok_unrecognised,
+	TOK_ERROR,	/* for SID */
+	TOK_UNRECOGNISED,
 
-	tok_equals,
-	tok_alt,
-	tok_sep,
-	tok_except,
+	TOK_EQUALS,
+	TOK_ALT,
+	TOK_SEP,
+	TOK_EXCEPT,
 
-	tok_star,
-	tok_cat,
-	tok_opt,
+	TOK_STAR,
+	TOK_CAT,
+	TOK_OPT,
 
-	tok_start_Hgroup,
-	tok_end_Hgroup,
-	tok_start_Hopt,
-	tok_end_Hopt,
-	tok_start_Hstar,
-	tok_end_Hstar,
+	TOK_START_HGROUP,
+	TOK_END_HGROUP,
+	TOK_START_HOPT,
+	TOK_END_HOPT,
+	TOK_START_HSTAR,
+	TOK_END_HSTAR,
 
-	tok_empty,
-	tok_name,
-	tok_literal,
-	tok_number
+	TOK_EMPTY,
+	TOK_NAME,
+	TOK_LITERAL,
+	TOK_NUMBER
 };
 
 #endif

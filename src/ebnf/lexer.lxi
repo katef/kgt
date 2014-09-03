@@ -14,7 +14,7 @@ ACTION <err_unexpected_character>: (c: CHARACTER) -> ();
 ACTION <err_invalid_sequence>: (c0: CHARACTER, c1: CHARACTER, c2: CHARACTER) -> ();
 
 
-TOKEN "\e" -> $sep;
+TOKEN "\e" -> $SEP;
 
 /* 7.6: Gap-separator */
 GROUP white = " \t\r\n\v\f";
@@ -50,45 +50,45 @@ ZONE double: "\"" ... "\"" -> $ = <io_literal> {
 /*
  * Table 1: Representation of terminal-charaters
  */
-TOKEN "|" -> $alt;
+TOKEN "|" -> $ALT;
 
-TOKEN "\[" -> $start-opt;
-TOKEN "]" -> $end-opt;
-TOKEN "{" -> $start-star;
-TOKEN "}" -> $end-star;
-TOKEN ";" -> $sep;
+TOKEN "\[" -> $START-OPT;
+TOKEN "]" -> $END-OPT;
+TOKEN "{" -> $START-STAR;
+TOKEN "}" -> $END-STAR;
+TOKEN ";" -> $SEP;
 
 
 /*
  * Table 2: Alternative representation of terminal-characters
  */
-TOKEN "/" -> $alt;
-TOKEN "!" -> $alt;
-TOKEN "." -> $sep;
+TOKEN "/" -> $ALT;
+TOKEN "!" -> $ALT;
+TOKEN "." -> $SEP;
 
-TOKEN "(:" -> $start-star;	/* TODO rename to start-rep */
-TOKEN ":)" -> $end-star;
-TOKEN "(/" -> $start-opt;
-TOKEN "/)" -> $end-opt;
+TOKEN "(:" -> $START-STAR;	/* TODO rename to start-rep */
+TOKEN ":)" -> $END-STAR;
+TOKEN "(/" -> $START-OPT;
+TOKEN "/)" -> $END-OPT;
 
 
 /*
  * Tokens shared by both representations
  */
-TOKEN "," -> $cat;
-TOKEN "=" -> $equals;
-TOKEN "(" -> $start-group;
-TOKEN ")" -> $end-group;
-TOKEN "-" -> $except;
-TOKEN "*" -> $star;
-TOKEN "?" -> $opt;
+TOKEN "," -> $CAT;
+TOKEN "=" -> $EQUALS;
+TOKEN "(" -> $START-GROUP;
+TOKEN ")" -> $END-GROUP;
+TOKEN "-" -> $EXCEPT;
+TOKEN "*" -> $STAR;
+TOKEN "?" -> $OPT;
 
 GROUP letter = {A-Z} + {a-z};
 GROUP digit = {0-9};
 
 GROUP character = "[letter][digit]" + "-_";
 GROUP character_or_space = "[character]" + " ";
-ZONE name: "[character]" -> <io_push>(#0), $$ [...) "[^character_or_space]" -> $name {
+ZONE name: "[character]" -> <io_push>(#0), $$ [...) "[^character_or_space]" -> $NAME {
 	/*
 	 * Space is excluded from whitespace in EBNF names, to permit names with
 	 * spaces. This includes trailing spaces, which are expected to be removed
@@ -100,7 +100,7 @@ ZONE name: "[character]" -> <io_push>(#0), $$ [...) "[^character_or_space]" -> $
 	TOKEN DEFAULT -> <err_unexpected_character>(#0), $$;
 };
 
-ZONE number: "[digit]" -> <io_push>(#0), $$ [...) "[^digit]" -> $number {
+ZONE number: "[digit]" -> <io_push>(#0), $$ [...) "[^digit]" -> $NUMBER {
 	GROUP white = "";
 	TOKEN "\e" -> <err_unexpected_eof>, $$;
 	TOKEN "[digit]" -> <io_push>(#0), $$;

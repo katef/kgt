@@ -13,10 +13,10 @@ ACTION <err_unexpected_character>: (c: CHARACTER) -> ();
 ACTION <err_invalid_sequence>: (c0: CHARACTER, c1: CHARACTER, c2: CHARACTER) -> ();
 
 
-TOKEN "=" -> $equals;
-TOKEN "|" -> $alt;
-TOKEN "\e" -> $sep;
-TOKEN "." -> $sep;
+TOKEN "=" -> $EQUALS;
+TOKEN "|" -> $ALT;
+TOKEN "\e" -> $SEP;
+TOKEN "." -> $SEP;
 
 ZONE literal: "\"" ... "\"" -> $ = <io_literal> {
 	GROUP white = "";
@@ -27,20 +27,20 @@ ZONE literal: "\"" ... "\"" -> $ = <io_literal> {
 
 GROUP character = {A-Z} + {a-z} + {0-9} + "-_";
 /* TODO: end group is wrong? */
-ZONE identifier: "[character]" -> <io_push>(#0), $$ [...) "[^character]" -> $name {
+ZONE identifier: "[character]" -> <io_push>(#0), $$ [...) "[^character]" -> $NAME {
 	GROUP white = "";
 	TOKEN "\e" -> <err_unexpected_eof>, $$;
 	TOKEN DEFAULT -> <io_push>(#0), $$;
 }
 
-TOKEN "{" -> $start-star;
-TOKEN "}" -> $end-star;
+TOKEN "{" -> $START-STAR;
+TOKEN "}" -> $END-STAR;
 
-TOKEN "\[" -> $start-opt;
-TOKEN "]" -> $end-opt;
+TOKEN "\[" -> $START-OPT;
+TOKEN "]" -> $END-OPT;
 
-TOKEN "(" -> $start-group;
-TOKEN ")" -> $end-group;
+TOKEN "(" -> $START-GROUP;
+TOKEN ")" -> $END-GROUP;
 
 TOKEN DEFAULT -> <err_unexpected_character>(#0), $$;
 

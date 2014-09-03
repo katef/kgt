@@ -41,6 +41,6 @@ io_flush(void)
 enum tok
 io_literal(void)
 {
-	return bufferindex == 0 ? tok_empty : tok_literal;
+	return bufferindex == 0 ? TOK_EMPTY : TOK_LITERAL;
 }
 

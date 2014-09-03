@@ -1,15 +1,15 @@
 /*
  * Automatically generated from the files:
- *	bnf_parser.sid
+ *	src/bnf/parser.sid
  * and
- *	../parser.act
+ *	src/parser.act
  * by:
  *	sid
  */
 
 /* BEGINNING OF HEADER */
 
-#line 40 "../parser.act"
+#line 40 "src/parser.act"
 
 
 	#include <stdlib.h>
@@ -29,7 +29,7 @@
 	int act_savedtoken;
 
 	/* Interfaces required by SID's generated parser */
-	#define ERROR_TERMINAL   (tok_error)
+	#define ERROR_TERMINAL   (TOK_ERROR)
 	#define CURRENT_TERMINAL act_currenttoken
 	#define ADVANCE_LEXER    do { act_currenttoken = act_next(); } while (0)
 	#define SAVE_LEXER(t)    do { act_savedtoken = act_currenttoken; act_currenttoken = (t); } while (0)
@@ -65,7 +65,7 @@
 		}
 	}
 
-#line 69 "bnf_parser.c"
+#line 69 "src/bnf/parser.c"
 
 
 #ifndef ERROR_TERMINAL
@@ -76,10 +76,10 @@
 
 static void prod_list_Hof_Hterms(map_term *);
 static void prod_list_Hof_Halts(map_alt *);
-static void prod_48(map_production *);
-static void prod_49(map_term *, map_alt *);
-static void prod_50(map_term *);
 static void prod_list_Hof_Hproductions(map_production *);
+static void prod_54(map_production *);
+static void prod_55(map_term *, map_alt *);
+static void prod_56(map_term *);
 static void prod_term(map_term *);
 static void prod_production(map_production *);
 extern void prod_bnf_Hgrammar(map_production *);
@@ -99,7 +99,7 @@ prod_list_Hof_Hterms(map_term *ZOl)
 	}
 	{
 		prod_term (&ZIl);
-		prod_50 (&ZIl);
+		prod_56 (&ZIl);
 		if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 			RESTORE_LEXER;
 			goto ZL1;
@@ -125,7 +125,7 @@ prod_list_Hof_Halts(map_alt *ZOl)
 		map_term ZIt;
 
 		prod_list_Hof_Hterms (&ZIt);
-		prod_49 (&ZIt, &ZIl);
+		prod_55 (&ZIt, &ZIl);
 		if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 			RESTORE_LEXER;
 			goto ZL1;
@@ -140,10 +140,34 @@ ZL0:;
 }
 
 static void
-prod_48(map_production *ZIl)
+prod_list_Hof_Hproductions(map_production *ZOl)
+{
+	map_production ZIl;
+
+	if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
+		return;
+	}
+	{
+		prod_production (&ZIl);
+		prod_54 (&ZIl);
+		if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
+			RESTORE_LEXER;
+			goto ZL1;
+		}
+	}
+	goto ZL0;
+ZL1:;
+	SAVE_LEXER ((ERROR_TERMINAL));
+	return;
+ZL0:;
+	*ZOl = ZIl;
+}
+
+static void
+prod_54(map_production *ZIl)
 {
 	switch (CURRENT_TERMINAL) {
-	case (tok_name):
+	case (TOK_NAME):
 		{
 			map_production ZIp;
 
@@ -154,12 +178,12 @@ prod_48(map_production *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-production-to-list */
 			{
-#line 203 "../parser.act"
+#line 203 "src/parser.act"
 
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIp);
 	
-#line 163 "bnf_parser.c"
+#line 187 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: add-production-to-list */
 		}
@@ -176,20 +200,20 @@ ZL1:;
 }
 
 static void
-prod_49(map_term *ZIt, map_alt *ZOl)
+prod_55(map_term *ZIt, map_alt *ZOl)
 {
 	map_alt ZIl;
 
 	switch (CURRENT_TERMINAL) {
-	case (tok_alt):
+	case (TOK_ALT):
 		{
 			map_alt ZIa;
 
-			/* BEGINNING OF INLINE: 39 */
+			/* BEGINNING OF INLINE: 45 */
 			{
 				{
 					switch (CURRENT_TERMINAL) {
-					case (tok_alt):
+					case (TOK_ALT):
 						break;
 					default:
 						goto ZL3;
@@ -201,17 +225,17 @@ prod_49(map_term *ZIt, map_alt *ZOl)
 				{
 					/* BEGINNING OF ACTION: err-expected-alt */
 					{
-#line 210 "../parser.act"
+#line 210 "src/parser.act"
 
 		expected("alternative separator");
 	
-#line 209 "bnf_parser.c"
+#line 233 "src/bnf/parser.c"
 					}
 					/* END OF ACTION: err-expected-alt */
 				}
 			ZL2:;
 			}
-			/* END OF INLINE: 39 */
+			/* END OF INLINE: 45 */
 			prod_list_Hof_Halts (&ZIa);
 			if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 				RESTORE_LEXER;
@@ -219,23 +243,23 @@ prod_49(map_term *ZIt, map_alt *ZOl)
 			}
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 144 "../parser.act"
+#line 144 "src/parser.act"
 
 		(ZIl) = xmalloc(sizeof *(ZIl));
 		(ZIl)->terms = (*ZIt);
 		(ZIl)->next = NULL;
 	
-#line 229 "bnf_parser.c"
+#line 253 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: make-alt */
 			/* BEGINNING OF ACTION: add-alt-to-list */
 			{
-#line 198 "../parser.act"
+#line 198 "src/parser.act"
 
 		assert((ZIl)->next == NULL);
 		(ZIl)->next = (ZIa);
 	
-#line 239 "bnf_parser.c"
+#line 263 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: add-alt-to-list */
 		}
@@ -244,13 +268,13 @@ prod_49(map_term *ZIt, map_alt *ZOl)
 		{
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 144 "../parser.act"
+#line 144 "src/parser.act"
 
 		(ZIl) = xmalloc(sizeof *(ZIl));
 		(ZIl)->terms = (*ZIt);
 		(ZIl)->next = NULL;
 	
-#line 254 "bnf_parser.c"
+#line 278 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: make-alt */
 		}
@@ -267,10 +291,10 @@ ZL0:;
 }
 
 static void
-prod_50(map_term *ZIl)
+prod_56(map_term *ZIl)
 {
 	switch (CURRENT_TERMINAL) {
-	case (tok_empty): case (tok_name): case (tok_literal):
+	case (TOK_EMPTY): case (TOK_NAME): case (TOK_LITERAL):
 		{
 			map_term ZIt;
 
@@ -281,12 +305,12 @@ prod_50(map_term *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-term-to-list */
 			{
-#line 193 "../parser.act"
+#line 193 "src/parser.act"
 
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIt);
 	
-#line 290 "bnf_parser.c"
+#line 314 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: add-term-to-list */
 		}
@@ -303,71 +327,47 @@ ZL1:;
 }
 
 static void
-prod_list_Hof_Hproductions(map_production *ZOl)
-{
-	map_production ZIl;
-
-	if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
-		return;
-	}
-	{
-		prod_production (&ZIl);
-		prod_48 (&ZIl);
-		if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
-			RESTORE_LEXER;
-			goto ZL1;
-		}
-	}
-	goto ZL0;
-ZL1:;
-	SAVE_LEXER ((ERROR_TERMINAL));
-	return;
-ZL0:;
-	*ZOl = ZIl;
-}
-
-static void
 prod_term(map_term *ZOt)
 {
 	map_term ZIt;
 
 	switch (CURRENT_TERMINAL) {
-	case (tok_empty):
+	case (TOK_EMPTY):
 		{
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-empty-term */
 			{
-#line 121 "../parser.act"
+#line 121 "src/parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_EMPTY;
 		(ZIt)->repeat = 1;
 		(ZIt)->next = NULL;
 	
-#line 348 "bnf_parser.c"
+#line 348 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: make-empty-term */
 		}
 		break;
-	case (tok_literal):
+	case (TOK_LITERAL):
 		{
 			map_string ZIl;
 
-			/* BEGINNING OF EXTRACT: literal */
+			/* BEGINNING OF EXTRACT: LITERAL */
 			{
-#line 100 "../parser.act"
+#line 100 "src/parser.act"
 
 		assert(strlen(io_buffer) > 0);
 		ZIl = xstrdup(io_buffer);
 		io_flush();
 	
-#line 365 "bnf_parser.c"
+#line 365 "src/bnf/parser.c"
 			}
-			/* END OF EXTRACT: literal */
+			/* END OF EXTRACT: LITERAL */
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-literal-term */
 			{
-#line 128 "../parser.act"
+#line 128 "src/parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_TERMINAL;	/* TODO rename to literal or vice-versa, perhaps */
@@ -375,18 +375,18 @@ prod_term(map_term *ZOt)
 		(ZIt)->repeat = 1;
 		(ZIt)->next = NULL;
 	
-#line 379 "bnf_parser.c"
+#line 379 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: make-literal-term */
 		}
 		break;
-	case (tok_name):
+	case (TOK_NAME):
 		{
 			map_string ZIn;
 
-			/* BEGINNING OF EXTRACT: name */
+			/* BEGINNING OF EXTRACT: NAME */
 			{
-#line 94 "../parser.act"
+#line 94 "src/parser.act"
 
 		assert(strlen(io_buffer) > 0);
 		assert(!isspace((unsigned char) io_buffer[0]));
@@ -394,13 +394,13 @@ prod_term(map_term *ZOt)
 		ZIn = xstrdup(io_buffer);
 		io_flush();
 	
-#line 398 "bnf_parser.c"
+#line 398 "src/bnf/parser.c"
 			}
-			/* END OF EXTRACT: name */
+			/* END OF EXTRACT: NAME */
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-production-term */
 			{
-#line 136 "../parser.act"
+#line 136 "src/parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_PRODUCTION;
@@ -408,7 +408,7 @@ prod_term(map_term *ZOt)
 		(ZIt)->repeat = 1;
 		(ZIt)->next = NULL;
 	
-#line 412 "bnf_parser.c"
+#line 412 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: make-production-term */
 		}
@@ -439,10 +439,10 @@ prod_production(map_production *ZOp)
 		map_alt ZIa;
 
 		switch (CURRENT_TERMINAL) {
-		case (tok_name):
-			/* BEGINNING OF EXTRACT: name */
+		case (TOK_NAME):
+			/* BEGINNING OF EXTRACT: NAME */
 			{
-#line 94 "../parser.act"
+#line 94 "src/parser.act"
 
 		assert(strlen(io_buffer) > 0);
 		assert(!isspace((unsigned char) io_buffer[0]));
@@ -450,19 +450,19 @@ prod_production(map_production *ZOp)
 		ZIn = xstrdup(io_buffer);
 		io_flush();
 	
-#line 454 "bnf_parser.c"
+#line 454 "src/bnf/parser.c"
 			}
-			/* END OF EXTRACT: name */
+			/* END OF EXTRACT: NAME */
 			break;
 		default:
 			goto ZL1;
 		}
 		ADVANCE_LEXER;
-		/* BEGINNING OF INLINE: 43 */
+		/* BEGINNING OF INLINE: 49 */
 		{
 			{
 				switch (CURRENT_TERMINAL) {
-				case (tok_equals):
+				case (TOK_EQUALS):
 					break;
 				default:
 					goto ZL3;
@@ -474,17 +474,17 @@ prod_production(map_production *ZOp)
 			{
 				/* BEGINNING OF ACTION: err-expected-equals */
 				{
-#line 218 "../parser.act"
+#line 218 "src/parser.act"
 
 		expected("production assignment");
 	
-#line 482 "bnf_parser.c"
+#line 482 "src/bnf/parser.c"
 				}
 				/* END OF ACTION: err-expected-equals */
 			}
 		ZL2:;
 		}
-		/* END OF INLINE: 43 */
+		/* END OF INLINE: 49 */
 		prod_list_Hof_Halts (&ZIa);
 		if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 			RESTORE_LEXER;
@@ -492,21 +492,21 @@ prod_production(map_production *ZOp)
 		}
 		/* BEGINNING OF ACTION: make-production */
 		{
-#line 150 "../parser.act"
+#line 150 "src/parser.act"
 
 		(ZIp) = xmalloc(sizeof *(ZIp));
 		(ZIp)->name = (ZIn);
 		(ZIp)->alts = (ZIa);
 		(ZIp)->next = NULL;
 	
-#line 503 "bnf_parser.c"
+#line 503 "src/bnf/parser.c"
 		}
 		/* END OF ACTION: make-production */
-		/* BEGINNING OF INLINE: 44 */
+		/* BEGINNING OF INLINE: 50 */
 		{
 			{
 				switch (CURRENT_TERMINAL) {
-				case (tok_sep):
+				case (TOK_SEP):
 					break;
 				default:
 					goto ZL5;
@@ -518,17 +518,17 @@ prod_production(map_production *ZOp)
 			{
 				/* BEGINNING OF ACTION: err-expected-sep */
 				{
-#line 214 "../parser.act"
+#line 214 "src/parser.act"
 
 		expected("alternative separator");
 	
-#line 526 "bnf_parser.c"
+#line 526 "src/bnf/parser.c"
 				}
 				/* END OF ACTION: err-expected-sep */
 			}
 		ZL4:;
 		}
-		/* END OF INLINE: 44 */
+		/* END OF INLINE: 50 */
 	}
 	goto ZL0;
 ZL1:;
@@ -558,20 +558,20 @@ ZL1:;
 	{
 		/* BEGINNING OF ACTION: make-empty-production */
 		{
-#line 157 "../parser.act"
+#line 157 "src/parser.act"
 
 		(ZIl) = NULL;
 	
-#line 566 "bnf_parser.c"
+#line 566 "src/bnf/parser.c"
 		}
 		/* END OF ACTION: make-empty-production */
 		/* BEGINNING OF ACTION: err-unhandled */
 		{
-#line 222 "../parser.act"
+#line 222 "src/parser.act"
 
 		expected(NULL);
 	
-#line 575 "bnf_parser.c"
+#line 575 "src/bnf/parser.c"
 		}
 		/* END OF ACTION: err-unhandled */
 	}
@@ -581,8 +581,8 @@ ZL0:;
 
 /* BEGINNING OF TRAILER */
 
-#line 225 "../parser.act"
+#line 225 "src/parser.act"
 
-#line 587 "bnf_parser.c"
+#line 587 "src/bnf/parser.c"
 
 /* END OF FILE */

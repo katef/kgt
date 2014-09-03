@@ -65,7 +65,7 @@ act_next(void)
 	case LANG_EBNF: t = ebnf_next(&state.ebnf_state); break;
 	}
 
-	if (t == tok_unrecognised) {
+	if (t == TOK_UNRECOGNISED) {
 		xerror("unrecognised token on line %d", io_line);
 	}
 

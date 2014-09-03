@@ -172,7 +172,7 @@ ebnf_next_number(struct ebnf_state *state)
 			goto start; /* leaf */
 		} else if (!ebnf_group(ebnf_group_digit, c0)) {
 			ebnf_push(state, c0);
-			return tok_number;
+			return TOK_NUMBER;
 		}
 
 		/* DEFAULT */
@@ -212,7 +212,7 @@ ebnf_next_name(struct ebnf_state *state)
 			goto start; /* leaf */
 		} else if (!ebnf_group(ebnf_group_character_or_space, c0)) {
 			ebnf_push(state, c0);
-			return tok_name;
+			return TOK_NAME;
 		}
 
 		/* DEFAULT */
@@ -352,77 +352,77 @@ ebnf_next(struct ebnf_state *state)
 		if (ebnf_group(ebnf_group_white, c0)) goto start;
 		switch (c0) {
 		case '?': {
-				return tok_opt;
+				return TOK_OPT;
 			}
 
 		case '*': {
-				return tok_star;
+				return TOK_STAR;
 			}
 
 		case '-': {
-				return tok_except;
+				return TOK_EXCEPT;
 			}
 
 		case ')': {
-				return tok_end_Hgroup;
+				return TOK_END_HGROUP;
 			}
 
 		case '=': {
-				return tok_equals;
+				return TOK_EQUALS;
 			}
 
 		case ',': {
-				return tok_cat;
+				return TOK_CAT;
 			}
 
 		case ':': {
 				int c1 = ebnf_readchar(state);
 				if (c1 == ')') {
-					return tok_end_Hstar;
+					return TOK_END_HSTAR;
 				}
 				ebnf_push(state, c1);
 			}
 			break;
 
 		case '.': {
-				return tok_sep;
+				return TOK_SEP;
 			}
 
 		case '!': {
-				return tok_alt;
+				return TOK_ALT;
 			}
 
 		case '/': {
 				int c1 = ebnf_readchar(state);
 				if (c1 == ')') {
-					return tok_end_Hopt;
+					return TOK_END_HOPT;
 				}
 				ebnf_push(state, c1);
-				return tok_alt;
+				return TOK_ALT;
 			}
 
 		case ';': {
-				return tok_sep;
+				return TOK_SEP;
 			}
 
 		case '}': {
-				return tok_end_Hstar;
+				return TOK_END_HSTAR;
 			}
 
 		case '{': {
-				return tok_start_Hstar;
+				return TOK_START_HSTAR;
 			}
 
 		case ']': {
-				return tok_end_Hopt;
+				return TOK_END_HOPT;
 			}
 
 		case '[': {
-				return tok_start_Hopt;
+				return TOK_START_HOPT;
 			}
 
 		case '|': {
-				return tok_alt;
+				return TOK_ALT;
 			}
 
 		case '"': {
@@ -448,7 +448,7 @@ ebnf_next(struct ebnf_state *state)
 							goto start; /* leaf */
 						}
 						ebnf_push(state, c2);
-						return tok_start_Hopt;
+						return TOK_START_HOPT;
 					}
 
 				case ':': {
@@ -463,7 +463,7 @@ ebnf_next(struct ebnf_state *state)
 							goto start; /* leaf */
 						}
 						ebnf_push(state, c2);
-						return tok_start_Hstar;
+						return TOK_START_HSTAR;
 					}
 
 				case '*': {
@@ -484,11 +484,11 @@ ebnf_next(struct ebnf_state *state)
 
 				}
 				ebnf_push(state, c1);
-				return tok_start_Hgroup;
+				return TOK_START_HGROUP;
 			}
 
 		case LEXI_EOF: {
-				return tok_sep;
+				return TOK_SEP;
 			}
 
 		}

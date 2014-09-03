@@ -17,19 +17,19 @@ ACTION <err_invalid_sequence>: (c0: CHARACTER, c1: CHARACTER, c2: CHARACTER) -> 
 
 GROUP white = " \t";
 
-TOKEN "::=" -> $equals;
-TOKEN "|" -> $alt;
+TOKEN "::=" -> $EQUALS;
+TOKEN "|" -> $ALT;
 
 /*
  * Newlines are whitespace, except for a double newline, which acts as a
  * production separator.
  */
-TOKEN "\e" -> $sep;
-TOKEN "\n\n" -> $sep;
+TOKEN "\e" -> $SEP;
+TOKEN "\n\n" -> $SEP;
 TOKEN "\n" -> $$;
 
 GROUP character = {A-Z} + {a-z} + {0-9} + "-_";
-ZONE name: "<" ... ">" -> $name {
+ZONE name: "<" ... ">" -> $NAME {
 	GROUP white = "";
 	TOKEN "\e" -> <err_unexpected_eof>, $$;
 	TOKEN "[character]" -> <io_push>(#0), $$;

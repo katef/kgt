@@ -161,7 +161,7 @@ wsn_next_identifier(struct wsn_state *state)
 		}
 		if (!wsn_group(wsn_group_character, c0)) {
 			wsn_push(state, c0);
-			return tok_name;
+			return TOK_NAME;
 		}
 
 		/* DEFAULT */
@@ -238,27 +238,27 @@ wsn_next(struct wsn_state *state)
 		if (wsn_group(wsn_group_white, c0)) goto start;
 		switch (c0) {
 		case ')': {
-				return tok_end_Hgroup;
+				return TOK_END_HGROUP;
 			}
 
 		case '(': {
-				return tok_start_Hgroup;
+				return TOK_START_HGROUP;
 			}
 
 		case ']': {
-				return tok_end_Hopt;
+				return TOK_END_HOPT;
 			}
 
 		case '[': {
-				return tok_start_Hopt;
+				return TOK_START_HOPT;
 			}
 
 		case '}': {
-				return tok_end_Hstar;
+				return TOK_END_HSTAR;
 			}
 
 		case '{': {
-				return tok_start_Hstar;
+				return TOK_START_HSTAR;
 			}
 
 		case '"': {
@@ -266,19 +266,19 @@ wsn_next(struct wsn_state *state)
 			}
 
 		case '.': {
-				return tok_sep;
+				return TOK_SEP;
 			}
 
 		case LEXI_EOF: {
-				return tok_sep;
+				return TOK_SEP;
 			}
 
 		case '|': {
-				return tok_alt;
+				return TOK_ALT;
 			}
 
 		case '=': {
-				return tok_equals;
+				return TOK_EQUALS;
 			}
 
 		}

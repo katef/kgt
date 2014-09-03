@@ -1,28 +1,28 @@
 /*
  * Automatically generated from the files:
- *	bnf_parser.sid
+ *	src/bnf/parser.sid
  * and
- *	../parser.act
+ *	src/parser.act
  * by:
  *	sid
  */
 
 /* BEGINNING OF HEADER */
 
-#line 80 "../parser.act"
+#line 80 "src/parser.act"
 
 
 	int act_next(void);
 
-#line 18 "bnf_parser.h"
+#line 18 "src/bnf/parser.h"
 
 /* BEGINNING OF FUNCTION DECLARATIONS */
 
 extern void prod_bnf_Hgrammar(map_production *);
 /* BEGINNING OF TRAILER */
 
-#line 226 "../parser.act"
+#line 226 "src/parser.act"
 
-#line 27 "bnf_parser.h"
+#line 27 "src/bnf/parser.h"
 
 /* END OF FILE */

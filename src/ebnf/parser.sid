@@ -12,127 +12,123 @@
 
 %types%
 
-	STRING;
-	NUMBER;
+	string;
+	number;
 
-	/* AST elements */
-	PRODUCTION;
-	TERM;
-	ALT;
+	ast_production;
+	ast_term;
+	ast_alt;
 
 %terminals%
 
-	!error;
-	!unrecognised;
+	!ERROR;
+	!UNRECOGNISED;
 
-	equals;
-	alt;
-	sep;
-	!except;
+	EQUALS;
+	ALT;
+	SEP;
+	!EXCEPT;
 
-	star;
-	cat;
-	!opt;
+	STAR;
+	CAT;
+	!OPT;
 
-	start-group;
-	end-group;
-	start-opt;
-	end-opt;
-	start-star;
-	end-star;
+	START-GROUP; END-GROUP;
+	START-OPT;   END-OPT;
+	START-STAR;  END-STAR;
 
-	empty;
-	name: () -> (:STRING);
-	literal: () -> (:STRING);
-	number: () -> (:NUMBER);
+	EMPTY;
+	NAME:    () -> (:string);
+	LITERAL: () -> (:string);
+	NUMBER:  () -> (:number);
 
 %productions%
 
-	<make-empty-term>: () -> (:TERM);
-	<make-literal-term>: (:STRING) -> (:TERM);
-	<make-production-term>: (:STRING) -> (:TERM);
-	<make-alt>: (:TERM) -> (:ALT);
-	<make-production>: (:STRING, :ALT) -> (:PRODUCTION);
-	<make-empty-production>: () -> (:PRODUCTION);
+	<make-empty-term>: () -> (:ast_term);
+	<make-literal-term>: (:string) -> (:ast_term);
+	<make-production-term>: (:string) -> (:ast_term);
+	<make-alt>: (:ast_term) -> (:ast_alt);
+	<make-production>: (:string, :ast_alt) -> (:ast_production);
+	<make-empty-production>: () -> (:ast_production);
 
-	<make-star-group>: (:ALT) -> (:TERM);
-	<make-opt-group>: (:ALT) -> (:TERM);
-	<make-alt-group>: (:ALT) -> (:TERM);
+	<make-star-group>: (:ast_alt) -> (:ast_term);
+	<make-opt-group>: (:ast_alt) -> (:ast_term);
+	<make-alt-group>: (:ast_alt) -> (:ast_term);
 
-	<set-repeat>: (:TERM, :NUMBER) -> ();
+	<set-repeat>: (:ast_term, :number) -> ();
 
-	<add-term-to-list>: (:TERM, :TERM) -> ();
-	<add-alt-to-list>: (:ALT, :ALT) -> ();
-	<add-production-to-list>: (:PRODUCTION, :PRODUCTION) -> ();
+	<add-term-to-list>: (:ast_term, :ast_term) -> ();
+	<add-alt-to-list>: (:ast_alt, :ast_alt) -> ();
+	<add-production-to-list>: (:ast_production, :ast_production) -> ();
 
 	<err-expected-alt>;
 	<err-expected-sep>;
 	<err-expected-equals>;
 	<err-unhandled>;
 
-	list-of-terms: () -> (:TERM);
-	list-of-alts: () -> (:ALT);
+	list-of-terms: () -> (:ast_term);
+	list-of-alts: () -> (:ast_alt);
 
 
-	term: () -> (t :TERM) = {
-		empty;
+	term: () -> (t :ast_term) = {
+		EMPTY;
 		t = <make-empty-term>;
 	||
-		l = literal;
+		l = LITERAL;
 		t = <make-literal-term>(l);
 	||
-		n = name;
+		n = NAME;
 		t = <make-production-term>(n);
 	};
 
-	factor: () -> (t :TERM) = {
+	factor: () -> (t :ast_term) = {
 		t = term;
 	||
-		start-star;
+		START-STAR;
 		a = list-of-alts;
-		end-star;
+		END-STAR;
 
 		t = <make-star-group>(a);
 	||
-		start-opt;
+		START-OPT;
 		a = list-of-alts;
-		end-opt;
+		END-OPT;
 
 		t = <make-opt-group>(a);
 	||
-		start-group;
+		START-GROUP;
 		a = list-of-alts;
-		end-group;
+		END-GROUP;
 
 		t = <make-alt-group>(a);
 	};
 
-	repeatable-factor: () -> (t :TERM) = {
+	repeatable-factor: () -> (t :ast_term) = {
 		t = factor;
 	||
-		n = number;
-		star;
+		n = NUMBER;
+		STAR;
 		t = factor;
 		<set-repeat>(t, n);
 	};
 
-	list-of-terms: () -> (l :TERM) = {
+	list-of-terms: () -> (l :ast_term) = {
 		l = repeatable-factor;
 	||
 		l = repeatable-factor;
-		cat;
+		CAT;
 		t = list-of-terms;
 		<add-term-to-list>(t, l);
 	};
 
-	list-of-alts: () -> (l :ALT) = {
+	list-of-alts: () -> (l :ast_alt) = {
 		t = list-of-terms;
 		l = <make-alt>(t);
 	||
 		t = list-of-terms;
 
 		{
-			alt;
+			ALT;
 		##
 			<err-expected-alt>;
 		};
@@ -142,11 +138,11 @@
 		<add-alt-to-list>(a, l);
 	};
 
-	production: () -> (p :PRODUCTION) = {
-		n = name;
+	production: () -> (p :ast_production) = {
+		n = NAME;
 
 		{
-			equals;
+			EQUALS;
 		##
 			<err-expected-equals>;
 		};
@@ -155,13 +151,13 @@
 		p = <make-production>(n, a);
 
 		{
-			sep;
+			SEP;
 		##
 			<err-expected-sep>;
 		};
 	};
 
-	list-of-productions: () -> (l :PRODUCTION) = {
+	list-of-productions: () -> (l :ast_production) = {
 		l = production;
 	||
 		l = production;
@@ -169,7 +165,7 @@
 		<add-production-to-list>(p, l);
 	};
 
-	ebnf-grammar: () -> (l :PRODUCTION) = {
+	ebnf-grammar: () -> (l :ast_production) = {
 		l = list-of-productions;
 	##
 		l = <make-empty-production>;

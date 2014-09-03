@@ -245,7 +245,7 @@ bnf_next_name(struct bnf_state *state)
 			}
 
 		case '>': {
-				return tok_name;
+				return TOK_NAME;
 			}
 
 		}
@@ -295,18 +295,18 @@ bnf_next(struct bnf_state *state)
 		case '\n': {
 				int c1 = bnf_readchar(state);
 				if (c1 == '\n') {
-					return tok_sep;
+					return TOK_SEP;
 				}
 				bnf_push(state, c1);
 				goto start; /* leaf */
 			}
 
 		case LEXI_EOF: {
-				return tok_sep;
+				return TOK_SEP;
 			}
 
 		case '|': {
-				return tok_alt;
+				return TOK_ALT;
 			}
 
 		case ':': {
@@ -314,7 +314,7 @@ bnf_next(struct bnf_state *state)
 				if (c1 == ':') {
 					int c2 = bnf_readchar(state);
 					if (c2 == '=') {
-						return tok_equals;
+						return TOK_EQUALS;
 					}
 					bnf_push(state, c2);
 				}

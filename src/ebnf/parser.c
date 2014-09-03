@@ -1,15 +1,15 @@
 /*
  * Automatically generated from the files:
- *	ebnf_parser.sid
+ *	src/ebnf/parser.sid
  * and
- *	../parser.act
+ *	src/parser.act
  * by:
  *	sid
  */
 
 /* BEGINNING OF HEADER */
 
-#line 40 "../parser.act"
+#line 40 "src/parser.act"
 
 
 	#include <stdlib.h>
@@ -29,7 +29,7 @@
 	int act_savedtoken;
 
 	/* Interfaces required by SID's generated parser */
-	#define ERROR_TERMINAL   (tok_error)
+	#define ERROR_TERMINAL   (TOK_ERROR)
 	#define CURRENT_TERMINAL act_currenttoken
 	#define ADVANCE_LEXER    do { act_currenttoken = act_next(); } while (0)
 	#define SAVE_LEXER(t)    do { act_savedtoken = act_currenttoken; act_currenttoken = (t); } while (0)
@@ -65,7 +65,7 @@
 		}
 	}
 
-#line 69 "ebnf_parser.c"
+#line 69 "src/ebnf/parser.c"
 
 
 #ifndef ERROR_TERMINAL
@@ -97,14 +97,14 @@ prod_factor(map_term *ZOt)
 	map_term ZIt;
 
 	switch (CURRENT_TERMINAL) {
-	case (tok_start_Hgroup):
+	case (TOK_START_HGROUP):
 		{
 			map_alt ZIa;
 
 			ADVANCE_LEXER;
 			prod_list_Hof_Halts (&ZIa);
 			switch (CURRENT_TERMINAL) {
-			case (tok_end_Hgroup):
+			case (TOK_END_HGROUP):
 				break;
 			case (ERROR_TERMINAL):
 				RESTORE_LEXER;
@@ -115,7 +115,7 @@ prod_factor(map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-alt-group */
 			{
-#line 178 "../parser.act"
+#line 178 "src/parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_GROUP;
@@ -123,19 +123,19 @@ prod_factor(map_term *ZOt)
 		(ZIt)->u.group->kleene = KLEENE_GROUP;
 		(ZIt)->u.group->alts = (ZIa);
 	
-#line 127 "ebnf_parser.c"
+#line 127 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: make-alt-group */
 		}
 		break;
-	case (tok_start_Hopt):
+	case (TOK_START_HOPT):
 		{
 			map_alt ZIa;
 
 			ADVANCE_LEXER;
 			prod_list_Hof_Halts (&ZIa);
 			switch (CURRENT_TERMINAL) {
-			case (tok_end_Hopt):
+			case (TOK_END_HOPT):
 				break;
 			case (ERROR_TERMINAL):
 				RESTORE_LEXER;
@@ -146,7 +146,7 @@ prod_factor(map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-opt-group */
 			{
-#line 170 "../parser.act"
+#line 170 "src/parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_GROUP;
@@ -154,19 +154,19 @@ prod_factor(map_term *ZOt)
 		(ZIt)->u.group->kleene = KLEENE_OPTIONAL;
 		(ZIt)->u.group->alts = (ZIa);
 	
-#line 158 "ebnf_parser.c"
+#line 158 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: make-opt-group */
 		}
 		break;
-	case (tok_start_Hstar):
+	case (TOK_START_HSTAR):
 		{
 			map_alt ZIa;
 
 			ADVANCE_LEXER;
 			prod_list_Hof_Halts (&ZIa);
 			switch (CURRENT_TERMINAL) {
-			case (tok_end_Hstar):
+			case (TOK_END_HSTAR):
 				break;
 			case (ERROR_TERMINAL):
 				RESTORE_LEXER;
@@ -177,7 +177,7 @@ prod_factor(map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-star-group */
 			{
-#line 162 "../parser.act"
+#line 162 "src/parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_GROUP;
@@ -185,12 +185,12 @@ prod_factor(map_term *ZOt)
 		(ZIt)->u.group->kleene = KLEENE_STAR;
 		(ZIt)->u.group->alts = (ZIa);
 	
-#line 189 "ebnf_parser.c"
+#line 189 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: make-star-group */
 		}
 		break;
-	case (tok_empty): case (tok_name): case (tok_literal):
+	case (TOK_EMPTY): case (TOK_NAME): case (TOK_LITERAL):
 		{
 			prod_term (&ZIt);
 			if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
@@ -306,20 +306,20 @@ ZL1:;
 	{
 		/* BEGINNING OF ACTION: make-empty-production */
 		{
-#line 157 "../parser.act"
+#line 157 "src/parser.act"
 
 		(ZIl) = NULL;
 	
-#line 314 "ebnf_parser.c"
+#line 314 "src/ebnf/parser.c"
 		}
 		/* END OF ACTION: make-empty-production */
 		/* BEGINNING OF ACTION: err-unhandled */
 		{
-#line 222 "../parser.act"
+#line 222 "src/parser.act"
 
 		expected(NULL);
 	
-#line 323 "ebnf_parser.c"
+#line 323 "src/ebnf/parser.c"
 		}
 		/* END OF ACTION: err-unhandled */
 	}
@@ -331,7 +331,7 @@ static void
 prod_59(map_production *ZIl)
 {
 	switch (CURRENT_TERMINAL) {
-	case (tok_name):
+	case (TOK_NAME):
 		{
 			map_production ZIp;
 
@@ -342,12 +342,12 @@ prod_59(map_production *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-production-to-list */
 			{
-#line 203 "../parser.act"
+#line 203 "src/parser.act"
 
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIp);
 	
-#line 351 "ebnf_parser.c"
+#line 351 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: add-production-to-list */
 		}
@@ -369,42 +369,42 @@ prod_term(map_term *ZOt)
 	map_term ZIt;
 
 	switch (CURRENT_TERMINAL) {
-	case (tok_empty):
+	case (TOK_EMPTY):
 		{
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-empty-term */
 			{
-#line 121 "../parser.act"
+#line 121 "src/parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_EMPTY;
 		(ZIt)->repeat = 1;
 		(ZIt)->next = NULL;
 	
-#line 385 "ebnf_parser.c"
+#line 385 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: make-empty-term */
 		}
 		break;
-	case (tok_literal):
+	case (TOK_LITERAL):
 		{
 			map_string ZIl;
 
-			/* BEGINNING OF EXTRACT: literal */
+			/* BEGINNING OF EXTRACT: LITERAL */
 			{
-#line 100 "../parser.act"
+#line 100 "src/parser.act"
 
 		assert(strlen(io_buffer) > 0);
 		ZIl = xstrdup(io_buffer);
 		io_flush();
 	
-#line 402 "ebnf_parser.c"
+#line 402 "src/ebnf/parser.c"
 			}
-			/* END OF EXTRACT: literal */
+			/* END OF EXTRACT: LITERAL */
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-literal-term */
 			{
-#line 128 "../parser.act"
+#line 128 "src/parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_TERMINAL;	/* TODO rename to literal or vice-versa, perhaps */
@@ -412,18 +412,18 @@ prod_term(map_term *ZOt)
 		(ZIt)->repeat = 1;
 		(ZIt)->next = NULL;
 	
-#line 416 "ebnf_parser.c"
+#line 416 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: make-literal-term */
 		}
 		break;
-	case (tok_name):
+	case (TOK_NAME):
 		{
 			map_string ZIn;
 
-			/* BEGINNING OF EXTRACT: name */
+			/* BEGINNING OF EXTRACT: NAME */
 			{
-#line 94 "../parser.act"
+#line 94 "src/parser.act"
 
 		assert(strlen(io_buffer) > 0);
 		assert(!isspace((unsigned char) io_buffer[0]));
@@ -431,13 +431,13 @@ prod_term(map_term *ZOt)
 		ZIn = xstrdup(io_buffer);
 		io_flush();
 	
-#line 435 "ebnf_parser.c"
+#line 435 "src/ebnf/parser.c"
 			}
-			/* END OF EXTRACT: name */
+			/* END OF EXTRACT: NAME */
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-production-term */
 			{
-#line 136 "../parser.act"
+#line 136 "src/parser.act"
 
 		(ZIt) = xmalloc(sizeof *(ZIt));
 		(ZIt)->type = TYPE_PRODUCTION;
@@ -445,7 +445,7 @@ prod_term(map_term *ZOt)
 		(ZIt)->repeat = 1;
 		(ZIt)->next = NULL;
 	
-#line 449 "ebnf_parser.c"
+#line 449 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: make-production-term */
 		}
@@ -469,7 +469,7 @@ prod_60(map_term *ZIt, map_alt *ZOl)
 	map_alt ZIl;
 
 	switch (CURRENT_TERMINAL) {
-	case (tok_alt):
+	case (TOK_ALT):
 		{
 			map_alt ZIa;
 
@@ -477,7 +477,7 @@ prod_60(map_term *ZIt, map_alt *ZOl)
 			{
 				{
 					switch (CURRENT_TERMINAL) {
-					case (tok_alt):
+					case (TOK_ALT):
 						break;
 					default:
 						goto ZL3;
@@ -489,11 +489,11 @@ prod_60(map_term *ZIt, map_alt *ZOl)
 				{
 					/* BEGINNING OF ACTION: err-expected-alt */
 					{
-#line 210 "../parser.act"
+#line 210 "src/parser.act"
 
 		expected("alternative separator");
 	
-#line 497 "ebnf_parser.c"
+#line 497 "src/ebnf/parser.c"
 					}
 					/* END OF ACTION: err-expected-alt */
 				}
@@ -507,23 +507,23 @@ prod_60(map_term *ZIt, map_alt *ZOl)
 			}
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 144 "../parser.act"
+#line 144 "src/parser.act"
 
 		(ZIl) = xmalloc(sizeof *(ZIl));
 		(ZIl)->terms = (*ZIt);
 		(ZIl)->next = NULL;
 	
-#line 517 "ebnf_parser.c"
+#line 517 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: make-alt */
 			/* BEGINNING OF ACTION: add-alt-to-list */
 			{
-#line 198 "../parser.act"
+#line 198 "src/parser.act"
 
 		assert((ZIl)->next == NULL);
 		(ZIl)->next = (ZIa);
 	
-#line 527 "ebnf_parser.c"
+#line 527 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: add-alt-to-list */
 		}
@@ -532,13 +532,13 @@ prod_60(map_term *ZIt, map_alt *ZOl)
 		{
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 144 "../parser.act"
+#line 144 "src/parser.act"
 
 		(ZIl) = xmalloc(sizeof *(ZIl));
 		(ZIl)->terms = (*ZIt);
 		(ZIl)->next = NULL;
 	
-#line 542 "ebnf_parser.c"
+#line 542 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: make-alt */
 		}
@@ -558,7 +558,7 @@ static void
 prod_61(map_term *ZIl)
 {
 	switch (CURRENT_TERMINAL) {
-	case (tok_cat):
+	case (TOK_CAT):
 		{
 			map_term ZIt;
 
@@ -570,12 +570,12 @@ prod_61(map_term *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-term-to-list */
 			{
-#line 193 "../parser.act"
+#line 193 "src/parser.act"
 
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIt);
 	
-#line 579 "ebnf_parser.c"
+#line 579 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: add-term-to-list */
 		}
@@ -597,13 +597,13 @@ prod_repeatable_Hfactor(map_term *ZOt)
 	map_term ZIt;
 
 	switch (CURRENT_TERMINAL) {
-	case (tok_number):
+	case (TOK_NUMBER):
 		{
 			map_number ZIn;
 
-			/* BEGINNING OF EXTRACT: number */
+			/* BEGINNING OF EXTRACT: NUMBER */
 			{
-#line 111 "../parser.act"
+#line 111 "src/parser.act"
 
 		assert(strlen(io_buffer) > 0);
 
@@ -614,12 +614,12 @@ prod_repeatable_Hfactor(map_term *ZOt)
 		ZIn = atoi(io_buffer);
 		io_flush();
 	
-#line 618 "ebnf_parser.c"
+#line 618 "src/ebnf/parser.c"
 			}
-			/* END OF EXTRACT: number */
+			/* END OF EXTRACT: NUMBER */
 			ADVANCE_LEXER;
 			switch (CURRENT_TERMINAL) {
-			case (tok_star):
+			case (TOK_STAR):
 				break;
 			default:
 				goto ZL1;
@@ -632,18 +632,18 @@ prod_repeatable_Hfactor(map_term *ZOt)
 			}
 			/* BEGINNING OF ACTION: set-repeat */
 			{
-#line 187 "../parser.act"
+#line 187 "src/parser.act"
 
 		assert((ZIn) > 0);
 		(ZIt)->repeat = (ZIn);
 	
-#line 641 "ebnf_parser.c"
+#line 641 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: set-repeat */
 		}
 		break;
-	case (tok_start_Hgroup): case (tok_start_Hopt): case (tok_start_Hstar): case (tok_empty):
-	case (tok_name): case (tok_literal):
+	case (TOK_START_HGROUP): case (TOK_START_HOPT): case (TOK_START_HSTAR): case (TOK_EMPTY):
+	case (TOK_NAME): case (TOK_LITERAL):
 		{
 			prod_factor (&ZIt);
 			if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
@@ -678,10 +678,10 @@ prod_production(map_production *ZOp)
 		map_alt ZIa;
 
 		switch (CURRENT_TERMINAL) {
-		case (tok_name):
-			/* BEGINNING OF EXTRACT: name */
+		case (TOK_NAME):
+			/* BEGINNING OF EXTRACT: NAME */
 			{
-#line 94 "../parser.act"
+#line 94 "src/parser.act"
 
 		assert(strlen(io_buffer) > 0);
 		assert(!isspace((unsigned char) io_buffer[0]));
@@ -689,9 +689,9 @@ prod_production(map_production *ZOp)
 		ZIn = xstrdup(io_buffer);
 		io_flush();
 	
-#line 693 "ebnf_parser.c"
+#line 693 "src/ebnf/parser.c"
 			}
-			/* END OF EXTRACT: name */
+			/* END OF EXTRACT: NAME */
 			break;
 		default:
 			goto ZL1;
@@ -701,7 +701,7 @@ prod_production(map_production *ZOp)
 		{
 			{
 				switch (CURRENT_TERMINAL) {
-				case (tok_equals):
+				case (TOK_EQUALS):
 					break;
 				default:
 					goto ZL3;
@@ -713,11 +713,11 @@ prod_production(map_production *ZOp)
 			{
 				/* BEGINNING OF ACTION: err-expected-equals */
 				{
-#line 218 "../parser.act"
+#line 218 "src/parser.act"
 
 		expected("production assignment");
 	
-#line 721 "ebnf_parser.c"
+#line 721 "src/ebnf/parser.c"
 				}
 				/* END OF ACTION: err-expected-equals */
 			}
@@ -731,21 +731,21 @@ prod_production(map_production *ZOp)
 		}
 		/* BEGINNING OF ACTION: make-production */
 		{
-#line 150 "../parser.act"
+#line 150 "src/parser.act"
 
 		(ZIp) = xmalloc(sizeof *(ZIp));
 		(ZIp)->name = (ZIn);
 		(ZIp)->alts = (ZIa);
 		(ZIp)->next = NULL;
 	
-#line 742 "ebnf_parser.c"
+#line 742 "src/ebnf/parser.c"
 		}
 		/* END OF ACTION: make-production */
 		/* BEGINNING OF INLINE: 55 */
 		{
 			{
 				switch (CURRENT_TERMINAL) {
-				case (tok_sep):
+				case (TOK_SEP):
 					break;
 				default:
 					goto ZL5;
@@ -757,11 +757,11 @@ prod_production(map_production *ZOp)
 			{
 				/* BEGINNING OF ACTION: err-expected-sep */
 				{
-#line 214 "../parser.act"
+#line 214 "src/parser.act"
 
 		expected("alternative separator");
 	
-#line 765 "ebnf_parser.c"
+#line 765 "src/ebnf/parser.c"
 				}
 				/* END OF ACTION: err-expected-sep */
 			}
@@ -779,8 +779,8 @@ ZL0:;
 
 /* BEGINNING OF TRAILER */
 
-#line 225 "../parser.act"
+#line 225 "src/parser.act"
 
-#line 785 "ebnf_parser.c"
+#line 785 "src/ebnf/parser.c"
 
 /* END OF FILE */

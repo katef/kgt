@@ -6,17 +6,17 @@
 
 %prefixes%
 
-	terminal = tok_;
+	terminal = TOK_;
 	function = prod_;
 
 %maps%
 
-	STRING -> map_string;
-	NUMBER -> map_number;
+	string -> map_string;
+	number -> map_number;
 
-	TERM -> map_term;
-	ALT -> map_alt;
-	PRODUCTION -> map_production;
+	ast_term       -> map_term;
+	ast_alt        -> map_alt;
+	ast_production -> map_production;
 
 %header% @{
 
@@ -37,7 +37,7 @@
 	int act_savedtoken;
 
 	/* Interfaces required by SID's generated parser */
-	#define ERROR_TERMINAL   @$error
+	#define ERROR_TERMINAL   @$ERROR
 	#define CURRENT_TERMINAL act_currenttoken
 	#define ADVANCE_LEXER    do { act_currenttoken = act_next(); } while (0)
 	#define SAVE_LEXER(t)    do { act_savedtoken = act_currenttoken; act_currenttoken = (t); } while (0)
@@ -87,7 +87,7 @@
 
 %terminals%
 
-	name: () -> (s :STRING) = @{
+	NAME: () -> (s :string) = @{
 		assert(strlen(io_buffer) > 0);
 		assert(!isspace((unsigned char) io_buffer[0]));
 		rtrim(io_buffer);
@@ -95,13 +95,13 @@
 		io_flush();
 	@};
 
-	literal: () -> (s :STRING) = @{
+	LITERAL: () -> (s :string) = @{
 		assert(strlen(io_buffer) > 0);
 		@s = xstrdup(io_buffer);
 		io_flush();
 	@};
 
-	number: () -> (n :NUMBER) = @{
+	NUMBER: () -> (n :number) = @{
 		assert(strlen(io_buffer) > 0);
 
 		if (strlen(io_buffer) > 5) {
@@ -117,14 +117,14 @@
 	/* TODO: big pile of error messages */
 
 
-	<make-empty-term>: () -> (t :TERM) = @{
+	<make-empty-term>: () -> (t :ast_term) = @{
 		@t = xmalloc(sizeof *@t);
 		@t->type = TYPE_EMPTY;
 		@t->repeat = 1;
 		@t->next = NULL;
 	@};
 
-	<make-literal-term>: (l :STRING) -> (t :TERM) = @{
+	<make-literal-term>: (l :string) -> (t :ast_term) = @{
 		@t = xmalloc(sizeof *@t);
 		@t->type = TYPE_TERMINAL;	/* TODO rename to literal or vice-versa, perhaps */
 		@t->u.literal = @l;
@@ -132,7 +132,7 @@
 		@t->next = NULL;
 	@};
 
-	<make-production-term>: (n :STRING) -> (t :TERM) = @{
+	<make-production-term>: (n :string) -> (t :ast_term) = @{
 		@t = xmalloc(sizeof *@t);
 		@t->type = TYPE_PRODUCTION;
 		@t->u.name = @n;
@@ -140,25 +140,25 @@
 		@t->next = NULL;
 	@};
 
-	<make-alt>: (t :TERM) -> (a :ALT) = @{
+	<make-alt>: (t :ast_term) -> (a :ast_alt) = @{
 		@a = xmalloc(sizeof *@a);
 		@a->terms = @t;
 		@a->next = NULL;
 	@};
 
-	<make-production>: (n :STRING, a :ALT) -> (p :PRODUCTION) = @{
+	<make-production>: (n :string, a :ast_alt) -> (p :ast_production) = @{
 		@p = xmalloc(sizeof *@p);
 		@p->name = @n;
 		@p->alts = @a;
 		@p->next = NULL;
 	@};
 
-	<make-empty-production>: () -> (p :PRODUCTION) = @{
+	<make-empty-production>: () -> (p :ast_production) = @{
 		@p = NULL;
 	@};
 
 
-	<make-star-group>: (a :ALT) -> (t :TERM) = @{
+	<make-star-group>: (a :ast_alt) -> (t :ast_term) = @{
 		@t = xmalloc(sizeof *@t);
 		@t->type = TYPE_GROUP;
 		@t->u.group = xmalloc(sizeof *@t->u.group);
@@ -166,7 +166,7 @@
 		@t->u.group->alts = @a;
 	@};
 
-	<make-opt-group>: (a :ALT) -> (t :TERM) = @{
+	<make-opt-group>: (a :ast_alt) -> (t :ast_term) = @{
 		@t = xmalloc(sizeof *@t);
 		@t->type = TYPE_GROUP;
 		@t->u.group = xmalloc(sizeof *@t->u.group);
@@ -174,7 +174,7 @@
 		@t->u.group->alts = @a;
 	@};
 
-	<make-alt-group>: (a :ALT) -> (t :TERM) = @{
+	<make-alt-group>: (a :ast_alt) -> (t :ast_term) = @{
 		@t = xmalloc(sizeof *@t);
 		@t->type = TYPE_GROUP;
 		@t->u.group = xmalloc(sizeof *@t->u.group);
@@ -183,23 +183,23 @@
 	@};
 
 
-	<set-repeat>: (t :TERM, n :NUMBER) -> () = @{
+	<set-repeat>: (t :ast_term, n :number) -> () = @{
 		assert(@n > 0);
 		@t->repeat = @n;
 	@};
 
 
-	<add-term-to-list>: (l :TERM, t :TERM) -> () = @{
+	<add-term-to-list>: (l :ast_term, t :ast_term) -> () = @{
 		assert(@t->next == NULL);
 		@t->next = @l;
 	@};
 
-	<add-alt-to-list>: (l :ALT, a :ALT) -> () = @{
+	<add-alt-to-list>: (l :ast_alt, a :ast_alt) -> () = @{
 		assert(@a->next == NULL);
 		@a->next = @l;
 	@};
 
-	<add-production-to-list>: (l :PRODUCTION, p :PRODUCTION) -> () = @{
+	<add-production-to-list>: (l :ast_production, p :ast_production) -> () = @{
 		assert(@p->next == NULL);
 		@p->next = @l;
 	@};
