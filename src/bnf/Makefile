@@ -4,6 +4,8 @@ SRC += src/bnf/lexer.c
 SRC += src/bnf/parser.c
 SRC += src/bnf/output.c
 
+PARSER += src/bnf/parser.sid
+
 # LEXIFLAGS = -t tok_ -p bnf_
 
 PART += bnf
@@ -15,11 +17,14 @@ DFLAGS_${src} += -D LEXI_HEADER='"lexer.h"'
 
 ${BUILD}/src/bnf/lexer.o: src/bnf/lexer.h
 
+.for parser in ${PARSER:Msrc/bnf/parser.sid}
+ACT_${parser} = src/parser.act
+.endfor
+
 .for src in ${SRC:Msrc/bnf/*.c}
 ${BUILD}/lib/bnf.o:    ${BUILD}/${src:R}.o
 ${BUILD}/lib/bnf.opic: ${BUILD}/${src:R}.opic
 .endfor
-
 
 #lexer.c: lexer.lxi ../lexer.lct parser.h
 #	$(LEXI) $(LEXIFLAGS) -l c lexer.lxi ../lexer.lct lexer.c
@@ -27,7 +32,4 @@ ${BUILD}/lib/bnf.opic: ${BUILD}/${src:R}.opic
 #
 #lexer.h: lexer.lxi ../lexer.lct parser.h
 #	$(LEXI) $(LEXIFLAGS) -l h lexer.lxi ../lexer.lct lexer.h
-#
-#parser.c parser.h: parser.sid ../parser.act
-#	$(SID) $(SIDFLAGS) parser.sid ../parser.act parser.c parser.h
 

@@ -4,6 +4,8 @@ SRC += src/ebnf/lexer.c
 SRC += src/ebnf/parser.c
 SRC += src/ebnf/output.c
 
+PARSER += src/ebnf/parser.sid
+
 # LEXIFLAGS = -t tok_ -p ebnf_
 
 PART += ebnf
@@ -14,6 +16,10 @@ DFLAGS_${src} += -D LEXI_HEADER='"lexer.h"'
 .endfor
 
 ${BUILD}/src/ebnf/lexer.o: src/ebnf/lexer.h
+
+.for parser in ${PARSER:Msrc/ebnf/parser.sid}
+ACT_${parser} = src/parser.act
+.endfor
 
 .for src in ${SRC:Msrc/ebnf/*.c}
 ${BUILD}/lib/ebnf.o:    ${BUILD}/${src:R}.o
