@@ -5,6 +5,6 @@
 
 #include "../ast.h"
 
-void rrd_output(struct ast_production *);
+void rrd_output(struct ast_production *, int);
 
 #endif

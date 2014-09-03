@@ -63,6 +63,19 @@ void node_free(struct node *n) {
 	free(n);
 }
 
+void node_collapse(struct node **n) {
+	struct node_list *list;
+	if ((**n).type != NT_LIST)
+		return;
+	list = (struct node_list *)*n;
+	if (list->list && !list->list->next) {
+		*n = list->list;
+		list->list = 0;
+		node_free(&list->node);
+		node_collapse(n);
+	}
+}
+
 static int transform_alts(struct node **, struct ast_alt *);
 static int transform_alt(struct node **, struct ast_alt *);
 static int transform_term(struct node **, struct ast_term *);
@@ -81,14 +94,7 @@ static int transform_alts(struct node **on, struct ast_alt *alts) {
 			tip = &(**tip).next;
 	}
 
-	if (!alts->next) {
-		*on = list;
-	} else {
-		struct node_list *choice = node_create(NT_LIST);
-		choice->type = LIST_CHOICE;
-		choice->list = list;
-		*on = &choice->node;
-	}
+	*on = list;
 
 	return 1;
 }
@@ -104,7 +110,7 @@ static int transform_alt(struct node **on, struct ast_alt *alt) {
 			tip = &(**tip).next;
 	}
 
-	if (!alt->terms->next) {
+	if (!list->next) {
 		*on = list;
 	} else {
 		struct node_list *sequence = node_create(NT_LIST);
@@ -170,7 +176,12 @@ static int transform_leaf(struct node **on, struct ast_term *term) {
 
 static int transform_group(struct node **on, struct ast_group *group) {
 	if (group->kleene == KLEENE_GROUP) {
-		return transform_alts(on, group->alts);
+		struct node_list *list = node_create(NT_LIST);
+		list->type = LIST_CHOICE;
+		*on = &list->node;
+		if (!transform_alts(&list->list, group->alts))
+            return 0;
+        node_collapse(on);
 	} else if (group->kleene == KLEENE_OPTIONAL) {
 		struct node *nothing;
 		struct node_list *choice;
@@ -179,81 +190,96 @@ static int transform_group(struct node **on, struct ast_group *group) {
 
 		choice = node_create(NT_LIST);
 		choice->type = LIST_CHOICE;
+		choice->list = nothing;
 
 		*on = &choice->node;
-		return transform_alts(&nothing->next, group->alts);
+		if (!transform_alts(&nothing->next, group->alts))
+            return 0;
 	} else {
-		struct node *nothing, **list;
+		struct node *nothing;
+		struct node_list *choice;
 		struct node_loop *loop;
 
 		nothing = node_create(NT_NOTHING);
+		choice = node_create(NT_LIST);
+		choice->type = LIST_CHOICE;
 
 		loop = node_create(NT_LOOP);
 		if (group->kleene == KLEENE_CROSS) {
-			list = &loop->forward;
+			loop->forward = &choice->node;
 			loop->backward = nothing;
 		} else { /* process of elimination: it's KLEENE_STAR */
-			list = &loop->backward;
 			loop->forward = nothing;
+			loop->backward = &choice->node;
 		}
 
 		*on = &loop->node;
-		return transform_alts(list, group->alts);
+		if (!transform_alts(&choice->list, group->alts))
+            return 0;
+
+		node_collapse(&loop->forward);
+		node_collapse(&loop->backward);
 	}
+	return 1;
 }
 
 int ast_to_rrd(struct ast_production *ast, struct node **rrd) {
-	return transform_alts(rrd, ast->alts);
+	struct node_list *choice = node_create(NT_LIST);
+	choice->type = LIST_CHOICE;
+	if (!transform_alts(&choice->list, ast->alts))
+		return 0;
+	*rrd = &choice->node;
+	node_collapse(rrd);
+	return 1;
 }
 
-static int node_call_walker(struct node *n, const struct node_walker *ws, int depth, void *a) {
-	if (n->type == NT_NOTHING) {
-		return ws->visit_nothing ? ws->visit_nothing(a, depth, n) : -1;
+static int node_call_walker(struct node **n, const struct node_walker *ws, int depth, void *a) {
+	if ((**n).type == NT_NOTHING) {
+		return ws->visit_nothing ? ws->visit_nothing(*n, n, depth, a) : -1;
 	}
-	if (n->type == NT_LEAF) {
-		struct node_leaf *leaf = (struct node_leaf *)n;
+	if ((**n).type == NT_LEAF) {
+		struct node_leaf *leaf = (struct node_leaf *)*n;
 		if (leaf->type == LEAF_IDENTIFIER)
-			return ws->visit_identifier ? ws->visit_identifier(a, depth, leaf) : -1;
+			return ws->visit_identifier ? ws->visit_identifier(leaf, n, depth, a) : -1;
 		else
-			return ws->visit_terminal ? ws->visit_terminal(a, depth, leaf) : -1;
+			return ws->visit_terminal ? ws->visit_terminal(leaf, n, depth, a) : -1;
 	}
-	if (n->type == NT_LIST) {
-		struct node_list *list = (struct node_list *)n;
+	if ((**n).type == NT_LIST) {
+		struct node_list *list = (struct node_list *)*n;
 		if (list->type == LIST_CHOICE)
-			return ws->visit_choice ? ws->visit_choice(a, depth, list) : -1;
+			return ws->visit_choice ? ws->visit_choice(list, n, depth, a) : -1;
 		else
-			return ws->visit_sequence ? ws->visit_sequence(a, depth, list) : -1;
+			return ws->visit_sequence ? ws->visit_sequence(list, n, depth, a) : -1;
 	}
-	if (n->type == NT_LOOP) {
-		struct node_loop *loop = (struct node_loop *)n;
-		return ws->visit_loop ? ws->visit_loop(a, depth, loop) : -1;
+	if ((**n).type == NT_LOOP) {
+		struct node_loop *loop = (struct node_loop *)*n;
+		return ws->visit_loop ? ws->visit_loop(loop, n, depth, a) : -1;
 	}
 	return -1;
 }
 
-int node_walk_list(struct node *n, const struct node_walker *ws, int depth, void *a) {
-	struct node *p;
-	for (p = n; p; p = p->next) {
-		if (!node_walk(p, ws, depth, a))
+int node_walk_list(struct node **n, const struct node_walker *ws, int depth, void *a) {
+	for (; *n; n = &(**n).next) {
+		if (!node_walk(n, ws, depth, a))
 			return 0;
 	}
 	return 1;
 }
 
-int node_walk(struct node *n, const struct node_walker *ws, int depth, void *a) {
+int node_walk(struct node **n, const struct node_walker *ws, int depth, void *a) {
 	int r = node_call_walker(n, ws, depth, a);
 	if (r == 0) {
 		return 0;
 	} else if (r == -1) {
-		if (n->type == NT_LIST) {
-			struct node_list *list = (struct node_list *)n;
-			if (!node_walk_list(list->list, ws, depth + 1, a))
+		if ((**n).type == NT_LIST) {
+			struct node_list *list = (struct node_list *)*n;
+			if (!node_walk_list(&list->list, ws, depth + 1, a))
 				return 0;
-		} else if (n->type == NT_LOOP) {
-			struct node_loop *loop = (struct node_loop *)n;
-			if (!node_walk_list(loop->forward, ws, depth + 1, a))
+		} else if ((**n).type == NT_LOOP) {
+			struct node_loop *loop = (struct node_loop *)*n;
+			if (!node_walk(&loop->forward, ws, depth + 1, a))
 				return 0;
-			if (!node_walk_list(loop->backward, ws, depth + 1, a))
+			if (!node_walk(&loop->backward, ws, depth + 1, a))
 				return 0;
 		} else {
 			r = 1;

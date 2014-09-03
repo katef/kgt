@@ -3,6 +3,7 @@
 SRC += src/rrd/transform.c
 SRC += src/rrd/beautify.c
 SRC += src/rrd/output.c
+SRC += src/rrd/render.c
 
 PART += rrd
 

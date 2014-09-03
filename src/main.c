@@ -75,7 +75,7 @@ act_next(void)
 static void
 xusage(void)
 {
-	printf("usage: kgt [-l <language>] [ -e <language> ]\n");
+	printf("usage: kgt [-n] [-l <language>] [ -e <language> ]\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -110,6 +110,7 @@ int
 main(int argc, char *argv[])
 {
 	struct ast_production *grammar;
+	int beautify = 1;
 
 	input = LANG_BNF;
 	output = input;
@@ -117,7 +118,7 @@ main(int argc, char *argv[])
 	{
 		int c;
 
-		while ((c = getopt(argc, argv, "hl:e:")) != -1) {
+		while ((c = getopt(argc, argv, "hnl:e:")) != -1) {
 			switch (c) {
 			case 'l':
 				input = lang(optarg);
@@ -125,6 +126,10 @@ main(int argc, char *argv[])
 
 			case 'e':
 				output = lang(optarg);
+				break;
+
+			case 'n':
+				beautify = 0;
 				break;
 
 			case '?':
@@ -178,7 +183,7 @@ main(int argc, char *argv[])
 	case LANG_SID:  sid_output (grammar); break;
 	case LANG_TRD:  trd_output (grammar); break;
 	case LANG_DOT:  dot_output (grammar); break;
-	case LANG_RRD:  rrd_output (grammar); break;
+	case LANG_RRD:  rrd_output (grammar, beautify); break;
 
 	default:
 		fprintf(stderr, "Unsupported output language\n");

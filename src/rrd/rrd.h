@@ -22,9 +22,16 @@ enum list_type {
 	LIST_SEQUENCE
 };
 
+struct box_size {
+	int w;
+	int h;
+};
+
 struct node {
 	struct node *next;
 	enum node_type type;
+	struct box_size size;
+	int y;
 };
 
 struct node_leaf {
@@ -49,17 +56,24 @@ void *node_create(enum node_type);
 void *node_duplicate(struct node *);
 void node_free(struct node *);
 
+void node_collapse(struct node **);
+
+
+/* node traversal - visit functions are passed a pointer to the pointer that ties
+ * the visited node into the tree.
+ * they are free to replace the node they visited via said pointer. cf. beautify
+ */
 struct node_walker {
-	int (*visit_nothing   )(void *, int, struct node *);
-	int (*visit_identifier)(void *, int, struct node_leaf *);
-	int (*visit_terminal  )(void *, int, struct node_leaf *);
-	int (*visit_choice    )(void *, int, struct node_list *);
-	int (*visit_sequence  )(void *, int, struct node_list *);
-	int (*visit_loop      )(void *, int, struct node_loop *);
+	int (*visit_nothing   )(struct node *,		struct node **, int, void *);
+	int (*visit_identifier)(struct node_leaf *, struct node **, int, void *);
+	int (*visit_terminal  )(struct node_leaf *, struct node **, int, void *);
+	int (*visit_choice	  )(struct node_list *, struct node **, int, void *);
+	int (*visit_sequence  )(struct node_list *, struct node **, int, void *);
+	int (*visit_loop	  )(struct node_loop *, struct node **, int, void *);
 };
 
-int node_walk(struct node *, const struct node_walker *, int, void *);
-int node_walk_list(struct node *, const struct node_walker *, int, void *);
+int node_walk(struct node **, const struct node_walker *, int, void *);
+int node_walk_list(struct node **, const struct node_walker *, int, void *);
 
 int ast_to_rrd(struct ast_production *, struct node **);
 
