@@ -1,0 +1,51 @@
+# $Id$
+
+# 7.6: Gap-separator
+/[ \t\r\n\v\f]+/;
+
+# Table 4: Invalid sequences of characters
+# TODO: update for strings instead
+# TODO: permit -> $error for lx
+# '(*)' -> $error;
+# '(:)' -> $error;
+# '(/)' -> $error;
+
+'(*' .. '*)' {
+	/./ -> $char;
+}
+
+'`' .. '`' -> $literal {
+	/[^`]/ -> $char;
+}
+
+'"' .. '"' -> $literal {
+	/[^"]/ -> $char;
+}
+
+# Table 1: Representation of terminal-charaters
+'|' -> $alt;
+';' -> $sep;
+'[' -> $startopt;  ']' -> $endopt;
+'{' -> $startstar; '}' -> $endstar;
+
+# Table 2: Alternative representation of terminal-characters
+'/' -> $alt;
+'!' -> $alt;
+'.' -> $sep;
+'(:' -> $startstar; ':)' -> $endstar; # TODO: rename to -rep
+'(/' -> $startopt;  '/)' -> $endopt;
+
+# tokens shared by both representations
+',' -> $cat;
+'=' -> $equals;
+'(' -> $startgroup; ')' -> $endgroup;
+'-' -> $except;
+'*' -> $star;
+'?' -> $opt;
+
+# spaces are permitted within EBNF names
+# XXX: I am unsure that this is correct. EBNF is far too complicated.
+/[a-z]([-a-z0-9_\t\r\n\v\f ]*[-a-z0-9_])?/i -> $ident;
+
+/[0-9]+/ -> $number;
+

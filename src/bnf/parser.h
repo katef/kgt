@@ -9,20 +9,24 @@
 
 /* BEGINNING OF HEADER */
 
-#line 80 "src/parser.act"
+#line 122 "src/parser.act"
 
 
-	int act_next(void);
+	typedef struct lex_state * lex_state;
+	typedef struct act_state * act_state;
 
-#line 18 "src/bnf/parser.h"
+	typedef struct ast_production * map_production;
+
+#line 21 "src/bnf/parser.h"
 
 /* BEGINNING OF FUNCTION DECLARATIONS */
 
-extern void prod_bnf_Hgrammar(map_production *);
+extern void prod_bnf(lex_state, act_state, map_production *);
 /* BEGINNING OF TRAILER */
 
-#line 226 "src/parser.act"
+#line 361 "src/parser.act"
 
-#line 27 "src/bnf/parser.h"
+
+#line 31 "src/bnf/parser.h"
 
 /* END OF FILE */

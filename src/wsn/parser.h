@@ -9,20 +9,24 @@
 
 /* BEGINNING OF HEADER */
 
-#line 80 "src/parser.act"
+#line 122 "src/parser.act"
 
 
-	int act_next(void);
+	typedef struct lex_state * lex_state;
+	typedef struct act_state * act_state;
 
-#line 18 "src/wsn/parser.h"
+	typedef struct ast_production * map_production;
+
+#line 21 "src/wsn/parser.h"
 
 /* BEGINNING OF FUNCTION DECLARATIONS */
 
-extern void prod_wsn_Hgrammar(map_production *);
+extern void prod_wsn(lex_state, act_state, map_production *);
 /* BEGINNING OF TRAILER */
 
-#line 226 "src/parser.act"
+#line 361 "src/parser.act"
 
-#line 27 "src/wsn/parser.h"
+
+#line 31 "src/wsn/parser.h"
 
 /* END OF FILE */

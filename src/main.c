@@ -2,41 +2,31 @@
 
 #define _POSIX_C_SOURCE 2
 
+#include <unistd.h>
+
+#include <assert.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <string.h>
 
 /* See %maps% - This is given for the entry point into the grammar */
 /* TODO: how to do this nicely? permit more complex types for SID's .act files? */
 typedef struct ast_production * map_production;
 
-#include "bnf/lexer.h"
-#include "bnf/parser.h"
+#include "bnf/input.h"
+#include "wsn/input.h"
+#include "ebnf/input.h"
+
 #include "bnf/output.h"
-
-#include "wsn/lexer.h"
-#include "wsn/parser.h"
 #include "wsn/output.h"
-
-#include "ebnf/lexer.h"
-#include "ebnf/parser.h"
 #include "ebnf/output.h"
-
 #include "sid/output.h"
-
 #include "trd/output.h"
-
 #include "dot/output.h"
-
 #include "rrd/output.h"
 
-#include "io.h"
 #include "ast.h"
-#include "tokens.h"
 #include "xalloc.h"
-
-int act_currenttoken;
 
 enum lang {
 	LANG_BNF,
@@ -48,35 +38,23 @@ enum lang {
 	LANG_RRD
 } input, output;
 
-union {
-	struct bnf_state  bnf_state;
-	struct wsn_state  wsn_state;
-	struct ebnf_state ebnf_state;
-} state;
-
-int
-act_next(void)
-{
-	int t;
-
-	switch (input) {
-	case LANG_BNF:  t = bnf_next(&state.bnf_state);   break;
-	case LANG_WSN:  t = wsn_next(&state.wsn_state);   break;
-	case LANG_EBNF: t = ebnf_next(&state.ebnf_state); break;
-	}
-
-	if (t == TOK_UNRECOGNISED) {
-		xerror("unrecognised token on line %d", io_line);
-	}
-
-	return t;
-}
-
 static void
 xusage(void)
 {
 	printf("usage: kgt [-n] [-l <language>] [ -e <language> ]\n");
 	exit(EXIT_FAILURE);
+}
+
+static int
+kgt_fgetc(void *opaque)
+{
+	FILE *f;
+
+	f = opaque;
+
+	assert(f != NULL);
+
+	return fgetc(f);
 }
 
 static enum lang
@@ -146,31 +124,10 @@ main(int argc, char *argv[])
 		}
 	}
 
-	io_fin = stdin;
-	io_line = 1;
-
-	/* TODO: default format from extension. override with -l */
-	/* TODO: array of structs containing lexer stuff? probably not */
-
-	grammar = NULL;
 	switch (input) {
-	case LANG_BNF:
-		bnf_init(&state.bnf_state);
-		act_currenttoken = act_next();
-		prod_bnf_Hgrammar(&grammar);
-		break;
-
-	case LANG_WSN:
-		wsn_init(&state.wsn_state);
-		act_currenttoken = act_next();
-		prod_wsn_Hgrammar(&grammar);
-		break;
-
-	case LANG_EBNF:
-		ebnf_init(&state.ebnf_state);
-		act_currenttoken = act_next();
-		prod_ebnf_Hgrammar(&grammar);
-		break;
+	case LANG_BNF:  grammar = bnf_input (kgt_fgetc, stdin); break;
+	case LANG_WSN:  grammar = wsn_input (kgt_fgetc, stdin); break;
+	case LANG_EBNF: grammar = ebnf_input(kgt_fgetc, stdin); break;
 
 	default:
 		fprintf(stderr, "Unsupported input language\n");

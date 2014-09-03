@@ -6,6 +6,7 @@
 
 %types%
 
+	char;
 	string;
 	!number;
 
@@ -23,16 +24,23 @@
 	SEP;
 	!EXCEPT;
 
-	!START-GROUP; !END-GROUP;
-	!START-OPT;   !END-OPT;
-	!START-STAR;  !END-STAR;
+	!STARTGROUP; !ENDGROUP;
+	!STARTOPT;   !ENDOPT;
+	!STARTSTAR;  !ENDSTAR;
 
 	EMPTY;
-	NAME:    () -> (:string);
-	LITERAL: () -> (:string);
+	NAME;
+	LITERAL;
+
+	!ESC:    () -> (:char);
+	CHAR:    () -> (:char);
+	!IDENT:  () -> (:string);
 	!NUMBER: () -> (:number);
 
 %productions%
+
+	<pattern-char>:   (:char) -> ();
+	<pattern-buffer>: ()      -> (:string);
 
 	<make-empty-term>: () -> (:ast_term);
 	<make-literal-term>: (:string) -> (:ast_term);
@@ -51,20 +59,35 @@
 	<add-alt-to-list>: (:ast_alt, :ast_alt) -> ();
 	<add-production-to-list>: (:ast_production, :ast_production) -> ();
 
+	<err-syntax>;
 	<err-expected-alt>;
 	<err-expected-sep>;
 	<err-expected-equals>;
-	<err-unhandled>;
+
+	body: () -> () = {
+		{
+			c = CHAR;
+			/* TODO: ESC and friends here */
+		};
+		<pattern-char>(c);
+		body;
+	||
+		$;
+	};
 
 	term: () -> (t :ast_term) = {
 		EMPTY;
 		t = <make-empty-term>;
 	||
-		l = LITERAL;
-		t = <make-literal-term>(l);
+		body;
+		LITERAL;
+		s = <pattern-buffer>;
+		t = <make-literal-term>(s);
 	||
-		n = NAME;
-		t = <make-production-term>(n);
+		body;
+		NAME;
+		s = <pattern-buffer>;
+		t = <make-production-term>(s);
 	};
 
 	list-of-terms: () -> (l :ast_term) = {
@@ -93,7 +116,9 @@
 	};
 
 	production: () -> (p :ast_production) = {
-		n = NAME;
+		body;
+		NAME;
+		s = <pattern-buffer>;
 
 		{
 			EQUALS;
@@ -102,10 +127,12 @@
 		};
 
 		a = list-of-alts;
-		p = <make-production>(n, a);
+		p = <make-production>(s, a);
 
 		{
 			SEP;
+		||
+			EOF;
 		##
 			<err-expected-sep>;
 		};
@@ -119,14 +146,14 @@
 		<add-production-to-list>(p, l);
 	};
 
-	bnf-grammar: () -> (l :ast_production) = {
+	bnf: () -> (l :ast_production) = {
 		l = list-of-productions;
 	##
 		l = <make-empty-production>;
-		<err-unhandled>;
+		<err-syntax>;
 	};
 
 %entry%
 
-	bnf-grammar;
+	bnf;
 

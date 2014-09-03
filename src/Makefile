@@ -1,7 +1,6 @@
 .include "../share/mk/top.mk"
 
 SRC += src/main.c
-SRC += src/io.c
 SRC += src/xalloc.c
 
 PROG += kgt
@@ -12,7 +11,6 @@ PROG += kgt
 #.endfor
 
 ${BUILD}/bin/kgt: ${BUILD}/src/main.o
-${BUILD}/bin/kgt: ${BUILD}/src/io.o
 ${BUILD}/bin/kgt: ${BUILD}/src/xalloc.o
 
 .for part in ${PART:Mbnf} ${PART:Mebnf} ${PART:Msid} ${PART:Mtrd} \

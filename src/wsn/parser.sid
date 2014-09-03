@@ -6,6 +6,7 @@
 
 %types%
 
+	char;
 	string;
 	!number;
 
@@ -27,17 +28,23 @@
 	!CAT;
 	!OPT;
 
-	START-GROUP; END-GROUP;
-	START-OPT;   END-OPT;
-	START-STAR;  END-STAR;
+	STARTGROUP; ENDGROUP;
+	STARTOPT;   ENDOPT;
+	STARTSTAR;  ENDSTAR;
 
 	EMPTY;
-	NAME:    () -> (:string);
-	LITERAL: () -> (:string);
+	!NAME;
+	LITERAL;
+
+	ESC:     () -> (:char);
+	CHAR:    () -> (:char);
+	IDENT:   () -> (:string);
 	!NUMBER: () -> (:number);
 
-
 %productions%
+
+	<pattern-char>:   (:char) -> ();
+	<pattern-buffer>: ()      -> (:string);
 
 	<make-empty-term>: () -> (:ast_term);
 	<make-literal-term>: (:string) -> (:ast_term);
@@ -56,44 +63,57 @@
 	<add-alt-to-list>: (:ast_alt, :ast_alt) -> ();
 	<add-production-to-list>: (:ast_production, :ast_production) -> ();
 
+	<err-syntax>;
 	<err-expected-alt>;
 	<err-expected-sep>;
 	<err-expected-equals>;
-	<err-unhandled>;
 
 	list-of-terms: () -> (:ast_term);
 	list-of-alts: () -> (:ast_alt);
 
+	body: () -> () = {
+		{
+			c = DOUBLEUP;
+		||
+			c = CHAR;
+		};
+		<pattern-char>(c);
+		body;
+	||
+		$;
+	};
 
 	term: () -> (t :ast_term) = {
 		EMPTY;
 		t = <make-empty-term>;
 	||
-		l = LITERAL;
-		t = <make-literal-term>(l);
+		body;
+		LITERAL;
+		s = <pattern-buffer>;
+		t = <make-literal-term>(s);
 	||
-		n = NAME;
-		t = <make-production-term>(n);
+		s = IDENT;
+		t = <make-production-term>(s);
 	};
 
 	factor: () -> (t :ast_term) = {
 		t = term;
 	||
-		START-STAR;
+		STARTSTAR;
 		a = list-of-alts;
-		END-STAR;
+		ENDSTAR;
 
 		t = <make-star-group>(a);
 	||
-		START-OPT;
+		STARTOPT;
 		a = list-of-alts;
-		END-OPT;
+		ENDOPT;
 
 		t = <make-opt-group>(a);
 	||
-		START-GROUP;
+		STARTGROUP;
 		a = list-of-alts;
-		END-GROUP;
+		ENDGROUP;
 
 		t = <make-alt-group>(a);
 	};
@@ -124,7 +144,7 @@
 	};
 
 	production: () -> (p :ast_production) = {
-		n = NAME;
+		s = IDENT;
 
 		{
 			EQUALS;
@@ -133,7 +153,7 @@
 		};
 
 		a = list-of-alts;
-		p = <make-production>(n, a);
+		p = <make-production>(s, a);
 
 		{
 			SEP;
@@ -150,14 +170,14 @@
 		<add-production-to-list>(p, l);
 	};
 
-	wsn-grammar: () -> (l :ast_production) = {
+	wsn: () -> (l :ast_production) = {
 		l = list-of-productions;
 	##
 		l = <make-empty-production>;
-		<err-unhandled>;
+		<err-syntax>;
 	};
 
 %entry%
 
-	wsn-grammar;
+	wsn;
 

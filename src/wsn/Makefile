@@ -4,21 +4,27 @@ SRC += src/wsn/lexer.c
 SRC += src/wsn/parser.c
 SRC += src/wsn/output.c
 
+LEXER  += src/wsn/lexer.lx
 PARSER += src/wsn/parser.sid
-
-# LEXIFLAGS = -t tok_ -p wsn_
 
 PART += wsn
 
-.for src in ${SRC:Msrc/wsn/lexer.c}
-CFLAGS_${src} += -D LEXI_HEADER='"lexer.h"'
-DFLAGS_${src} += -D LEXI_HEADER='"lexer.h"'
+.for src in ${LEXER:Msrc/wsn/lexer.lx}
+LX_CFLAGS_${src} += -p lx_wsn_
 .endfor
-
-${BUILD}/src/wsn/lexer.o: src/wsn/lexer.h
 
 .for parser in ${PARSER:Msrc/wsn/parser.sid}
 ACT_${parser} = src/parser.act
+.endfor
+
+.for src in ${SRC:Msrc/wsn/lexer.c}
+CFLAGS_${src} += -D LX_HEADER='"lexer.h"'
+DFLAGS_${src} += -D LX_HEADER='"lexer.h"'
+.endfor
+
+.for src in ${SRC:Msrc/wsn/parser.c}
+CFLAGS_${src} += -D FORM='wsn'
+DFLAGS_${src} += -D FORM='wsn'
 .endfor
 
 .for src in ${SRC:Msrc/wsn/*.c}
