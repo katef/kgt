@@ -43,7 +43,7 @@
 	#include "parser.h"
 	#include "lexer.h"
 
-	#include "input.h"
+	#include "io.h"
 
 	typedef char         map_char;
 	typedef const char * map_string;

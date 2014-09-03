@@ -12,6 +12,7 @@
 
 #include "../ast.h"
 
+#include "io.h"
 #include "rrd.h"
 #include "beautify.h"
 #include "render.h"

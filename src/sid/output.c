@@ -14,6 +14,8 @@
 #include "../ast.h"
 #include "../xalloc.h"
 
+#include "io.h"
+
 static void
 output_section(const char *section)
 {

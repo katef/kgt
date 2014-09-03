@@ -9,17 +9,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "bnf/input.h"
-#include "wsn/input.h"
-#include "ebnf/input.h"
-
-#include "bnf/output.h"
-#include "wsn/output.h"
-#include "ebnf/output.h"
-#include "sid/output.h"
-#include "trd/output.h"
-#include "dot/output.h"
-#include "rrd/output.h"
+#include "bnf/io.h"
+#include "wsn/io.h"
+#include "ebnf/io.h"
+#include "sid/io.h"
+#include "trd/io.h"
+#include "dot/io.h"
+#include "rrd/io.h"
 
 #include "ast.h"
 #include "xalloc.h"

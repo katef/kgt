@@ -13,6 +13,8 @@
 
 #include "../ast.h"
 
+#include "io.h"
+
 static void output_term(struct ast_term *term);
 
 static void

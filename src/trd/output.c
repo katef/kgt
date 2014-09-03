@@ -14,6 +14,8 @@
 
 #include "../ast.h"
 
+#include "io.h"
+
 static void output_alts(struct ast_alt *alts);
 
 static void

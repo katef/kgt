@@ -14,6 +14,8 @@
 
 #include "../ast.h"
 
+#include "io.h"
+
 static void output_alt(struct ast_production *grammar, struct ast_alt *alt);
 
 static void
