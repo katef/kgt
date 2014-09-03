@@ -12,6 +12,7 @@
 #include <assert.h>
 
 #include "../ast.h"
+#include "../xalloc.h"
 
 static void
 output_section(const char *section)
