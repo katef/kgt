@@ -63,7 +63,6 @@ output_production(struct ast_production *production)
 	struct ast_alt *alt;
 
 	printf("\t%s = {\n\t\t", production->name);
-	output_alt(alt);
 
 	for (alt = production->alts; alt != NULL; alt = alt->next) {
 		output_alt(alt);
