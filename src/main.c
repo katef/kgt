@@ -20,11 +20,11 @@
 #include "ast.h"
 #include "xalloc.h"
 
-struct lang {
+struct io {
 	const char *name;
 	struct ast_production *(*in)(int (*f)(void *), void *);
 	void (*out)(struct ast_production *);
-} lang[] = {
+} io[] = {
 	{ "bnf",  bnf_input,  bnf_output  },
 	{ "wsn",  wsn_input,  wsn_output  },
 	{ "ebnf", ebnf_input, ebnf_output },
@@ -33,8 +33,6 @@ struct lang {
 	{ "dot",  NULL,       dot_output  },
 	{ "rrd",  NULL,       rrd_output  }
 };
-
-struct lang *in, *out;
 
 static void
 xusage(void)
@@ -55,14 +53,14 @@ kgt_fgetc(void *opaque)
 	return fgetc(f);
 }
 
-static struct lang *
-findlang(const char *s)
+static struct io *
+lang(const char *s)
 {
 	size_t i;
 
-	for (i = 0; i < sizeof lang / sizeof *lang; i++) {
-		if (0 == strcmp(s, lang[i].name)) {
-			return &lang[i];
+	for (i = 0; i < sizeof io / sizeof *io; i++) {
+		if (0 == strcmp(s, io[i].name)) {
+			return &io[i];
 		}
 	}
 
@@ -74,8 +72,9 @@ int
 main(int argc, char *argv[])
 {
 	struct ast_production *g;
+	struct io *in, *out;
 
-	in  = findlang("bnf");
+	in  = lang("bnf");
 	out = in;
 
 	{
@@ -83,8 +82,8 @@ main(int argc, char *argv[])
 
 		while ((c = getopt(argc, argv, "hnl:e:")) != -1) {
 			switch (c) {
-			case 'l': in  = findlang(optarg); break;
-			case 'e': out = findlang(optarg); break;
+			case 'l': in  = lang(optarg); break;
+			case 'e': out = lang(optarg); break;
 
 			case 'n':
 				beautify = 0;
