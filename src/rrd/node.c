@@ -21,17 +21,22 @@ node_free(struct node *n)
 		next = p->next;
 
 		switch (n->type) {
-		case NODE_LIST:
-			node_free(n->u.list.list);
+		case NODE_SKIP:
+		case NODE_TERMINAL:
+		case NODE_IDENTIFIER:
+			break;
+
+		case NODE_CHOICE:
+			node_free(n->u.choice);
+			break;
+
+		case NODE_SEQUENCE:
+			node_free(n->u.sequence);
 			break;
 
 		case NODE_LOOP:
 			node_free(n->u.loop.forward);
 			node_free(n->u.loop.backward);
-			break;
-
-		case NODE_SKIP:
-		case NODE_LEAF:
 			break;
 		}
 
@@ -53,35 +58,65 @@ node_create_skip(void)
 }
 
 struct node *
-node_create_leaf(enum leaf_type type, const char *text)
+node_create_terminal(const char *terminal)
 {
 	struct node *new;
 
-	assert(text != NULL);
+	assert(terminal != NULL);
 
 	new = xmalloc(sizeof *new);
 
-	new->type = NODE_LEAF;
+	new->type = NODE_TERMINAL;
 	new->next = NULL;
 
-	new->u.leaf.type = type;
-	new->u.leaf.text = text;
+	new->u.terminal = terminal;
 
 	return new;
 }
 
 struct node *
-node_create_list(enum list_type type, struct node *list)
+node_create_identifier(const char *identifier)
+{
+	struct node *new;
+
+	assert(identifier != NULL);
+
+	new = xmalloc(sizeof *new);
+
+	new->type = NODE_IDENTIFIER;
+	new->next = NULL;
+
+	new->u.identifier = identifier;
+
+	return new;
+}
+
+struct node *
+node_create_choice(struct node *choice)
 {
 	struct node *new;
 
 	new = xmalloc(sizeof *new);
 
-	new->type = NODE_LIST;
+	new->type = NODE_CHOICE;
 	new->next = NULL;
 
-	new->u.list.type = type;
-	new->u.list.list = list;
+	new->u.choice = choice;
+
+	return new;
+}
+
+struct node *
+node_create_sequence(struct node *sequence)
+{
+	struct node *new;
+
+	new = xmalloc(sizeof *new);
+
+	new->type = NODE_SEQUENCE;
+	new->next = NULL;
+
+	new->u.sequence = sequence;
 
 	return new;
 }
@@ -107,18 +142,33 @@ node_collapse(struct node **n)
 {
 	struct node *list;
 
-	if ((**n).type != NODE_LIST) {
-		return;
-	}
-
 	list = *n;
 
-	if (list->u.list.list == NULL || list->u.list.list->next == NULL) {
+	switch (list->type) {
+	case NODE_CHOICE:
+		/* TODO: list_count() */
+		if (list->u.choice == NULL || list->u.choice->next == NULL) {
+			return;
+		}
+
+		*n = list->u.choice;
+		list->u.choice = NULL;
+
+		break;
+
+	case NODE_SEQUENCE:
+		if (list->u.sequence == NULL || list->u.sequence->next == NULL) {
+			return;
+		}
+
+		*n = list->u.sequence;
+		list->u.sequence = NULL;
+
+		break;
+
+	default:
 		return;
 	}
-
-	*n = list->u.list.list;
-	list->u.list.list = NULL;
 
 	node_free(list);
 

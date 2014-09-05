@@ -55,21 +55,28 @@ dim_nothing(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static int
-dim_leaf(struct node *n, struct node **np, int depth, void *arg)
+dim_identifier(struct node *n, struct node **np, int depth, void *arg)
 {
-	int len;
-
 	(void) np;
 	(void) arg;
 	(void) depth;
 
-	if (n->u.leaf.type == LEAF_IDENTIFIER) {
-		len = strlen(n->u.leaf.text) + 2;
-	} else {
-		len = strlen(n->u.leaf.text) + 4;
-	}
+	n->size.w = strlen(n->u.identifier) + 2;
+	n->size.h = 1;
+	n->y = 0;
 
-	n->size.w = len;
+	return 1;
+}
+
+static int
+dim_terminal(struct node *n, struct node **np, int depth, void *arg)
+{
+	(void) np;
+	(void) arg;
+	(void) depth;
+
+
+	n->size.w = strlen(n->u.terminal) + 4;
 	n->size.h = 1;
 	n->y = 0;
 
@@ -85,9 +92,9 @@ dim_sequence(struct node *n, struct node **np, int depth, void *arg)
 	(void) np;
 	(void) arg;
 
-	node_walk_list(&n->u.list.list, &w_dimension, depth + 1, arg);
+	node_walk_list(&n->u.sequence, &w_dimension, depth + 1, arg);
 
-	for (p = n->u.list.list; p != NULL; p = p->next) {
+	for (p = n->u.sequence; p != NULL; p = p->next) {
 		w += p->size.w + 2;
 		if (p->y > top) {
 			top = p->y;
@@ -113,16 +120,16 @@ dim_choice(struct node *n, struct node **np, int depth, void *arg)
 	(void) np;
 	(void) arg;
 
-	node_walk_list(&n->u.list.list, &w_dimension, depth + 1, arg);
+	node_walk_list(&n->u.choice, &w_dimension, depth + 1, arg);
 
-	for (p = n->u.list.list; p != NULL; p = p->next) {
+	for (p = n->u.choice; p != NULL; p = p->next) {
 		h += 1 + p->size.h;
 
 		if (p->size.w > w) {
 			w = p->size.w;
 		}
 
-		if (p == n->u.list.list) {
+		if (p == n->u.choice) {
 			if (p->type == NODE_SKIP && p->next && !p->next->next) {
 				n->y = 2 + p->y + p->next->y;
 			} else {
@@ -160,24 +167,33 @@ dim_loop(struct node *n, struct node **np, int depth, void *arg)
 
 static struct node_walker w_dimension = {
 	dim_nothing,
-	dim_leaf, dim_leaf,
-	dim_choice, dim_sequence,
+	dim_identifier, dim_terminal,
+	dim_choice,     dim_sequence,
 	dim_loop
 };
 
 static int
-render_leaf(struct node *n, struct node **np, int depth, void *arg)
+render_terminal(struct node *n, struct node **np, int depth, void *arg)
 {
 	struct render_context *ctx = arg;
 
 	(void) np;
 	(void) depth;
 
-	if (n->u.leaf.type == LEAF_IDENTIFIER) {
-		bprintf(ctx, " %s ", n->u.leaf.text);
-	} else {
-		bprintf(ctx, " \"%s\" ", n->u.leaf.text);
-	}
+	bprintf(ctx, " \"%s\" ", n->u.terminal);
+
+	return 1;
+}
+
+static int
+render_identifier(struct node *n, struct node **np, int depth, void *arg)
+{
+	struct render_context *ctx = arg;
+
+	(void) np;
+	(void) depth;
+
+	bprintf(ctx, " %s ", n->u.identifier);
 
 	return 1;
 }
@@ -209,7 +225,7 @@ render_sequence(struct node *n, struct node **np, int depth, void *arg)
 
 	ctx->y += n->y;
 	if (!ctx->rtl) {
-		for (p = n->u.list.list; p != NULL; p = p->next) {
+		for (p = n->u.sequence; p != NULL; p = p->next) {
 			segment(ctx, p, depth + 1, !!p->next);
 		}
 	} else {
@@ -217,7 +233,7 @@ render_sequence(struct node *n, struct node **np, int depth, void *arg)
 
 		rl = NULL;
 
-		for (p = n->u.list.list; p != NULL; p = p->next) {
+		for (p = n->u.sequence; p != NULL; p = p->next) {
 			b_push(&rl, p);
 		}
 
@@ -263,14 +279,14 @@ render_choice(struct node *n, struct node **np, int depth, void *arg)
 	struct node *p;
 	int x = ctx->x, y = ctx->y;
 	int line = y + n->y;
-	char *a_in	= (n->y - n->u.list.list->y) ? "v" : "^";
-	char *a_out = (n->y - n->u.list.list->y) ? "^" : "v";
+	char *a_in	= (n->y - n->u.choice->y) ? "v" : "^";
+	char *a_out = (n->y - n->u.choice->y) ? "^" : "v";
 
-	ctx->y += n->u.list.list->y;
+	ctx->y += n->u.choice->y;
 
 	(void) np;
 
-	for (p = n->u.list.list; p != NULL; p = p->next) {
+	for (p = n->u.choice; p != NULL; p = p->next) {
 		int i, flush = ctx->y == line;
 
 		ctx->x = x;
@@ -353,8 +369,8 @@ render_loop(struct node *n, struct node **np, int depth, void *arg)
 
 static struct node_walker w_render = {
 	0,
-	render_leaf, render_leaf,
-	render_choice, render_sequence,
+	render_terminal, render_identifier,
+	render_choice,   render_sequence,
 	render_loop
 };
 

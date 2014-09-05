@@ -24,7 +24,7 @@ redundant_choice(struct node *n, struct node **np, int depth, void *arg)
 	int nc = 0, isopt = 0;
 	struct node **p, **loop = NULL;
 
-	for (p = &n->u.list.list; *p != NULL; p = &(**p).next) {
+	for (p = &n->u.choice; *p != NULL; p = &(**p).next) {
 		nc++;
 
 		if (!node_walk(p, &pretty_redundant, depth + 1, arg)) {
@@ -65,24 +65,20 @@ redundant_choice(struct node *n, struct node **np, int depth, void *arg)
 		struct node **next;
 
 		/* fold nested choices into this one */
-		for (p = &n->u.list.list; *p != NULL; p = next) {
+		for (p = &n->u.choice; *p != NULL; p = next) {
 			struct node **head, **tail;
 			struct node *dead;
 
 			next = &(*p)->next;
 
-			if ((*p)->type != NODE_LIST) {
-				continue;
-			}
-
-			if ((*p)->u.list.type != LIST_CHOICE) {
+			if ((*p)->type != NODE_CHOICE) {
 				continue;
 			}
 
 			dead = *p;
 
 			/* incoming inner list */
-			head = &(*p)->u.list.list;
+			head = &(*p)->u.choice;
 
 			for (tail = head; *tail != NULL; tail = &(*tail)->next)
 				;

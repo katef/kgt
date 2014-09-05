@@ -32,7 +32,7 @@ bottom_sequence(struct node *n, struct node **np, int depth, void *arg)
 
 	(void) np;
 
-	for (p = &n->u.list.list; *p != NULL; p = &(**p).next) {
+	for (p = &n->u.sequence; *p != NULL; p = &(**p).next) {
 		ctx->applied = 0;
 
 		if (!node_walk(p, &pretty_bottom, depth + 1, ctx)) {
@@ -44,7 +44,7 @@ bottom_sequence(struct node *n, struct node **np, int depth, void *arg)
 
 	if (0 && anything) {
 		ctx->everything = 1;
-		node_walk_list(&n->u.list.list, &pretty_bottom, depth + 1, ctx);
+		node_walk_list(&n->u.sequence, &pretty_bottom, depth + 1, ctx);
 		ctx->everything = 0;
 	}
 
@@ -71,37 +71,35 @@ bottom_loop(struct node *n, struct node **np, int depth, void *arg)
 			break;
 		}
 
-		if (!everything && n->u.loop.backward->type == NODE_LEAF) {
+		if (!everything && (n->u.loop.backward->type == NODE_TERMINAL || n->u.loop.backward->type == NODE_IDENTIFIER)) {
 			break;
 		}
 
-		if (n->u.loop.backward->type == NODE_LIST) {
-			struct node *list;
+		if (n->u.loop.backward->type == NODE_CHOICE) {
+			struct node *p;
+			int c;
 
-			list = n->u.loop.backward;
-			if (list->u.list.type == LIST_CHOICE) {
-				struct node *p;
-				int c = 0;
+			c = 0;
 
-				for (p = list->u.list.list; p != NULL; p = p->next) {
-					if (p->type == NODE_LIST || p->type == NODE_LOOP)
-						c = 1;
+			for (p = n->u.loop.backward->u.choice; p != NULL; p = p->next) {
+				if (p->type == NODE_CHOICE || p->type == NODE_SEQUENCE || p->type == NODE_LOOP) {
+					c = 1;
 				}
+			}
 
-				if (!c) {
-					break;
-				}
+			if (!c) {
+				break;
 			}
 		}
 
 		tmp = n->u.loop.backward;
 		n->u.loop.backward = n->u.loop.forward;
-		n->u.loop.forward = tmp;
+		n->u.loop.forward  = tmp;
 
 		/* short-circuit */
 		skip = node_create_skip();
 		skip->next = n;
-		choice = node_create_list(LIST_CHOICE, skip);
+		choice = node_create_choice(skip);
 		choice->next = n->next;
 		n->next = NULL;
 		*np = choice;

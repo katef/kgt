@@ -5,16 +5,6 @@
 
 #include "../ast.h"
 
-enum leaf_type {
-	LEAF_TERMINAL,
-	LEAF_IDENTIFIER
-};
-
-enum list_type {
-	LIST_CHOICE,
-	LIST_SEQUENCE
-};
-
 struct box_size {
 	int w;
 	int h;
@@ -23,21 +13,19 @@ struct box_size {
 struct node {
 	enum {
 		NODE_SKIP,
-		NODE_LEAF,
-		NODE_LIST,
+		NODE_TERMINAL,
+		NODE_IDENTIFIER,
+		NODE_CHOICE,
+		NODE_SEQUENCE,
 		NODE_LOOP
 	} type;
 
 	union {
-		struct {
-			enum leaf_type type;
-			const char *text;
-		} leaf;
+		const char *terminal;
+		const char *identifier;
 
-		struct {
-			enum list_type type;
-			struct node *list;
-		} list;
+		struct node *choice;
+		struct node *sequence;
 
 		struct {
 			struct node *forward;

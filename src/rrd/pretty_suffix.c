@@ -19,18 +19,20 @@
 static int
 leaves_eq(struct node *a, struct node *b)
 {
-	assert(a->type == NODE_LEAF);
-	assert(b->type == NODE_LEAF);
-
-	if (a->u.leaf.type != b->u.leaf.type) {
+	if (a->type != b->type) {
 		return 0;
 	}
 
-	if (0 != strcmp(a->u.leaf.text, b->u.leaf.text)) {
+	switch (a->type) {
+	case NODE_TERMINAL:
+		return 0 == strcmp(a->u.terminal, b->u.terminal);
+
+	case NODE_IDENTIFIER:
+		return 0 == strcmp(a->u.identifier, b->u.identifier);
+
+	default:
 		return 0;
 	}
-
-	return 1;
 }
 
 static int
@@ -38,7 +40,7 @@ process_loop_leaf(struct node *loop, struct bnode *bp)
 {
 	struct node *a, *b;
 
-	if (bp == NULL || bp->v->type != NODE_LEAF) {
+	if (bp == NULL || (bp->v->type != NODE_TERMINAL && bp->v->type != NODE_IDENTIFIER)) {
 		return 0;
 	}
 
@@ -67,9 +69,9 @@ loop_switch_sides(int suflen, struct node *loop, struct bnode **rl)
 	if (suflen > 1) {
 		struct node *seq;
 
-		seq = node_create_list(LIST_SEQUENCE, NULL);
+		seq = node_create_sequence(NULL);
 
-		n = &seq->u.list.list;
+		n = &seq->u.sequence;
 		node_free(loop->u.loop.forward);
 		loop->u.loop.forward = seq;
 
@@ -95,7 +97,7 @@ loop_switch_sides(int suflen, struct node *loop, struct bnode **rl)
 		loop->u.loop.backward = skip;
 	}
 
-	if (loop->u.loop.backward->type == NODE_LIST) {
+	if (loop->u.loop.backward->type == NODE_CHOICE || loop->u.loop.backward->type == NODE_SEQUENCE) {
 		node_collapse(&loop->u.loop.backward);
 	}
 }
@@ -110,11 +112,11 @@ process_loop_list(struct node *loop, struct bnode *bp)
 
 	list = loop->u.loop.backward;
 
-	if (list->u.list.type == LIST_CHOICE) {
+	if (list->type == NODE_CHOICE) {
 		return 0;
 	}
 
-	for (p = list->u.list.list; p != NULL; p = p->next) {
+	for (p = list->u.sequence; p != NULL; p = p->next) {
 		b_push(&rl, p);
 	}
 
@@ -122,7 +124,11 @@ process_loop_list(struct node *loop, struct bnode *bp)
 	for (rp = rl; rp != NULL && bp != NULL; rp = rp->next, bp = bp->next) {
 		struct node *a, *b;
 
-		if (rp->v->type != NODE_LEAF || bp->v->type != NODE_LEAF) {
+		if (rp->v->type != NODE_TERMINAL || rp->v->type != NODE_IDENTIFIER) {
+			break;
+		}
+
+		if (bp->v->type != NODE_TERMINAL || bp->v->type != NODE_IDENTIFIER) {
 			break;
 		}
 
@@ -153,11 +159,11 @@ process_loop(struct node *loop, struct bnode *bp)
 		return 0;
 	}
 
-	if (loop->u.loop.backward->type == NODE_LIST) {
+	if (loop->u.loop.backward->type == NODE_CHOICE || loop->u.loop.backward->type == NODE_SEQUENCE) {
 		return process_loop_list(loop, bp);
 	}
 
-	if (loop->u.loop.backward->type == NODE_LEAF) {
+	if (loop->u.loop.backward->type == NODE_TERMINAL || loop->u.loop.backward->type == NODE_IDENTIFIER) {
 		return process_loop_leaf(loop, bp);
 	}
 
@@ -167,12 +173,12 @@ process_loop(struct node *loop, struct bnode *bp)
 static struct node_walker pretty_collapse_suffixes;
 
 static int
-collapse_list(struct node *n, struct node **np, int depth, void *arg)
+collapse_sequence(struct node *n, struct node **np, int depth, void *arg)
 {
 	struct node *p;
 	struct bnode *rl = 0;
 
-	for (p = n->u.list.list; p != NULL; p = p->next) {
+	for (p = n->u.sequence; p != NULL; p = p->next) {
 		int i, suffix_len;
 
 		if (p->type != NODE_LOOP) {
@@ -195,14 +201,14 @@ collapse_list(struct node *n, struct node **np, int depth, void *arg)
 			if (rl) {
 				rl->v->next = p;
 			} else {
-				n->u.list.list = p;
+				n->u.sequence = p;
 			}
 		}
 	}
 
 	b_clear(&rl);
 
-	if (!node_walk_list(&n->u.list.list, &pretty_collapse_suffixes, depth + 1, arg)) {
+	if (!node_walk_list(&n->u.sequence, &pretty_collapse_suffixes, depth + 1, arg)) {
 		return 0;
 	}
 
@@ -214,7 +220,7 @@ collapse_list(struct node *n, struct node **np, int depth, void *arg)
 static struct node_walker pretty_collapse_suffixes = {
 	NULL,
 	NULL, NULL,
-	NULL, collapse_list,
+	NULL, collapse_sequence,
 	NULL
 };
 

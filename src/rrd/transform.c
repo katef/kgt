@@ -43,7 +43,7 @@ transform_alt(struct ast_alt *alt)
 	if (list->next == NULL) {
 		return list;
 	} else {
-		return node_create_list(LIST_SEQUENCE, list);
+		return node_create_sequence(list);
 	}
 }
 
@@ -80,10 +80,10 @@ transform_leaf(struct ast_term *term)
 {
 	switch (term->type) {
 	case TYPE_PRODUCTION:
-		return node_create_leaf(LEAF_IDENTIFIER, term->u.name);
+		return node_create_identifier(term->u.name);
 
 	case TYPE_TERMINAL:
-		return node_create_leaf(LEAF_TERMINAL, term->u.literal);
+		return node_create_terminal(term->u.literal);
 
 	default:
 		errno = EINVAL;
@@ -95,14 +95,14 @@ static struct node *
 transform_group(struct ast_alt *group)
 {
 	struct node *list;
+	struct node *alts;
 
-	list = node_create_list(LIST_SEQUENCE, NULL);
-
-	list->u.list.list = transform_alts(group);
-	if (list->u.list.list == NULL) {
-		node_free(list);
+	alts = transform_alts(group);
+	if (alts == NULL) {
 		return NULL;
 	}
+
+	list = node_create_sequence(alts);
 
 	node_collapse(&list);
 
@@ -137,7 +137,7 @@ optional_term(struct ast_term *term)
 
 	skip->next = n;
 
-	return node_create_list(LIST_CHOICE, skip);
+	return node_create_choice(skip);
 }
 
 static struct node *
@@ -179,7 +179,7 @@ zeroormore_term(struct ast_term *term)
 
 	skip->next = n;
 
-	choice = node_create_list(LIST_CHOICE, skip);
+	choice = node_create_choice(skip);
 
 	loop = node_create_loop(skip, choice);
 
@@ -228,7 +228,7 @@ ast_to_rrd(struct ast_production *ast)
 		return NULL;
 	}
 
-	choice = node_create_list(LIST_CHOICE, n);
+	choice = node_create_choice(n);
 
 	node_collapse(&choice);
 
@@ -245,25 +245,12 @@ node_call_walker(struct node **n, const struct node_walker *ws, int depth, void 
 	node = *n;
 
 	switch (node->type) {
-	case NODE_SKIP:
-		return ws->visit_skip ? ws->visit_skip(*n, n, depth, a) : -1;
-
-	case NODE_LEAF:
-		if (node->u.leaf.type == LEAF_IDENTIFIER) {
-			return ws->visit_identifier ? ws->visit_identifier(node, n, depth, a) : -1;
-		} else {
-			return ws->visit_terminal   ? ws->visit_terminal(node, n, depth, a)   : -1;
-		}
-
-	case NODE_LIST:
-		if (node->u.list.type == LIST_CHOICE) {
-			return ws->visit_choice   ? ws->visit_choice(node, n, depth, a)   : -1;
-		} else {
-			return ws->visit_sequence ? ws->visit_sequence(node, n, depth, a) : -1;
-		}
-
-	case NODE_LOOP:
-		return ws->visit_loop ? ws->visit_loop(node, n, depth, a) : -1;
+	case NODE_SKIP:       return ws->visit_skip       ? ws->visit_skip(*n, n, depth, a)         : -1;
+	case NODE_TERMINAL:   return ws->visit_terminal   ? ws->visit_terminal(node, n, depth, a)   : -1;
+	case NODE_IDENTIFIER: return ws->visit_identifier ? ws->visit_identifier(node, n, depth, a) : -1;
+	case NODE_CHOICE:     return ws->visit_choice     ? ws->visit_choice(node, n, depth, a)     : -1;
+	case NODE_SEQUENCE:   return ws->visit_sequence   ? ws->visit_sequence(node, n, depth, a)   : -1;
+	case NODE_LOOP:       return ws->visit_loop       ? ws->visit_loop(node, n, depth, a)       : -1;
 	}
 
 	return -1;
@@ -301,8 +288,15 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *a)
 	}
 
 	switch (node->type) {
-	case NODE_LIST:
-		if (!node_walk_list(&node->u.list.list, ws, depth + 1, a)) {
+	case NODE_CHOICE:
+		if (!node_walk_list(&node->u.choice, ws, depth + 1, a)) {
+			return 0;
+		}
+
+		break;
+
+	case NODE_SEQUENCE:
+		if (!node_walk_list(&node->u.sequence, ws, depth + 1, a)) {
 			return 0;
 		}
 
@@ -320,7 +314,8 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *a)
 		break;
 
 	case NODE_SKIP:
-	case NODE_LEAF:
+	case NODE_IDENTIFIER:
+	case NODE_TERMINAL:
 		break;
 	}
 

@@ -32,38 +32,65 @@ visit_skip(struct node *n, struct node **np, int depth, void *arg)
 	(void) np;
 
 	print_indent(f, depth);
-	fprintf(f, "NT_SKIP\n");
+	fprintf(f, "NODE_SKIP\n");
 
 	return 1;
 }
 
 static int
-visit_leaf(struct node *n, struct node **np, int depth, void *arg)
+visit_identifier(struct node *n, struct node **np, int depth, void *arg)
 {
 	FILE *f = arg;
 
 	(void) np;
 
 	print_indent(f, depth);
-	if (n->u.leaf.type == LEAF_IDENTIFIER) {
-		fprintf(f, "NT_LEAF(IDENTIFIER): %s\n", n->u.leaf.text);
-	} else {
-		fprintf(f, "NT_LEAF(TERMINAL): \"%s\"\n", n->u.leaf.text);
+	fprintf(f, "NODE_IDENTIFIER: %s\n", n->u.identifier);
+
+	return 1;
+}
+
+static int
+visit_terminal(struct node *n, struct node **np, int depth, void *arg)
+{
+	FILE *f = arg;
+
+	(void) np;
+
+	print_indent(f, depth);
+	fprintf(f, "NODE_TERMINAL: %s\n", n->u.terminal);
+
+	return 1;
+}
+
+static int
+visit_choice(struct node *n, struct node **np, int depth, void *arg)
+{
+	FILE *f = arg;
+
+	(void) np;
+
+	print_indent(f, depth);
+	fprintf(f, "NODE_CHOICE: [\n");
+	if (!node_walk_list(&n->u.choice, &rrd_print, depth + 1, arg)) {
+		return 0;
 	}
+	print_indent(f, depth);
+	fprintf(f, "]\n");
 
 	return 1;
 }
 
 static int
-visit_list(struct node *n, struct node **np, int depth, void *arg)
+visit_sequence(struct node *n, struct node **np, int depth, void *arg)
 {
 	FILE *f = arg;
 
 	(void) np;
 
 	print_indent(f, depth);
-	fprintf(f, "NT_LIST(%s): [\n", n->u.list.type == LIST_CHOICE ? "CHOICE" : "SEQUENCE");
-	if (!node_walk_list(&n->u.list.list, &rrd_print, depth + 1, arg)) {
+	fprintf(f, "NODE_SEQUENCE: [\n");
+	if (!node_walk_list(&n->u.sequence, &rrd_print, depth + 1, arg)) {
 		return 0;
 	}
 	print_indent(f, depth);
@@ -80,7 +107,7 @@ visit_loop(struct node *n, struct node **np, int depth, void *arg)
 	(void) np;
 
 	print_indent(f, depth);
-	fprintf(f, "NT_LOOP:\n");
+	fprintf(f, "NODE_LOOP:\n");
 	if (n->u.loop.forward->type != NODE_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".forward:\n");
@@ -102,8 +129,8 @@ visit_loop(struct node *n, struct node **np, int depth, void *arg)
 
 static struct node_walker rrd_print = {
 	visit_skip,
-	visit_leaf, visit_leaf,
-	visit_list, visit_list,
+	visit_identifier, visit_terminal,
+	visit_choice,     visit_sequence,
 	visit_loop
 };
 

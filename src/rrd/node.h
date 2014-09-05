@@ -12,10 +12,16 @@ struct node *
 node_create_skip(void);
 
 struct node *
-node_create_leaf(enum leaf_type type, const char *text);
+node_create_terminal(const char *terminal);
 
 struct node *
-node_create_list(enum list_type type, struct node *list);
+node_create_identifier(const char *identifier);
+
+struct node *
+node_create_choice(struct node *choice);
+
+struct node *
+node_create_sequence(struct node *sequence);
 
 struct node *
 node_create_loop(struct node *forward, struct node *backward);
