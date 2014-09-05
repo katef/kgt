@@ -5,7 +5,7 @@
 
 struct ast_production;
 
-extern int beautify;
+extern int prettify;
 
 void
 rrd_output(struct ast_production *);

@@ -20,5 +20,8 @@ node_create_list(enum list_type type, struct node *list);
 struct node *
 node_create_loop(struct node *forward, struct node *backward);
 
+void
+node_collapse(struct node **n);
+
 #endif
 

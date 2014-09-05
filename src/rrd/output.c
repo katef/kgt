@@ -14,11 +14,11 @@
 
 #include "io.h"
 #include "rrd.h"
-#include "beautify.h"
+#include "pretty.h"
 #include "render.h"
 #include "node.h"
 
-int beautify = 1;
+int prettify = 1;
 
 static void
 print_indent(FILE *f, int n)
@@ -134,8 +134,10 @@ rrd_output(struct ast_production *grammar)
 print_repr(&rrd);
 */
 
-		if (beautify) {
-			rrd_beautify_all(&rrd);
+		if (prettify) {
+			rrd_pretty_suffixes(&rrd);
+			rrd_pretty_redundant(&rrd);
+			rrd_pretty_bottom(&rrd);
 		}
 
 /* XXX:

@@ -102,3 +102,26 @@ node_create_loop(struct node *forward, struct node *backward)
 	return new;
 }
 
+void
+node_collapse(struct node **n)
+{
+	struct node *list;
+
+	if ((**n).type != NODE_LIST) {
+		return;
+	}
+
+	list = *n;
+
+	if (list->u.list.list == NULL || list->u.list.list->next == NULL) {
+		return;
+	}
+
+	*n = list->u.list.list;
+	list->u.list.list = NULL;
+
+	node_free(list);
+
+	node_collapse(n);
+}
+

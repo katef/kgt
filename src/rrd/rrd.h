@@ -51,9 +51,6 @@ struct node {
 	struct node *next;
 };
 
-void
-node_collapse(struct node **n);
-
 /* node traversal - visit functions are passed a pointer to the pointer that ties
  * the visited node into the tree.
  * they are free to replace the node they visited via said pointer. cf. beautify

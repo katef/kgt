@@ -86,7 +86,7 @@ main(int argc, char *argv[])
 			case 'e': out = lang(optarg); break;
 
 			case 'n':
-				beautify = 0;
+				prettify = 0;
 				break;
 
 			case '?':
