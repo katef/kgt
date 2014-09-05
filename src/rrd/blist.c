@@ -32,6 +32,7 @@ b_pop(struct bnode **list, struct node **out)
 	if (out) {
 		*out = n->v;
 	}
+
 	free(n);
 
 	return 1;
