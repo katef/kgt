@@ -28,7 +28,7 @@ static void print_indent(FILE *f, int n) {
 
 static struct node_walker rrd_print;
 
-static int visit_nothing(struct node *n, struct node **np, int depth, void *arg) {
+static int visit_skip(struct node *n, struct node **np, int depth, void *arg) {
 	FILE *f = arg;
 	(void) n;
 	(void) np;
@@ -81,7 +81,7 @@ static int visit_loop(struct node_loop *n, struct node **np, int depth, void *ar
 }
 
 static struct node_walker rrd_print = {
-	visit_nothing,
+	visit_skip,
 	visit_leaf, visit_leaf,
 	visit_list, visit_list,
 	visit_loop

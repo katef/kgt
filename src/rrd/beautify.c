@@ -89,9 +89,9 @@ static void loop_switch_sides(int suflen, struct node_loop *loop, struct bnode *
 	if (b_pop(rl, &v)) {
 		v->next = 0;
 	} else {
-		struct node *nothing = node_create(NT_SKIP);
+		struct node *skip = node_create(NT_SKIP);
 		node_free(loop->backward);
-		loop->backward = nothing;
+		loop->backward = skip;
 	}
 
 	if (loop->backward->type == NT_LIST)
@@ -218,7 +218,7 @@ static int bot_heavy_loop(struct node_loop *n, struct node **np, int depth, void
 	ctx->everything = 0;
 	do {
 		struct node_list *choice;
-		struct node *tmp, *nothing;
+		struct node *tmp, *skip;
 		if (n->forward->type != NT_SKIP)
 			break;
 		if (n->backward->type == NT_SKIP
@@ -245,13 +245,13 @@ static int bot_heavy_loop(struct node_loop *n, struct node **np, int depth, void
 		/* short-circuit */
 		choice = node_create(NT_LIST);
 		choice->type = LIST_CHOICE;
-		nothing = node_create(NT_SKIP);
-		nothing->next = &n->node;
-		choice->list = nothing;
+		skip = node_create(NT_SKIP);
+		skip->next = &n->node;
+		choice->list = skip;
 		choice->node.next = n->node.next;
 		n->node.next = 0;
 		*np = &choice->node;
-		if (!node_walk(&nothing->next, &bt_bot_heavy, depth + 1, ctx))
+		if (!node_walk(&skip->next, &bt_bot_heavy, depth + 1, ctx))
 			return 0;
 		ctx->applied = 1;
 		ctx->everything = everything;

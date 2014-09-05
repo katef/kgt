@@ -140,34 +140,34 @@ static int single_term(struct node **on, struct ast_term *term) {
 }
 
 static int optional_term(struct node **on, struct ast_term *term) {
-	struct node *nothing;
+	struct node *skip;
 	struct node_list *choice;
 
-	nothing = node_create(NT_SKIP);
+	skip = node_create(NT_SKIP);
 
 	choice = node_create(NT_LIST);
 	choice->type = LIST_CHOICE;
-	choice->list = nothing;
+	choice->list = skip;
 
 	*on = &choice->node;
-	if (!single_term(&nothing->next, term))
+	if (!single_term(&skip->next, term))
 		return 0;
 
 	return 1;
 }
 
 static int oneormore_term(struct node **on, struct ast_term *term) {
-	struct node *nothing;
+	struct node *skip;
 	struct node_list *choice;
 	struct node_loop *loop;
 
-	nothing = node_create(NT_SKIP);
+	skip = node_create(NT_SKIP);
 	choice = node_create(NT_LIST);
 	choice->type = LIST_CHOICE;
 
 	loop = node_create(NT_LOOP);
 	loop->forward = &choice->node;
-	loop->backward = nothing;
+	loop->backward = skip;
 
 	*on = &loop->node;
 	if (!single_term(&choice->list, term))
@@ -180,20 +180,20 @@ static int oneormore_term(struct node **on, struct ast_term *term) {
 }
 
 static int zeroormore_term(struct node **on, struct ast_term *term) {
-	struct node *nothing;
+	struct node *skip;
 	struct node_list *choice;
 	struct node_loop *loop;
 
-	nothing = node_create(NT_SKIP);
+	skip = node_create(NT_SKIP);
 	choice = node_create(NT_LIST);
 	choice->type = LIST_CHOICE;
 
 	loop = node_create(NT_LOOP);
-	loop->forward = nothing;
+	loop->forward = skip;
 	loop->backward = &choice->node;
 
 	*on = &loop->node;
-	if (!single_term(&nothing->next, term))
+	if (!single_term(&skip->next, term))
 		return 0;
 
 	node_collapse(&loop->forward);
@@ -269,7 +269,7 @@ int ast_to_rrd(struct ast_production *ast, struct node **rrd) {
 
 static int node_call_walker(struct node **n, const struct node_walker *ws, int depth, void *a) {
 	if ((**n).type == NT_SKIP) {
-		return ws->visit_nothing ? ws->visit_nothing(*n, n, depth, a) : -1;
+		return ws->visit_skip ? ws->visit_skip(*n, n, depth, a) : -1;
 	}
 	if ((**n).type == NT_LEAF) {
 		struct node_leaf *leaf = (struct node_leaf *)*n;
