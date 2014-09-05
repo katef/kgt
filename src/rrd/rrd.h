@@ -6,7 +6,7 @@
 #include "../ast.h"
 
 enum node_type {
-	NT_NOTHING,
+	NT_SKIP,
 	NT_LEAF,
 	NT_LIST,
 	NT_LOOP

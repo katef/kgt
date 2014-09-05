@@ -75,14 +75,14 @@ static int transform_leaf(struct node **, struct ast_term *);
 static int transform_group(struct node **, struct ast_alt *);
 
 static int transform_alts(struct node **on, struct ast_alt *alts) {
-	struct node *list = 0, **tip = &list;
+	struct node *list = 0, **head = &list;
 	struct ast_alt *p;
 
 	for (p = alts; p; p = p->next) {
-		if (!transform_alt(tip, p))
+		if (!transform_alt(head, p))
 			return 0;
-		while (*tip)
-			tip = &(**tip).next;
+		while (*head)
+			head = &(**head).next;
 	}
 
 	*on = list;
@@ -91,14 +91,14 @@ static int transform_alts(struct node **on, struct ast_alt *alts) {
 }
 
 static int transform_alt(struct node **on, struct ast_alt *alt) {
-	struct node *list = 0, **tip = &list;
+	struct node *list = 0, **head = &list;
 	struct ast_term *p;
 
 	for (p = alt->terms; p; p = p->next) {
-		if (!transform_term(tip, p))
+		if (!transform_term(head, p))
 			return 0;
-		while (*tip)
-			tip = &(**tip).next;
+		while (*head)
+			head = &(**head).next;
 	}
 
 	if (!list->next) {
@@ -143,7 +143,7 @@ static int optional_term(struct node **on, struct ast_term *term) {
 	struct node *nothing;
 	struct node_list *choice;
 
-	nothing = node_create(NT_NOTHING);
+	nothing = node_create(NT_SKIP);
 
 	choice = node_create(NT_LIST);
 	choice->type = LIST_CHOICE;
@@ -161,7 +161,7 @@ static int oneormore_term(struct node **on, struct ast_term *term) {
 	struct node_list *choice;
 	struct node_loop *loop;
 
-	nothing = node_create(NT_NOTHING);
+	nothing = node_create(NT_SKIP);
 	choice = node_create(NT_LIST);
 	choice->type = LIST_CHOICE;
 
@@ -184,7 +184,7 @@ static int zeroormore_term(struct node **on, struct ast_term *term) {
 	struct node_list *choice;
 	struct node_loop *loop;
 
-	nothing = node_create(NT_NOTHING);
+	nothing = node_create(NT_SKIP);
 	choice = node_create(NT_LIST);
 	choice->type = LIST_CHOICE;
 
@@ -229,7 +229,7 @@ static int transform_term(struct node **on, struct ast_term *term) {
 }
 
 static int transform_empty(struct node **on) {
-	struct node *n = node_create(NT_NOTHING);
+	struct node *n = node_create(NT_SKIP);
 	*on = n;
 	return 1;
 }
@@ -268,7 +268,7 @@ int ast_to_rrd(struct ast_production *ast, struct node **rrd) {
 }
 
 static int node_call_walker(struct node **n, const struct node_walker *ws, int depth, void *a) {
-	if ((**n).type == NT_NOTHING) {
+	if ((**n).type == NT_SKIP) {
 		return ws->visit_nothing ? ws->visit_nothing(*n, n, depth, a) : -1;
 	}
 	if ((**n).type == NT_LEAF) {

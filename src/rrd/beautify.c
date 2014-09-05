@@ -89,7 +89,7 @@ static void loop_switch_sides(int suflen, struct node_loop *loop, struct bnode *
 	if (b_pop(rl, &v)) {
 		v->next = 0;
 	} else {
-		struct node *nothing = node_create(NT_NOTHING);
+		struct node *nothing = node_create(NT_SKIP);
 		node_free(loop->backward);
 		loop->backward = nothing;
 	}
@@ -128,8 +128,8 @@ static int process_loop_list(struct node_loop *loop, struct bnode *bp) {
 }
 
 static int process_loop(struct node_loop *loop, struct bnode *bp) {
-	if (loop->backward->type == NT_NOTHING
-	 || loop->forward->type != NT_NOTHING)
+	if (loop->backward->type == NT_SKIP
+	 || loop->forward->type != NT_SKIP)
 		return 0;
 
 	if (loop->backward->type == NT_LIST)
@@ -219,9 +219,9 @@ static int bot_heavy_loop(struct node_loop *n, struct node **np, int depth, void
 	do {
 		struct node_list *choice;
 		struct node *tmp, *nothing;
-		if (n->forward->type != NT_NOTHING)
+		if (n->forward->type != NT_SKIP)
 			break;
-		if (n->backward->type == NT_NOTHING
+		if (n->backward->type == NT_SKIP
 		 || n->backward->type == NT_LOOP)
 			break;
 		if (!everything && n->backward->type == NT_LEAF)
@@ -245,7 +245,7 @@ static int bot_heavy_loop(struct node_loop *n, struct node **np, int depth, void
 		/* short-circuit */
 		choice = node_create(NT_LIST);
 		choice->type = LIST_CHOICE;
-		nothing = node_create(NT_NOTHING);
+		nothing = node_create(NT_SKIP);
 		nothing->next = &n->node;
 		choice->list = nothing;
 		choice->node.next = n->node.next;
@@ -284,7 +284,7 @@ static int redundant_choice(struct node_list *n, struct node **np, int depth, vo
 		nc++;
 		if (!node_walk(p, &bt_redundant, depth + 1, arg))
 			return 0;
-		if ((**p).type == NT_NOTHING) {
+		if ((**p).type == NT_SKIP) {
 			isopt = 1;
 		}
 		if ((**p).type == NT_LOOP) {
@@ -295,11 +295,11 @@ static int redundant_choice(struct node_list *n, struct node **np, int depth, vo
 	if (nc == 2 && isopt && loop) {
 		struct node_loop *l = (struct node_loop *)*loop;
 		/* special case: if an optional loop has an empty half, we can elide the NT_CHOICE */
-		if (l->forward->type == NT_NOTHING) {
+		if (l->forward->type == NT_SKIP) {
 			*np = *loop;
 			*loop = 0;
 			node_free(&n->node);
-		} else if (l->backward->type == NT_NOTHING) {
+		} else if (l->backward->type == NT_SKIP) {
 			struct node *tmp = l->backward;
 			l->backward = l->forward;
 			l->forward = tmp;
@@ -339,15 +339,15 @@ static int redundant_loop(struct node_loop *n, struct node **np, int depth, void
 	if (!node_walk(&n->backward, &bt_redundant, depth + 1, arg))
 		return 0;
 
-	if (n->forward->type == NT_LOOP && n->backward->type == NT_NOTHING) {
+	if (n->forward->type == NT_LOOP && n->backward->type == NT_SKIP) {
 		loop = (struct node_loop *)n->forward;
-		if (loop->forward->type == NT_NOTHING || loop->backward->type == NT_NOTHING)
+		if (loop->forward->type == NT_SKIP || loop->backward->type == NT_SKIP)
 			inner = &n->forward;
-	} else if (n->backward->type == NT_LOOP && n->forward->type == NT_NOTHING) {
+	} else if (n->backward->type == NT_LOOP && n->forward->type == NT_SKIP) {
 		loop = (struct node_loop *)n->backward;
-		if (loop->forward->type == NT_NOTHING) {
+		if (loop->forward->type == NT_SKIP) {
 			inner = &n->backward;
-		} else if (loop->backward->type == NT_NOTHING) {
+		} else if (loop->backward->type == NT_SKIP) {
 			struct node *tmp = loop->backward;
 			loop->backward = loop->forward;
 			loop->forward = tmp;

@@ -33,7 +33,7 @@ static int visit_nothing(struct node *n, struct node **np, int depth, void *arg)
 	(void) n;
 	(void) np;
 	print_indent(f, depth);
-	fprintf(f, "NT_NOTHING\n");
+	fprintf(f, "NT_SKIP\n");
 	return 1;
 }
 
@@ -65,13 +65,13 @@ static int visit_loop(struct node_loop *n, struct node **np, int depth, void *ar
 	(void) np;
 	print_indent(f, depth);
 	fprintf(f, "NT_LOOP:\n");
-	if (n->forward->type != NT_NOTHING) {
+	if (n->forward->type != NT_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".forward:\n");
 		if (!node_walk_list(&n->forward, &rrd_print, depth + 2, arg))
 			return 0;
 	}
-	if (n->backward->type != NT_NOTHING) {
+	if (n->backward->type != NT_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".backward:\n");
 		if (!node_walk_list(&n->backward, &rrd_print, depth + 2, arg))

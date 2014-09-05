@@ -87,7 +87,7 @@ static int dim_choice(struct node_list *n, struct node **np, int depth, void *ar
 		if (p->size.w > w)
 			w = p->size.w;
 		if (p == n->list) {
-			if (p->type == NT_NOTHING && p->next && !p->next->next) {
+			if (p->type == NT_SKIP && p->next && !p->next->next) {
 				n->node.y = 2 + p->y + p->next->y;
 			} else {
 				n->node.y = p->y;
