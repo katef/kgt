@@ -14,48 +14,51 @@
 
 #include "io.h"
 
-static void output_term(struct ast_term *term);
-
-static void
-output_group_alt(struct ast_alt *alt)
-{
-	struct ast_term *term;
-
-	for (term = alt->terms; term != NULL; term = term->next) {
-		output_term(term);
-	}
-}
-
-static void
-output_group(struct ast_group *group)
-{
-	char s, e;
-	struct ast_alt *alt;
-
-	assert(group->kleene != KLEENE_CROSS);
-
-	switch (group->kleene) {
-	case KLEENE_STAR:     s = '{'; e = '}'; break;
-	case KLEENE_GROUP:    s = '('; e = ')'; break;
-	case KLEENE_OPTIONAL: s = '['; e = ']'; break;
-	}
-
-	printf(" %c", s);
-
-	for (alt = group->alts; alt != NULL; alt = alt->next) {
-		output_group_alt(alt);
-
-		if (alt->next != NULL) {
-			printf(" |");
-		}
-	}
-
-	printf(" %c", e);
-}
+static void output_alt(struct ast_alt *alt);
 
 static void
 output_term(struct ast_term *term)
 {
+	const char *s, *e;
+	size_t i;
+
+	struct {
+		unsigned int min;
+		unsigned int max;
+		const char *s;
+		const char *e;
+	} a[] = {
+		{ 1, 1, " ( ", " )" },
+		{ 1, 1, "",    ""   },
+		{ 0, 1, " [ ", " ]" },
+		{ 0, 0, " { ", " }" }
+	};
+
+	s = NULL;
+	e = NULL;
+
+	for (i = 0; i < sizeof a / sizeof *a; i++) {
+		if (i == 0 && term->type != TYPE_GROUP) {
+			continue;
+		}
+
+		if (term->min == a[i].min && term->min == a[i].min) {
+			s = a[i].s;
+			e = a[i].e;
+			break;
+		}
+	}
+
+	/* TODO: for {1,0} output first term inline */
+
+	assert(s != NULL && e != NULL);
+
+	/* EBNF cannot express minimum term repetition; TODO: semantic checks for this */
+	assert(term->min <= 1);
+	assert(term->max <= 1);
+
+	printf("%s", s);
+
 	switch (term->type) {
 	case TYPE_EMPTY:
 		fputs(" \"\"", stdout);
@@ -81,9 +84,11 @@ output_term(struct ast_term *term)
 		break;
 
 	case TYPE_GROUP:
-		output_group(term->u.group);
+		output_alt(term->u.group);
 		break;
 	}
+
+	printf("%s", e);
 }
 
 static void

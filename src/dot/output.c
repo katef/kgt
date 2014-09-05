@@ -87,27 +87,13 @@ find(struct ast_production *grammar, const char *name)
 
 static void
 output_group(struct ast_production *grammar,
-	struct ast_term *term, struct ast_group *group)
+	struct ast_term *term, struct ast_alt *group)
 {
 	struct ast_alt *alt;
-	const char *s;
 
-	switch (group->kleene) {
-	case KLEENE_STAR:     s = "*";  break;
-	case KLEENE_CROSS:    s = "+";  break;
-	case KLEENE_GROUP:    s = "()"; break;
-	case KLEENE_OPTIONAL: s = "?";  break;
-	}
-
-	printf("\t\"t%p\" -> \"g%p\";\n",
-		(void *) term, (void *) group);
-
-	printf("\t\"g%p\" [ label = \"%s\" ];\n",
-		(void *) group, s);
-
-	for (alt = group->alts; alt != NULL; alt = alt->next) {
-		printf("\t\"g%p\" -> \"a%p\";\n",
-			(void *) group, (void *) alt);
+	for (alt = group; alt != NULL; alt = alt->next) {
+		printf("\t\"t%p\" -> \"a%p\";\n",
+			(void *) term, (void *) alt);
 
 		output_alt(grammar, alt);
 	}
@@ -117,14 +103,22 @@ static void
 output_term(struct ast_production *grammar,
 	struct ast_alt *alt, struct ast_term *term)
 {
+	assert(term->max >= term->min || !term->max);
+
 	printf("\t\"a%p\" -> \"t%p\";\n",
 		(void *) alt, (void *) term);
 
 	printf("\t\"t%p\" [ shape = record, label = \"",
 		(void *) term);
 
-	if (term->repeat > 1) {
-		printf("%u &times;|", term->repeat);
+	if (term->min == 1 && term->max == 1) {
+		/* nothing */
+	} else if (!term->max) {
+		printf("\\{%u,""\\}&times;|", term->min);
+	} else if (term->min == term->max) {
+		printf("%u&times;|", term->min);
+	} else {
+		printf("\\{%u,%u\\}&times;|", term->min, term->max);
 	}
 
 	switch (term->type) {
@@ -141,7 +135,7 @@ output_term(struct ast_production *grammar,
 		break;
 
 	case TYPE_GROUP:
-		printf("()"); /* TODO */
+		printf("()");
 		break;
 	}
 

@@ -53,7 +53,6 @@ struct node_loop {
 };
 
 void *node_create(enum node_type);
-void *node_duplicate(struct node *);
 void node_free(struct node *);
 
 void node_collapse(struct node **);

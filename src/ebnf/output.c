@@ -28,38 +28,58 @@ output_group_alt(struct ast_alt *alt)
 }
 
 static void
-output_group(struct ast_group *group)
+output_group(struct ast_alt *group)
 {
 	struct ast_alt *alt;
-	char s, e;
 
-	assert(group->kleene != KLEENE_CROSS);
-
-	switch (group->kleene) {
-	case KLEENE_STAR:     s = '{'; e = '}'; break;
-	case KLEENE_GROUP:    s = '('; e = ')'; break;
-	case KLEENE_OPTIONAL: s = '['; e = ']'; break;
-	}
-
-	printf(" %c", s);
-
-	for (alt = group->alts; alt != NULL; alt = alt->next) {
+	for (alt = group; alt != NULL; alt = alt->next) {
 		output_group_alt(alt);
 
 		if (alt->next != NULL) {
 			printf(" |");
 		}
 	}
-
-	printf(" %c", e);
 }
 
 static void
 output_term(struct ast_term *term)
 {
-	if (term->repeat > 1) {
-		printf(" %u *", term->repeat);
+	const char *s, *e;
+	size_t i;
+
+	struct {
+		unsigned int min;
+		unsigned int max;
+		const char *s;
+		const char *e;
+	} a[] = {
+		{ 1, 1, " (", " ) " },
+		{ 1, 1, "",    ""    },
+		{ 0, 1, " [", " ] " },
+		{ 0, 0, " {", " } " }
+	};
+
+	s = NULL;
+	e = NULL;
+
+	for (i = 0; i < sizeof a / sizeof *a; i++) {
+		if (i == 0 && term->type != TYPE_GROUP) {
+			continue;
+		}
+
+		if (term->min == a[i].min && term->min == a[i].min) {
+			s = a[i].s;
+			e = a[i].e;
+			break;
+		}
 	}
+
+	assert(s != NULL && e != NULL);
+
+	/* EBNF cannot express minimum term repetition; TODO: semantic checks for this */
+	assert(term->min <= 1);
+
+	printf("%s", s);
 
 	switch (term->type) {
 	case TYPE_EMPTY:
@@ -86,9 +106,16 @@ output_term(struct ast_term *term)
 		break;
 
 	case TYPE_GROUP:
+		if (term->min == 1 && term->max == 1) {
+			s = " ( ";
+			e = " ) ";
+		}
+
 		output_group(term->u.group);
 		break;
 	}
+
+	printf("%s", e);
 }
 
 static void
@@ -111,7 +138,6 @@ output_production(struct ast_production *production)
 	struct ast_alt *alt;
 
 	printf("%s =", production->name);
-
 	for (alt = production->alts; alt != NULL; alt = alt->next) {
 		output_alt(alt);
 
@@ -120,7 +146,9 @@ output_production(struct ast_production *production)
 		}
 	}
 
-	printf(";\n\n");
+	printf("\n");
+	printf("\t;\n");
+	printf("\n");
 }
 
 void

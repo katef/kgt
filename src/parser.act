@@ -174,36 +174,88 @@
 		 */
 		@s = xstrdup(lex_state->a);
 		if (@s == NULL) {
-				perror("xstrdup");
-				exit(EXIT_FAILURE);
+			perror("xstrdup");
+			exit(EXIT_FAILURE);
 		}
 
 		lex_state->p = lex_state->a;
 	@};
 
 
+	<rep-one>: () -> (min :number, max :number) = @{
+		@min = 1;
+		@max = 1;
+	@};
+
+	<rep-one-or-more>: () -> (min :number, max :number) = @{
+		@min = 1;
+		@max = 0;
+	@};
+
+	<rep-zero-or-more>: () -> (min :number, max :number) = @{
+		@min = 0;
+		@max = 0;
+	@};
+
+	<rep-zero-or-one>: () -> (min :number, max :number) = @{
+		@min = 0;
+		@max = 1;
+	@};
+
+	<set-repeat>: (t :ast_term, min :number, max :number) -> () = @{
+		assert(@max >= @min || !@max);
+
+		@t->min = @min;
+		@t->max = @max;
+	@};
+
+	<mul-repeat>: (t :ast_term, n :number) -> () = @{
+		assert(@n > 0);
+
+		/*
+		 * This multiplies a term's {min,max} pair as if the term were
+		 * repeated multiple times inline. Possible situations here are:
+		 *
+		 *   {0,0} * n => {0,0}
+		 *   {0,1} * n => {0,n}
+		 *   {1,0} * n => {n,0}
+		 *   {i,j} * n => {in,jn} where j >= i
+		 *
+		 * Note a max of 0 indicates no limit on the number of repetitions.
+		 */
+
+		@t->min *= @n;
+		@t->max *= @n;
+	@};
+
+
 	<make-empty-term>: () -> (t :ast_term) = @{
 		@t = xmalloc(sizeof *@t);
 		@t->type = TYPE_EMPTY;
-		@t->repeat = 1;
-		@t->next = NULL;
-	@};
-
-	<make-literal-term>: (l :string) -> (t :ast_term) = @{
-		@t = xmalloc(sizeof *@t);
-		@t->type = TYPE_TERMINAL;	/* TODO rename to literal or vice-versa, perhaps */
-		@t->u.literal = @l;
-		@t->repeat = 1;
 		@t->next = NULL;
 	@};
 
 	<make-production-term>: (n :string) -> (t :ast_term) = @{
 		@t = xmalloc(sizeof *@t);
 		@t->type = TYPE_PRODUCTION;
-		@t->u.name = @n;
-		@t->repeat = 1;
 		@t->next = NULL;
+		@t->u.name = @n;
 	@};
+
+	<make-literal-term>: (l :string) -> (t :ast_term) = @{
+		@t = xmalloc(sizeof *@t);
+		@t->type = TYPE_TERMINAL;	/* TODO: rename to literal or vice-versa, perhaps */
+		@t->next = NULL;
+		@t->u.literal = @l;
+	@};
+
+	<make-group-term>: (a :ast_alt) -> (t :ast_term) = @{
+		@t = xmalloc(sizeof *@t);
+		@t->type = TYPE_GROUP;
+		@t->next = NULL;
+		@t->u.group = @a;
+	@};
+
 
 	<make-alt>: (t :ast_term) -> (a :ast_alt) = @{
 		@a = xmalloc(sizeof *@a);
@@ -220,37 +272,6 @@
 
 	<make-empty-production>: () -> (p :ast_production) = @{
 		@p = NULL;
-	@};
-
-
-	<make-star-group>: (a :ast_alt) -> (t :ast_term) = @{
-		@t = xmalloc(sizeof *@t);
-		@t->type = TYPE_GROUP;
-		@t->u.group = xmalloc(sizeof *@t->u.group);
-		@t->u.group->kleene = KLEENE_STAR;
-		@t->u.group->alts = @a;
-	@};
-
-	<make-opt-group>: (a :ast_alt) -> (t :ast_term) = @{
-		@t = xmalloc(sizeof *@t);
-		@t->type = TYPE_GROUP;
-		@t->u.group = xmalloc(sizeof *@t->u.group);
-		@t->u.group->kleene = KLEENE_OPTIONAL;
-		@t->u.group->alts = @a;
-	@};
-
-	<make-alt-group>: (a :ast_alt) -> (t :ast_term) = @{
-		@t = xmalloc(sizeof *@t);
-		@t->type = TYPE_GROUP;
-		@t->u.group = xmalloc(sizeof *@t->u.group);
-		@t->u.group->kleene = KLEENE_GROUP;
-		@t->u.group->alts = @a;
-	@};
-
-
-	<set-repeat>: (t :ast_term, n :number) -> () = @{
-		assert(@n > 0);
-		@t->repeat = @n;
 	@};
 
 

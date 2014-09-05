@@ -28,15 +28,6 @@ void *node_create(enum node_type type) {
 	return n;
 }
 
-void *node_duplicate(struct node *n) {
-	size_t size = node_size[n->type];
-	struct node *copy;
-	assert(n);
-	copy = xmalloc(size);
-	memcpy(copy, n, size);
-	return copy;
-}
-
 static void node_free_list(struct node *n) {
 	struct node *p = n;
 	while (p) {
@@ -81,7 +72,7 @@ static int transform_alt(struct node **, struct ast_alt *);
 static int transform_term(struct node **, struct ast_term *);
 static int transform_empty(struct node **);
 static int transform_leaf(struct node **, struct ast_term *);
-static int transform_group(struct node **, struct ast_group *);
+static int transform_group(struct node **, struct ast_alt *);
 
 static int transform_alts(struct node **on, struct ast_alt *alts) {
 	struct node *list = 0, **tip = &list;
@@ -122,9 +113,8 @@ static int transform_alt(struct node **on, struct ast_alt *alt) {
 	return 1;
 }
 
-static int transform_term(struct node **on, struct ast_term *term) {
+static int single_term(struct node **on, struct ast_term *term) {
 	int ok;
-	unsigned int i;
 	struct node *n;
 
 	switch (term->type) {
@@ -145,14 +135,97 @@ static int transform_term(struct node **on, struct ast_term *term) {
 	if (!ok)
 		return 0;
 
-	for (i = 1; i < term->repeat; i++) {
-		struct node *copy = node_duplicate(n);
-		copy->next = n;
-		n = copy;
-	}
-
 	*on = n;
 	return 1;
+}
+
+static int optional_term(struct node **on, struct ast_term *term) {
+	struct node *nothing;
+	struct node_list *choice;
+
+	nothing = node_create(NT_NOTHING);
+
+	choice = node_create(NT_LIST);
+	choice->type = LIST_CHOICE;
+	choice->list = nothing;
+
+	*on = &choice->node;
+	if (!single_term(&nothing->next, term))
+		return 0;
+
+	return 1;
+}
+
+static int oneormore_term(struct node **on, struct ast_term *term) {
+	struct node *nothing;
+	struct node_list *choice;
+	struct node_loop *loop;
+
+	nothing = node_create(NT_NOTHING);
+	choice = node_create(NT_LIST);
+	choice->type = LIST_CHOICE;
+
+	loop = node_create(NT_LOOP);
+	loop->forward = &choice->node;
+	loop->backward = nothing;
+
+	*on = &loop->node;
+	if (!single_term(&choice->list, term))
+		return 0;
+
+	node_collapse(&loop->forward);
+	node_collapse(&loop->backward);
+
+	return 1;
+}
+
+static int zeroormore_term(struct node **on, struct ast_term *term) {
+	struct node *nothing;
+	struct node_list *choice;
+	struct node_loop *loop;
+
+	nothing = node_create(NT_NOTHING);
+	choice = node_create(NT_LIST);
+	choice->type = LIST_CHOICE;
+
+	loop = node_create(NT_LOOP);
+	loop->forward = nothing;
+	loop->backward = &choice->node;
+
+	*on = &loop->node;
+	if (!single_term(&nothing->next, term))
+		return 0;
+
+	node_collapse(&loop->forward);
+	node_collapse(&loop->backward);
+
+	return 1;
+}
+
+static int transform_term(struct node **on, struct ast_term *term) {
+	size_t i;
+
+	struct {
+		unsigned int min;
+		unsigned int max;
+		int (*f)(struct node **on, struct ast_term *term);
+	} a[] = {
+		{ 1, 1, single_term     },
+		{ 0, 1, optional_term   },
+		{ 1, 0, oneormore_term  },
+		{ 0, 0, zeroormore_term }
+	};
+
+	/* TODO: our rrd tree can't express finite term repetition */
+	assert(term->max <= 1);
+
+	for (i = 0; i < sizeof a / sizeof *a; i++) {
+		if (term->min == a[i].min && term->min == a[i].min) {
+			return a[i].f(on, term);
+		}
+	}
+
+	return 0;
 }
 
 static int transform_empty(struct node **on) {
@@ -174,52 +247,13 @@ static int transform_leaf(struct node **on, struct ast_term *term) {
 	return 1;
 }
 
-static int transform_group(struct node **on, struct ast_group *group) {
-	if (group->kleene == KLEENE_GROUP) {
-		struct node_list *list = node_create(NT_LIST);
-		list->type = LIST_CHOICE;
-		*on = &list->node;
-		if (!transform_alts(&list->list, group->alts))
-            return 0;
-        node_collapse(on);
-	} else if (group->kleene == KLEENE_OPTIONAL) {
-		struct node *nothing;
-		struct node_list *choice;
-
-		nothing = node_create(NT_NOTHING);
-
-		choice = node_create(NT_LIST);
-		choice->type = LIST_CHOICE;
-		choice->list = nothing;
-
-		*on = &choice->node;
-		if (!transform_alts(&nothing->next, group->alts))
-            return 0;
-	} else {
-		struct node *nothing;
-		struct node_list *choice;
-		struct node_loop *loop;
-
-		nothing = node_create(NT_NOTHING);
-		choice = node_create(NT_LIST);
-		choice->type = LIST_CHOICE;
-
-		loop = node_create(NT_LOOP);
-		if (group->kleene == KLEENE_CROSS) {
-			loop->forward = &choice->node;
-			loop->backward = nothing;
-		} else { /* process of elimination: it's KLEENE_STAR */
-			loop->forward = nothing;
-			loop->backward = &choice->node;
-		}
-
-		*on = &loop->node;
-		if (!transform_alts(&choice->list, group->alts))
-            return 0;
-
-		node_collapse(&loop->forward);
-		node_collapse(&loop->backward);
-	}
+static int transform_group(struct node **on, struct ast_alt *group) {
+	struct node_list *list = node_create(NT_LIST);
+	list->type = LIST_CHOICE;
+	*on = &list->node;
+	if (!transform_alts(&list->list, group))
+		return 0;
+	node_collapse(on);
 	return 1;
 }
 

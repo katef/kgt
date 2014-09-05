@@ -19,29 +19,45 @@
 static void output_alts(struct ast_alt *alts);
 
 static void
-output_group(struct ast_group *group)
-{
-	const char *s, *e;
-
-	assert(group->kleene != KLEENE_CROSS);
-
-	switch (group->kleene) {
-	case KLEENE_STAR:     s = "ZeroOrMore("; e = ")"; break;
-	case KLEENE_CROSS:    s = "OneOrMore("; e = ")";  break;
-	case KLEENE_GROUP:    s = "Sequence("; e = ")";   break;
-	case KLEENE_OPTIONAL: s = "Optional("; e = ")";   break;
-	}
-
-	printf("%s", s);
-
-	output_alts(group->alts);
-
-	printf("%s", e);
-}
-
-static void
 output_term(struct ast_term *term)
 {
+	const char *s, *e;
+	size_t i;
+
+	struct {
+		unsigned int min;
+		unsigned int max;
+		const char *s;
+		const char *e;
+	} a[] = {
+		{ 1, 1, "Sequence(",   ")" },
+		{ 0, 1, "Optional(",   ")" },
+		{ 0, 0, "ZeroOrMore(", ")" },
+		{ 1, 0, "OneOrMore(",  ")" }
+	};
+
+	s = NULL;
+	e = NULL;
+
+	for (i = 0; i < sizeof a / sizeof *a; i++) {
+		if (term->min == a[i].min && term->min == a[i].min) {
+			s = a[i].s;
+			e = a[i].e;
+			break;
+		}
+	}
+
+	assert(s != NULL && e != NULL);
+
+	/* the trd syntax cannot express minimum term repetition; TODO: semantic checks for this */
+	assert(term->min <= 1);
+
+	/* EBNF cannot express minimum term repetition; TODO: semantic checks for this */
+	assert(term->min <= 1);
+	assert(!(term->min == 1 || !term->max));
+
+	printf(" %s", s);
+
 	switch (term->type) {
 	case TYPE_EMPTY:
 		fputs("Skip()", stdout);
@@ -71,9 +87,15 @@ output_term(struct ast_term *term)
 		break;
 
 	case TYPE_GROUP:
-		output_group(term->u.group);
+		output_alts(term->u.group);
 		break;
 	}
+
+	if (term->max > 1) {
+		printf(", Comment('%s%u')", "\xC3\x97", term->max);
+	}
+
+	printf("%s", e);
 }
 
 static void

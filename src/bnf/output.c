@@ -20,6 +20,10 @@ output_term(struct ast_term *term)
 	assert(term->type != TYPE_GROUP);
 	/* TODO: semantic checks ought to find if we can output to this language; groups cannot */
 
+	/* BNF cannot express term repetition; TODO: semantic checks for this */
+	assert(term->min == 1);
+	assert(term->max == 1);
+
 	switch (term->type) {
 	case TYPE_EMPTY:
 		fputs(" \"\"", stdout);

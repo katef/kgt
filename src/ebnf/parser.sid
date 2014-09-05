@@ -53,18 +53,22 @@
 	<pattern-char>:   (:char) -> ();
 	<pattern-buffer>: ()      -> (:string);
 
-	<make-empty-term>: () -> (:ast_term);
-	<make-literal-term>: (:string) -> (:ast_term);
-	<make-production-term>: (:string) -> (:ast_term);
+	<rep-one>:          () -> (:number, :number);
+	!<rep-one-or-more>: () -> (:number, :number);
+	<rep-zero-or-more>: () -> (:number, :number);
+	<rep-zero-or-one>:  () -> (:number, :number);
+
+	<set-repeat>: (:ast_term, :number, :number) -> ();
+	<mul-repeat>: (:ast_term, :number)          -> ();
+
+	<make-empty-term>:      ()         -> (:ast_term);
+	<make-production-term>: (:string)  -> (:ast_term);
+	<make-literal-term>:    (:string)  -> (:ast_term);
+	<make-group-term>:      (:ast_alt) -> (:ast_term);
+
 	<make-alt>: (:ast_term) -> (:ast_alt);
 	<make-production>: (:string, :ast_alt) -> (:ast_production);
 	<make-empty-production>: () -> (:ast_production);
-
-	<make-star-group>: (:ast_alt) -> (:ast_term);
-	<make-opt-group>: (:ast_alt) -> (:ast_term);
-	<make-alt-group>: (:ast_alt) -> (:ast_term);
-
-	<set-repeat>: (:ast_term, :number) -> ();
 
 	<add-term-to-list>: (:ast_term, :ast_term) -> ();
 	<add-alt-to-list>: (:ast_alt, :ast_alt) -> ();
@@ -103,24 +107,36 @@
 
 	factor: () -> (t :ast_term) = {
 		t = term;
+
+		(min, max) = <rep-one>;
+		<set-repeat>(t, min, max);
 	||
 		STARTSTAR;
 		a = list-of-alts;
 		ENDSTAR;
 
-		t = <make-star-group>(a);
+		t = <make-group-term>(a);
+
+		(min, max) = <rep-zero-or-more>;
+		<set-repeat>(t, min, max);
 	||
 		STARTOPT;
 		a = list-of-alts;
 		ENDOPT;
 
-		t = <make-opt-group>(a);
+		t = <make-group-term>(a);
+
+		(min, max) = <rep-zero-or-one>;
+		<set-repeat>(t, min, max);
 	||
 		STARTGROUP;
 		a = list-of-alts;
 		ENDGROUP;
 
-		t = <make-alt-group>(a);
+		t = <make-group-term>(a);
+
+		(min, max) = <rep-one>;
+		<set-repeat>(t, min, max);
 	};
 
 	repeatable-factor: () -> (t :ast_term) = {
@@ -129,7 +145,8 @@
 		n = NUMBER;
 		STAR;
 		t = factor;
-		<set-repeat>(t, n);
+
+		<mul-repeat>(t, n);
 	};
 
 	list-of-terms: () -> (l :ast_term) = {

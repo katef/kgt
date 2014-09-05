@@ -3,24 +3,7 @@
 #ifndef KGT_AST_H
 #define KGT_AST_H
 
-struct ast_term;
-
-/*
- * A group collates a sub-list of terms within an alt, for the pupose of
- * specifying their repetitivity:
- *
- * { a + b + c }
- */
-struct ast_group {
-	enum {
-		KLEENE_STAR,    /* * */
-		KLEENE_CROSS,   /* + */
-		KLEENE_GROUP,	/* grouping for alts (not actually a kleene operator) */
-		KLEENE_OPTIONAL /* ? (nor is this!) */
-	} kleene;
-
-	struct ast_alt *alts;
-};
+struct ast_alt;
 
 /*
  * A term is a sequential list of items within an alt. Each item may be
@@ -39,12 +22,13 @@ struct ast_term {
 	} type;
 
 	union {
-		const char *name;	/* production name */
+		const char *name;	/* production name; TODO: point to ast_production instead */
 		const char *literal;
-		struct ast_group *group;
+		struct ast_alt *group;
 	} u;
 
-	unsigned int repeat;
+	unsigned int min;
+	unsigned int max; /* false (0) for unlimited */
 
 	struct ast_term *next;
 };

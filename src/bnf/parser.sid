@@ -8,7 +8,7 @@
 
 	char;
 	string;
-	!number;
+	number;
 
 	ast_production;
 	ast_term;
@@ -43,18 +43,22 @@
 	<pattern-char>:   (:char) -> ();
 	<pattern-buffer>: ()      -> (:string);
 
-	<make-empty-term>: () -> (:ast_term);
-	<make-literal-term>: (:string) -> (:ast_term);
-	<make-production-term>: (:string) -> (:ast_term);
+	<rep-one>:           () -> (:number, :number);
+	!<rep-one-or-more>:  () -> (:number, :number);
+	!<rep-zero-or-more>: () -> (:number, :number);
+	!<rep-zero-or-one>:  () -> (:number, :number);
+
+	<set-repeat>:  (:ast_term, :number, :number) -> ();
+	!<mul-repeat>: (:ast_term, :number)          -> ();
+
+	<make-empty-term>:      ()         -> (:ast_term);
+	<make-production-term>: (:string)  -> (:ast_term);
+	<make-literal-term>:    (:string)  -> (:ast_term);
+	<make-group-term>:      (:ast_alt) -> (:ast_term);
+
 	<make-alt>: (:ast_term) -> (:ast_alt);
 	<make-production>: (:string, :ast_alt) -> (:ast_production);
 	<make-empty-production>: () -> (:ast_production);
-
-	!<make-star-group>: (:ast_alt) -> (:ast_term);
-	!<make-opt-group>: (:ast_alt) -> (:ast_term);
-	!<make-alt-group>: (:ast_alt) -> (:ast_term);
-
-	!<set-repeat>: (:ast_term, :number) -> ();
 
 	<add-term-to-list>: (:ast_term, :ast_term) -> ();
 	<add-alt-to-list>: (:ast_alt, :ast_alt) -> ();
@@ -91,10 +95,17 @@
 		t = <make-production-term>(s);
 	};
 
+	factor: () -> (t :ast_term) = {
+		t = term;
+
+		(min, max) = <rep-one>;
+		<set-repeat>(t, min, max);
+	};
+
 	list-of-terms: () -> (l :ast_term) = {
-		l = term;
+		l = factor;
 	||
-		l = term;
+		l = factor;
 		t = list-of-terms;
 		<add-term-to-list>(t, l);
 	};

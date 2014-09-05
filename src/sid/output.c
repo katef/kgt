@@ -16,6 +16,8 @@
 
 #include "io.h"
 
+static void output_alt(struct ast_alt *);
+
 static void
 output_section(const char *section)
 {
@@ -23,11 +25,19 @@ output_section(const char *section)
 }
 
 static void
-output_term(struct ast_term *term)
+output_literal(const char *s)
 {
-	assert(term->type != TYPE_GROUP);
-	/* TODO: can output groups as [ ... ] local rules with a stub to call them X times? */
+	char c;
 
+	assert(s != NULL);
+
+	c = strchr(s, '\"') ? '\'' : '\"';
+	printf("%c%s%c; ", c, s, c);
+}
+
+static void
+output_basic(struct ast_term *term)
+{
 	switch (term->type) {
 	case TYPE_EMPTY:
 		fputs("$$; ", stdout);
@@ -37,13 +47,33 @@ output_term(struct ast_term *term)
 		printf("%s; ", term->u.name);
 		break;
 
-	case TYPE_TERMINAL: {
-			char c;
-
-			c = strchr(term->u.literal, '\"') ? '\'' : '\"';
-			printf("%c%s%c; ", c, term->u.literal, c);
-		}
+	case TYPE_TERMINAL:
+		output_literal(term->u.literal);
 		break;
+
+	case TYPE_GROUP:
+		fputs("{ ", stdout);
+		output_alt(term->u.group);
+		fputs("}; ", stdout);
+	}
+}
+
+static void
+output_term(struct ast_term *term)
+{
+	/* SID cannot express term repetition; TODO: semantic checks for this */
+	/* TODO: can output repetition as [ ... ] local rules with a stub to call them X times? */
+	assert(term->min <= 1);
+	assert(term->max <= 1);
+
+	if (term->min == 0) {
+		fputs("{ $$; || ", stdout);
+	}
+
+	output_basic(term);
+
+	if (term->min == 0) {
+		fputs("}; ", stdout);
 	}
 }
 
@@ -55,8 +85,6 @@ output_alt(struct ast_alt *alt)
 	for (term = alt->terms; term != NULL; term = term->next) {
 		output_term(term);
 	}
-
-	printf("\n");
 }
 
 static void
@@ -68,6 +96,8 @@ output_production(struct ast_production *production)
 
 	for (alt = production->alts; alt != NULL; alt = alt->next) {
 		output_alt(alt);
+
+		printf("\n");
 
 		if (alt->next != NULL) {
 			printf("\t||\n\t\t");
@@ -119,10 +149,18 @@ output_terminals(struct ast_production *grammar)
 			struct ast_term *t;
 
 			for (term = alt->terms; term != NULL; term = term->next) {
-				const char *name;
-
-				if (term->type == TYPE_PRODUCTION && is_defined(grammar, term->u.name)) {
+				switch (term->type) {
+				case TYPE_EMPTY:
+				case TYPE_GROUP:
 					continue;
+
+				case TYPE_PRODUCTION:
+					if (is_defined(grammar, term->u.name)) {
+						continue;
+					}
+
+				case TYPE_TERMINAL:
+					break;
 				}
 
 				for (t = found; t != NULL; t = t->next) {
@@ -152,7 +190,7 @@ output_terminals(struct ast_production *grammar)
 		for (t = found; t != NULL; t = next) {
 			next = t->next;
 			printf("\t");
-			output_term(t);
+			output_basic(t);
 			printf("\n");
 			free(t);
 		}
