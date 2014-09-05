@@ -63,12 +63,12 @@ void node_collapse(struct node **);
  * they are free to replace the node they visited via said pointer. cf. beautify
  */
 struct node_walker {
-	int (*visit_skip	  )(struct node *,		struct node **, int, void *);
+	int (*visit_skip      )(struct node *,      struct node **, int, void *);
 	int (*visit_identifier)(struct node_leaf *, struct node **, int, void *);
 	int (*visit_terminal  )(struct node_leaf *, struct node **, int, void *);
-	int (*visit_choice	  )(struct node_list *, struct node **, int, void *);
+	int (*visit_choice    )(struct node_list *, struct node **, int, void *);
 	int (*visit_sequence  )(struct node_list *, struct node **, int, void *);
-	int (*visit_loop	  )(struct node_loop *, struct node **, int, void *);
+	int (*visit_loop      )(struct node_loop *, struct node **, int, void *);
 };
 
 int node_walk(struct node **, const struct node_walker *, int, void *);

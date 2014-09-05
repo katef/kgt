@@ -19,7 +19,9 @@
 
 int beautify = 1;
 
-static void print_indent(FILE *f, int n) {
+static void
+print_indent(FILE *f, int n)
+{
 	int i;
 	for (i = 0; i < n; i++) {
 		fprintf(f, "    ");
@@ -28,41 +30,62 @@ static void print_indent(FILE *f, int n) {
 
 static struct node_walker rrd_print;
 
-static int visit_skip(struct node *n, struct node **np, int depth, void *arg) {
+static int
+visit_skip(struct node *n, struct node **np, int depth, void *arg)
+{
 	FILE *f = arg;
+
 	(void) n;
 	(void) np;
+
 	print_indent(f, depth);
 	fprintf(f, "NT_SKIP\n");
+
 	return 1;
 }
 
-static int visit_leaf(struct node_leaf *n, struct node **np, int depth, void *arg) {
+static int
+visit_leaf(struct node_leaf *n, struct node **np, int depth, void *arg)
+{
 	FILE *f = arg;
+
 	(void) np;
+
 	print_indent(f, depth);
-	if (n->type == LEAF_IDENTIFIER)
+	if (n->type == LEAF_IDENTIFIER) {
 		fprintf(f, "NT_LEAF(IDENTIFIER): %s\n", n->text);
-	else
+	} else {
 		fprintf(f, "NT_LEAF(TERMINAL): \"%s\"\n", n->text);
+	}
+
 	return 1;
 }
 
-static int visit_list(struct node_list *n, struct node **np, int depth, void *arg) {
+static int
+visit_list(struct node_list *n, struct node **np, int depth, void *arg)
+{
 	FILE *f = arg;
+
 	(void) np;
+
 	print_indent(f, depth);
 	fprintf(f, "NT_LIST(%s): [\n", n->type == LIST_CHOICE ? "CHOICE" : "SEQUENCE");
-	if (!node_walk_list(&n->list, &rrd_print, depth + 1, arg))
+	if (!node_walk_list(&n->list, &rrd_print, depth + 1, arg)) {
 		return 0;
+	}
 	print_indent(f, depth);
 	fprintf(f, "]\n");
+
 	return 1;
 }
 
-static int visit_loop(struct node_loop *n, struct node **np, int depth, void *arg) {
+static int
+visit_loop(struct node_loop *n, struct node **np, int depth, void *arg)
+{
 	FILE *f = arg;
+
 	(void) np;
+
 	print_indent(f, depth);
 	fprintf(f, "NT_LOOP:\n");
 	if (n->forward->type != NT_SKIP) {
@@ -71,12 +94,14 @@ static int visit_loop(struct node_loop *n, struct node **np, int depth, void *ar
 		if (!node_walk_list(&n->forward, &rrd_print, depth + 2, arg))
 			return 0;
 	}
+
 	if (n->backward->type != NT_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".backward:\n");
 		if (!node_walk_list(&n->backward, &rrd_print, depth + 2, arg))
 			return 0;
 	}
+
 	return 1;
 }
 
@@ -87,19 +112,25 @@ static struct node_walker rrd_print = {
 	visit_loop
 };
 
-static void print_repr(struct node **n) {
+static void
+print_repr(struct node **n)
+{
 	node_walk(n, &rrd_print, 1, stdout);
 }
 
-void rrd_output(struct ast_production *grammar) {
+void
+rrd_output(struct ast_production *grammar)
+{
 	struct ast_production *p;
 
 	for (p = grammar; p; p = p->next) {
 		struct node *rrd;
 		assert(ast_to_rrd(p, &rrd) && "AST transformation failed somehow");
 
-		if (beautify)
+		if (beautify) {
 			rrd_beautify_all(&rrd);
+		}
+
 		printf("%s:\n", p->name);
 		rrd_render(&rrd);
 		printf("\n");
