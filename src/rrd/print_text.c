@@ -13,6 +13,7 @@
 
 #include "rrd.h"
 #include "blist.h"
+#include "print.h"
 
 struct render_context {
 	struct box_size size;
@@ -358,7 +359,7 @@ static struct node_walker w_render = {
 };
 
 void
-rrd_render(struct node **rrd)
+rrd_print_text(struct node **rrd)
 {
 	struct render_context ctx;
 	int i;
