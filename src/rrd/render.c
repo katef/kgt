@@ -12,6 +12,7 @@
 #include "../xalloc.h"
 
 #include "rrd.h"
+#include "blist.h"
 
 struct render_context {
 	struct box_size size;
@@ -176,45 +177,6 @@ render_leaf(struct node_leaf *n, struct node **np, int depth, void *arg)
 	} else {
 		bprintf(ctx, " \"%s\" ", n->text);
 	}
-
-	return 1;
-}
-
-/* XXX exactly the same list used in beautify.c - should factor out */
-struct bnode {
-	struct node *v;
-	struct bnode *next;
-};
-
-static void
-b_push(struct bnode **list, struct node *v)
-{
-	struct bnode bn;
-
-	bn.v = v;
-	bn.next = *list;
-
-	*list = xmalloc(sizeof bn);
-	**list = bn;
-}
-
-static int
-b_pop(struct bnode **list, struct node **out)
-{
-	struct bnode *n;
-
-	if (list == NULL || *list == NULL) {
-		return 0;
-	}
-
-	n = *list;
-	*list = (**list).next;
-
-	if (out != NULL) {
-		*out = n->v;
-	}
-
-	free(n);
 
 	return 1;
 }

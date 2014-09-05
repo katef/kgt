@@ -1,5 +1,6 @@
 .include "../../share/mk/top.mk"
 
+SRC += src/rrd/blist.c
 SRC += src/rrd/transform.c
 SRC += src/rrd/beautify.c
 SRC += src/rrd/output.c
