@@ -7,81 +7,36 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "../ast.h"
 #include "../xalloc.h"
 
 #include "rrd.h"
+#include "node.h"
 
-static const size_t node_size[] = {
-	sizeof (struct node),
-	sizeof (struct node_leaf),
-	sizeof (struct node_list),
-	sizeof (struct node_loop)
-};
-
-void *
-node_create(enum node_type type)
-{
-	struct node *n;
-	n = xmalloc(node_size[type]);
-	n->next = 0;
-	n->type = type;
-	return n;
-}
-
-static void
-node_free_list(struct node *n)
-{
-	struct node *p = n;
-	while (p) {
-		n = p->next;
-		node_free(p);
-		p = n;
-	}
-}
-
-void
-node_free(struct node *n)
-{
-	if (n == NULL) {
-		return;
-	}
-
-	switch (n->type) {
-	case NT_LIST:
-		node_free_list(((struct node_list *)n)->list);
-		break;
-
-	case NT_LOOP:
-		node_free_list(((struct node_loop *)n)->forward);
-		node_free_list(((struct node_loop *)n)->backward);
-		break;
-
-	case NT_SKIP:
-	case NT_LEAF:
-		break;
-	}
-
-	free(n);
-}
-
+/* XXX: perhaps belongs under beautify */
 void
 node_collapse(struct node **n)
 {
-	struct node_list *list;
+	struct node *list;
 
-	if ((**n).type != NT_LIST) {
+	if ((**n).type != NODE_LIST) {
 		return;
 	}
 
-	list = (struct node_list *)*n;
-	if (list->list && !list->list->next) {
-		*n = list->list;
-		list->list = 0;
-		node_free(&list->node);
-		node_collapse(n);
+	list = *n;
+
+	if (list->u.list.list == NULL || list->u.list.list->next == NULL) {
+		return;
 	}
+
+	*n = list->u.list.list;
+	list->u.list.list = NULL;
+
+	node_free(list);
+
+	node_collapse(n);
 }
 
 static int transform_alts(struct node **, struct ast_alt *);
@@ -91,11 +46,13 @@ static int transform_empty(struct node **);
 static int transform_leaf(struct node **, struct ast_term *);
 static int transform_group(struct node **, struct ast_alt *);
 
-static int transform_alts(struct node **on, struct ast_alt *alts) {
+static int
+transform_alts(struct node **on, struct ast_alt *alts)
+{
 	struct node *list = 0, **head = &list;
 	struct ast_alt *p;
 
-	for (p = alts; p; p = p->next) {
+	for (p = alts; p != NULL; p = p->next) {
 		if (!transform_alt(head, p)) {
 			return 0;
 		}
@@ -110,30 +67,29 @@ static int transform_alts(struct node **on, struct ast_alt *alts) {
 	return 1;
 }
 
-static int transform_alt(struct node **on, struct ast_alt *alt) {
-	struct node *list = 0, **head = &list;
+static int
+transform_alt(struct node **on, struct ast_alt *alt)
+{
+	struct node *list, **tail;
 	struct ast_term *p;
 
-	for (p = alt->terms; p; p = p->next) {
-		if (!transform_term(head, p)) {
+	list = NULL;
+	tail = &list;
+
+	for (p = alt->terms; p != NULL; p = p->next) {
+		if (!transform_term(tail, p)) {
 			return 0;
 		}
 
-		while (*head) {
-			head = &(**head).next;
+		while (*tail) {
+			tail = &(**tail).next;
 		}
 	}
 
-	if (!list->next) {
+	if (list->next == NULL) {
 		*on = list;
 	} else {
-		struct node_list *sequence;
-
-		sequence = node_create(NT_LIST);
-		sequence->type = LIST_SEQUENCE;
-		sequence->list = list;
-
-		*on = &sequence->node;
+		*on = node_create_list(LIST_SEQUENCE, list);
 	}
 
 	return 1;
@@ -156,15 +112,10 @@ static int
 optional_term(struct node **on, struct ast_term *term)
 {
 	struct node *skip;
-	struct node_list *choice;
 
-	skip = node_create(NT_SKIP);
+	skip = node_create_skip();
 
-	choice = node_create(NT_LIST);
-	choice->type = LIST_CHOICE;
-	choice->list = skip;
-
-	*on = &choice->node;
+	*on = node_create_list(LIST_CHOICE, skip);
 
 	if (!single_term(&skip->next, term)) {
 		return 0;
@@ -177,24 +128,22 @@ static int
 oneormore_term(struct node **on, struct ast_term *term)
 {
 	struct node *skip;
-	struct node_list *choice;
-	struct node_loop *loop;
+	struct node *choice;
+	struct node *loop;
 
-	skip = node_create(NT_SKIP);
-	choice = node_create(NT_LIST);
-	choice->type = LIST_CHOICE;
+	skip = node_create_skip();
 
-	loop = node_create(NT_LOOP);
-	loop->forward = &choice->node;
-	loop->backward = skip;
+	choice = node_create_list(LIST_CHOICE, NULL);
 
-	*on = &loop->node;
-	if (!single_term(&choice->list, term)) {
+	loop = node_create_loop(choice, skip);
+	*on = loop;
+
+	if (!single_term(&choice->u.list.list, term)) {
 		return 0;
 	}
 
-	node_collapse(&loop->forward);
-	node_collapse(&loop->backward);
+	node_collapse(&loop->u.loop.forward);
+	node_collapse(&loop->u.loop.backward);
 
 	return 1;
 }
@@ -203,24 +152,22 @@ static int
 zeroormore_term(struct node **on, struct ast_term *term)
 {
 	struct node *skip;
-	struct node_list *choice;
-	struct node_loop *loop;
+	struct node *choice;
+	struct node *loop;
 
-	skip = node_create(NT_SKIP);
-	choice = node_create(NT_LIST);
-	choice->type = LIST_CHOICE;
+	skip = node_create_skip();
 
-	loop = node_create(NT_LOOP);
-	loop->forward = skip;
-	loop->backward = &choice->node;
+	choice = node_create_list(LIST_CHOICE, NULL);
 
-	*on = &loop->node;
+	loop = node_create_loop(skip, choice);
+	*on = loop;
+
 	if (!single_term(&skip->next, term)) {
 		return 0;
 	}
 
-	node_collapse(&loop->forward);
-	node_collapse(&loop->backward);
+	node_collapse(&loop->u.loop.forward);
+	node_collapse(&loop->u.loop.backward);
 
 	return 1;
 }
@@ -256,27 +203,26 @@ transform_term(struct node **on, struct ast_term *term)
 static int
 transform_empty(struct node **on)
 {
-	struct node *n = node_create(NT_SKIP);
-	*on = n;
+	*on = node_create_skip();
 	return 1;
 }
 
 static int
 transform_leaf(struct node **on, struct ast_term *term)
 {
-	struct node_leaf *n;
+	switch (term->type) {
+	case TYPE_PRODUCTION:
+		*on = node_create_leaf(LEAF_IDENTIFIER, term->u.name);
+		break;
 
-	n = node_create(NT_LEAF);
+	case TYPE_TERMINAL:
+		*on = node_create_leaf(LEAF_TERMINAL, term->u.literal);
+		break;
 
-	if (term->type == TYPE_PRODUCTION) {
-		n->type = LEAF_IDENTIFIER;
-		n->text = term->u.name;
-	} else if (term->type == TYPE_TERMINAL) {
-		n->type = LEAF_TERMINAL;
-		n->text = term->u.literal;
+	default:
+		errno = EINVAL;
+		return 0;
 	}
-
-	*on = &n->node;
 
 	return 1;
 }
@@ -284,10 +230,13 @@ transform_leaf(struct node **on, struct ast_term *term)
 static int
 transform_group(struct node **on, struct ast_alt *group)
 {
-	struct node_list *list = node_create(NT_LIST);
-	list->type = LIST_CHOICE;
-	*on = &list->node;
-	if (!transform_alts(&list->list, group)) {
+	struct node *list;
+
+	list = node_create_list(LIST_SEQUENCE, NULL);
+
+	*on = list;
+
+	if (!transform_alts(&list->u.list.list, group)) {
 		return 0;
 	}
 
@@ -299,15 +248,16 @@ transform_group(struct node **on, struct ast_alt *group)
 int
 ast_to_rrd(struct ast_production *ast, struct node **rrd)
 {
-	struct node_list *choice;
+	struct node *choice;
 
-	choice = node_create(NT_LIST);
-	choice->type = LIST_CHOICE;
-	if (!transform_alts(&choice->list, ast->alts)) {
+	choice = node_create_list(LIST_CHOICE, NULL);
+
+	if (!transform_alts(&choice->u.list.list, ast->alts)) {
 		return 0;
 	}
 
-	*rrd = &choice->node;
+	*rrd = choice;
+
 	node_collapse(rrd);
 
 	return 1;
@@ -316,32 +266,32 @@ ast_to_rrd(struct ast_production *ast, struct node **rrd)
 static int
 node_call_walker(struct node **n, const struct node_walker *ws, int depth, void *a)
 {
-	switch ((**n).type) {
-	case NT_SKIP:
+	struct node *node;
+
+	assert(n != NULL);
+
+	node = *n;
+
+	switch (node->type) {
+	case NODE_SKIP:
 		return ws->visit_skip ? ws->visit_skip(*n, n, depth, a) : -1;
 
-	case NT_LEAF: {
-		struct node_leaf *leaf = (struct node_leaf *)*n;
-		if (leaf->type == LEAF_IDENTIFIER) {
-			return ws->visit_identifier ? ws->visit_identifier(leaf, n, depth, a) : -1;
+	case NODE_LEAF:
+		if (node->u.leaf.type == LEAF_IDENTIFIER) {
+			return ws->visit_identifier ? ws->visit_identifier(node, n, depth, a) : -1;
 		} else {
-			return ws->visit_terminal ? ws->visit_terminal(leaf, n, depth, a) : -1;
+			return ws->visit_terminal   ? ws->visit_terminal(node, n, depth, a)   : -1;
 		}
-	}
 
-	case NT_LIST: {
-		struct node_list *list = (struct node_list *)*n;
-		if (list->type == LIST_CHOICE) {
-			return ws->visit_choice ? ws->visit_choice(list, n, depth, a) : -1;
+	case NODE_LIST:
+		if (node->u.list.type == LIST_CHOICE) {
+			return ws->visit_choice   ? ws->visit_choice(node, n, depth, a)   : -1;
 		} else {
-			return ws->visit_sequence ? ws->visit_sequence(list, n, depth, a) : -1;
+			return ws->visit_sequence ? ws->visit_sequence(node, n, depth, a) : -1;
 		}
-	}
 
-	case NT_LOOP: {
-		struct node_loop *loop = (struct node_loop *)*n;
-		return ws->visit_loop ? ws->visit_loop(loop, n, depth, a) : -1;
-	}
+	case NODE_LOOP:
+		return ws->visit_loop ? ws->visit_loop(node, n, depth, a) : -1;
 	}
 
 	return -1;
@@ -350,7 +300,7 @@ node_call_walker(struct node **n, const struct node_walker *ws, int depth, void 
 int
 node_walk_list(struct node **n, const struct node_walker *ws, int depth, void *a)
 {
-	for (; *n; n = &(**n).next) {
+	for (; *n != NULL; n = &(**n).next) {
 		if (!node_walk(n, ws, depth, a)) {
 			return 0;
 		}
@@ -362,7 +312,14 @@ node_walk_list(struct node **n, const struct node_walker *ws, int depth, void *a
 int
 node_walk(struct node **n, const struct node_walker *ws, int depth, void *a)
 {
-	int r = node_call_walker(n, ws, depth, a);
+	struct node *node;
+	int r;
+
+	assert(n != NULL);
+
+	node = *n;
+
+	r = node_call_walker(n, ws, depth, a);
 	if (r == 0) {
 		return 0;
 	}
@@ -371,35 +328,27 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *a)
 		return 1;
 	}
 
-	switch ((**n).type) {
-	case NT_LIST: {
-		struct node_list *list;
-
-		list = (struct node_list *) *n;
-		if (!node_walk_list(&list->list, ws, depth + 1, a)) {
+	switch (node->type) {
+	case NODE_LIST:
+		if (!node_walk_list(&node->u.list.list, ws, depth + 1, a)) {
 			return 0;
 		}
 
 		break;
-	}
 
-	case NT_LOOP: {
-		struct node_loop *loop;
-
-		loop = (struct node_loop *) *n;
-		if (!node_walk(&loop->forward, ws, depth + 1, a)) {
+	case NODE_LOOP:
+		if (!node_walk(&node->u.loop.forward, ws, depth + 1, a)) {
 			return 0;
 		}
 
-		if (!node_walk(&loop->backward, ws, depth + 1, a)) {
+		if (!node_walk(&node->u.loop.backward, ws, depth + 1, a)) {
 			return 0;
 		}
 
 		break;
-	}
 
-	case NT_SKIP:
-	case NT_LEAF:
+	case NODE_SKIP:
+	case NODE_LEAF:
 		break;
 	}
 

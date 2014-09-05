@@ -16,6 +16,7 @@
 #include "rrd.h"
 #include "beautify.h"
 #include "render.h"
+#include "node.h"
 
 int beautify = 1;
 
@@ -45,32 +46,32 @@ visit_skip(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static int
-visit_leaf(struct node_leaf *n, struct node **np, int depth, void *arg)
+visit_leaf(struct node *n, struct node **np, int depth, void *arg)
 {
 	FILE *f = arg;
 
 	(void) np;
 
 	print_indent(f, depth);
-	if (n->type == LEAF_IDENTIFIER) {
-		fprintf(f, "NT_LEAF(IDENTIFIER): %s\n", n->text);
+	if (n->u.leaf.type == LEAF_IDENTIFIER) {
+		fprintf(f, "NT_LEAF(IDENTIFIER): %s\n", n->u.leaf.text);
 	} else {
-		fprintf(f, "NT_LEAF(TERMINAL): \"%s\"\n", n->text);
+		fprintf(f, "NT_LEAF(TERMINAL): \"%s\"\n", n->u.leaf.text);
 	}
 
 	return 1;
 }
 
 static int
-visit_list(struct node_list *n, struct node **np, int depth, void *arg)
+visit_list(struct node *n, struct node **np, int depth, void *arg)
 {
 	FILE *f = arg;
 
 	(void) np;
 
 	print_indent(f, depth);
-	fprintf(f, "NT_LIST(%s): [\n", n->type == LIST_CHOICE ? "CHOICE" : "SEQUENCE");
-	if (!node_walk_list(&n->list, &rrd_print, depth + 1, arg)) {
+	fprintf(f, "NT_LIST(%s): [\n", n->u.list.type == LIST_CHOICE ? "CHOICE" : "SEQUENCE");
+	if (!node_walk_list(&n->u.list.list, &rrd_print, depth + 1, arg)) {
 		return 0;
 	}
 	print_indent(f, depth);
@@ -80,7 +81,7 @@ visit_list(struct node_list *n, struct node **np, int depth, void *arg)
 }
 
 static int
-visit_loop(struct node_loop *n, struct node **np, int depth, void *arg)
+visit_loop(struct node *n, struct node **np, int depth, void *arg)
 {
 	FILE *f = arg;
 
@@ -88,18 +89,20 @@ visit_loop(struct node_loop *n, struct node **np, int depth, void *arg)
 
 	print_indent(f, depth);
 	fprintf(f, "NT_LOOP:\n");
-	if (n->forward->type != NT_SKIP) {
+	if (n->u.loop.forward->type != NODE_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".forward:\n");
-		if (!node_walk_list(&n->forward, &rrd_print, depth + 2, arg))
+		if (!node_walk_list(&n->u.loop.forward, &rrd_print, depth + 2, arg)) {
 			return 0;
+		}
 	}
 
-	if (n->backward->type != NT_SKIP) {
+	if (n->u.loop.backward->type != NODE_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".backward:\n");
-		if (!node_walk_list(&n->backward, &rrd_print, depth + 2, arg))
+		if (!node_walk_list(&n->u.loop.backward, &rrd_print, depth + 2, arg)) {
 			return 0;
+		}
 	}
 
 	return 1;
@@ -127,9 +130,17 @@ rrd_output(struct ast_production *grammar)
 		struct node *rrd;
 		assert(ast_to_rrd(p, &rrd) && "AST transformation failed somehow");
 
+/* XXX:
+print_repr(&rrd);
+*/
+
 		if (beautify) {
 			rrd_beautify_all(&rrd);
 		}
+
+/* XXX:
+print_repr(&rrd);
+*/
 
 		printf("%s:\n", p->name);
 		rrd_render(&rrd);

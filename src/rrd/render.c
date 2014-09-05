@@ -54,7 +54,7 @@ dim_nothing(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static int
-dim_leaf(struct node_leaf *n, struct node **np, int depth, void *arg)
+dim_leaf(struct node *n, struct node **np, int depth, void *arg)
 {
 	int len;
 
@@ -62,21 +62,21 @@ dim_leaf(struct node_leaf *n, struct node **np, int depth, void *arg)
 	(void) arg;
 	(void) depth;
 
-	if (n->type == LEAF_IDENTIFIER) {
-		len = strlen(n->text) + 2;
+	if (n->u.leaf.type == LEAF_IDENTIFIER) {
+		len = strlen(n->u.leaf.text) + 2;
 	} else {
-		len = strlen(n->text) + 4;
+		len = strlen(n->u.leaf.text) + 4;
 	}
 
-	n->node.size.w = len;
-	n->node.size.h = 1;
-	n->node.y = 0;
+	n->size.w = len;
+	n->size.h = 1;
+	n->y = 0;
 
 	return 1;
 }
 
 static int
-dim_sequence(struct node_list *n, struct node **np, int depth, void *arg)
+dim_sequence(struct node *n, struct node **np, int depth, void *arg)
 {
 	int w = 0, top = 0, bot = 1;
 	struct node *p;
@@ -84,9 +84,9 @@ dim_sequence(struct node_list *n, struct node **np, int depth, void *arg)
 	(void) np;
 	(void) arg;
 
-	node_walk_list(&n->list, &w_dimension, depth + 1, arg);
+	node_walk_list(&n->u.list.list, &w_dimension, depth + 1, arg);
 
-	for (p = n->list; p; p = p->next) {
+	for (p = n->u.list.list; p != NULL; p = p->next) {
 		w += p->size.w + 2;
 		if (p->y > top) {
 			top = p->y;
@@ -96,15 +96,15 @@ dim_sequence(struct node_list *n, struct node **np, int depth, void *arg)
 		}
 	}
 
-	n->node.size.w = w - 2;
-	n->node.size.h = bot + top;
-	n->node.y = top;
+	n->size.w = w - 2;
+	n->size.h = bot + top;
+	n->y = top;
 
 	return 1;
 }
 
 static int
-dim_choice(struct node_list *n, struct node **np, int depth, void *arg)
+dim_choice(struct node *n, struct node **np, int depth, void *arg)
 {
 	int w = 0, h = -1;
 	struct node *p;
@@ -112,47 +112,47 @@ dim_choice(struct node_list *n, struct node **np, int depth, void *arg)
 	(void) np;
 	(void) arg;
 
-	node_walk_list(&n->list, &w_dimension, depth + 1, arg);
+	node_walk_list(&n->u.list.list, &w_dimension, depth + 1, arg);
 
-	for (p = n->list; p; p = p->next) {
+	for (p = n->u.list.list; p != NULL; p = p->next) {
 		h += 1 + p->size.h;
 
 		if (p->size.w > w) {
 			w = p->size.w;
 		}
 
-		if (p == n->list) {
-			if (p->type == NT_SKIP && p->next && !p->next->next) {
-				n->node.y = 2 + p->y + p->next->y;
+		if (p == n->u.list.list) {
+			if (p->type == NODE_SKIP && p->next && !p->next->next) {
+				n->y = 2 + p->y + p->next->y;
 			} else {
-				n->node.y = p->y;
+				n->y = p->y;
 			}
 		}
 	}
 
-	n->node.size.w = w + 6;
-	n->node.size.h = h;
+	n->size.w = w + 6;
+	n->size.h = h;
 
 	return 1;
 }
 
 static int
-dim_loop(struct node_loop *n, struct node **np, int depth, void *arg)
+dim_loop(struct node *n, struct node **np, int depth, void *arg)
 {
 	int wf, wb;
 
 	(void) np;
 	(void) arg;
 
-	node_walk(&n->forward, &w_dimension, depth + 1, arg);
-	wf = n->forward->size.w;
+	node_walk(&n->u.loop.forward, &w_dimension, depth + 1, arg);
+	wf = n->u.loop.forward->size.w;
 
-	node_walk(&n->backward, &w_dimension, depth + 1, arg);
-	wb = n->backward->size.w;
+	node_walk(&n->u.loop.backward, &w_dimension, depth + 1, arg);
+	wb = n->u.loop.backward->size.w;
 
-	n->node.size.w = (wf > wb ? wf : wb) + 6;
-	n->node.size.h = n->forward->size.h + n->backward->size.h + 1;
-	n->node.y = n->forward->y;
+	n->size.w = (wf > wb ? wf : wb) + 6;
+	n->size.h = n->u.loop.forward->size.h + n->u.loop.backward->size.h + 1;
+	n->y = n->u.loop.forward->y;
 
 	return 1;
 }
@@ -165,17 +165,17 @@ static struct node_walker w_dimension = {
 };
 
 static int
-render_leaf(struct node_leaf *n, struct node **np, int depth, void *arg)
+render_leaf(struct node *n, struct node **np, int depth, void *arg)
 {
 	struct render_context *ctx = arg;
 
 	(void) np;
 	(void) depth;
 
-	if (n->type == LEAF_IDENTIFIER) {
-		bprintf(ctx, " %s ", n->text);
+	if (n->u.leaf.type == LEAF_IDENTIFIER) {
+		bprintf(ctx, " %s ", n->u.leaf.text);
 	} else {
-		bprintf(ctx, " \"%s\" ", n->text);
+		bprintf(ctx, " \"%s\" ", n->u.leaf.text);
 	}
 
 	return 1;
@@ -197,7 +197,7 @@ segment(struct render_context *ctx, struct node *n, int depth, int delim)
 }
 
 static int
-render_sequence(struct node_list *n, struct node **np, int depth, void *arg)
+render_sequence(struct node *n, struct node **np, int depth, void *arg)
 {
 	/* ->-item1->-item2 */
 	struct render_context *ctx = arg;
@@ -206,14 +206,17 @@ render_sequence(struct node_list *n, struct node **np, int depth, void *arg)
 
 	(void) np;
 
-	ctx->y += n->node.y;
+	ctx->y += n->y;
 	if (!ctx->rtl) {
-		for (p = n->list; p; p = p->next) {
+		for (p = n->u.list.list; p != NULL; p = p->next) {
 			segment(ctx, p, depth + 1, !!p->next);
 		}
 	} else {
-		struct bnode *rl = 0;
-		for (p = n->list; p; p = p->next) {
+		struct bnode *rl;
+
+		rl = NULL;
+
+		for (p = n->u.list.list; p != NULL; p = p->next) {
 			b_push(&rl, p);
 		}
 
@@ -253,20 +256,20 @@ justify(struct render_context *ctx, int depth, struct node *n, int space, int ar
 }
 
 static int
-render_choice(struct node_list *n, struct node **np, int depth, void *arg)
+render_choice(struct node *n, struct node **np, int depth, void *arg)
 {
 	struct render_context *ctx = arg;
 	struct node *p;
 	int x = ctx->x, y = ctx->y;
-	int line = y + n->node.y;
-	char *a_in	= (n->node.y - n->list->y) ? "v" : "^";
-	char *a_out = (n->node.y - n->list->y) ? "^" : "v";
+	int line = y + n->y;
+	char *a_in	= (n->y - n->u.list.list->y) ? "v" : "^";
+	char *a_out = (n->y - n->u.list.list->y) ? "^" : "v";
 
-	ctx->y += n->list->y;
+	ctx->y += n->u.list.list->y;
 
 	(void) np;
 
-	for (p = n->list; p; p = p->next) {
+	for (p = n->u.list.list; p != NULL; p = p->next) {
 		int i, flush = ctx->y == line;
 
 		ctx->x = x;
@@ -277,9 +280,9 @@ render_choice(struct node_list *n, struct node **np, int depth, void *arg)
 		}
 
 		ctx->x += 1;
-		justify(ctx, depth + 1, p, n->node.size.w - 2, 0);
+		justify(ctx, depth + 1, p, n->size.w - 2, 0);
 
-		ctx->x = x + n->node.size.w - 1;
+		ctx->x = x + n->size.w - 1;
 		if (!ctx->rtl) {
 			bprintf(ctx, flush ? ">" : a_in);
 		} else {
@@ -291,7 +294,7 @@ render_choice(struct node_list *n, struct node **np, int depth, void *arg)
 			for (i = 0; i < p->size.h - p->y + p->next->y; i++) {
 				ctx->x = x;
 				bprintf(ctx, "|");
-				ctx->x = x + n->node.size.w - 1;
+				ctx->x = x + n->size.w - 1;
 				bprintf(ctx, "|");
 				ctx->y++;
 			}
@@ -306,7 +309,7 @@ render_choice(struct node_list *n, struct node **np, int depth, void *arg)
 }
 
 static int
-render_loop(struct node_loop *n, struct node **np, int depth, void *arg)
+render_loop(struct node *n, struct node **np, int depth, void *arg)
 {
 	struct render_context *ctx = arg;
 	int x = ctx->x, y = ctx->y;
@@ -314,19 +317,19 @@ render_loop(struct node_loop *n, struct node **np, int depth, void *arg)
 
 	(void) np;
 
-	ctx->y += n->node.y;
+	ctx->y += n->y;
 	bprintf(ctx, !ctx->rtl ? ">" : "v");
 	ctx->x += 1;
 
-	justify(ctx, depth + 1, n->forward, n->node.size.w - 2, 0);
-	ctx->x = x + n->node.size.w - 1;
+	justify(ctx, depth + 1, n->u.loop.forward, n->size.w - 2, 0);
+	ctx->x = x + n->size.w - 1;
 	bprintf(ctx, !ctx->rtl ? "v" : "<");
 	ctx->y++;
 
-	for (i = 0; i < n->forward->size.h - n->forward->y + n->backward->y; i++) {
+	for (i = 0; i < n->u.loop.forward->size.h - n->u.loop.forward->y + n->u.loop.backward->y; i++) {
 		ctx->x = x;
 		bprintf(ctx, "|");
-		ctx->x = x + n->node.size.w - 1;
+		ctx->x = x + n->size.w - 1;
 		bprintf(ctx, "|");
 		ctx->y++;
 	}
@@ -335,10 +338,10 @@ render_loop(struct node_loop *n, struct node **np, int depth, void *arg)
 	bprintf(ctx, !ctx->rtl ? "^" : ">");
 	ctx->x += 1;
 	ctx->rtl = !ctx->rtl;
-	justify(ctx, depth + 1, n->backward, n->node.size.w - 2, 0);
+	justify(ctx, depth + 1, n->u.loop.backward, n->size.w - 2, 0);
 
 	ctx->rtl = !ctx->rtl;
-	ctx->x = x + n->node.size.w - 1;
+	ctx->x = x + n->size.w - 1;
 	bprintf(ctx, !ctx->rtl ? "<" : "^");
 
 	ctx->x = x;

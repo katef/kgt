@@ -13,15 +13,19 @@
 
 #include "rrd.h"
 #include "blist.h"
+#include "node.h"
 
 static int
-leaves_eq(struct node_leaf *a, struct node_leaf *b)
+leaves_eq(struct node *a, struct node *b)
 {
-	if (a->type != b->type) {
+	assert(a->type == NODE_LEAF);
+	assert(b->type == NODE_LEAF);
+
+	if (a->u.leaf.type != b->u.leaf.type) {
 		return 0;
 	}
 
-	if (0 != strcmp(a->text, b->text)) {
+	if (0 != strcmp(a->u.leaf.text, b->u.leaf.text)) {
 		return 0;
 	}
 
@@ -29,21 +33,24 @@ leaves_eq(struct node_leaf *a, struct node_leaf *b)
 }
 
 static int
-process_loop_leaf(struct node_loop *loop, struct bnode *bp)
+process_loop_leaf(struct node *loop, struct bnode *bp)
 {
-	struct node_leaf *a, *b;
+	struct node *a, *b;
 
-	a = (struct node_leaf *) loop->backward;
-
-	if (bp == NULL || bp->v->type != NT_LEAF) {
+	if (bp == NULL || bp->v->type != NODE_LEAF) {
 		return 0;
 	}
 
-	b = (struct node_leaf *) bp->v;
+	a = loop->u.loop.backward;
+	b = bp->v;
+
 	if (leaves_eq(a, b)) {
-		struct node *tmp = loop->forward;
-		loop->forward = loop->backward;
-		loop->backward = tmp;
+		struct node *tmp;
+
+		tmp = loop->u.loop.forward;
+		loop->u.loop.forward  = loop->u.loop.backward;
+		loop->u.loop.backward = tmp;
+
 		return 1;
 	}
 
@@ -51,19 +58,19 @@ process_loop_leaf(struct node_loop *loop, struct bnode *bp)
 }
 
 static void
-loop_switch_sides(int suflen, struct node_loop *loop, struct bnode **rl)
+loop_switch_sides(int suflen, struct node *loop, struct bnode **rl)
 {
 	struct node *v, **n;
 	int i;
 
 	if (suflen > 1) {
-		struct node_list *seq = node_create(NT_LIST);
-		seq->type = LIST_SEQUENCE;
-		seq->list = 0;
+		struct node *seq;
 
-		n = &seq->list;
-		node_free(loop->forward);
-		loop->forward = &seq->node;
+		seq = node_create_list(LIST_SEQUENCE, NULL);
+
+		n = &seq->u.list.list;
+		node_free(loop->u.loop.forward);
+		loop->u.loop.forward = seq;
 
 		for (i = 0; i < suflen; i++) {
 			(void) b_pop(rl, &v);
@@ -71,10 +78,10 @@ loop_switch_sides(int suflen, struct node_loop *loop, struct bnode **rl)
 			*n = v;
 		}
 	} else {
-		node_free(loop->forward);
+		node_free(loop->u.loop.forward);
 		(void) b_pop(rl, &v);
 		v->next = 0;
-		loop->forward = v;
+		loop->u.loop.forward = v;
 	}
 
 	if (b_pop(rl, &v)) {
@@ -82,53 +89,50 @@ loop_switch_sides(int suflen, struct node_loop *loop, struct bnode **rl)
 	} else {
 		struct node *skip;
 
-		skip = node_create(NT_SKIP);
-		node_free(loop->backward);
-		loop->backward = skip;
+		skip = node_create_skip();
+		node_free(loop->u.loop.backward);
+		loop->u.loop.backward = skip;
 	}
 
-	if (loop->backward->type == NT_LIST) {
-		node_collapse(&loop->backward);
+	if (loop->u.loop.backward->type == NODE_LIST) {
+		node_collapse(&loop->u.loop.backward);
 	}
 }
 
 static int
-process_loop_list(struct node_loop *loop, struct bnode *bp)
+process_loop_list(struct node *loop, struct bnode *bp)
 {
-	struct node_list *list;
+	struct node *list;
 	struct node *p;
 	struct bnode *rl = 0, *rp;
 	int suffix = 0;
 
-	list = (struct node_list *) loop->backward;
+	list = loop->u.loop.backward;
 
-	if (list->type == LIST_CHOICE) {
+	if (list->u.list.type == LIST_CHOICE) {
 		return 0;
 	}
 
-	for (p = list->list; p; p = p->next) {
+	for (p = list->u.list.list; p != NULL; p = p->next) {
 		b_push(&rl, p);
 	}
 
-	rp = rl;
 	/* linkedlistcmp() */
-	while (rp && bp) {
-		struct node_leaf *a, *b;
+	for (rp = rl; rp != NULL && bp != NULL; rp = rp->next, bp = bp->next) {
+		struct node *a, *b;
 
-		if (rp->v->type != NT_LEAF || bp->v->type != NT_LEAF) {
+		if (rp->v->type != NODE_LEAF || bp->v->type != NODE_LEAF) {
 			break;
 		}
 
-		a = (struct node_leaf *) rp->v;
-		b = (struct node_leaf *) bp->v;
+		a = rp->v;
+		b = bp->v;
 
 		if (!leaves_eq(a, b)) {
 			break;
 		}
 
 		suffix++;
-		rp = rp->next;
-		bp = bp->next;
 	}
 
 	if (suffix > 0) {
@@ -141,18 +145,18 @@ process_loop_list(struct node_loop *loop, struct bnode *bp)
 }
 
 static int
-process_loop(struct node_loop *loop, struct bnode *bp)
+process_loop(struct node *loop, struct bnode *bp)
 {
-	if (loop->backward->type == NT_SKIP
-	 || loop->forward->type != NT_SKIP) {
+	if (loop->u.loop.backward->type == NODE_SKIP
+	 || loop->u.loop.forward->type != NODE_SKIP) {
 		return 0;
 	}
 
-	if (loop->backward->type == NT_LIST) {
+	if (loop->u.loop.backward->type == NODE_LIST) {
 		return process_loop_list(loop, bp);
 	}
 
-	if (loop->backward->type == NT_LEAF) {
+	if (loop->u.loop.backward->type == NODE_LEAF) {
 		return process_loop_leaf(loop, bp);
 	}
 
@@ -162,22 +166,20 @@ process_loop(struct node_loop *loop, struct bnode *bp)
 static struct node_walker bt_collapse_suffixes;
 
 static int
-collapse_list(struct node_list *n, struct node **np, int depth, void *arg)
+collapse_list(struct node *n, struct node **np, int depth, void *arg)
 {
 	struct node *p;
 	struct bnode *rl = 0;
 
-	for (p = n->list; p; p = p->next) {
-		struct node_loop *loop;
+	for (p = n->u.list.list; p != NULL; p = p->next) {
 		int i, suffix_len;
 
-		if (p->type != NT_LOOP) {
+		if (p->type != NODE_LOOP) {
 			b_push(&rl, p);
 			continue;
 		}
 
-		loop = (struct node_loop *)p;
-		suffix_len = process_loop(loop, rl);
+		suffix_len = process_loop(p, rl);
 
 		/* delete suffix_len things from the list */
 		for (i = 0; i < suffix_len; i++) {
@@ -192,14 +194,14 @@ collapse_list(struct node_list *n, struct node **np, int depth, void *arg)
 			if (rl) {
 				rl->v->next = p;
 			} else {
-				n->list = p;
+				n->u.list.list = p;
 			}
 		}
 	}
 
 	b_clear(&rl);
 
-	if (!node_walk_list(&n->list, &bt_collapse_suffixes, depth + 1, arg)) {
+	if (!node_walk_list(&n->u.list.list, &bt_collapse_suffixes, depth + 1, arg)) {
 		return 0;
 	}
 
@@ -223,7 +225,7 @@ struct bot_heavy_context {
 };
 
 static int
-bot_heavy_sequence(struct node_list *n, struct node **np, int depth, void *arg)
+bot_heavy_sequence(struct node *n, struct node **np, int depth, void *arg)
 {
 	struct bot_heavy_context *ctx = arg;
 	struct node **p;
@@ -231,7 +233,7 @@ bot_heavy_sequence(struct node_list *n, struct node **np, int depth, void *arg)
 
 	(void) np;
 
-	for (p = &n->list; *p; p = &(**p).next) {
+	for (p = &n->u.list.list; *p != NULL; p = &(**p).next) {
 		ctx->applied = 0;
 
 		if (!node_walk(p, &bt_bot_heavy, depth + 1, ctx)) {
@@ -243,7 +245,7 @@ bot_heavy_sequence(struct node_list *n, struct node **np, int depth, void *arg)
 
 	if (0 && anything) {
 		ctx->everything = 1;
-		node_walk_list(&n->list, &bt_bot_heavy, depth + 1, ctx);
+		node_walk_list(&n->u.list.list, &bt_bot_heavy, depth + 1, ctx);
 		ctx->everything = 0;
 	}
 
@@ -251,39 +253,39 @@ bot_heavy_sequence(struct node_list *n, struct node **np, int depth, void *arg)
 }
 
 static int
-bot_heavy_loop(struct node_loop *n, struct node **np, int depth, void *arg)
+bot_heavy_loop(struct node *n, struct node **np, int depth, void *arg)
 {
 	struct bot_heavy_context *ctx = arg;
 	int everything = ctx->everything;
 	ctx->everything = 0;
 
 	do {
-		struct node_list *choice;
+		struct node *choice;
 		struct node *tmp, *skip;
 
-		if (n->forward->type != NT_SKIP) {
+		if (n->u.loop.forward->type != NODE_SKIP) {
 			break;
 		}
 
-		if (n->backward->type == NT_SKIP
-		 || n->backward->type == NT_LOOP) {
+		if (n->u.loop.backward->type == NODE_SKIP
+		 || n->u.loop.backward->type == NODE_LOOP) {
 			break;
 		}
 
-		if (!everything && n->backward->type == NT_LEAF) {
+		if (!everything && n->u.loop.backward->type == NODE_LEAF) {
 			break;
 		}
 
-		if (n->backward->type == NT_LIST) {
-			struct node_list *list;
+		if (n->u.loop.backward->type == NODE_LIST) {
+			struct node *list;
 
-			list = (struct node_list *) n->backward;
-			if (list->type == LIST_CHOICE) {
+			list = n->u.loop.backward;
+			if (list->u.list.type == LIST_CHOICE) {
 				struct node *p;
 				int c = 0;
 
-				for (p = list->list; p; p = p->next) {
-					if (p->type == NT_LIST || p->type == NT_LOOP)
+				for (p = list->u.list.list; p != NULL; p = p->next) {
+					if (p->type == NODE_LIST || p->type == NODE_LOOP)
 						c = 1;
 				}
 
@@ -293,19 +295,17 @@ bot_heavy_loop(struct node_loop *n, struct node **np, int depth, void *arg)
 			}
 		}
 
-		tmp = n->backward;
-		n->backward = n->forward;
-		n->forward = tmp;
+		tmp = n->u.loop.backward;
+		n->u.loop.backward = n->u.loop.forward;
+		n->u.loop.forward = tmp;
 
 		/* short-circuit */
-		choice = node_create(NT_LIST);
-		choice->type = LIST_CHOICE;
-		skip = node_create(NT_SKIP);
-		skip->next = &n->node;
-		choice->list = skip;
-		choice->node.next = n->node.next;
-		n->node.next = NULL;
-		*np = &choice->node;
+		skip = node_create_skip();
+		skip->next = n;
+		choice = node_create_list(LIST_CHOICE, skip);
+		choice->next = n->next;
+		n->next = NULL;
+		*np = choice;
 
 		if (!node_walk(&skip->next, &bt_bot_heavy, depth + 1, ctx)) {
 			return 0;
@@ -316,11 +316,11 @@ bot_heavy_loop(struct node_loop *n, struct node **np, int depth, void *arg)
 		return 1;
 	} while (0);
 
-	if (!node_walk(&n->forward, &bt_bot_heavy, depth + 1, ctx)) {
+	if (!node_walk(&n->u.loop.forward, &bt_bot_heavy, depth + 1, ctx)) {
 		return 0;
 	}
 
-	if (!node_walk(&n->backward, &bt_bot_heavy, depth + 1, ctx)) {
+	if (!node_walk(&n->u.loop.backward, &bt_bot_heavy, depth + 1, ctx)) {
 		return 0;
 	}
 
@@ -340,72 +340,83 @@ static struct node_walker bt_bot_heavy = {
 static struct node_walker bt_redundant;
 
 static int
-redundant_choice(struct node_list *n, struct node **np, int depth, void *arg)
+redundant_choice(struct node *n, struct node **np, int depth, void *arg)
 {
 	int nc = 0, isopt = 0;
-	struct node **p, **loop = 0;
+	struct node **p, **loop = NULL;
 
-	for (p = &n->list; *p; p = &(**p).next) {
+	for (p = &n->u.list.list; *p != NULL; p = &(**p).next) {
 		nc++;
 
 		if (!node_walk(p, &bt_redundant, depth + 1, arg)) {
 			return 0;
 		}
 
-		if ((**p).type == NT_SKIP) {
+		if ((**p).type == NODE_SKIP) {
 			isopt = 1;
 		}
 
-		if ((**p).type == NT_LOOP) {
+		if ((**p).type == NODE_LOOP) {
 			loop = p;
 		}
 	}
 
-	if (nc == 2 && isopt && loop) {
-		struct node_loop *l;
+	if (nc == 2 && isopt && loop != NULL) {
+		struct node *l;
 
-		l = (struct node_loop *) *loop;
+		l = *loop;
 
-		/* special case: if an optional loop has an empty half, we can elide the NT_CHOICE */
-		if (l->forward->type == NT_SKIP) {
+		/* special case: if an optional loop has an empty half, we can elide the NODE_CHOICE */
+		if (l->u.loop.forward->type == NODE_SKIP) {
 			*np = *loop;
-			*loop = 0;
-			node_free(&n->node);
-		} else if (l->backward->type == NT_SKIP) {
-			struct node *tmp = l->backward;
-			l->backward = l->forward;
-			l->forward = tmp;
+			*loop = NULL;
+			node_free(n);
+		} else if (l->u.loop.backward->type == NODE_SKIP) {
+			struct node *tmp;
+
+			tmp = l->u.loop.backward;
+			l->u.loop.backward = l->u.loop.forward;
+			l->u.loop.forward = tmp;
 			*np = *loop;
-			*loop = 0;
-			node_free(&n->node);
+			*loop = NULL;
+
+			node_free(n);
 		}
 	} else {
-		int i = 0;
+		struct node **next;
 
 		/* fold nested choices into this one */
-		for (p = &n->list; *p; p = &(**p).next) {
-			struct node_list *choice;
-			struct node *last;
+		for (p = &n->u.list.list; *p != NULL; p = next) {
+			struct node **head, **tail;
+			struct node *dead;
 
-			i++;
+			next = &(*p)->next;
 
-			if ((**p).type != NT_LIST) {
+			if ((*p)->type != NODE_LIST) {
 				continue;
 			}
 
-			choice = (struct node_list *) *p;
-			if (choice->type != LIST_CHOICE) {
+			if ((*p)->u.list.type != LIST_CHOICE) {
 				continue;
 			}
 
-			for (last = choice->list; last->next; last = last->next)
+			dead = *p;
+
+			/* incoming inner list */
+			head = &(*p)->u.list.list;
+
+			for (tail = head; *tail != NULL; tail = &(*tail)->next)
 				;
 
-			last->next = (**p).next;
-			*p = choice->list;
-			choice->list = 0;
+			*tail = (*p)->next;
+			(*p)->next = NULL;
 
-			node_free(&choice->node);
+			*p = *head;
+			*head = NULL;
+
+			next = p;
+
+			node_free(dead);
 		}
 	}
 
@@ -413,40 +424,41 @@ redundant_choice(struct node_list *n, struct node **np, int depth, void *arg)
 }
 
 static int
-redundant_loop(struct node_loop *n, struct node **np, int depth, void *arg)
+redundant_loop(struct node *n, struct node **np, int depth, void *arg)
 {
 	struct node **inner = 0;
-	struct node_loop *loop;
+	struct node *loop;
 
-	if (!node_walk(&n->forward, &bt_redundant, depth + 1, arg)) {
+	if (!node_walk(&n->u.loop.forward, &bt_redundant, depth + 1, arg)) {
 		return 0;
 	}
 
-	if (!node_walk(&n->backward, &bt_redundant, depth + 1, arg)) {
+	if (!node_walk(&n->u.loop.backward, &bt_redundant, depth + 1, arg)) {
 		return 0;
 	}
 
-	if (n->forward->type == NT_LOOP && n->backward->type == NT_SKIP) {
-		loop = (struct node_loop *) n->forward;
-		if (loop->forward->type == NT_SKIP || loop->backward->type == NT_SKIP) {
-			inner = &n->forward;
+	if (n->u.loop.forward->type == NODE_LOOP && n->u.loop.backward->type == NODE_SKIP) {
+		loop = n->u.loop.forward;
+		if (loop->u.loop.forward->type == NODE_SKIP || loop->u.loop.backward->type == NODE_SKIP) {
+			inner = &n->u.loop.forward;
 		}
-	} else if (n->backward->type == NT_LOOP && n->forward->type == NT_SKIP) {
-		loop = (struct node_loop *) n->backward;
-		if (loop->forward->type == NT_SKIP) {
-			inner = &n->backward;
-		} else if (loop->backward->type == NT_SKIP) {
-			struct node *tmp = loop->backward;
-			loop->backward = loop->forward;
-			loop->forward = tmp;
-			inner = &n->backward;
+	} else if (n->u.loop.backward->type == NODE_LOOP && n->u.loop.forward->type == NODE_SKIP) {
+		loop = n->u.loop.backward;
+		if (loop->u.loop.forward->type == NODE_SKIP) {
+			inner = &n->u.loop.backward;
+		} else if (loop->u.loop.backward->type == NODE_SKIP) {
+			struct node *tmp;
+			tmp = loop->u.loop.backward;
+			loop->u.loop.backward = loop->u.loop.forward;
+			loop->u.loop.forward = tmp;
+			inner = &n->u.loop.backward;
 		}
 	}
 
 	if (inner) {
 		*np = *inner;
 		*inner = 0;
-		node_free(&n->node);
+		node_free(n);
 	}
 
 	return 1;

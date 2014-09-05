@@ -5,6 +5,7 @@ SRC += src/rrd/transform.c
 SRC += src/rrd/beautify.c
 SRC += src/rrd/output.c
 SRC += src/rrd/render.c
+SRC += src/rrd/node.c
 
 PART += rrd
 
