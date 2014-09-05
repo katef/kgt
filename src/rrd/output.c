@@ -128,7 +128,12 @@ rrd_output(struct ast_production *grammar)
 
 	for (p = grammar; p; p = p->next) {
 		struct node *rrd;
-		assert(ast_to_rrd(p, &rrd) && "AST transformation failed somehow");
+
+		rrd = ast_to_rrd(p);
+		if (rrd == NULL) {
+			perror("ast_to_rrd");
+			return;
+		}
 
 /* XXX:
 print_repr(&rrd);

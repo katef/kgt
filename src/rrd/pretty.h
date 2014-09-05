@@ -6,7 +6,7 @@
 #include "rrd.h"
 
 void rrd_pretty_suffixes(struct node **);
-void rrd_pretty_botheavy(struct node **);
+void rrd_pretty_bottom(struct node **);
 void rrd_pretty_redundant(struct node **);
 
 #endif

@@ -67,6 +67,6 @@ struct node_walker {
 int node_walk(struct node **, const struct node_walker *, int, void *);
 int node_walk_list(struct node **, const struct node_walker *, int, void *);
 
-int ast_to_rrd(struct ast_production *, struct node **);
+struct node *ast_to_rrd(struct ast_production *);
 
 #endif

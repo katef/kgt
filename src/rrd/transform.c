@@ -15,36 +15,11 @@
 #include "rrd.h"
 #include "node.h"
 
-static int transform_alts(struct node **, struct ast_alt *);
-static int transform_alt(struct node **, struct ast_alt *);
-static int transform_term(struct node **, struct ast_term *);
-static int transform_empty(struct node **);
-static int transform_leaf(struct node **, struct ast_term *);
-static int transform_group(struct node **, struct ast_alt *);
+static struct node *
+transform_term(struct ast_term *term);
 
-static int
-transform_alts(struct node **on, struct ast_alt *alts)
-{
-	struct node *list = 0, **head = &list;
-	struct ast_alt *p;
-
-	for (p = alts; p != NULL; p = p->next) {
-		if (!transform_alt(head, p)) {
-			return 0;
-		}
-
-		while (*head) {
-			head = &(**head).next;
-		}
-	}
-
-	*on = list;
-
-	return 1;
-}
-
-static int
-transform_alt(struct node **on, struct ast_alt *alt)
+static struct node *
+transform_alt(struct ast_alt *alt)
 {
 	struct node *list, **tail;
 	struct ast_term *p;
@@ -53,8 +28,11 @@ transform_alt(struct node **on, struct ast_alt *alt)
 	tail = &list;
 
 	for (p = alt->terms; p != NULL; p = p->next) {
-		if (!transform_term(tail, p)) {
-			return 0;
+		/* TODO: node_append */
+		*tail = transform_term(p);
+		if (*tail == NULL) {
+			node_free(list);
+			return NULL;
 		}
 
 		while (*tail) {
@@ -63,100 +41,163 @@ transform_alt(struct node **on, struct ast_alt *alt)
 	}
 
 	if (list->next == NULL) {
-		*on = list;
+		return list;
 	} else {
-		*on = node_create_list(LIST_SEQUENCE, list);
+		return node_create_list(LIST_SEQUENCE, list);
 	}
-
-	return 1;
 }
 
-static int
-single_term(struct node **on, struct ast_term *term)
+static struct node *
+transform_alts(struct ast_alt *alts)
+{
+	struct node *list = 0, **head = &list;
+	struct ast_alt *p;
+
+	for (p = alts; p != NULL; p = p->next) {
+		/* TODO: node_add */
+		*head = transform_alt(p);
+		if (*head == NULL) {
+			node_free(list);
+			return NULL;
+		}
+
+		while (*head) {
+			head = &(**head).next;
+		}
+	}
+
+	return list;
+}
+
+static struct node *
+transform_empty(void)
+{
+	return node_create_skip();
+}
+
+static struct node *
+transform_leaf(struct ast_term *term)
 {
 	switch (term->type) {
-	case TYPE_EMPTY:      return transform_empty(on);
 	case TYPE_PRODUCTION:
-	case TYPE_TERMINAL:   return transform_leaf (on, term);
-	case TYPE_GROUP:      return transform_group(on, term->u.group);
-	}
+		return node_create_leaf(LEAF_IDENTIFIER, term->u.name);
 
-	return 0;
+	case TYPE_TERMINAL:
+		return node_create_leaf(LEAF_TERMINAL, term->u.literal);
+
+	default:
+		errno = EINVAL;
+		return NULL;
+	}
 }
 
-static int
-optional_term(struct node **on, struct ast_term *term)
+static struct node *
+transform_group(struct ast_alt *group)
+{
+	struct node *list;
+
+	list = node_create_list(LIST_SEQUENCE, NULL);
+
+	list->u.list.list = transform_alts(group);
+	if (list->u.list.list == NULL) {
+		node_free(list);
+		return NULL;
+	}
+
+	node_collapse(&list);
+
+	return list;
+}
+
+static struct node *
+single_term(struct ast_term *term)
+{
+	switch (term->type) {
+	case TYPE_EMPTY:      return transform_empty();
+	case TYPE_PRODUCTION:
+	case TYPE_TERMINAL:   return transform_leaf (term);
+	case TYPE_GROUP:      return transform_group(term->u.group);
+	}
+
+	return NULL;
+}
+
+static struct node *
+optional_term(struct ast_term *term)
 {
 	struct node *skip;
+	struct node *n;
+
+	n = single_term(term);
+	if (n == NULL) {
+		return NULL;
+	}
 
 	skip = node_create_skip();
 
-	*on = node_create_list(LIST_CHOICE, skip);
+	skip->next = n;
 
-	if (!single_term(&skip->next, term)) {
-		return 0;
-	}
-
-	return 1;
+	return node_create_list(LIST_CHOICE, skip);
 }
 
-static int
-oneormore_term(struct node **on, struct ast_term *term)
+static struct node *
+oneormore_term(struct ast_term *term)
 {
-	struct node *skip;
-	struct node *choice;
 	struct node *loop;
+	struct node *skip;
+	struct node *n;
+
+	n = single_term(term);
+	if (n == NULL) {
+		return NULL;
+	}
 
 	skip = node_create_skip();
 
-	choice = node_create_list(LIST_CHOICE, NULL);
-
-	loop = node_create_loop(choice, skip);
-	*on = loop;
-
-	if (!single_term(&choice->u.list.list, term)) {
-		return 0;
-	}
+	loop = node_create_loop(n, skip);
 
 	node_collapse(&loop->u.loop.forward);
 	node_collapse(&loop->u.loop.backward);
 
-	return 1;
+	return loop;
 }
 
-static int
-zeroormore_term(struct node **on, struct ast_term *term)
+static struct node *
+zeroormore_term(struct ast_term *term)
 {
 	struct node *skip;
 	struct node *choice;
 	struct node *loop;
+	struct node *n;
+
+	n = single_term(term);
+	if (n == NULL) {
+		return NULL;
+	}
 
 	skip = node_create_skip();
 
-	choice = node_create_list(LIST_CHOICE, NULL);
+	skip->next = n;
+
+	choice = node_create_list(LIST_CHOICE, skip);
 
 	loop = node_create_loop(skip, choice);
-	*on = loop;
-
-	if (!single_term(&skip->next, term)) {
-		return 0;
-	}
 
 	node_collapse(&loop->u.loop.forward);
 	node_collapse(&loop->u.loop.backward);
 
-	return 1;
+	return loop;
 }
 
-static int
-transform_term(struct node **on, struct ast_term *term)
+static struct node *
+transform_term(struct ast_term *term)
 {
 	size_t i;
 
 	struct {
 		unsigned int min;
 		unsigned int max;
-		int (*f)(struct node **on, struct ast_term *term);
+		struct node *(*f)(struct ast_term *term);
 	} a[] = {
 		{ 1, 1, single_term     },
 		{ 0, 1, optional_term   },
@@ -169,74 +210,29 @@ transform_term(struct node **on, struct ast_term *term)
 
 	for (i = 0; i < sizeof a / sizeof *a; i++) {
 		if (term->min == a[i].min && term->min == a[i].min) {
-			return a[i].f(on, term);
+			return a[i].f(term);
 		}
 	}
 
-	return 0;
+	return NULL;
 }
 
-static int
-transform_empty(struct node **on)
-{
-	*on = node_create_skip();
-	return 1;
-}
-
-static int
-transform_leaf(struct node **on, struct ast_term *term)
-{
-	switch (term->type) {
-	case TYPE_PRODUCTION:
-		*on = node_create_leaf(LEAF_IDENTIFIER, term->u.name);
-		break;
-
-	case TYPE_TERMINAL:
-		*on = node_create_leaf(LEAF_TERMINAL, term->u.literal);
-		break;
-
-	default:
-		errno = EINVAL;
-		return 0;
-	}
-
-	return 1;
-}
-
-static int
-transform_group(struct node **on, struct ast_alt *group)
-{
-	struct node *list;
-
-	list = node_create_list(LIST_SEQUENCE, NULL);
-
-	*on = list;
-
-	if (!transform_alts(&list->u.list.list, group)) {
-		return 0;
-	}
-
-	node_collapse(on);
-
-	return 1;
-}
-
-int
-ast_to_rrd(struct ast_production *ast, struct node **rrd)
+struct node *
+ast_to_rrd(struct ast_production *ast)
 {
 	struct node *choice;
+	struct node *n;
 
-	choice = node_create_list(LIST_CHOICE, NULL);
-
-	if (!transform_alts(&choice->u.list.list, ast->alts)) {
-		return 0;
+	n = transform_alts(ast->alts);
+	if (n == NULL) {
+		return NULL;
 	}
 
-	*rrd = choice;
+	choice = node_create_list(LIST_CHOICE, n);
 
-	node_collapse(rrd);
+	node_collapse(&choice);
 
-	return 1;
+	return choice;
 }
 
 static int
