@@ -21,6 +21,8 @@ SUBDIR += src/sid
 SUBDIR += src/trd
 SUBDIR += src/wsn
 SUBDIR += src/rrd
+SUBDIR += src/rrdump
+SUBDIR += src/rrtext
 SUBDIR += src
 
 #INCDIR += include

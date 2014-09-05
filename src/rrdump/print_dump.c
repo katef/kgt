@@ -6,11 +6,11 @@
 
 #include "../ast.h"
 
+#include "../rrd/rrd.h"
+#include "../rrd/pretty.h"
+#include "../rrd/node.h"
+
 #include "io.h"
-#include "rrd.h"
-#include "pretty.h"
-#include "print.h"
-#include "node.h"
 
 static void
 print_indent(FILE *f, int n)

@@ -15,23 +15,27 @@
 #include "sid/io.h"
 #include "trd/io.h"
 #include "dot/io.h"
-#include "rrd/io.h"
+#include "rrdump/io.h"
+#include "rrtext/io.h"
 
 #include "ast.h"
 #include "xalloc.h"
+
+int prettify = 1;
 
 struct io {
 	const char *name;
 	struct ast_production *(*in)(int (*f)(void *), void *);
 	void (*out)(struct ast_production *);
 } io[] = {
-	{ "bnf",  bnf_input,  bnf_output  },
-	{ "wsn",  wsn_input,  wsn_output  },
-	{ "ebnf", ebnf_input, ebnf_output },
-	{ "sid",  NULL,       sid_output  },
-	{ "trd",  NULL,       trd_output  },
-	{ "dot",  NULL,       dot_output  },
-	{ "rrd",  NULL,       rrd_output  }
+	{ "bnf",    bnf_input,  bnf_output    },
+	{ "wsn",    wsn_input,  wsn_output    },
+	{ "ebnf",   ebnf_input, ebnf_output   },
+	{ "sid",    NULL,       sid_output    },
+	{ "trd",    NULL,       trd_output    },
+	{ "dot",    NULL,       dot_output    },
+	{ "rrdump", NULL,       rrdump_output },
+	{ "rrtext", NULL,       rrtext_output }
 };
 
 static void

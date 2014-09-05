@@ -2,11 +2,7 @@
 
 SRC += src/rrd/blist.c
 SRC += src/rrd/transform.c
-SRC += src/rrd/output.c
 SRC += src/rrd/node.c
-
-SRC += src/rrd/print_dump.c
-SRC += src/rrd/print_text.c
 
 SRC += src/rrd/pretty_suffix.c
 SRC += src/rrd/pretty_bottom.c

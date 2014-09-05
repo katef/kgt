@@ -2,8 +2,8 @@
 
 /*
  * Railroad Diagram Output
- * Spew out a text description of the abstract representation of railroads
- * TODO: add more output formats (read: ones that actually draw diagrams)
+ *
+ * Output a plaintext diagram of the abstract representation of railroads
  */
 
 #include <assert.h>
@@ -12,16 +12,14 @@
 
 #include "../ast.h"
 
-#include "io.h"
-#include "rrd.h"
-#include "pretty.h"
-#include "print.h"
-#include "node.h"
+#include "../rrd/rrd.h"
+#include "../rrd/pretty.h"
+#include "../rrd/node.h"
 
-int prettify = 1;
+#include "io.h"
 
 void
-rrd_output(struct ast_production *grammar)
+rrtext_output(struct ast_production *grammar)
 {
 	struct ast_production *p;
 
@@ -34,19 +32,11 @@ rrd_output(struct ast_production *grammar)
 			return;
 		}
 
-/* XXX:
-rrd_print_dump(&rrd);
-*/
-
 		if (prettify) {
 			rrd_pretty_suffixes(&rrd);
 			rrd_pretty_redundant(&rrd);
 			rrd_pretty_bottom(&rrd);
 		}
-
-/* XXX:
-rrd_print_dump(&rrd);
-*/
 
 		printf("%s:\n", p->name);
 		rrd_print_text(&rrd);
@@ -55,3 +45,4 @@ rrd_print_dump(&rrd);
 		node_free(rrd);
 	}
 }
+

@@ -13,8 +13,9 @@ PROG += kgt
 ${BUILD}/bin/kgt: ${BUILD}/src/main.o
 ${BUILD}/bin/kgt: ${BUILD}/src/xalloc.o
 
-.for part in ${PART:Mbnf} ${PART:Mebnf} ${PART:Msid} ${PART:Mtrd} \
-	${PART:Mdot} ${PART:Mrrd} ${PART:Mwsn}
+.for part in ${PART:Mbnf} ${PART:Mebnf} ${PART:Msid} \
+	${PART:Mdot} ${PART:Mwsn} ${PART:Mtrd} \
+	${PART:Mrrd} ${PART:Mrrdump} ${PART:Mrrtext}
 ${BUILD}/bin/kgt: ${BUILD}/lib/${part}.o
 .endfor
 

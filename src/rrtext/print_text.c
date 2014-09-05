@@ -11,9 +11,10 @@
 
 #include "../xalloc.h"
 
-#include "rrd.h"
-#include "blist.h"
-#include "print.h"
+#include "../rrd/rrd.h"
+#include "../rrd/blist.h"
+
+#include "io.h"
 
 struct render_context {
 	struct box_size size;
