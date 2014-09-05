@@ -23,6 +23,7 @@ SUBDIR += src/wsn
 SUBDIR += src/rrd
 SUBDIR += src/rrdump
 SUBDIR += src/rrtext
+SUBDIR += src/rrdot
 SUBDIR += src
 
 #INCDIR += include
