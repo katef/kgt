@@ -32,7 +32,7 @@ visit_skip(struct node *n, struct node **np, int depth, void *arg)
 	(void) np;
 
 	print_indent(f, depth);
-	fprintf(f, "NODE_SKIP\n");
+	fprintf(f, "SKIP\n");
 
 	return 1;
 }
@@ -45,7 +45,7 @@ visit_identifier(struct node *n, struct node **np, int depth, void *arg)
 	(void) np;
 
 	print_indent(f, depth);
-	fprintf(f, "NODE_IDENTIFIER: %s\n", n->u.identifier);
+	fprintf(f, "IDENTIFIER: <%s>\n", n->u.identifier);
 
 	return 1;
 }
@@ -58,7 +58,7 @@ visit_terminal(struct node *n, struct node **np, int depth, void *arg)
 	(void) np;
 
 	print_indent(f, depth);
-	fprintf(f, "NODE_TERMINAL: %s\n", n->u.terminal);
+	fprintf(f, "TERMINAL: \"%s\"\n", n->u.terminal);
 
 	return 1;
 }
@@ -71,7 +71,7 @@ visit_choice(struct node *n, struct node **np, int depth, void *arg)
 	(void) np;
 
 	print_indent(f, depth);
-	fprintf(f, "NODE_CHOICE: [\n");
+	fprintf(f, "CHOICE: [\n");
 	if (!node_walk_list(&n->u.choice, &rrd_print, depth + 1, arg)) {
 		return 0;
 	}
@@ -89,7 +89,7 @@ visit_sequence(struct node *n, struct node **np, int depth, void *arg)
 	(void) np;
 
 	print_indent(f, depth);
-	fprintf(f, "NODE_SEQUENCE: [\n");
+	fprintf(f, "SEQUENCE: [\n");
 	if (!node_walk_list(&n->u.sequence, &rrd_print, depth + 1, arg)) {
 		return 0;
 	}
@@ -107,7 +107,7 @@ visit_loop(struct node *n, struct node **np, int depth, void *arg)
 	(void) np;
 
 	print_indent(f, depth);
-	fprintf(f, "NODE_LOOP:\n");
+	fprintf(f, "LOOP:\n");
 	if (n->u.loop.forward->type != NODE_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".forward:\n");
