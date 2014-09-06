@@ -41,10 +41,10 @@ rrdot_output(struct ast_production *grammar)
 		}
 
         printf("\t\"%s/%p\" [ shape = plaintext, label = \"%s\" ];\n",
-			p->name, (void *) p, p->name,
+			p->name, (void *) p,
 			p->name);
 
-		rrd_print_dot(p->name, p, &rrd);
+		rrd_print_dot(p->name, p, "", rrd);
 
 		node_free(rrd);
 	}

@@ -69,8 +69,8 @@ escputs(const char *s, FILE *f)
 	}
 }
 
-static void
-dot_list(const char *prefix, const void *parent, const char *port, const struct node *node)
+void
+rrd_print_dot(const char *prefix, const void *parent, const char *port, const struct node *node)
 {
 	const struct node *p;
 
@@ -116,33 +116,30 @@ dot_list(const char *prefix, const void *parent, const char *port, const struct 
 		case NODE_LOOP:
 			printf("label = \"<b> &larr;|LOOP|<r> &rarr;\""); /* TODO: utf */
 			break;
+
+		default:
+			printf("label = \"?\", color = red");
 		}
 
 		printf(" ];\n");
 
 		switch (p->type) {
 		case NODE_CHOICE:
-			dot_list(prefix, p, "", p->u.choice);
+			rrd_print_dot(prefix, p, "", p->u.choice);
 			break;
 
 		case NODE_SEQUENCE:
-			dot_list(prefix, p, "", p->u.sequence);
+			rrd_print_dot(prefix, p, "", p->u.sequence);
 			break;
 
 		case NODE_LOOP:
-			dot_list(prefix, p, ":f", p->u.loop.forward);
-			dot_list(prefix, p, ":b", p->u.loop.backward);
+			rrd_print_dot(prefix, p, ":f", p->u.loop.forward);
+			rrd_print_dot(prefix, p, ":b", p->u.loop.backward);
 			break;
 
 		default:
 			break;
 		}
 	}
-}
-
-void
-rrd_print_dot(const char *prefix, const void *parent, struct node **n)
-{
-	dot_list(prefix, parent, "", *n);
 }
 
