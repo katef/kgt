@@ -16,7 +16,7 @@
 
 #include "io.h"
 
-static void output_alt(struct ast_production *grammar, struct ast_alt *alt);
+static void output_alt(struct ast_rule *grammar, struct ast_alt *alt);
 
 static void
 escputc(int c, FILE *f)
@@ -71,10 +71,10 @@ escputs(const char *s, FILE *f)
 	}
 }
 
-static struct ast_production *
-find(struct ast_production *grammar, const char *name)
+static struct ast_rule *
+find(struct ast_rule *grammar, const char *name)
 {
-	struct ast_production *p;
+	struct ast_rule *p;
 
 	for (p = grammar; p != NULL; p = p->next) {
 		if (0 == strcmp(p->name, name)) {
@@ -86,7 +86,7 @@ find(struct ast_production *grammar, const char *name)
 }
 
 static void
-output_group(struct ast_production *grammar,
+output_group(struct ast_rule *grammar,
 	struct ast_term *term, struct ast_alt *group)
 {
 	struct ast_alt *alt;
@@ -100,7 +100,7 @@ output_group(struct ast_production *grammar,
 }
 
 static void
-output_term(struct ast_production *grammar,
+output_term(struct ast_rule *grammar,
 	struct ast_alt *alt, struct ast_term *term)
 {
 	assert(term->max >= term->min || !term->max);
@@ -126,7 +126,7 @@ output_term(struct ast_production *grammar,
 		fputs("&#x3B5;", stdout);
 		break;
 
-	case TYPE_PRODUCTION:
+	case TYPE_RULE:
 		escputs(term->u.name, stdout);
 		break;
 
@@ -145,9 +145,9 @@ output_term(struct ast_production *grammar,
 	case TYPE_EMPTY:
 		break;
 
-	case TYPE_PRODUCTION:
-		/* XXX: the AST ought to have a link to the ast_production here */
-/* XXX: cross-links to productions are confusing
+	case TYPE_RULE:
+		/* XXX: the AST ought to have a link to the ast_rule here */
+/* XXX: cross-links to rules are confusing
 		if (find(grammar, term->u.name) != NULL) {
 			printf("\t\"t%p\" -> \"p%p\" [ dir = forward, color = blue, weight = 0 ];\n",
 				(void *) term, find(grammar, term->u.name));
@@ -167,7 +167,7 @@ output_term(struct ast_production *grammar,
 }
 
 static void
-output_alt(struct ast_production *grammar,
+output_alt(struct ast_rule *grammar,
 	struct ast_alt *alt)
 {
 	struct ast_term *term;
@@ -181,40 +181,40 @@ output_alt(struct ast_production *grammar,
 }
 
 static void
-output_alts(struct ast_production *grammar,
-	struct ast_production *production, struct ast_alt *alts)
+output_alts(struct ast_rule *grammar,
+	struct ast_rule *rule, struct ast_alt *alts)
 {
 	struct ast_alt *alt;
 
 	for (alt = alts; alt != NULL; alt = alt->next) {
 		printf("\t\"p%p\" -> \"a%p\";\n",
-			(void *) production, (void *) alt);
+			(void *) rule, (void *) alt);
 
 		output_alt(grammar, alt);
 	}
 }
 
 static void
-output_production(struct ast_production *grammar,
-	struct ast_production *production)
+output_rule(struct ast_rule *grammar,
+	struct ast_rule *rule)
 {
 	printf("\t\"p%p\" [ shape = record, label = \"=|%s\" ];\n",
-		(void *) production, production->name);
+		(void *) rule, rule->name);
 
-	output_alts(grammar, production, production->alts);
+	output_alts(grammar, rule, rule->alts);
 }
 
 void
-dot_output(struct ast_production *grammar)
+dot_output(struct ast_rule *grammar)
 {
-	struct ast_production *p;
+	struct ast_rule *p;
 
 	printf("digraph G {\n");
 	printf("\tnode [ shape = box, style = rounded ];\n");
 	printf("\tedge [ dir = none ];\n");
 
 	for (p = grammar; p != NULL; p = p->next) {
-		output_production(grammar, p);
+		output_rule(grammar, p);
 	}
 
 	printf("};\n");

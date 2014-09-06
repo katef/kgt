@@ -71,7 +71,7 @@ bottom_loop(struct node *n, struct node **np, int depth, void *arg)
 			break;
 		}
 
-		if (!everything && (n->u.loop.backward->type == NODE_TERMINAL || n->u.loop.backward->type == NODE_IDENTIFIER)) {
+		if (!everything && (n->u.loop.backward->type == NODE_TERMINAL || n->u.loop.backward->type == NODE_RULE)) {
 			break;
 		}
 

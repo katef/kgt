@@ -15,7 +15,7 @@ struct node *
 node_create_terminal(const char *terminal);
 
 struct node *
-node_create_identifier(const char *identifier);
+node_create_name(const char *name);
 
 struct node *
 node_create_choice(struct node *choice);

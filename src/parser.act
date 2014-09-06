@@ -20,9 +20,9 @@
 	string -> map_string;
 	number -> map_number;
 
-	ast_term       -> map_term;
-	ast_alt        -> map_alt;
-	ast_production -> map_production;
+	ast_term -> map_term;
+	ast_alt  -> map_alt;
+	ast_rule -> map_rule;
 
 %header% @{
 
@@ -117,7 +117,7 @@
 	typedef struct lex_state * lex_state;
 	typedef struct act_state * act_state;
 
-	typedef struct ast_production * map_production;
+	typedef struct ast_rule * map_rule;
 
 @};
 
@@ -235,9 +235,9 @@
 		@t->next = NULL;
 	@};
 
-	<make-production-term>: (n :string) -> (t :ast_term) = @{
+	<make-rule-term>: (n :string) -> (t :ast_term) = @{
 		@t = xmalloc(sizeof *@t);
-		@t->type = TYPE_PRODUCTION;
+		@t->type = TYPE_RULE;
 		@t->next = NULL;
 		@t->u.name = @n;
 	@};
@@ -263,15 +263,15 @@
 		@a->next = NULL;
 	@};
 
-	<make-production>: (n :string, a :ast_alt) -> (p :ast_production) = @{
-		@p = xmalloc(sizeof *@p);
-		@p->name = @n;
-		@p->alts = @a;
-		@p->next = NULL;
+	<make-rule>: (n :string, a :ast_alt) -> (r :ast_rule) = @{
+		@r = xmalloc(sizeof *@r);
+		@r->name = @n;
+		@r->alts = @a;
+		@r->next = NULL;
 	@};
 
-	<make-empty-production>: () -> (p :ast_production) = @{
-		@p = NULL;
+	<make-empty-rule>: () -> (r :ast_rule) = @{
+		@r = NULL;
 	@};
 
 
@@ -285,9 +285,9 @@
 		@a->next = @l;
 	@};
 
-	<add-production-to-list>: (l :ast_production, p :ast_production) -> () = @{
-		assert(@p->next == NULL);
-		@p->next = @l;
+	<add-rule-to-list>: (l :ast_rule, r :ast_rule) -> () = @{
+		assert(@r->next == NULL);
+		@r->next = @l;
 	@};
 
 
@@ -301,11 +301,11 @@
 	@};
 
 	<err-expected-sep> = @{
-		err_expected(lex_state, "production separator");
+		err_expected(lex_state, "production rule separator");
 	@};
 
 	<err-expected-equals> = @{
-		err_expected(lex_state, "production assignment");
+		err_expected(lex_state, "production rule assignment");
 	@};
 
 %trailer% @{
@@ -325,7 +325,7 @@
 		return lex_state->f(lex_state->opaque);
 	}
 
-	struct ast_production *
+	struct ast_rule *
 	FORM_INPUT(int (*f)(void *opaque), void *opaque)
 	{
 		struct act_state  act_state_s;
@@ -334,7 +334,7 @@
 		struct lex_state *lex_state;
 
 		struct LX_STATE *lx;
-		struct ast_production *new;
+		struct ast_rule *new;
 
 		assert(f != NULL);
 

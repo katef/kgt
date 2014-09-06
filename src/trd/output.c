@@ -63,7 +63,7 @@ output_term(struct ast_term *term)
 		fputs("Skip()", stdout);
 		break;
 
-	case TYPE_PRODUCTION:
+	case TYPE_RULE:
 		/* TODO: escape things */
 		printf("NonTerminal('%s')", term->u.name);
 		break;
@@ -138,22 +138,22 @@ output_alts(struct ast_alt *alts)
 }
 
 static void
-output_production(struct ast_production *production)
+output_rule(struct ast_rule *rule)
 {
-	printf("add('%s', Diagram(\n\t", production->name);
+	printf("add('%s', Diagram(\n\t", rule->name);
 
-	output_alts(production->alts);
+	output_alts(rule->alts);
 
 	printf("));\n\n");
 }
 
 void
-trd_output(struct ast_production *grammar)
+trd_output(struct ast_rule *grammar)
 {
-	struct ast_production *p;
+	struct ast_rule *p;
 
 	for (p = grammar; p != NULL; p = p->next) {
-		output_production(p);
+		output_rule(p);
 	}
 }
 

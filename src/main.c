@@ -26,8 +26,8 @@ int prettify = 1;
 
 struct io {
 	const char *name;
-	struct ast_production *(*in)(int (*f)(void *), void *);
-	void (*out)(struct ast_production *);
+	struct ast_rule *(*in)(int (*f)(void *), void *);
+	void (*out)(struct ast_rule *);
 } io[] = {
 	{ "bnf",    bnf_input,  bnf_output    },
 	{ "wsn",    wsn_input,  wsn_output    },
@@ -77,7 +77,7 @@ lang(const char *s)
 int
 main(int argc, char *argv[])
 {
-	struct ast_production *g;
+	struct ast_rule *g;
 	struct io *in, *out;
 
 	in  = lang("bnf");

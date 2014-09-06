@@ -64,7 +64,7 @@ output_term(struct ast_term *term)
 		fputs(" \"\"", stdout);
 		break;
 
-	case TYPE_PRODUCTION:
+	case TYPE_RULE:
 		printf(" %s", term->u.name);
 		break;
 
@@ -102,12 +102,12 @@ output_alt(struct ast_alt *alt)
 }
 
 static void
-output_production(struct ast_production *production)
+output_rule(struct ast_rule *rule)
 {
 	struct ast_alt *alt;
 
-	alt = production->alts;
-	printf("%s =", production->name);
+	alt = rule->alts;
+	printf("%s =", rule->name);
 	output_alt(alt);
 
 	for (alt = alt->next; alt != NULL; alt = alt->next) {
@@ -119,12 +119,12 @@ output_production(struct ast_production *production)
 }
 
 void
-wsn_output(struct ast_production *grammar)
+wsn_output(struct ast_rule *grammar)
 {
-	struct ast_production *p;
+	struct ast_rule *p;
 
 	for (p = grammar; p != NULL; p = p->next) {
-		output_production(p);
+		output_rule(p);
 	}
 }
 

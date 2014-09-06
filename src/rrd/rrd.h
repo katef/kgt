@@ -14,15 +14,15 @@ struct node {
 	enum {
 		NODE_SKIP,
 		NODE_TERMINAL,
-		NODE_IDENTIFIER,
+		NODE_RULE,
 		NODE_CHOICE,
 		NODE_SEQUENCE,
 		NODE_LOOP
 	} type;
 
 	union {
-		const char *terminal;
-		const char *identifier;
+		const char *terminal; /* TODO: point to ast_terminal instead */
+		const char *name;     /* TODO: point to ast_rule instead */
 
 		struct node *choice;
 		struct node *sequence;
@@ -45,7 +45,7 @@ struct node {
  */
 struct node_walker {
 	int (*visit_skip      )(struct node *, struct node **, int, void *);
-	int (*visit_identifier)(struct node *, struct node **, int, void *);
+	int (*visit_name)(struct node *, struct node **, int, void *);
 	int (*visit_terminal  )(struct node *, struct node **, int, void *);
 	int (*visit_choice    )(struct node *, struct node **, int, void *);
 	int (*visit_sequence  )(struct node *, struct node **, int, void *);
@@ -55,6 +55,6 @@ struct node_walker {
 int node_walk(struct node **, const struct node_walker *, int, void *);
 int node_walk_list(struct node **, const struct node_walker *, int, void *);
 
-struct node *ast_to_rrd(struct ast_production *);
+struct node *ast_to_rrd(struct ast_rule *);
 
 #endif

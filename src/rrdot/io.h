@@ -3,11 +3,11 @@
 #ifndef KGT_RRDOT_IO_H
 #define KGT_RRDOT_IO_H
 
-struct ast_production;
+struct ast_rule;
 
 extern int prettify;
 
 void
-rrdot_output(struct ast_production *);
+rrdot_output(struct ast_rule *);
 
 #endif

@@ -27,8 +27,8 @@ leaves_eq(struct node *a, struct node *b)
 	case NODE_TERMINAL:
 		return 0 == strcmp(a->u.terminal, b->u.terminal);
 
-	case NODE_IDENTIFIER:
-		return 0 == strcmp(a->u.identifier, b->u.identifier);
+	case NODE_RULE:
+		return 0 == strcmp(a->u.name, b->u.name);
 
 	default:
 		return 0;
@@ -40,7 +40,7 @@ process_loop_leaf(struct node *loop, struct bnode *bp)
 {
 	struct node *a, *b;
 
-	if (bp == NULL || (bp->v->type != NODE_TERMINAL && bp->v->type != NODE_IDENTIFIER)) {
+	if (bp == NULL || (bp->v->type != NODE_TERMINAL && bp->v->type != NODE_RULE)) {
 		return 0;
 	}
 
@@ -124,11 +124,11 @@ process_loop_list(struct node *loop, struct bnode *bp)
 	for (rp = rl; rp != NULL && bp != NULL; rp = rp->next, bp = bp->next) {
 		struct node *a, *b;
 
-		if (rp->v->type != NODE_TERMINAL || rp->v->type != NODE_IDENTIFIER) {
+		if (rp->v->type != NODE_TERMINAL || rp->v->type != NODE_RULE) {
 			break;
 		}
 
-		if (bp->v->type != NODE_TERMINAL || bp->v->type != NODE_IDENTIFIER) {
+		if (bp->v->type != NODE_TERMINAL || bp->v->type != NODE_RULE) {
 			break;
 		}
 
@@ -163,7 +163,7 @@ process_loop(struct node *loop, struct bnode *bp)
 		return process_loop_list(loop, bp);
 	}
 
-	if (loop->u.loop.backward->type == NODE_TERMINAL || loop->u.loop.backward->type == NODE_IDENTIFIER) {
+	if (loop->u.loop.backward->type == NODE_TERMINAL || loop->u.loop.backward->type == NODE_RULE) {
 		return process_loop_leaf(loop, bp);
 	}
 

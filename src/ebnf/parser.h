@@ -15,13 +15,13 @@
 	typedef struct lex_state * lex_state;
 	typedef struct act_state * act_state;
 
-	typedef struct ast_production * map_production;
+	typedef struct ast_rule * map_rule;
 
 #line 21 "src/ebnf/parser.h"
 
 /* BEGINNING OF FUNCTION DECLARATIONS */
 
-extern void prod_ebnf(lex_state, act_state, map_production *);
+extern void prod_ebnf(lex_state, act_state, map_rule *);
 /* BEGINNING OF TRAILER */
 
 #line 382 "src/parser.act"

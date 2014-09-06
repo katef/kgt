@@ -105,9 +105,9 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 			printf("\\\"\"");
 			break;
 
-		case NODE_IDENTIFIER:
+		case NODE_RULE:
 			printf("label = \"\\<");
-			escputs(p->u.terminal, stdout);
+			escputs(p->u.name, stdout);
 			printf("\\>\"");
 			break;
 
@@ -150,9 +150,9 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 }
 
 void
-rrdot_output(struct ast_production *grammar)
+rrdot_output(struct ast_rule *grammar)
 {
-	struct ast_production *p;
+	struct ast_rule *p;
 
 	printf("digraph G {\n");
 	printf("\tnode [ shape = record, style = rounded ];\n");

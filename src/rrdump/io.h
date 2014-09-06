@@ -3,11 +3,11 @@
 #ifndef KGT_RRDUMP_IO_H
 #define KGT_RRDUMP_IO_H
 
-struct ast_production;
+struct ast_rule;
 
 extern int prettify;
 
 void
-rrdump_output(struct ast_production *);
+rrdump_output(struct ast_rule *);
 
 #endif

@@ -42,14 +42,14 @@ visit_skip(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static int
-visit_identifier(struct node *n, struct node **np, int depth, void *arg)
+visit_name(struct node *n, struct node **np, int depth, void *arg)
 {
 	FILE *f = arg;
 
 	(void) np;
 
 	print_indent(f, depth);
-	fprintf(f, "IDENTIFIER: <%s>\n", n->u.identifier);
+	fprintf(f, "NAME: <%s>\n", n->u.name);
 
 	return 1;
 }
@@ -133,15 +133,15 @@ visit_loop(struct node *n, struct node **np, int depth, void *arg)
 
 static struct node_walker rrd_print = {
 	visit_skip,
-	visit_identifier, visit_terminal,
-	visit_choice,     visit_sequence,
+	visit_name,   visit_terminal,
+	visit_choice, visit_sequence,
 	visit_loop
 };
 
 void
-rrdump_output(struct ast_production *grammar)
+rrdump_output(struct ast_rule *grammar)
 {
-	struct ast_production *p;
+	struct ast_rule *p;
 
 	for (p = grammar; p; p = p->next) {
 		struct node *rrd;

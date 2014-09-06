@@ -43,7 +43,7 @@ output_basic(struct ast_term *term)
 		fputs("$$; ", stdout);
 		break;
 
-	case TYPE_PRODUCTION:
+	case TYPE_RULE:
 		printf("%s; ", term->u.name);
 		break;
 
@@ -88,13 +88,13 @@ output_alt(struct ast_alt *alt)
 }
 
 static void
-output_production(struct ast_production *production)
+output_rule(struct ast_rule *rule)
 {
 	struct ast_alt *alt;
 
-	printf("\t%s = {\n\t\t", production->name);
+	printf("\t%s = {\n\t\t", rule->name);
 
-	for (alt = production->alts; alt != NULL; alt = alt->next) {
+	for (alt = rule->alts; alt != NULL; alt = alt->next) {
 		output_alt(alt);
 
 		printf("\n");
@@ -107,10 +107,10 @@ output_production(struct ast_production *production)
 	printf("\t};\n\n");
 }
 
-static struct ast_production *
-is_defined(struct ast_production *grammar, const char *name)
+static struct ast_rule *
+is_defined(struct ast_rule *grammar, const char *name)
 {
-	struct ast_production *p;
+	struct ast_rule *p;
 
 	for (p = grammar; p != NULL; p = p->next) {
 		if (0 == strcmp(p->name, name)) {
@@ -129,15 +129,15 @@ is_equal(struct ast_term *a, struct ast_term *b)
 	}
 
 	switch (a->type) {
-	case TYPE_PRODUCTION: return 0 == strcmp(a->u.name,    b->u.name);
+	case TYPE_RULE: return 0 == strcmp(a->u.name,    b->u.name);
 	case TYPE_TERMINAL:   return 0 == strcmp(a->u.literal, b->u.literal);
 	}
 }
 
 static void
-output_terminals(struct ast_production *grammar)
+output_terminals(struct ast_rule *grammar)
 {
-	struct ast_production *p;
+	struct ast_rule *p;
 	struct ast_term *found = NULL;
 
 	/* List terminals */
@@ -154,7 +154,7 @@ output_terminals(struct ast_production *grammar)
 				case TYPE_GROUP:
 					continue;
 
-				case TYPE_PRODUCTION:
+				case TYPE_RULE:
 					if (is_defined(grammar, term->u.name)) {
 						continue;
 					}
@@ -198,9 +198,9 @@ output_terminals(struct ast_production *grammar)
 }
 
 void
-sid_output(struct ast_production *grammar)
+sid_output(struct ast_rule *grammar)
 {
-	struct ast_production *p;
+	struct ast_rule *p;
 
 	output_section("types");
 
@@ -208,12 +208,12 @@ sid_output(struct ast_production *grammar)
 
 	output_terminals(grammar);
 
-	output_section("productions");
+	output_section("rules");
 
-	/* TODO list production declartations */
+	/* TODO list rule declartations */
 
 	for (p = grammar; p != NULL; p = p->next) {
-		output_production(p);
+		output_rule(p);
 	}
 
 	output_section("entry");

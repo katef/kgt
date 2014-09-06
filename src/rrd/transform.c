@@ -79,8 +79,8 @@ static struct node *
 transform_leaf(struct ast_term *term)
 {
 	switch (term->type) {
-	case TYPE_PRODUCTION:
-		return node_create_identifier(term->u.name);
+	case TYPE_RULE:
+		return node_create_name(term->u.name);
 
 	case TYPE_TERMINAL:
 		return node_create_terminal(term->u.literal);
@@ -114,7 +114,7 @@ single_term(struct ast_term *term)
 {
 	switch (term->type) {
 	case TYPE_EMPTY:      return transform_empty();
-	case TYPE_PRODUCTION:
+	case TYPE_RULE:
 	case TYPE_TERMINAL:   return transform_leaf (term);
 	case TYPE_GROUP:      return transform_group(term->u.group);
 	}
@@ -218,7 +218,7 @@ transform_term(struct ast_term *term)
 }
 
 struct node *
-ast_to_rrd(struct ast_production *ast)
+ast_to_rrd(struct ast_rule *ast)
 {
 	struct node *choice;
 	struct node *n;
@@ -245,12 +245,12 @@ node_call_walker(struct node **n, const struct node_walker *ws, int depth, void 
 	node = *n;
 
 	switch (node->type) {
-	case NODE_SKIP:       return ws->visit_skip       ? ws->visit_skip(*n, n, depth, a)         : -1;
-	case NODE_TERMINAL:   return ws->visit_terminal   ? ws->visit_terminal(node, n, depth, a)   : -1;
-	case NODE_IDENTIFIER: return ws->visit_identifier ? ws->visit_identifier(node, n, depth, a) : -1;
-	case NODE_CHOICE:     return ws->visit_choice     ? ws->visit_choice(node, n, depth, a)     : -1;
-	case NODE_SEQUENCE:   return ws->visit_sequence   ? ws->visit_sequence(node, n, depth, a)   : -1;
-	case NODE_LOOP:       return ws->visit_loop       ? ws->visit_loop(node, n, depth, a)       : -1;
+	case NODE_SKIP:     return ws->visit_skip     ? ws->visit_skip(*n, n, depth, a)       : -1;
+	case NODE_TERMINAL: return ws->visit_terminal ? ws->visit_terminal(node, n, depth, a) : -1;
+	case NODE_RULE:     return ws->visit_name     ? ws->visit_name(node, n, depth, a)     : -1;
+	case NODE_CHOICE:   return ws->visit_choice   ? ws->visit_choice(node, n, depth, a)   : -1;
+	case NODE_SEQUENCE: return ws->visit_sequence ? ws->visit_sequence(node, n, depth, a) : -1;
+	case NODE_LOOP:     return ws->visit_loop     ? ws->visit_loop(node, n, depth, a)     : -1;
 	}
 
 	return -1;
@@ -314,7 +314,7 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *a)
 		break;
 
 	case NODE_SKIP:
-	case NODE_IDENTIFIER:
+	case NODE_RULE:
 	case NODE_TERMINAL:
 		break;
 	}

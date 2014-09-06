@@ -7,7 +7,7 @@ struct ast_alt;
 
 /*
  * A term is a sequential list of items within an alt. Each item may be
- * a terminal literal, a production name, or a group of terms.
+ * a terminal literal, a production rule name, or a group of terms.
  *
  * A term may be repeated a number of times, as in the EBNF x * 3 construct.
  *
@@ -16,13 +16,13 @@ struct ast_alt;
 struct ast_term {
 	enum {
 		TYPE_EMPTY,
-		TYPE_PRODUCTION,
+		TYPE_RULE,
 		TYPE_TERMINAL,
 		TYPE_GROUP
 	} type;
 
 	union {
-		const char *name;	/* production name; TODO: point to ast_production instead */
+		const char *name;	/* production rule name; TODO: point to ast_rule instead */
 		const char *literal;
 		struct ast_alt *group;
 	} u;
@@ -46,17 +46,17 @@ struct ast_alt {
 };
 
 /*
- * A grammar is a list of productions. Each production maps a name onto a list
+ * A grammar is a list of production rules. Each rule maps a name onto a list
  * of alternatives:
  *
  * name1 := alt1 | alt2 | alt3 ;
  * name2 := alt1 ;
  */
-struct ast_production {
+struct ast_rule {
 	const char *name;
 	struct ast_alt *alts;
 
-	struct ast_production *next;
+	struct ast_rule *next;
 };
 
 #endif

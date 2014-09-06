@@ -3,11 +3,11 @@
 #ifndef KGT_RRTEXT_IO_H
 #define KGT_RRTEXT_IO_H
 
-struct ast_production;
+struct ast_rule;
 
 extern int prettify;
 
 void
-rrtext_output(struct ast_production *);
+rrtext_output(struct ast_rule *);
 
 #endif

@@ -23,7 +23,7 @@ node_free(struct node *n)
 		switch (n->type) {
 		case NODE_SKIP:
 		case NODE_TERMINAL:
-		case NODE_IDENTIFIER:
+		case NODE_RULE:
 			break;
 
 		case NODE_CHOICE:
@@ -75,18 +75,18 @@ node_create_terminal(const char *terminal)
 }
 
 struct node *
-node_create_identifier(const char *identifier)
+node_create_name(const char *name)
 {
 	struct node *new;
 
-	assert(identifier != NULL);
+	assert(name != NULL);
 
 	new = xmalloc(sizeof *new);
 
-	new->type = NODE_IDENTIFIER;
+	new->type = NODE_RULE;
 	new->next = NULL;
 
-	new->u.identifier = identifier;
+	new->u.name = name;
 
 	return new;
 }
