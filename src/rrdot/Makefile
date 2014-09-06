@@ -1,7 +1,6 @@
 .include "../../share/mk/top.mk"
 
 SRC += src/rrdot/output.c
-SRC += src/rrdot/print_dot.c
 
 PART += rrdot
 

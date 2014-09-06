@@ -1,7 +1,6 @@
 .include "../../share/mk/top.mk"
 
 SRC += src/rrtext/output.c
-SRC += src/rrtext/print_text.c
 
 PART += rrtext
 
