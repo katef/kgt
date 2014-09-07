@@ -421,7 +421,8 @@ rrtext_output(const struct ast_rule *grammar)
 			}
 
 			ctx.rtl = 0;
-			ctx.x = ctx.y = 0;
+			ctx.x = 0;
+			ctx.y = 0;
 			ctx.scratch = xmalloc(ctx.size.w + 1);
 
 			ctx.y = rrd->y;

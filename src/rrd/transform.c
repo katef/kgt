@@ -50,7 +50,7 @@ transform_alt(const struct ast_alt *alt)
 static struct node *
 transform_alts(const struct ast_alt *alts)
 {
-	struct node *list = 0, **head = &list;
+	struct node *list = NULL, **head = &list;
 	const struct ast_alt *p;
 
 	for (p = alts; p != NULL; p = p->next) {

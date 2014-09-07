@@ -101,7 +101,7 @@ redundant_choice(struct node *n, struct node **np, int depth, void *arg)
 static int
 redundant_loop(struct node *n, struct node **np, int depth, void *arg)
 {
-	struct node **inner = 0;
+	struct node **inner = NULL;
 	struct node *loop;
 
 	if (!node_walk(&n->u.loop.forward, &pretty_redundant, depth + 1, arg)) {
@@ -132,7 +132,7 @@ redundant_loop(struct node *n, struct node **np, int depth, void *arg)
 
 	if (inner) {
 		*np = *inner;
-		*inner = 0;
+		*inner = NULL;
 		node_free(n);
 	}
 
@@ -140,15 +140,15 @@ redundant_loop(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static struct node_walker pretty_redundant = {
-	0,
-	0, 0,
-	redundant_choice, 0,
+	NULL,
+	NULL, NULL,
+	redundant_choice, NULL,
 	redundant_loop
 };
 
 void
 rrd_pretty_redundant(struct node **rrd)
 {
-	node_walk(rrd, &pretty_redundant, 0, 0);
+	node_walk(rrd, &pretty_redundant, 0, NULL);
 }
 

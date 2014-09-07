@@ -83,12 +83,12 @@ loop_switch_sides(int suflen, struct node *loop, struct bnode **rl)
 	} else {
 		node_free(loop->u.loop.forward);
 		(void) b_pop(rl, &v);
-		v->next = 0;
+		v->next = NULL;
 		loop->u.loop.forward = v;
 	}
 
 	if (b_pop(rl, &v)) {
-		v->next = 0;
+		v->next = NULL;
 	} else {
 		struct node *skip;
 
@@ -107,7 +107,7 @@ process_loop_list(struct node *loop, struct bnode *bp)
 {
 	struct node *list;
 	struct node *p;
-	struct bnode *rl = 0, *rp;
+	struct bnode *rl = NULL, *rp;
 	int suffix = 0;
 
 	list = loop->u.loop.backward;
@@ -176,7 +176,7 @@ static int
 collapse_sequence(struct node *n, struct node **np, int depth, void *arg)
 {
 	struct node *p;
-	struct bnode *rl = 0;
+	struct bnode *rl = NULL;
 
 	for (p = n->u.sequence; p != NULL; p = p->next) {
 		int i, suffix_len;

@@ -128,9 +128,9 @@ bottom_loop(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static struct node_walker pretty_bottom = {
-	0,
-	0, 0,
-	0, bottom_sequence,
+	NULL,
+	NULL, NULL,
+	NULL, bottom_sequence,
 	bottom_loop
 };
 
@@ -143,7 +143,7 @@ rrd_pretty_bottom(struct node **rrd)
 	 * this results in a bulkier diagram, but avoids reversing the contents of
 	 * the sequence.
 	 */
-	struct bottom_context ctx = {0, 0};
+	struct bottom_context ctx = { 0, 0 };
 	node_walk(rrd, &pretty_bottom, 0, &ctx);
 }
 

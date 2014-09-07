@@ -20,6 +20,7 @@ static void
 print_indent(FILE *f, int n)
 {
 	int i;
+
 	for (i = 0; i < n; i++) {
 		fprintf(f, "    ");
 	}
@@ -143,7 +144,7 @@ rrdump_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
 
-	for (p = grammar; p; p = p->next) {
+	for (p = grammar; p != NULL; p = p->next) {
 		struct node *rrd;
 
 		rrd = ast_to_rrd(p);

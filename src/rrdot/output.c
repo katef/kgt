@@ -158,7 +158,7 @@ rrdot_output(const struct ast_rule *grammar)
 	printf("\tnode [ shape = record, style = rounded ];\n");
 	printf("\tedge [ dir = none ];\n");
 
-	for (p = grammar; p; p = p->next) {
+	for (p = grammar; p != NULL; p = p->next) {
 		struct node *rrd;
 
 		rrd = ast_to_rrd(p);
