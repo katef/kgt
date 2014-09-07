@@ -1,5 +1,6 @@
 .include "../share/mk/top.mk"
 
+SRC += src/ast.c
 SRC += src/main.c
 SRC += src/xalloc.c
 
@@ -10,6 +11,7 @@ PROG += kgt
 #${BUILD}/bin/kgt: ${BUILD}/${src:R}.o
 #.endfor
 
+${BUILD}/bin/kgt: ${BUILD}/src/ast.o
 ${BUILD}/bin/kgt: ${BUILD}/src/main.o
 ${BUILD}/bin/kgt: ${BUILD}/src/xalloc.o
 

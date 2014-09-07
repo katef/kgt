@@ -56,8 +56,31 @@ struct ast_rule {
 	const char *name;
 	struct ast_alt *alts;
 
+	unsigned int defined:1;
+
 	struct ast_rule *next;
 };
+
+struct ast_term *
+ast_make_empty_term(void);
+
+struct ast_term *
+ast_make_rule_term(const char *name);
+
+struct ast_term *
+ast_make_literal_term(const char *literal);
+
+struct ast_term *
+ast_make_group_term(struct ast_alt *group);
+
+struct ast_alt *
+ast_make_alt(struct ast_term *terms);
+
+struct ast_rule *
+ast_make_rule(const char *name, struct ast_alt *alts);
+
+struct ast_rule *
+ast_find_rule(const struct ast_rule *grammar, const char *name);
 
 #endif
 

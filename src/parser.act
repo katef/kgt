@@ -230,44 +230,28 @@
 
 
 	<make-empty-term>: () -> (t :ast_term) = @{
-		@t = xmalloc(sizeof *@t);
-		@t->type = TYPE_EMPTY;
-		@t->next = NULL;
+		@t = ast_make_empty_term();
 	@};
 
 	<make-rule-term>: (n :string) -> (t :ast_term) = @{
-		@t = xmalloc(sizeof *@t);
-		@t->type = TYPE_RULE;
-		@t->next = NULL;
-		@t->u.name = @n;
+		@t = ast_make_rule_term(@n);
 	@};
 
 	<make-literal-term>: (l :string) -> (t :ast_term) = @{
-		@t = xmalloc(sizeof *@t);
-		@t->type = TYPE_TERMINAL;	/* TODO: rename to literal or vice-versa, perhaps */
-		@t->next = NULL;
-		@t->u.literal = @l;
+		@t = ast_make_literal_term(@l);
 	@};
 
 	<make-group-term>: (a :ast_alt) -> (t :ast_term) = @{
-		@t = xmalloc(sizeof *@t);
-		@t->type = TYPE_GROUP;
-		@t->next = NULL;
-		@t->u.group = @a;
+		@t = ast_make_group_term(@a);
 	@};
 
 
 	<make-alt>: (t :ast_term) -> (a :ast_alt) = @{
-		@a = xmalloc(sizeof *@a);
-		@a->terms = @t;
-		@a->next = NULL;
+		@a = ast_make_alt(@t);
 	@};
 
 	<make-rule>: (n :string, a :ast_alt) -> (r :ast_rule) = @{
-		@r = xmalloc(sizeof *@r);
-		@r->name = @n;
-		@r->alts = @a;
-		@r->next = NULL;
+		@r = ast_make_rule(@n, @a);
 	@};
 
 	<make-empty-rule>: () -> (r :ast_rule) = @{

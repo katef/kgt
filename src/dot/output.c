@@ -71,20 +71,6 @@ escputs(const char *s, FILE *f)
 	}
 }
 
-static const struct ast_rule *
-find(const struct ast_rule *grammar, const char *name)
-{
-	const struct ast_rule *p;
-
-	for (p = grammar; p != NULL; p = p->next) {
-		if (0 == strcmp(p->name, name)) {
-			return p;
-		}
-	}
-
-	return NULL;
-}
-
 static void
 output_group(const struct ast_rule *grammar,
 	const struct ast_term *term, const struct ast_alt *group)
@@ -148,9 +134,9 @@ output_term(const struct ast_rule *grammar,
 	case TYPE_RULE:
 		/* XXX: the AST ought to have a link to the ast_rule here */
 /* XXX: cross-links to rules are confusing
-		if (find(grammar, term->u.name) != NULL) {
+		if (term->ast_find_rule(grammar, term->u.name) != NULL) {
 			printf("\t\"t%p\" -> \"p%p\" [ dir = forward, color = blue, weight = 0 ];\n",
-				(void *) term, find(grammar, term->u.name));
+				(void *) term, ast_find_rule(grammar, term->u.name));
 		}
 */
 		break;
