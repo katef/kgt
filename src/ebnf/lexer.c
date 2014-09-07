@@ -688,7 +688,7 @@ z4(struct lx_ebnf_lx *lx)
 			case '7':	          continue;
 			case '8':	          continue;
 			case '9':	          continue;
-			default:  lx_ebnf_ungetc(lx, c); return TOK_NUMBER;
+			default:  lx_ebnf_ungetc(lx, c); return TOK_COUNT;
 			}
 
 		case S12: /* e.g. ":" */
@@ -923,7 +923,7 @@ z4(struct lx_ebnf_lx *lx)
 	case S8: return TOK_CAT;
 	case S9: return TOK_EXCEPT;
 	case S10: return TOK_ALT;
-	case S11: return TOK_NUMBER;
+	case S11: return TOK_COUNT;
 	case S13: return TOK_SEP;
 	case S14: return TOK_EQUALS;
 	case S15: return TOK_OPT;
@@ -942,7 +942,7 @@ const char *
 lx_ebnf_name(enum lx_ebnf_token t)
 {
 	switch (t) {
-	case TOK_NUMBER: return "NUMBER";
+	case TOK_COUNT: return "COUNT";
 	case TOK_IDENT: return "IDENT";
 	case TOK_OPT: return "OPT";
 	case TOK_STAR: return "STAR";
@@ -993,7 +993,7 @@ lx_ebnf_example(enum lx_ebnf_token (*z)(struct lx_ebnf_lx *), enum lx_ebnf_token
 	} else
 	if (z == z4) {
 		switch (t) {
-		case TOK_NUMBER: return "0";
+		case TOK_COUNT: return "0";
 		case TOK_IDENT: return "a";
 		case TOK_OPT: return "?";
 		case TOK_STAR: return "*";

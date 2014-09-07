@@ -14,7 +14,7 @@
 
 	char;
 	string;
-	number;
+	count;
 
 	ast_rule;
 	ast_term;
@@ -43,23 +43,23 @@
 	!NAME;
 	LITERAL;
 
-	!ESC:   () -> (:char);
-	CHAR:   () -> (:char);
-	IDENT:  () -> (:string);
-	NUMBER: () -> (:number);
+	!ESC:  () -> (:char);
+	CHAR:  () -> (:char);
+	IDENT: () -> (:string);
+	COUNT: () -> (:count);
 
 %productions%
 
 	<pattern-char>:   (:char) -> ();
 	<pattern-buffer>: ()      -> (:string);
 
-	<rep-one>:          () -> (:number, :number);
-	!<rep-one-or-more>: () -> (:number, :number);
-	<rep-zero-or-more>: () -> (:number, :number);
-	<rep-zero-or-one>:  () -> (:number, :number);
+	<rep-one>:          () -> (:count, :count);
+	!<rep-one-or-more>: () -> (:count, :count);
+	<rep-zero-or-more>: () -> (:count, :count);
+	<rep-zero-or-one>:  () -> (:count, :count);
 
-	<set-repeat>: (:ast_term, :number, :number) -> ();
-	<mul-repeat>: (:ast_term, :number)          -> ();
+	<set-repeat>: (:ast_term, :count, :count) -> ();
+	<mul-repeat>: (:ast_term, :count)         -> ();
 
 	<make-empty-term>:      ()         -> (:ast_term);
 	<make-rule-term>: (:string)  -> (:ast_term);
@@ -142,7 +142,7 @@
 	repeatable-factor: () -> (t :ast_term) = {
 		t = factor;
 	||
-		n = NUMBER;
+		n = COUNT;
 		STAR;
 		t = factor;
 

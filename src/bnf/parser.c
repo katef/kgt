@@ -47,7 +47,7 @@
 
 	typedef char         map_char;
 	typedef const char * map_string;
-	typedef unsigned int map_number;
+	typedef unsigned int map_count;
 
 	typedef struct ast_term * map_term;
 	typedef struct ast_alt * map_alt;
@@ -134,8 +134,8 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 		return;
 	}
 	{
-		map_number ZImin;
-		map_number ZImax;
+		map_count ZImin;
+		map_count ZImax;
 
 		prod_term (lex_state, act_state, &ZIt);
 		if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {

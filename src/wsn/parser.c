@@ -47,7 +47,7 @@
 
 	typedef char         map_char;
 	typedef const char * map_string;
-	typedef unsigned int map_number;
+	typedef unsigned int map_count;
 
 	typedef struct ast_term * map_term;
 	typedef struct ast_alt * map_alt;
@@ -133,8 +133,8 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 	case (TOK_STARTGROUP):
 		{
 			map_alt ZIa;
-			map_number ZImin;
-			map_number ZImax;
+			map_count ZImin;
+			map_count ZImax;
 
 			ADVANCE_LEXER;
 			prod_list_Hof_Halts (lex_state, act_state, &ZIa);
@@ -184,8 +184,8 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 	case (TOK_STARTOPT):
 		{
 			map_alt ZIa;
-			map_number ZImin;
-			map_number ZImax;
+			map_count ZImin;
+			map_count ZImax;
 
 			ADVANCE_LEXER;
 			prod_list_Hof_Halts (lex_state, act_state, &ZIa);
@@ -235,8 +235,8 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 	case (TOK_STARTSTAR):
 		{
 			map_alt ZIa;
-			map_number ZImin;
-			map_number ZImax;
+			map_count ZImin;
+			map_count ZImax;
 
 			ADVANCE_LEXER;
 			prod_list_Hof_Halts (lex_state, act_state, &ZIa);
@@ -286,8 +286,8 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 	case (TOK_EMPTY): case (TOK_LITERAL): case (TOK_ESC): case (TOK_CHAR):
 	case (TOK_IDENT):
 		{
-			map_number ZImin;
-			map_number ZImax;
+			map_count ZImin;
+			map_count ZImax;
 
 			prod_term (lex_state, act_state, &ZIt);
 			if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {

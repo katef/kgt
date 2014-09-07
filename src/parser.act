@@ -18,7 +18,7 @@
 
 	char   -> map_char;
 	string -> map_string;
-	number -> map_number;
+	count  -> map_count;
 
 	ast_term -> map_term;
 	ast_alt  -> map_alt;
@@ -61,7 +61,7 @@
 
 	typedef char         map_char;
 	typedef const char * map_string;
-	typedef unsigned int map_number;
+	typedef unsigned int map_count;
 
 	typedef struct ast_term * map_term;
 	typedef struct ast_alt * map_alt;
@@ -149,7 +149,7 @@
 		}
 	@};
 
-	NUMBER: () -> (n :number) = @{
+	COUNT: () -> (n :count) = @{
 		@n = strtoul(lex_state->buf.a, NULL, 10);
 		/* TODO: range check */
 	@};
@@ -182,34 +182,34 @@
 	@};
 
 
-	<rep-one>: () -> (min :number, max :number) = @{
+	<rep-one>: () -> (min :count, max :count) = @{
 		@min = 1;
 		@max = 1;
 	@};
 
-	<rep-one-or-more>: () -> (min :number, max :number) = @{
+	<rep-one-or-more>: () -> (min :count, max :count) = @{
 		@min = 1;
 		@max = 0;
 	@};
 
-	<rep-zero-or-more>: () -> (min :number, max :number) = @{
+	<rep-zero-or-more>: () -> (min :count, max :count) = @{
 		@min = 0;
 		@max = 0;
 	@};
 
-	<rep-zero-or-one>: () -> (min :number, max :number) = @{
+	<rep-zero-or-one>: () -> (min :count, max :count) = @{
 		@min = 0;
 		@max = 1;
 	@};
 
-	<set-repeat>: (t :ast_term, min :number, max :number) -> () = @{
+	<set-repeat>: (t :ast_term, min :count, max :count) -> () = @{
 		assert(@max >= @min || !@max);
 
 		@t->min = @min;
 		@t->max = @max;
 	@};
 
-	<mul-repeat>: (t :ast_term, n :number) -> () = @{
+	<mul-repeat>: (t :ast_term, n :count) -> () = @{
 		assert(@n > 0);
 
 		/*

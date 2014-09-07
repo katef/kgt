@@ -47,5 +47,5 @@
 # XXX: I am unsure that this is correct. EBNF is far too complicated.
 /[a-z]([-a-z0-9_\t\r\n\v\f ]*[-a-z0-9_])?/i -> $ident;
 
-/[0-9]+/ -> $number;
+/[0-9]+/ -> $count;
 

@@ -4,7 +4,7 @@
 #define LX_H
 
 enum lx_ebnf_token {
-	TOK_NUMBER,
+	TOK_COUNT,
 	TOK_IDENT,
 	TOK_OPT,
 	TOK_STAR,
