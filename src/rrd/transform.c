@@ -16,13 +16,13 @@
 #include "node.h"
 
 static struct node *
-transform_term(struct ast_term *term);
+transform_term(const struct ast_term *term);
 
 static struct node *
-transform_alt(struct ast_alt *alt)
+transform_alt(const struct ast_alt *alt)
 {
 	struct node *list, **tail;
-	struct ast_term *p;
+	const struct ast_term *p;
 
 	list = NULL;
 	tail = &list;
@@ -48,10 +48,10 @@ transform_alt(struct ast_alt *alt)
 }
 
 static struct node *
-transform_alts(struct ast_alt *alts)
+transform_alts(const struct ast_alt *alts)
 {
 	struct node *list = 0, **head = &list;
-	struct ast_alt *p;
+	const struct ast_alt *p;
 
 	for (p = alts; p != NULL; p = p->next) {
 		/* TODO: node_add */
@@ -76,7 +76,7 @@ transform_empty(void)
 }
 
 static struct node *
-transform_leaf(struct ast_term *term)
+transform_leaf(const struct ast_term *term)
 {
 	switch (term->type) {
 	case TYPE_RULE:
@@ -92,7 +92,7 @@ transform_leaf(struct ast_term *term)
 }
 
 static struct node *
-transform_group(struct ast_alt *group)
+transform_group(const struct ast_alt *group)
 {
 	struct node *list;
 	struct node *alts;
@@ -110,7 +110,7 @@ transform_group(struct ast_alt *group)
 }
 
 static struct node *
-single_term(struct ast_term *term)
+single_term(const struct ast_term *term)
 {
 	switch (term->type) {
 	case TYPE_EMPTY:      return transform_empty();
@@ -123,7 +123,7 @@ single_term(struct ast_term *term)
 }
 
 static struct node *
-optional_term(struct ast_term *term)
+optional_term(const struct ast_term *term)
 {
 	struct node *skip;
 	struct node *n;
@@ -141,7 +141,7 @@ optional_term(struct ast_term *term)
 }
 
 static struct node *
-oneormore_term(struct ast_term *term)
+oneormore_term(const struct ast_term *term)
 {
 	struct node *loop;
 	struct node *skip;
@@ -163,7 +163,7 @@ oneormore_term(struct ast_term *term)
 }
 
 static struct node *
-zeroormore_term(struct ast_term *term)
+zeroormore_term(const struct ast_term *term)
 {
 	struct node *skip;
 	struct node *choice;
@@ -190,14 +190,14 @@ zeroormore_term(struct ast_term *term)
 }
 
 static struct node *
-transform_term(struct ast_term *term)
+transform_term(const struct ast_term *term)
 {
 	size_t i;
 
 	struct {
 		unsigned int min;
 		unsigned int max;
-		struct node *(*f)(struct ast_term *term);
+		struct node *(*f)(const struct ast_term *term);
 	} a[] = {
 		{ 1, 1, single_term     },
 		{ 0, 1, optional_term   },
@@ -218,7 +218,7 @@ transform_term(struct ast_term *term)
 }
 
 struct node *
-ast_to_rrd(struct ast_rule *ast)
+ast_to_rrd(const struct ast_rule *ast)
 {
 	struct node *choice;
 	struct node *n;

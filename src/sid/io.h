@@ -6,7 +6,7 @@
 struct ast_rule;
 
 void
-sid_output(struct ast_rule *grammar);
+sid_output(const struct ast_rule *grammar);
 
 #endif
 

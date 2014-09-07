@@ -6,7 +6,7 @@
 struct ast_rule;
 
 void
-dot_output(struct ast_rule *grammar);
+dot_output(const struct ast_rule *grammar);
 
 #endif
 

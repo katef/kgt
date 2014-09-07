@@ -150,9 +150,9 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 }
 
 void
-rrdot_output(struct ast_rule *grammar)
+rrdot_output(const struct ast_rule *grammar)
 {
-	struct ast_rule *p;
+	const struct ast_rule *p;
 
 	printf("digraph G {\n");
 	printf("\tnode [ shape = record, style = rounded ];\n");

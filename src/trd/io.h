@@ -6,7 +6,7 @@
 struct ast_rule;
 
 void
-trd_output(struct ast_rule *grammar);
+trd_output(const struct ast_rule *grammar);
 
 #endif
 

@@ -27,7 +27,7 @@ int prettify = 1;
 struct io {
 	const char *name;
 	struct ast_rule *(*in)(int (*f)(void *), void *);
-	void (*out)(struct ast_rule *);
+	void (*out)(const struct ast_rule *);
 } io[] = {
 	{ "bnf",    bnf_input,  bnf_output    },
 	{ "wsn",    wsn_input,  wsn_output    },

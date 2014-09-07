@@ -14,10 +14,10 @@
 
 #include "io.h"
 
-static void output_alt(struct ast_alt *alt);
+static void output_alt(const struct ast_alt *alt);
 
 static void
-output_term(struct ast_term *term)
+output_term(const struct ast_term *term)
 {
 	const char *s, *e;
 	size_t i;
@@ -92,9 +92,9 @@ output_term(struct ast_term *term)
 }
 
 static void
-output_alt(struct ast_alt *alt)
+output_alt(const struct ast_alt *alt)
 {
-	struct ast_term *term;
+	const struct ast_term *term;
 
 	for (term = alt->terms; term != NULL; term = term->next) {
 		output_term(term);
@@ -102,9 +102,9 @@ output_alt(struct ast_alt *alt)
 }
 
 static void
-output_rule(struct ast_rule *rule)
+output_rule(const struct ast_rule *rule)
 {
-	struct ast_alt *alt;
+	const struct ast_alt *alt;
 
 	alt = rule->alts;
 	printf("%s =", rule->name);
@@ -119,9 +119,9 @@ output_rule(struct ast_rule *rule)
 }
 
 void
-wsn_output(struct ast_rule *grammar)
+wsn_output(const struct ast_rule *grammar)
 {
-	struct ast_rule *p;
+	const struct ast_rule *p;
 
 	for (p = grammar; p != NULL; p = p->next) {
 		output_rule(p);

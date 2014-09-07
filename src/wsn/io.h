@@ -9,7 +9,7 @@ struct ast_rule *
 wsn_input(int (*f)(void *opaque), void *opaque);
 
 void
-wsn_output(struct ast_rule *grammar);
+wsn_output(const struct ast_rule *grammar);
 
 #endif
 

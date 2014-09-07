@@ -8,6 +8,6 @@ struct ast_rule;
 extern int prettify;
 
 void
-rrdump_output(struct ast_rule *);
+rrdump_output(const struct ast_rule *);
 
 #endif

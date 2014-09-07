@@ -16,7 +16,7 @@
 
 #include "io.h"
 
-static void output_alt(struct ast_alt *);
+static void output_alt(const struct ast_alt *);
 
 static void
 output_section(const char *section)
@@ -36,7 +36,7 @@ output_literal(const char *s)
 }
 
 static void
-output_basic(struct ast_term *term)
+output_basic(const struct ast_term *term)
 {
 	switch (term->type) {
 	case TYPE_EMPTY:
@@ -59,7 +59,7 @@ output_basic(struct ast_term *term)
 }
 
 static void
-output_term(struct ast_term *term)
+output_term(const struct ast_term *term)
 {
 	/* SID cannot express term repetition; TODO: semantic checks for this */
 	/* TODO: can output repetition as [ ... ] local rules with a stub to call them X times? */
@@ -78,9 +78,9 @@ output_term(struct ast_term *term)
 }
 
 static void
-output_alt(struct ast_alt *alt)
+output_alt(const struct ast_alt *alt)
 {
-	struct ast_term *term;
+	const struct ast_term *term;
 
 	for (term = alt->terms; term != NULL; term = term->next) {
 		output_term(term);
@@ -88,9 +88,9 @@ output_alt(struct ast_alt *alt)
 }
 
 static void
-output_rule(struct ast_rule *rule)
+output_rule(const struct ast_rule *rule)
 {
-	struct ast_alt *alt;
+	const struct ast_alt *alt;
 
 	printf("\t%s = {\n\t\t", rule->name);
 
@@ -107,10 +107,10 @@ output_rule(struct ast_rule *rule)
 	printf("\t};\n\n");
 }
 
-static struct ast_rule *
-is_defined(struct ast_rule *grammar, const char *name)
+static const struct ast_rule *
+is_defined(const struct ast_rule *grammar, const char *name)
 {
-	struct ast_rule *p;
+	const struct ast_rule *p;
 
 	for (p = grammar; p != NULL; p = p->next) {
 		if (0 == strcmp(p->name, name)) {
@@ -122,7 +122,7 @@ is_defined(struct ast_rule *grammar, const char *name)
 }
 
 static int
-is_equal(struct ast_term *a, struct ast_term *b)
+is_equal(const struct ast_term *a, const struct ast_term *b)
 {
 	if (a->type != b->type) {
 		return 0;
@@ -135,9 +135,9 @@ is_equal(struct ast_term *a, struct ast_term *b)
 }
 
 static void
-output_terminals(struct ast_rule *grammar)
+output_terminals(const struct ast_rule *grammar)
 {
-	struct ast_rule *p;
+	const struct ast_rule *p;
 	struct ast_term *found = NULL;
 
 	/* List terminals */
@@ -145,7 +145,7 @@ output_terminals(struct ast_rule *grammar)
 		struct ast_alt *alt;
 
 		for (alt = p->alts; alt != NULL; alt = alt->next) {
-			struct ast_term *term;
+			const struct ast_term *term;
 			struct ast_term *t;
 
 			for (term = alt->terms; term != NULL; term = term->next) {
@@ -198,9 +198,9 @@ output_terminals(struct ast_rule *grammar)
 }
 
 void
-sid_output(struct ast_rule *grammar)
+sid_output(const struct ast_rule *grammar)
 {
-	struct ast_rule *p;
+	const struct ast_rule *p;
 
 	output_section("types");
 

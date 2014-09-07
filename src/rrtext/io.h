@@ -8,6 +8,6 @@ struct ast_rule;
 extern int prettify;
 
 void
-rrtext_output(struct ast_rule *);
+rrtext_output(const struct ast_rule *);
 
 #endif

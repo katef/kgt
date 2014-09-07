@@ -383,9 +383,9 @@ static struct node_walker w_render = {
 };
 
 void
-rrtext_output(struct ast_rule *grammar)
+rrtext_output(const struct ast_rule *grammar)
 {
-	struct ast_rule *p;
+	const struct ast_rule *p;
 
 	for (p = grammar; p; p = p->next) {
 		struct node *rrd;

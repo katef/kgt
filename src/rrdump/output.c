@@ -139,9 +139,9 @@ static struct node_walker rrd_print = {
 };
 
 void
-rrdump_output(struct ast_rule *grammar)
+rrdump_output(const struct ast_rule *grammar)
 {
-	struct ast_rule *p;
+	const struct ast_rule *p;
 
 	for (p = grammar; p; p = p->next) {
 		struct node *rrd;

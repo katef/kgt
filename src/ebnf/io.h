@@ -9,7 +9,7 @@ struct ast_rule *
 ebnf_input(int (*f)(void *opaque), void *opaque);
 
 void
-ebnf_output(struct ast_rule *grammar);
+ebnf_output(const struct ast_rule *grammar);
 
 #endif
 
