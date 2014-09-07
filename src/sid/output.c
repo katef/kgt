@@ -129,8 +129,8 @@ is_equal(const struct ast_term *a, const struct ast_term *b)
 	}
 
 	switch (a->type) {
-	case TYPE_RULE: return 0 == strcmp(a->u.name,    b->u.name);
-	case TYPE_TERMINAL:   return 0 == strcmp(a->u.literal, b->u.literal);
+	case TYPE_RULE:     return 0 == strcmp(a->u.name,    b->u.name);
+	case TYPE_TERMINAL: return 0 == strcmp(a->u.literal, b->u.literal);
 	}
 }
 

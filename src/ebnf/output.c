@@ -54,7 +54,7 @@ output_term(const struct ast_term *term)
 		const char *e;
 	} a[] = {
 		{ 1, 1, " (", " ) " },
-		{ 1, 1, "",    ""    },
+		{ 1, 1, "",    ""   },
 		{ 0, 1, " [", " ] " },
 		{ 0, 0, " {", " } " }
 	};
