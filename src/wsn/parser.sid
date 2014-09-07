@@ -55,17 +55,17 @@
 	<set-repeat>:  (:ast_term, :count, :count) -> ();
 	!<mul-repeat>: (:ast_term, :count)         -> ();
 
-	<make-empty-term>:      ()         -> (:ast_term);
-	<make-rule-term>: (:string)  -> (:ast_term);
-	<make-literal-term>:    (:string)  -> (:ast_term);
-	<make-group-term>:      (:ast_alt) -> (:ast_term);
+	<make-empty-term>:   ()         -> (:ast_term);
+	<make-rule-term>:    (:string)  -> (:ast_term);
+	<make-literal-term>: (:string)  -> (:ast_term);
+	<make-group-term>:   (:ast_alt) -> (:ast_term);
 
-	<make-alt>: (:ast_term) -> (:ast_alt);
-	<make-rule>: (:string, :ast_alt) -> (:ast_rule);
-	<make-empty-rule>: () -> (:ast_rule);
+	<make-alt>:        (:ast_term)         -> (:ast_alt);
+	<make-rule>:       (:string, :ast_alt) -> (:ast_rule);
+	<make-empty-rule>: ()                  -> (:ast_rule);
 
 	<add-term-to-list>: (:ast_term, :ast_term) -> ();
-	<add-alt-to-list>: (:ast_alt, :ast_alt) -> ();
+	<add-alt-to-list>:  (:ast_alt, :ast_alt)   -> ();
 	<add-rule-to-list>: (:ast_rule, :ast_rule) -> ();
 
 	<err-syntax>;
@@ -74,7 +74,7 @@
 	<err-expected-equals>;
 
 	list-of-terms: () -> (:ast_term);
-	list-of-alts: () -> (:ast_alt);
+	list-of-alts:  () -> (:ast_alt);
 
 	body: () -> () = {
 		{
