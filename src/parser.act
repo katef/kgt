@@ -270,6 +270,13 @@
 	@};
 
 	<add-rule-to-list>: (l :ast_rule, r :ast_rule) -> () = @{
+		if (ast_find_rule(@l, @r->name)) {
+			fprintf(stderr, "production rule <%s> already exists\n", @r->name);
+			/* TODO: print location of this and previous definition */
+			/* TODO: handle as warning; add rule anyway, and bail out at end */
+			exit(EXIT_FAILURE);
+		}
+
 		assert(@r->next == NULL);
 		@r->next = @l;
 	@};

@@ -24,7 +24,7 @@
 extern void prod_bnf(lex_state, act_state, map_rule *);
 /* BEGINNING OF TRAILER */
 
-#line 366 "src/parser.act"
+#line 372 "src/parser.act"
 
 
 #line 31 "src/bnf/parser.h"
