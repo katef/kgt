@@ -12,8 +12,8 @@ struct bnode {
 void
 b_push(struct bnode **list, struct node *v);
 
-int
-b_pop(struct bnode **list, struct node **out);
+struct node *
+b_pop(struct bnode **list);
 
 void
 b_clear(struct bnode **list);

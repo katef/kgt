@@ -1,5 +1,6 @@
 /* $Id$ */
 
+#include <assert.h>
 #include <stdlib.h>
 
 #include "../xalloc.h"
@@ -11,6 +12,8 @@ b_push(struct bnode **list, struct node *v)
 {
 	struct bnode bn;
 
+	assert(v != NULL);
+
 	bn.v = v;
 	bn.next = *list;
 
@@ -18,31 +21,31 @@ b_push(struct bnode **list, struct node *v)
 	**list = bn;
 }
 
-int
-b_pop(struct bnode **list, struct node **out)
+struct node *
+b_pop(struct bnode **list)
 {
 	struct bnode *n;
+	struct node *v;
 
 	if (list == NULL || *list == NULL) {
-		return 0;
+		return NULL;
 	}
 
 	n = *list;
 	*list = (**list).next;
-	if (out) {
-		*out = n->v;
-	}
+
+	v = n->v;
 
 	free(n);
 
-	return 1;
+	return v;
 }
 
 void
 b_clear(struct bnode **list)
 {
 	while (*list) {
-		(void) b_pop(list, NULL);
+		(void) b_pop(list);
 	}
 }
 

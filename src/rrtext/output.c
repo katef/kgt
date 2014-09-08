@@ -245,7 +245,7 @@ render_sequence(struct node *n, struct node **np, int depth, void *arg)
 			b_push(&rl, p);
 		}
 
-		while (b_pop(&rl, &p)) {
+		while (p = b_pop(&rl), p != NULL) {
 			segment(ctx, p, depth + 1, !!rl);
 		}
 	}
