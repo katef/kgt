@@ -69,7 +69,7 @@ dim_name(struct node *n, struct node **np, int depth, void *arg)
 	(void) arg;
 	(void) depth;
 
-	n->size.w = strlen(n->u.name) + 2;
+	n->size.w = strlen(n->u.name) + 4;
 	n->size.h = 1;
 	n->y = 0;
 
@@ -84,7 +84,7 @@ dim_terminal(struct node *n, struct node **np, int depth, void *arg)
 	(void) depth;
 
 
-	n->size.w = strlen(n->u.terminal) + 4;
+	n->size.w = strlen(n->u.terminal) + 2;
 	n->size.h = 1;
 	n->y = 0;
 
