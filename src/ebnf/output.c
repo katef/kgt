@@ -87,7 +87,7 @@ output_term(const struct ast_term *term)
 		break;
 
 	case TYPE_RULE:
-		printf(" %s", term->u.name);
+		printf(" %s", term->u.rule->name);
 		break;
 
 	case TYPE_TERMINAL: {

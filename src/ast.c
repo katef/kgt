@@ -20,16 +20,16 @@ ast_make_empty_term(void)
 }
 
 struct ast_term *
-ast_make_rule_term(const char *name)
+ast_make_rule_term(struct ast_rule *rule)
 {
 	struct ast_term *new;
 
-	assert(name != NULL);
+	assert(rule != NULL);
 
 	new = xmalloc(sizeof *new);
 	new->type   = TYPE_RULE;
 	new->next   = NULL;
-	new->u.name = name;
+	new->u.rule = rule;
 
 	return new;
 }
@@ -103,5 +103,11 @@ ast_find_rule(const struct ast_rule *grammar, const char *name)
 	}
 
 	return NULL;
+}
+
+void
+ast_free_rule(struct ast_rule *rule)
+{
+	free(rule);
 }
 

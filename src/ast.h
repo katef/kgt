@@ -22,7 +22,7 @@ struct ast_term {
 	} type;
 
 	union {
-		const char *name;	/* production rule name; TODO: point to ast_rule instead */
+		struct ast_rule *rule;
 		const char *literal;
 		struct ast_alt *group;
 	} u;
@@ -63,7 +63,7 @@ struct ast_term *
 ast_make_empty_term(void);
 
 struct ast_term *
-ast_make_rule_term(const char *name);
+ast_make_rule_term(struct ast_rule *rule);
 
 struct ast_term *
 ast_make_literal_term(const char *literal);
@@ -79,6 +79,9 @@ ast_make_rule(const char *name, struct ast_alt *alts);
 
 struct ast_rule *
 ast_find_rule(const struct ast_rule *grammar, const char *name);
+
+void
+ast_free_rule(struct ast_rule *rule);
 
 #endif
 

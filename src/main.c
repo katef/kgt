@@ -113,6 +113,8 @@ main(int argc, char *argv[])
 
 	out->out(g);
 
+	/* TODO: free ast */
+
 	return EXIT_SUCCESS;
 }
 

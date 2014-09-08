@@ -65,7 +65,7 @@ output_term(const struct ast_term *term)
 
 	case TYPE_RULE:
 		/* TODO: escape things */
-		printf("NonTerminal('%s')", term->u.name);
+		printf("NonTerminal('%s')", term->u.rule->name);
 		break;
 
 	case TYPE_TERMINAL: {

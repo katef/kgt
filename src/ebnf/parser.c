@@ -151,7 +151,7 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-group-term */
 			{
-#line 245 "src/parser.act"
+#line 259 "src/parser.act"
 
 		(ZIt) = ast_make_group_term((ZIa));
 	
@@ -202,7 +202,7 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-group-term */
 			{
-#line 245 "src/parser.act"
+#line 259 "src/parser.act"
 
 		(ZIt) = ast_make_group_term((ZIa));
 	
@@ -253,7 +253,7 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-group-term */
 			{
-#line 245 "src/parser.act"
+#line 259 "src/parser.act"
 
 		(ZIt) = ast_make_group_term((ZIa));
 	
@@ -355,7 +355,7 @@ ZL1:;
 	{
 		/* BEGINNING OF ACTION: make-empty-rule */
 		{
-#line 258 "src/parser.act"
+#line 272 "src/parser.act"
 
 		(ZIl) = NULL;
 	
@@ -364,7 +364,7 @@ ZL1:;
 		/* END OF ACTION: make-empty-rule */
 		/* BEGINNING OF ACTION: err-syntax */
 		{
-#line 287 "src/parser.act"
+#line 302 "src/parser.act"
 
 		err(lex_state, "Syntax error");
 		exit(EXIT_FAILURE);
@@ -536,11 +536,25 @@ prod_term(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-rule-term */
 			{
-#line 237 "src/parser.act"
+#line 245 "src/parser.act"
 
-		(ZIt) = ast_make_rule_term((ZIs));
+		struct ast_rule *r;
+
+		/*
+		 * Regardless of whether a rule exists (yet) by this name, we make
+		 * a placeholder rule just so that we have an ast_rule struct
+		 * at which to point. This saves passing the grammar around, which
+		 * keeps the rule-building productions simpler.
+		 */
+		r = ast_make_rule((ZIs), NULL);
+		if (r == NULL) {
+			perror("ast_make_rule");
+			goto ZL1;
+		}
+
+		(ZIt) = ast_make_rule_term(r);
 	
-#line 544 "src/ebnf/parser.c"
+#line 558 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: make-rule-term */
 		}
@@ -580,16 +594,16 @@ prod_term(lex_state lex_state, act_state act_state, map_term *ZOt)
 
 		lex_state->p = lex_state->a;
 	
-#line 584 "src/ebnf/parser.c"
+#line 598 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: pattern-buffer */
 			/* BEGINNING OF ACTION: make-literal-term */
 			{
-#line 241 "src/parser.act"
+#line 255 "src/parser.act"
 
 		(ZIt) = ast_make_literal_term((ZIs));
 	
-#line 593 "src/ebnf/parser.c"
+#line 607 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: make-literal-term */
 		}
@@ -602,7 +616,7 @@ prod_term(lex_state lex_state, act_state act_state, map_term *ZOt)
 
 		(ZIt) = ast_make_empty_term();
 	
-#line 606 "src/ebnf/parser.c"
+#line 620 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: make-empty-term */
 		}
@@ -642,7 +656,7 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			exit(EXIT_FAILURE);
 		}
 	
-#line 646 "src/ebnf/parser.c"
+#line 660 "src/ebnf/parser.c"
 			}
 			/* END OF EXTRACT: IDENT */
 			break;
@@ -666,11 +680,11 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			{
 				/* BEGINNING OF ACTION: err-expected-equals */
 				{
-#line 299 "src/parser.act"
+#line 314 "src/parser.act"
 
 		err_expected(lex_state, "production rule assignment");
 	
-#line 674 "src/ebnf/parser.c"
+#line 688 "src/ebnf/parser.c"
 				}
 				/* END OF ACTION: err-expected-equals */
 			}
@@ -684,11 +698,11 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 		}
 		/* BEGINNING OF ACTION: make-rule */
 		{
-#line 254 "src/parser.act"
+#line 268 "src/parser.act"
 
 		(ZIr) = ast_make_rule((ZIs), (ZIa));
 	
-#line 692 "src/ebnf/parser.c"
+#line 706 "src/ebnf/parser.c"
 		}
 		/* END OF ACTION: make-rule */
 		/* BEGINNING OF INLINE: 71 */
@@ -707,11 +721,11 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			{
 				/* BEGINNING OF ACTION: err-expected-sep */
 				{
-#line 295 "src/parser.act"
+#line 310 "src/parser.act"
 
 		err_expected(lex_state, "production rule separator");
 	
-#line 715 "src/ebnf/parser.c"
+#line 729 "src/ebnf/parser.c"
 				}
 				/* END OF ACTION: err-expected-sep */
 			}
@@ -742,18 +756,19 @@ prod_74(lex_state lex_state, act_state act_state, map_rule *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-rule-to-list */
 			{
-#line 273 "src/parser.act"
+#line 287 "src/parser.act"
 
 		if (ast_find_rule((ZIr), (*ZIl)->name)) {
 			fprintf(stderr, "production rule <%s> already exists\n", (*ZIl)->name);
 			/* TODO: print location of this and previous definition */
+			/* TODO: handle as warning; add rule anyway, and bail out at end */
 			exit(EXIT_FAILURE);
 		}
 
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIr);
 	
-#line 757 "src/ebnf/parser.c"
+#line 772 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: add-rule-to-list */
 		}
@@ -795,11 +810,11 @@ prod_75(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 				{
 					/* BEGINNING OF ACTION: err-expected-alt */
 					{
-#line 291 "src/parser.act"
+#line 306 "src/parser.act"
 
 		err_expected(lex_state, "alternative separator");
 	
-#line 803 "src/ebnf/parser.c"
+#line 818 "src/ebnf/parser.c"
 					}
 					/* END OF ACTION: err-expected-alt */
 				}
@@ -813,21 +828,21 @@ prod_75(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 			}
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 250 "src/parser.act"
+#line 264 "src/parser.act"
 
 		(ZIl) = ast_make_alt((*ZIt));
 	
-#line 821 "src/ebnf/parser.c"
+#line 836 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: make-alt */
 			/* BEGINNING OF ACTION: add-alt-to-list */
 			{
-#line 268 "src/parser.act"
+#line 282 "src/parser.act"
 
 		assert((ZIl)->next == NULL);
 		(ZIl)->next = (ZIa);
 	
-#line 831 "src/ebnf/parser.c"
+#line 846 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: add-alt-to-list */
 		}
@@ -836,11 +851,11 @@ prod_75(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 		{
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 250 "src/parser.act"
+#line 264 "src/parser.act"
 
 		(ZIl) = ast_make_alt((*ZIt));
 	
-#line 844 "src/ebnf/parser.c"
+#line 859 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: make-alt */
 		}
@@ -872,12 +887,12 @@ prod_76(lex_state lex_state, act_state act_state, map_term *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-term-to-list */
 			{
-#line 263 "src/parser.act"
+#line 277 "src/parser.act"
 
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIt);
 	
-#line 881 "src/ebnf/parser.c"
+#line 896 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: add-term-to-list */
 		}
@@ -910,7 +925,7 @@ prod_repeatable_Hfactor(lex_state lex_state, act_state act_state, map_term *ZOt)
 		ZIn = strtoul(lex_state->buf.a, NULL, 10);
 		/* TODO: range check */
 	
-#line 914 "src/ebnf/parser.c"
+#line 929 "src/ebnf/parser.c"
 			}
 			/* END OF EXTRACT: COUNT */
 			ADVANCE_LEXER;
@@ -947,7 +962,7 @@ prod_repeatable_Hfactor(lex_state lex_state, act_state act_state, map_term *ZOt)
 		(ZIt)->min *= (ZIn);
 		(ZIt)->max *= (ZIn);
 	
-#line 951 "src/ebnf/parser.c"
+#line 966 "src/ebnf/parser.c"
 			}
 			/* END OF ACTION: mul-repeat */
 		}
@@ -974,7 +989,7 @@ ZL0:;
 
 /* BEGINNING OF TRAILER */
 
-#line 370 "src/parser.act"
+#line 416 "src/parser.act"
 
 
 	static int
@@ -1001,11 +1016,11 @@ ZL0:;
 		struct lex_state *lex_state;
 
 		struct LX_STATE *lx;
-		struct ast_rule *new;
+		struct ast_rule *g;
 
 		assert(f != NULL);
 
-		new = NULL;
+		g = NULL;
 
 		lex_state    = &lex_state_s;
 		lex_state->p = lex_state->a;
@@ -1037,13 +1052,44 @@ ZL0:;
 		act_state = &act_state_s;
 
 		ADVANCE_LEXER;
-		FORM_ENTRY(lex_state, act_state, &new);
+		FORM_ENTRY(lex_state, act_state, &g);
 
 		/* TODO: handle error */
 
-		return new;
+		/* substitute placeholder rules for the real thing */
+		{
+			const struct ast_rule *p;
+			const struct ast_alt *q;
+			struct ast_term *t;
+			struct ast_rule *r;
+
+			for (p = g; p != NULL; p = p->next) {
+				for (q = p->alts; q != NULL; q = q->next) {
+					for (t = q->terms; t != NULL; t = t->next) {
+						if (t->type != TYPE_RULE) {
+							continue;
+						}
+
+						r = ast_find_rule(g, t->u.rule->name);
+						if (r == NULL) {
+							fprintf(stderr, "production rule <%s> not defined\n", t->u.rule->name);
+							/* TODO: print location of this and previous definition */
+							/* TODO: handle as warning; add rule anyway, and bail out at end */
+							exit(EXIT_FAILURE);
+						}
+
+						free((char *) t->u.rule->name);
+						ast_free_rule(t->u.rule);
+
+						t->u.rule = r;
+					}
+				}
+			}
+		}
+
+		return g;
 	}
 
-#line 1048 "src/ebnf/parser.c"
+#line 1094 "src/ebnf/parser.c"
 
 /* END OF FILE */

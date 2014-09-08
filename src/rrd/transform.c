@@ -80,7 +80,7 @@ transform_leaf(const struct ast_term *term)
 {
 	switch (term->type) {
 	case TYPE_RULE:
-		return node_create_name(term->u.name);
+		return node_create_name(term->u.rule->name);
 
 	case TYPE_TERMINAL:
 		return node_create_terminal(term->u.literal);

@@ -326,7 +326,7 @@ ZL1:;
 	{
 		/* BEGINNING OF ACTION: make-empty-rule */
 		{
-#line 258 "src/parser.act"
+#line 272 "src/parser.act"
 
 		(ZIl) = NULL;
 	
@@ -335,7 +335,7 @@ ZL1:;
 		/* END OF ACTION: make-empty-rule */
 		/* BEGINNING OF ACTION: err-syntax */
 		{
-#line 287 "src/parser.act"
+#line 302 "src/parser.act"
 
 		err(lex_state, "Syntax error");
 		exit(EXIT_FAILURE);
@@ -453,7 +453,7 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			{
 				/* BEGINNING OF ACTION: err-expected-equals */
 				{
-#line 299 "src/parser.act"
+#line 314 "src/parser.act"
 
 		err_expected(lex_state, "production rule assignment");
 	
@@ -471,7 +471,7 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 		}
 		/* BEGINNING OF ACTION: make-rule */
 		{
-#line 254 "src/parser.act"
+#line 268 "src/parser.act"
 
 		(ZIr) = ast_make_rule((ZIs), (ZIa));
 	
@@ -499,7 +499,7 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			{
 				/* BEGINNING OF ACTION: err-expected-sep */
 				{
-#line 295 "src/parser.act"
+#line 310 "src/parser.act"
 
 		err_expected(lex_state, "production rule separator");
 	
@@ -534,18 +534,19 @@ prod_70(lex_state lex_state, act_state act_state, map_rule *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-rule-to-list */
 			{
-#line 273 "src/parser.act"
+#line 287 "src/parser.act"
 
 		if (ast_find_rule((ZIr), (*ZIl)->name)) {
 			fprintf(stderr, "production rule <%s> already exists\n", (*ZIl)->name);
 			/* TODO: print location of this and previous definition */
+			/* TODO: handle as warning; add rule anyway, and bail out at end */
 			exit(EXIT_FAILURE);
 		}
 
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIr);
 	
-#line 549 "src/bnf/parser.c"
+#line 550 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: add-rule-to-list */
 		}
@@ -587,11 +588,11 @@ prod_71(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 				{
 					/* BEGINNING OF ACTION: err-expected-alt */
 					{
-#line 291 "src/parser.act"
+#line 306 "src/parser.act"
 
 		err_expected(lex_state, "alternative separator");
 	
-#line 595 "src/bnf/parser.c"
+#line 596 "src/bnf/parser.c"
 					}
 					/* END OF ACTION: err-expected-alt */
 				}
@@ -605,21 +606,21 @@ prod_71(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 			}
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 250 "src/parser.act"
+#line 264 "src/parser.act"
 
 		(ZIl) = ast_make_alt((*ZIt));
 	
-#line 613 "src/bnf/parser.c"
+#line 614 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: make-alt */
 			/* BEGINNING OF ACTION: add-alt-to-list */
 			{
-#line 268 "src/parser.act"
+#line 282 "src/parser.act"
 
 		assert((ZIl)->next == NULL);
 		(ZIl)->next = (ZIa);
 	
-#line 623 "src/bnf/parser.c"
+#line 624 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: add-alt-to-list */
 		}
@@ -628,11 +629,11 @@ prod_71(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 		{
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 250 "src/parser.act"
+#line 264 "src/parser.act"
 
 		(ZIl) = ast_make_alt((*ZIt));
 	
-#line 636 "src/bnf/parser.c"
+#line 637 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: make-alt */
 		}
@@ -663,12 +664,12 @@ prod_72(lex_state lex_state, act_state act_state, map_term *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-term-to-list */
 			{
-#line 263 "src/parser.act"
+#line 277 "src/parser.act"
 
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIt);
 	
-#line 672 "src/bnf/parser.c"
+#line 673 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: add-term-to-list */
 		}
@@ -715,16 +716,16 @@ prod_73(lex_state lex_state, act_state act_state, map_term *ZOt)
 
 		lex_state->p = lex_state->a;
 	
-#line 719 "src/bnf/parser.c"
+#line 720 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: pattern-buffer */
 			/* BEGINNING OF ACTION: make-literal-term */
 			{
-#line 241 "src/parser.act"
+#line 255 "src/parser.act"
 
 		(ZIt) = ast_make_literal_term((ZIs));
 	
-#line 728 "src/bnf/parser.c"
+#line 729 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: make-literal-term */
 		}
@@ -754,16 +755,30 @@ prod_73(lex_state lex_state, act_state act_state, map_term *ZOt)
 
 		lex_state->p = lex_state->a;
 	
-#line 758 "src/bnf/parser.c"
+#line 759 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: pattern-buffer */
 			/* BEGINNING OF ACTION: make-rule-term */
 			{
-#line 237 "src/parser.act"
+#line 245 "src/parser.act"
 
-		(ZIt) = ast_make_rule_term((ZIs));
+		struct ast_rule *r;
+
+		/*
+		 * Regardless of whether a rule exists (yet) by this name, we make
+		 * a placeholder rule just so that we have an ast_rule struct
+		 * at which to point. This saves passing the grammar around, which
+		 * keeps the rule-building productions simpler.
+		 */
+		r = ast_make_rule((ZIs), NULL);
+		if (r == NULL) {
+			perror("ast_make_rule");
+			goto ZL1;
+		}
+
+		(ZIt) = ast_make_rule_term(r);
 	
-#line 767 "src/bnf/parser.c"
+#line 782 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: make-rule-term */
 		}
@@ -783,7 +798,7 @@ ZL0:;
 
 /* BEGINNING OF TRAILER */
 
-#line 370 "src/parser.act"
+#line 416 "src/parser.act"
 
 
 	static int
@@ -810,11 +825,11 @@ ZL0:;
 		struct lex_state *lex_state;
 
 		struct LX_STATE *lx;
-		struct ast_rule *new;
+		struct ast_rule *g;
 
 		assert(f != NULL);
 
-		new = NULL;
+		g = NULL;
 
 		lex_state    = &lex_state_s;
 		lex_state->p = lex_state->a;
@@ -846,13 +861,44 @@ ZL0:;
 		act_state = &act_state_s;
 
 		ADVANCE_LEXER;
-		FORM_ENTRY(lex_state, act_state, &new);
+		FORM_ENTRY(lex_state, act_state, &g);
 
 		/* TODO: handle error */
 
-		return new;
+		/* substitute placeholder rules for the real thing */
+		{
+			const struct ast_rule *p;
+			const struct ast_alt *q;
+			struct ast_term *t;
+			struct ast_rule *r;
+
+			for (p = g; p != NULL; p = p->next) {
+				for (q = p->alts; q != NULL; q = q->next) {
+					for (t = q->terms; t != NULL; t = t->next) {
+						if (t->type != TYPE_RULE) {
+							continue;
+						}
+
+						r = ast_find_rule(g, t->u.rule->name);
+						if (r == NULL) {
+							fprintf(stderr, "production rule <%s> not defined\n", t->u.rule->name);
+							/* TODO: print location of this and previous definition */
+							/* TODO: handle as warning; add rule anyway, and bail out at end */
+							exit(EXIT_FAILURE);
+						}
+
+						free((char *) t->u.rule->name);
+						ast_free_rule(t->u.rule);
+
+						t->u.rule = r;
+					}
+				}
+			}
+		}
+
+		return g;
 	}
 
-#line 857 "src/bnf/parser.c"
+#line 903 "src/bnf/parser.c"
 
 /* END OF FILE */

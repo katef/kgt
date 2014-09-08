@@ -113,7 +113,7 @@ output_term(const struct ast_rule *grammar,
 		break;
 
 	case TYPE_RULE:
-		escputs(term->u.name, stdout);
+		escputs(term->u.rule->name, stdout);
 		break;
 
 	case TYPE_TERMINAL:
@@ -132,12 +132,9 @@ output_term(const struct ast_rule *grammar,
 		break;
 
 	case TYPE_RULE:
-		/* XXX: the AST ought to have a link to the ast_rule here */
 /* XXX: cross-links to rules are confusing
-		if (term->ast_find_rule(grammar, term->u.name) != NULL) {
-			printf("\t\"t%p\" -> \"p%p\" [ dir = forward, color = blue, weight = 0 ];\n",
-				(void *) term, ast_find_rule(grammar, term->u.name));
-		}
+		printf("\t\"t%p\" -> \"p%p\" [ dir = forward, color = blue, weight = 0 ];\n",
+			(void *) term, term->u.rule);
 */
 		break;
 

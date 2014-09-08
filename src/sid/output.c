@@ -44,7 +44,7 @@ output_basic(const struct ast_term *term)
 		break;
 
 	case TYPE_RULE:
-		printf("%s; ", term->u.name);
+		printf("%s; ", term->u.rule->name);
 		break;
 
 	case TYPE_TERMINAL:
@@ -107,20 +107,6 @@ output_rule(const struct ast_rule *rule)
 	printf("\t};\n\n");
 }
 
-static const struct ast_rule *
-is_defined(const struct ast_rule *grammar, const char *name)
-{
-	const struct ast_rule *p;
-
-	for (p = grammar; p != NULL; p = p->next) {
-		if (0 == strcmp(p->name, name)) {
-			return p;
-		}
-	}
-
-	return NULL;
-}
-
 static int
 is_equal(const struct ast_term *a, const struct ast_term *b)
 {
@@ -129,8 +115,8 @@ is_equal(const struct ast_term *a, const struct ast_term *b)
 	}
 
 	switch (a->type) {
-	case TYPE_RULE:     return 0 == strcmp(a->u.name,    b->u.name);
-	case TYPE_TERMINAL: return 0 == strcmp(a->u.literal, b->u.literal);
+	case TYPE_RULE:     return 0 == strcmp(a->u.rule->name, b->u.rule->name);
+	case TYPE_TERMINAL: return 0 == strcmp(a->u.literal,    b->u.literal);
 	}
 }
 
@@ -155,9 +141,7 @@ output_terminals(const struct ast_rule *grammar)
 					continue;
 
 				case TYPE_RULE:
-					if (is_defined(grammar, term->u.name)) {
-						continue;
-					}
+					continue;
 
 				case TYPE_TERMINAL:
 					break;
@@ -174,7 +158,7 @@ output_terminals(const struct ast_rule *grammar)
 				}
 
 				t = xmalloc(sizeof *t);
-				t->u.name = term->u.name;
+				t->u.literal = term->u.literal;
 				t->type = term->type;
 				t->next = found;
 				found = t;

@@ -234,7 +234,21 @@
 	@};
 
 	<make-rule-term>: (n :string) -> (t :ast_term) = @{
-		@t = ast_make_rule_term(@n);
+		struct ast_rule *r;
+
+		/*
+		 * Regardless of whether a rule exists (yet) by this name, we make
+		 * a placeholder rule just so that we have an ast_rule struct
+		 * at which to point. This saves passing the grammar around, which
+		 * keeps the rule-building productions simpler.
+		 */
+		r = ast_make_rule(@n, NULL);
+		if (r == NULL) {
+			perror("ast_make_rule");
+			@!;
+		}
+
+		@t = ast_make_rule_term(r);
 	@};
 
 	<make-literal-term>: (l :string) -> (t :ast_term) = @{
@@ -325,11 +339,11 @@
 		struct lex_state *lex_state;
 
 		struct LX_STATE *lx;
-		struct ast_rule *new;
+		struct ast_rule *g;
 
 		assert(f != NULL);
 
-		new = NULL;
+		g = NULL;
 
 		lex_state    = &lex_state_s;
 		lex_state->p = lex_state->a;
@@ -361,11 +375,42 @@
 		act_state = &act_state_s;
 
 		ADVANCE_LEXER;
-		FORM_ENTRY(lex_state, act_state, &new);
+		FORM_ENTRY(lex_state, act_state, &g);
 
 		/* TODO: handle error */
 
-		return new;
+		/* substitute placeholder rules for the real thing */
+		{
+			const struct ast_rule *p;
+			const struct ast_alt *q;
+			struct ast_term *t;
+			struct ast_rule *r;
+
+			for (p = g; p != NULL; p = p->next) {
+				for (q = p->alts; q != NULL; q = q->next) {
+					for (t = q->terms; t != NULL; t = t->next) {
+						if (t->type != TYPE_RULE) {
+							continue;
+						}
+
+						r = ast_find_rule(g, t->u.rule->name);
+						if (r == NULL) {
+							fprintf(stderr, "production rule <%s> not defined\n", t->u.rule->name);
+							/* TODO: print location of this and previous definition */
+							/* TODO: handle as warning; add rule anyway, and bail out at end */
+							exit(EXIT_FAILURE);
+						}
+
+						free((char *) t->u.rule->name);
+						ast_free_rule(t->u.rule);
+
+						t->u.rule = r;
+					}
+				}
+			}
+		}
+
+		return g;
 	}
 
 @}, @{
