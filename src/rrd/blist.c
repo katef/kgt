@@ -10,15 +10,16 @@
 void
 b_push(struct bnode **list, struct node *v)
 {
-	struct bnode bn;
+	struct bnode *new;
 
+	assert(list != NULL);
 	assert(v != NULL);
 
-	bn.v = v;
-	bn.next = *list;
+	new = xmalloc(sizeof *new);
+	new->v = v;
+	new->next = *list;
 
-	*list = xmalloc(sizeof bn);
-	**list = bn;
+	*list = new;
 }
 
 struct node *
