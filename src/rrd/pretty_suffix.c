@@ -12,7 +12,7 @@
 #include "../xalloc.h"
 
 #include "rrd.h"
-#include "blist.h"
+#include "stack.h"
 #include "pretty.h"
 #include "node.h"
 
@@ -36,16 +36,16 @@ leaves_eq(struct node *a, struct node *b)
 }
 
 static int
-process_loop_leaf(struct node *loop, struct bnode *bp)
+process_loop_leaf(struct node *loop, struct stack *bp)
 {
 	struct node *a, *b;
 
-	if (bp == NULL || (bp->v->type != NODE_TERMINAL && bp->v->type != NODE_RULE)) {
+	if (bp == NULL || (bp->node->type != NODE_TERMINAL && bp->node->type != NODE_RULE)) {
 		return 0;
 	}
 
 	a = loop->u.loop.backward;
-	b = bp->v;
+	b = bp->node;
 
 	if (leaves_eq(a, b)) {
 		struct node *tmp;
@@ -61,7 +61,7 @@ process_loop_leaf(struct node *loop, struct bnode *bp)
 }
 
 static void
-loop_switch_sides(int suflen, struct node *loop, struct bnode **rl)
+loop_switch_sides(int suflen, struct node *loop, struct stack **rl)
 {
 	struct node *v, **n;
 	int i;
@@ -76,18 +76,18 @@ loop_switch_sides(int suflen, struct node *loop, struct bnode **rl)
 		loop->u.loop.forward = seq;
 
 		for (i = 0; i < suflen; i++) {
-			v = b_pop(rl);
+			v = stack_pop(rl);
 			v->next = *n;
 			*n = v;
 		}
 	} else {
 		node_free(loop->u.loop.forward);
-		v = b_pop(rl);
+		v = stack_pop(rl);
 		v->next = NULL;
 		loop->u.loop.forward = v;
 	}
 
-	v = b_pop(rl);
+	v = stack_pop(rl);
 	if (v != NULL) {
 		v->next = NULL;
 	} else {
@@ -104,11 +104,11 @@ loop_switch_sides(int suflen, struct node *loop, struct bnode **rl)
 }
 
 static int
-process_loop_list(struct node *loop, struct bnode *bp)
+process_loop_list(struct node *loop, struct stack *bp)
 {
 	struct node *list;
 	struct node *p;
-	struct bnode *rl = NULL, *rp;
+	struct stack *rl = NULL, *rp;
 	int suffix = 0;
 
 	list = loop->u.loop.backward;
@@ -118,23 +118,23 @@ process_loop_list(struct node *loop, struct bnode *bp)
 	}
 
 	for (p = list->u.sequence; p != NULL; p = p->next) {
-		b_push(&rl, p);
+		stack_push(&rl, p);
 	}
 
 	/* linkedlistcmp() */
 	for (rp = rl; rp != NULL && bp != NULL; rp = rp->next, bp = bp->next) {
 		struct node *a, *b;
 
-		if (rp->v->type != NODE_TERMINAL || rp->v->type != NODE_RULE) {
+		if (rp->node->type != NODE_TERMINAL || rp->node->type != NODE_RULE) {
 			break;
 		}
 
-		if (bp->v->type != NODE_TERMINAL || bp->v->type != NODE_RULE) {
+		if (bp->node->type != NODE_TERMINAL || bp->node->type != NODE_RULE) {
 			break;
 		}
 
-		a = rp->v;
-		b = bp->v;
+		a = rp->node;
+		b = bp->node;
 
 		if (!leaves_eq(a, b)) {
 			break;
@@ -147,13 +147,13 @@ process_loop_list(struct node *loop, struct bnode *bp)
 		loop_switch_sides(suffix, loop, &rl);
 	}
 
-	b_clear(&rl);
+	stack_free(&rl);
 
 	return suffix;
 }
 
 static int
-process_loop(struct node *loop, struct bnode *bp)
+process_loop(struct node *loop, struct stack *bp)
 {
 	if (loop->u.loop.backward->type == NODE_SKIP
 	 || loop->u.loop.forward->type != NODE_SKIP) {
@@ -177,13 +177,13 @@ static int
 collapse_sequence(struct node *n, struct node **np, int depth, void *arg)
 {
 	struct node *p;
-	struct bnode *rl = NULL;
+	struct stack *rl = NULL;
 
 	for (p = n->u.sequence; p != NULL; p = p->next) {
 		int i, suffix_len;
 
 		if (p->type != NODE_LOOP) {
-			b_push(&rl, p);
+			stack_push(&rl, p);
 			continue;
 		}
 
@@ -193,7 +193,7 @@ collapse_sequence(struct node *n, struct node **np, int depth, void *arg)
 		for (i = 0; i < suffix_len; i++) {
 			struct node *q;
 
-			q = b_pop(&rl);
+			q = stack_pop(&rl);
 			if (q == NULL) {
 				return 0;
 			}
@@ -201,14 +201,14 @@ collapse_sequence(struct node *n, struct node **np, int depth, void *arg)
 			node_free(q);
 
 			if (rl) {
-				rl->v->next = p;
+				rl->node->next = p;
 			} else {
 				n->u.sequence = p;
 			}
 		}
 	}
 
-	b_clear(&rl);
+	stack_free(&rl);
 
 	if (!node_walk_list(&n->u.sequence, &pretty_collapse_suffixes, depth + 1, arg)) {
 		return 0;

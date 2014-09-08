@@ -12,7 +12,6 @@
 #include "../xalloc.h"
 
 #include "rrd.h"
-#include "blist.h"
 #include "pretty.h"
 #include "node.h"
 

@@ -1,8 +1,8 @@
 .include "../../share/mk/top.mk"
 
-SRC += src/rrd/blist.c
-SRC += src/rrd/transform.c
 SRC += src/rrd/node.c
+SRC += src/rrd/transform.c
+SRC += src/rrd/stack.c
 
 SRC += src/rrd/pretty_suffix.c
 SRC += src/rrd/pretty_bottom.c

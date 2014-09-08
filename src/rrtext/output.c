@@ -19,7 +19,7 @@
 #include "../rrd/pretty.h"
 #include "../rrd/node.h"
 #include "../rrd/rrd.h"
-#include "../rrd/blist.h"
+#include "../rrd/stack.h"
 
 #include "io.h"
 
@@ -237,15 +237,15 @@ render_sequence(struct node *n, struct node **np, int depth, void *arg)
 			segment(ctx, p, depth + 1, !!p->next);
 		}
 	} else {
-		struct bnode *rl;
+		struct stack *rl;
 
 		rl = NULL;
 
 		for (p = n->u.sequence; p != NULL; p = p->next) {
-			b_push(&rl, p);
+			stack_push(&rl, p);
 		}
 
-		while (p = b_pop(&rl), p != NULL) {
+		while (p = stack_pop(&rl), p != NULL) {
 			segment(ctx, p, depth + 1, !!rl);
 		}
 	}
