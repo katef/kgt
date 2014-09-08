@@ -56,8 +56,6 @@ struct ast_rule {
 	const char *name;
 	struct ast_alt *alts;
 
-	unsigned int defined:1;
-
 	struct ast_rule *next;
 };
 
