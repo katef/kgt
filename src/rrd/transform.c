@@ -29,6 +29,9 @@ transform_alt(const struct ast_alt *alt)
 
 	for (p = alt->terms; p != NULL; p = p->next) {
 		/* TODO: node_append */
+		if (p->type == TYPE_EMPTY) {
+			continue;
+		}
 		*tail = transform_term(p);
 		if (*tail == NULL) {
 			node_free(list);
@@ -40,7 +43,9 @@ transform_alt(const struct ast_alt *alt)
 		}
 	}
 
-	if (list->next == NULL) {
+	if (list == NULL) {
+		return node_create_skip();
+	} else if (list->next == NULL) {
 		return list;
 	} else {
 		return node_create_sequence(list);
@@ -102,7 +107,7 @@ transform_group(const struct ast_alt *group)
 		return NULL;
 	}
 
-	list = node_create_sequence(alts);
+	list = node_create_choice(alts);
 
 	node_collapse(&list);
 
