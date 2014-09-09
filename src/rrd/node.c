@@ -147,7 +147,7 @@ node_collapse(struct node **n)
 	switch (list->type) {
 	case NODE_CHOICE:
 		/* TODO: list_count() */
-		if (list->u.choice == NULL || list->u.choice->next == NULL) {
+		if (list->u.choice == NULL || list->u.choice->next != NULL) {
 			return;
 		}
 
@@ -157,7 +157,7 @@ node_collapse(struct node **n)
 		break;
 
 	case NODE_SEQUENCE:
-		if (list->u.sequence == NULL || list->u.sequence->next == NULL) {
+		if (list->u.sequence == NULL || list->u.sequence->next != NULL) {
 			return;
 		}
 

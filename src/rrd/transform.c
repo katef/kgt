@@ -177,11 +177,7 @@ zeroormore_term(const struct ast_term *term)
 
 	skip = node_create_skip();
 
-	skip->next = n;
-
-	choice = node_create_choice(skip);
-
-	loop = node_create_loop(skip, choice);
+	loop = node_create_loop(skip, n);
 
 	node_collapse(&loop->u.loop.forward);
 	node_collapse(&loop->u.loop.backward);
@@ -209,7 +205,7 @@ transform_term(const struct ast_term *term)
 	assert(term->max <= 1);
 
 	for (i = 0; i < sizeof a / sizeof *a; i++) {
-		if (term->min == a[i].min && term->min == a[i].min) {
+		if (term->min == a[i].min && term->max == a[i].max) {
 			return a[i].f(term);
 		}
 	}

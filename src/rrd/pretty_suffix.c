@@ -125,11 +125,11 @@ process_loop_list(struct node *loop, struct stack *bp)
 	for (rp = rl; rp != NULL && bp != NULL; rp = rp->next, bp = bp->next) {
 		struct node *a, *b;
 
-		if (rp->node->type != NODE_TERMINAL || rp->node->type != NODE_RULE) {
+		if (rp->node->type != NODE_TERMINAL && rp->node->type != NODE_RULE) {
 			break;
 		}
 
-		if (bp->node->type != NODE_TERMINAL || bp->node->type != NODE_RULE) {
+		if (bp->node->type != NODE_TERMINAL && bp->node->type != NODE_RULE) {
 			break;
 		}
 
@@ -198,6 +198,7 @@ collapse_sequence(struct node *n, struct node **np, int depth, void *arg)
 				return 0;
 			}
 
+			q->next = NULL;
 			node_free(q);
 
 			if (rl) {
