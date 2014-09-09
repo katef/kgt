@@ -90,6 +90,8 @@
 	                              act_state->lex_tok = tok;                     } while (0)
 	#define RESTORE_LEXER    do { act_state->lex_tok = act_state->lex_tok_save; } while (0)
 
+	extern int allow_undefined;
+
 	static void
 	err(const struct lex_state *lex_state, const char *fmt, ...)
 	{
@@ -395,6 +397,12 @@
 
 						r = ast_find_rule(g, t->u.rule->name);
 						if (r == NULL) {
+							if (allow_undefined) {
+								/* XXX: would leak the ast_rule here */
+								/* TODO: convert to TYPE_TOKEN here */
+								continue;
+							}
+
 							fprintf(stderr, "production rule <%s> not defined\n", t->u.rule->name);
 							/* TODO: print location of this and previous definition */
 							/* TODO: handle as warning; add rule anyway, and bail out at end */

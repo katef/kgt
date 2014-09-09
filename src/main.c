@@ -23,6 +23,7 @@
 #include "xalloc.h"
 
 int prettify = 1;
+int allow_undefined = 1;
 
 struct io {
 	const char *name;
@@ -43,7 +44,7 @@ struct io {
 static void
 xusage(void)
 {
-	printf("usage: kgt [-n] [-l <language>] [ -e <language> ]\n");
+	printf("usage: kgt [-nu] [-l <language>] [ -e <language> ]\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -86,13 +87,17 @@ main(int argc, char *argv[])
 	{
 		int c;
 
-		while ((c = getopt(argc, argv, "hnl:e:")) != -1) {
+		while ((c = getopt(argc, argv, "hnl:e:u")) != -1) {
 			switch (c) {
 			case 'l': in  = lang(optarg); break;
 			case 'e': out = lang(optarg); break;
 
 			case 'n':
 				prettify = 0;
+				break;
+
+			case 'u':
+				allow_undefined = 0;
 				break;
 
 			case '?':
