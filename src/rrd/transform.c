@@ -90,6 +90,9 @@ transform_leaf(const struct ast_term *term)
 	case TYPE_LITERAL:
 		return node_create_literal(term->u.literal);
 
+	case TYPE_TOKEN:
+		return node_create_name(term->u.token);
+
 	default:
 		errno = EINVAL;
 		return NULL;
@@ -120,7 +123,8 @@ single_term(const struct ast_term *term)
 	switch (term->type) {
 	case TYPE_EMPTY:   return transform_empty();
 	case TYPE_RULE:
-	case TYPE_LITERAL: return transform_leaf (term);
+	case TYPE_LITERAL:
+	case TYPE_TOKEN:   return transform_leaf (term);
 	case TYPE_GROUP:   return transform_group(term->u.group);
 	}
 

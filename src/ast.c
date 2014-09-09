@@ -50,6 +50,21 @@ ast_make_literal_term(const char *literal)
 }
 
 struct ast_term *
+ast_make_token_term(const char *token)
+{
+	struct ast_term *new;
+
+	assert(token != NULL);
+
+	new = xmalloc(sizeof *new);
+	new->type    = TYPE_TOKEN;
+	new->next    = NULL;
+	new->u.token = token;
+
+	return new;
+}
+
+struct ast_term *
 ast_make_group_term(struct ast_alt *group)
 {
 	struct ast_term *new;

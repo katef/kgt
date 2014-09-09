@@ -18,12 +18,14 @@ struct ast_term {
 		TYPE_EMPTY,
 		TYPE_RULE,
 		TYPE_LITERAL,
+		TYPE_TOKEN,
 		TYPE_GROUP
 	} type;
 
 	union {
 		struct ast_rule *rule;
 		const char *literal;
+		const char *token;
 		struct ast_alt *group;
 	} u;
 
@@ -67,6 +69,9 @@ ast_make_rule_term(struct ast_rule *rule);
 
 struct ast_term *
 ast_make_literal_term(const char *literal);
+
+struct ast_term *
+ast_make_token_term(const char *token);
 
 struct ast_term *
 ast_make_group_term(struct ast_alt *group);

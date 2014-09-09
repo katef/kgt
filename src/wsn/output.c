@@ -83,6 +83,10 @@ output_term(const struct ast_term *term)
 		}
 		break;
 
+	case TYPE_TOKEN:
+		printf(" %s", term->u.token);
+		break;
+
 	case TYPE_GROUP:
 		output_alt(term->u.group);
 		break;

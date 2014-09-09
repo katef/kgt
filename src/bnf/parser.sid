@@ -54,6 +54,7 @@
 	<make-empty-term>:   ()         -> (:ast_term);
 	<make-rule-term>:    (:string)  -> (:ast_term);
 	<make-literal-term>: (:string)  -> (:ast_term);
+	!<make-token-term>:  (:string)  -> (:ast_term);
 	!<make-group-term>:  (:ast_alt) -> (:ast_term);
 
 	<make-alt>:        (:ast_term)         -> (:ast_alt);

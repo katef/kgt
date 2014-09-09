@@ -105,6 +105,10 @@ output_term(const struct ast_term *term)
 		}
 		break;
 
+	case TYPE_TOKEN:
+		printf(" %s", term->u.token);
+		break;
+
 	case TYPE_GROUP:
 		if (term->min == 1 && term->max == 1) {
 			s = " ( ";

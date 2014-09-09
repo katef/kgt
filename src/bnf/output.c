@@ -40,6 +40,10 @@ output_term(const struct ast_term *term)
 			printf(" %c%s%c", c, term->u.literal, c);
 		}
 		break;
+
+	case TYPE_TOKEN:
+		printf(" <%s>", term->u.token);
+		break;
 	}
 }
 

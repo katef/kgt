@@ -86,6 +86,11 @@ output_term(const struct ast_term *term)
 		}
 		break;
 
+	case TYPE_TOKEN:
+		/* TODO: escape things */
+		printf("NonTerminal('%s')", term->u.token);
+		break;
+
 	case TYPE_GROUP:
 		output_alts(term->u.group);
 		break;

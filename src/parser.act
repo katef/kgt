@@ -257,6 +257,10 @@
 		@t = ast_make_literal_term(@l);
 	@};
 
+	<make-token-term>: (n :string) -> (t :ast_term) = @{
+		@t = ast_make_token_term(@n);
+	@};
+
 	<make-group-term>: (a :ast_alt) -> (t :ast_term) = @{
 		@t = ast_make_group_term(@a);
 	@};
@@ -415,7 +419,16 @@
 							continue;
 						}
 
-						/* TODO: convert to TYPE_TOKEN here */
+						{
+							const char *token;
+
+							token = t->u.rule->name;
+
+							ast_free_rule(t->u.rule);
+
+							t->type    = TYPE_TOKEN;
+							t->u.token = t->u.rule->name;
+						}
 					}
 				}
 			}
