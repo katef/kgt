@@ -33,7 +33,7 @@ output_term(const struct ast_term *term)
 		printf(" <%s>", term->u.rule->name);
 		break;
 
-	case TYPE_TERMINAL: {
+	case TYPE_LITERAL: {
 			char c;
 
 			c = strchr(term->u.literal, '\"') ? '\'' : '\"';

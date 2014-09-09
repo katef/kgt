@@ -12,7 +12,7 @@ struct node *
 node_create_skip(void);
 
 struct node *
-node_create_terminal(const char *terminal);
+node_create_literal(const char *literal);
 
 struct node *
 node_create_name(const char *name);

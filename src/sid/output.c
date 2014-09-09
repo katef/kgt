@@ -47,7 +47,7 @@ output_basic(const struct ast_term *term)
 		printf("%s; ", term->u.rule->name);
 		break;
 
-	case TYPE_TERMINAL:
+	case TYPE_LITERAL:
 		output_literal(term->u.literal);
 		break;
 
@@ -115,8 +115,8 @@ is_equal(const struct ast_term *a, const struct ast_term *b)
 	}
 
 	switch (a->type) {
-	case TYPE_RULE:     return 0 == strcmp(a->u.rule->name, b->u.rule->name);
-	case TYPE_TERMINAL: return 0 == strcmp(a->u.literal,    b->u.literal);
+	case TYPE_RULE:    return 0 == strcmp(a->u.rule->name, b->u.rule->name);
+	case TYPE_LITERAL: return 0 == strcmp(a->u.literal,    b->u.literal);
 	}
 }
 
@@ -143,7 +143,7 @@ output_terminals(const struct ast_rule *grammar)
 				case TYPE_RULE:
 					continue;
 
-				case TYPE_TERMINAL:
+				case TYPE_LITERAL:
 					break;
 				}
 

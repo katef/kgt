@@ -23,7 +23,7 @@ node_free(struct node *n)
 
 		switch (n->type) {
 		case NODE_SKIP:
-		case NODE_TERMINAL:
+		case NODE_LITERAL:
 		case NODE_RULE:
 			break;
 
@@ -59,18 +59,18 @@ node_create_skip(void)
 }
 
 struct node *
-node_create_terminal(const char *terminal)
+node_create_literal(const char *literal)
 {
 	struct node *new;
 
-	assert(terminal != NULL);
+	assert(literal != NULL);
 
 	new = xmalloc(sizeof *new);
 
-	new->type = NODE_TERMINAL;
+	new->type = NODE_LITERAL;
 	new->next = NULL;
 
-	new->u.terminal = terminal;
+	new->u.literal = literal;
 
 	return new;
 }
@@ -190,8 +190,8 @@ node_compare_list(struct node *a, struct node *b, int once)
 		switch (a->type) {
 		case NODE_SKIP:
 			break;
-		case NODE_TERMINAL:
-			result = result && 0 == strcmp(a->u.terminal, b->u.terminal);
+		case NODE_LITERAL:
+			result = result && 0 == strcmp(a->u.literal, b->u.literal);
 			break;
 		case NODE_RULE:
 			result = result && 0 == strcmp(a->u.name, b->u.name);

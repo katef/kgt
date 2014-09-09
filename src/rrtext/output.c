@@ -77,14 +77,14 @@ dim_name(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static int
-dim_terminal(struct node *n, struct node **np, int depth, void *arg)
+dim_literal(struct node *n, struct node **np, int depth, void *arg)
 {
 	(void) np;
 	(void) arg;
 	(void) depth;
 
 
-	n->size.w = strlen(n->u.terminal) + 4;
+	n->size.w = strlen(n->u.literal) + 4;
 	n->size.h = 1;
 	n->y = 0;
 
@@ -175,20 +175,20 @@ dim_loop(struct node *n, struct node **np, int depth, void *arg)
 
 static struct node_walker w_dimension = {
 	dim_nothing,
-	dim_name, dim_terminal,
+	dim_name, dim_literal,
 	dim_choice,     dim_sequence,
 	dim_loop
 };
 
 static int
-render_terminal(struct node *n, struct node **np, int depth, void *arg)
+render_literal(struct node *n, struct node **np, int depth, void *arg)
 {
 	struct render_context *ctx = arg;
 
 	(void) np;
 	(void) depth;
 
-	bprintf(ctx, " \"%s\" ", n->u.terminal);
+	bprintf(ctx, " \"%s\" ", n->u.literal);
 
 	return 1;
 }
@@ -374,7 +374,7 @@ render_loop(struct node *n, struct node **np, int depth, void *arg)
 
 static struct node_walker w_render = {
 	0,
-	render_name,   render_terminal,
+	render_name,   render_literal,
 	render_choice, render_sequence,
 	render_loop
 };

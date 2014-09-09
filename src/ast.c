@@ -42,7 +42,7 @@ ast_make_literal_term(const char *literal)
 	assert(literal != NULL);
 
 	new = xmalloc(sizeof *new);
-	new->type      = TYPE_TERMINAL;	/* TODO: rename to literal or vice-versa, perhaps */
+	new->type      = TYPE_LITERAL;
 	new->next      = NULL;
 	new->u.literal = literal;
 

@@ -99,9 +99,9 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 			printf("label = \"&epsilon;\"");
 			break;
 
-		case NODE_TERMINAL:
+		case NODE_LITERAL:
 			printf("style = filled, shape = box, label = \"\\\"");
-			escputs(p->u.terminal, stdout);
+			escputs(p->u.literal, stdout);
 			printf("\\\"\"");
 			break;
 

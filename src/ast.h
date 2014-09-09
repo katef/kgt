@@ -17,7 +17,7 @@ struct ast_term {
 	enum {
 		TYPE_EMPTY,
 		TYPE_RULE,
-		TYPE_TERMINAL,
+		TYPE_LITERAL,
 		TYPE_GROUP
 	} type;
 

@@ -87,8 +87,8 @@ transform_leaf(const struct ast_term *term)
 	case TYPE_RULE:
 		return node_create_name(term->u.rule->name);
 
-	case TYPE_TERMINAL:
-		return node_create_terminal(term->u.literal);
+	case TYPE_LITERAL:
+		return node_create_literal(term->u.literal);
 
 	default:
 		errno = EINVAL;
@@ -118,10 +118,10 @@ static struct node *
 single_term(const struct ast_term *term)
 {
 	switch (term->type) {
-	case TYPE_EMPTY:      return transform_empty();
+	case TYPE_EMPTY:   return transform_empty();
 	case TYPE_RULE:
-	case TYPE_TERMINAL:   return transform_leaf (term);
-	case TYPE_GROUP:      return transform_group(term->u.group);
+	case TYPE_LITERAL: return transform_leaf (term);
+	case TYPE_GROUP:   return transform_group(term->u.group);
 	}
 
 	return NULL;
@@ -246,7 +246,7 @@ node_call_walker(struct node **n, const struct node_walker *ws, int depth, void 
 
 	switch (node->type) {
 	case NODE_SKIP:     return ws->visit_skip     ? ws->visit_skip(*n, n, depth, a)       : -1;
-	case NODE_TERMINAL: return ws->visit_terminal ? ws->visit_terminal(node, n, depth, a) : -1;
+	case NODE_LITERAL:  return ws->visit_literal  ? ws->visit_literal(node, n, depth, a)  : -1;
 	case NODE_RULE:     return ws->visit_name     ? ws->visit_name(node, n, depth, a)     : -1;
 	case NODE_CHOICE:   return ws->visit_choice   ? ws->visit_choice(node, n, depth, a)   : -1;
 	case NODE_SEQUENCE: return ws->visit_sequence ? ws->visit_sequence(node, n, depth, a) : -1;
@@ -315,7 +315,7 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *a)
 
 	case NODE_SKIP:
 	case NODE_RULE:
-	case NODE_TERMINAL:
+	case NODE_LITERAL:
 		break;
 	}
 

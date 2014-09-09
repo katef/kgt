@@ -24,8 +24,8 @@ leaves_eq(struct node *a, struct node *b)
 	}
 
 	switch (a->type) {
-	case NODE_TERMINAL:
-		return 0 == strcmp(a->u.terminal, b->u.terminal);
+	case NODE_LITERAL:
+		return 0 == strcmp(a->u.literal, b->u.literal);
 
 	case NODE_RULE:
 		return 0 == strcmp(a->u.name, b->u.name);
@@ -151,7 +151,7 @@ process_loop(struct node *loop, struct stack *bp)
 		return process_loop_list(loop, bp);
 	}
 
-	if (loop->u.loop.backward->type == NODE_TERMINAL || loop->u.loop.backward->type == NODE_RULE) {
+	if (loop->u.loop.backward->type == NODE_LITERAL || loop->u.loop.backward->type == NODE_RULE) {
 		return process_loop_leaf(loop, bp);
 	}
 

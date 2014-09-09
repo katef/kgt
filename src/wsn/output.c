@@ -68,7 +68,7 @@ output_term(const struct ast_term *term)
 		printf(" %s", term->u.rule->name);
 		break;
 
-	case TYPE_TERMINAL: {
+	case TYPE_LITERAL: {
 			const char *p;
 
 			fputs(" \"", stdout);

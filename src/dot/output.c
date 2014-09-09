@@ -116,7 +116,7 @@ output_term(const struct ast_rule *grammar,
 		escputs(term->u.rule->name, stdout);
 		break;
 
-	case TYPE_TERMINAL:
+	case TYPE_LITERAL:
 		escputs(term->u.literal, stdout);
 		break;
 
@@ -138,7 +138,7 @@ output_term(const struct ast_rule *grammar,
 */
 		break;
 
-	case TYPE_TERMINAL:
+	case TYPE_LITERAL:
 		printf("\t\"t%p\" [ style = filled ];\n",
 			(void *) term);
 		break;

@@ -56,14 +56,14 @@ visit_name(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static int
-visit_terminal(struct node *n, struct node **np, int depth, void *arg)
+visit_literal(struct node *n, struct node **np, int depth, void *arg)
 {
 	FILE *f = arg;
 
 	(void) np;
 
 	print_indent(f, depth);
-	fprintf(f, "TERMINAL: \"%s\"\n", n->u.terminal);
+	fprintf(f, "LITERAL: \"%s\"\n", n->u.literal);
 
 	return 1;
 }
@@ -134,7 +134,7 @@ visit_loop(struct node *n, struct node **np, int depth, void *arg)
 
 static struct node_walker rrd_print = {
 	visit_skip,
-	visit_name,   visit_terminal,
+	visit_name,   visit_literal,
 	visit_choice, visit_sequence,
 	visit_loop
 };
