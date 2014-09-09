@@ -387,6 +387,9 @@
 			const struct ast_alt *q;
 			struct ast_term *t;
 			struct ast_rule *r;
+			int ok;
+
+			ok = 1;
 
 			for (p = g; p != NULL; p = p->next) {
 				for (q = p->alts; q != NULL; q = q->next) {
@@ -396,25 +399,29 @@
 						}
 
 						r = ast_find_rule(g, t->u.rule->name);
-						if (r == NULL) {
-							if (allow_undefined) {
-								/* XXX: would leak the ast_rule here */
-								/* TODO: convert to TYPE_TOKEN here */
-								continue;
-							}
-
-							fprintf(stderr, "production rule <%s> not defined\n", t->u.rule->name);
-							/* TODO: print location of this and previous definition */
-							/* TODO: handle as warning; add rule anyway, and bail out at end */
-							exit(EXIT_FAILURE);
+						if (r != NULL) {
+							free((char *) t->u.rule->name);
+							ast_free_rule(t->u.rule);
+							t->u.rule = r;
+							continue;
 						}
 
-						free((char *) t->u.rule->name);
-						ast_free_rule(t->u.rule);
+						if (!allow_undefined) {
+							fprintf(stderr, "production rule <%s> not defined\n", t->u.rule->name);
+							/* TODO: print location of this and previous definition */
+							/* XXX: would leak the ast_rule here */
 
-						t->u.rule = r;
+							ok = 0;
+							continue;
+						}
+
+						/* TODO: convert to TYPE_TOKEN here */
 					}
 				}
+			}
+
+			if (!ok) {
+				exit(EXIT_FAILURE);
 			}
 		}
 

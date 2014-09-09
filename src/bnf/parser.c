@@ -800,7 +800,7 @@ ZL0:;
 
 /* BEGINNING OF TRAILER */
 
-#line 424 "src/parser.act"
+#line 431 "src/parser.act"
 
 
 	static int
@@ -873,6 +873,9 @@ ZL0:;
 			const struct ast_alt *q;
 			struct ast_term *t;
 			struct ast_rule *r;
+			int ok;
+
+			ok = 1;
 
 			for (p = g; p != NULL; p = p->next) {
 				for (q = p->alts; q != NULL; q = q->next) {
@@ -882,31 +885,35 @@ ZL0:;
 						}
 
 						r = ast_find_rule(g, t->u.rule->name);
-						if (r == NULL) {
-							if (allow_undefined) {
-								/* XXX: would leak the ast_rule here */
-								/* TODO: convert to TYPE_TOKEN here */
-								continue;
-							}
-
-							fprintf(stderr, "production rule <%s> not defined\n", t->u.rule->name);
-							/* TODO: print location of this and previous definition */
-							/* TODO: handle as warning; add rule anyway, and bail out at end */
-							exit(EXIT_FAILURE);
+						if (r != NULL) {
+							free((char *) t->u.rule->name);
+							ast_free_rule(t->u.rule);
+							t->u.rule = r;
+							continue;
 						}
 
-						free((char *) t->u.rule->name);
-						ast_free_rule(t->u.rule);
+						if (!allow_undefined) {
+							fprintf(stderr, "production rule <%s> not defined\n", t->u.rule->name);
+							/* TODO: print location of this and previous definition */
+							/* XXX: would leak the ast_rule here */
 
-						t->u.rule = r;
+							ok = 0;
+							continue;
+						}
+
+						/* TODO: convert to TYPE_TOKEN here */
 					}
 				}
+			}
+
+			if (!ok) {
+				exit(EXIT_FAILURE);
 			}
 		}
 
 		return g;
 	}
 
-#line 911 "src/bnf/parser.c"
+#line 918 "src/bnf/parser.c"
 
 /* END OF FILE */

@@ -24,7 +24,7 @@
 extern void prod_ebnf(lex_state, act_state, map_rule *);
 /* BEGINNING OF TRAILER */
 
-#line 426 "src/parser.act"
+#line 433 "src/parser.act"
 
 
 #line 31 "src/ebnf/parser.h"
