@@ -257,15 +257,13 @@ render_sequence(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static void
-justify(struct render_context *ctx, int depth, struct node *n, int space, int arrows)
+justify(struct render_context *ctx, int depth, struct node *n, int space)
 {
 	int x = ctx->x;
 	int off = (space - n->size.w) / 2;
-	int arrow = off / 2;
-	const char *as = !arrows ? "-" : ctx->rtl ? "<" : ">";
 
 	for (; ctx->x < x + off; ctx->x++) {
-		bprintf(ctx, ctx->x - x != arrow ? "-" : as);
+		bprintf(ctx, "-");
 	}
 
 	ctx->y -= n->y;
@@ -274,7 +272,7 @@ justify(struct render_context *ctx, int depth, struct node *n, int space, int ar
 	ctx->y += n->y;
 	ctx->x += n->size.w;
 	for (; ctx->x < x + space; ctx->x++) {
-		bprintf(ctx, space - 1 - ctx->x + x != arrow ? "-" : as);
+		bprintf(ctx, "-");
 	}
 
 	ctx->x = x;
@@ -305,7 +303,7 @@ render_choice(struct node *n, struct node **np, int depth, void *arg)
 		}
 
 		ctx->x += 1;
-		justify(ctx, depth + 1, p, n->size.w - 2, 0);
+		justify(ctx, depth + 1, p, n->size.w - 2);
 
 		ctx->x = x + n->size.w - 1;
 		if (!ctx->rtl) {
@@ -323,7 +321,6 @@ render_choice(struct node *n, struct node **np, int depth, void *arg)
 				bprintf(ctx, "|");
 				ctx->y++;
 			}
-			/*ctx->y -= p->next->y;*/
 		}
 	};
 
@@ -346,7 +343,7 @@ render_loop(struct node *n, struct node **np, int depth, void *arg)
 	bprintf(ctx, !ctx->rtl ? ">" : "v");
 	ctx->x += 1;
 
-	justify(ctx, depth + 1, n->u.loop.forward, n->size.w - 2, 0);
+	justify(ctx, depth + 1, n->u.loop.forward, n->size.w - 2);
 	ctx->x = x + n->size.w - 1;
 	bprintf(ctx, !ctx->rtl ? "v" : "<");
 	ctx->y++;
@@ -363,7 +360,7 @@ render_loop(struct node *n, struct node **np, int depth, void *arg)
 	bprintf(ctx, !ctx->rtl ? "^" : ">");
 	ctx->x += 1;
 	ctx->rtl = !ctx->rtl;
-	justify(ctx, depth + 1, n->u.loop.backward, n->size.w - 2, 0);
+	justify(ctx, depth + 1, n->u.loop.backward, n->size.w - 2);
 
 	ctx->rtl = !ctx->rtl;
 	ctx->x = x + n->size.w - 1;
