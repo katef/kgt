@@ -75,15 +75,12 @@ transform_alts(const struct ast_alt *alts)
 }
 
 static struct node *
-transform_empty(void)
-{
-	return node_create_skip();
-}
-
-static struct node *
-transform_leaf(const struct ast_term *term)
+single_term(const struct ast_term *term)
 {
 	switch (term->type) {
+	case TYPE_EMPTY:
+		return node_create_skip();
+
 	case TYPE_RULE:
 		return node_create_name(term->u.rule->name);
 
@@ -93,39 +90,25 @@ transform_leaf(const struct ast_term *term)
 	case TYPE_TOKEN:
 		return node_create_name(term->u.token);
 
+	case TYPE_GROUP: {
+		struct node *list;
+		struct node *alts;
+
+		alts = transform_alts(term->u.group);
+		if (alts == NULL) {
+			return NULL;
+		}
+
+		list = node_create_choice(alts);
+
+		node_collapse(&list);
+
+		return list;
+	}
+
 	default:
 		errno = EINVAL;
 		return NULL;
-	}
-}
-
-static struct node *
-transform_group(const struct ast_alt *group)
-{
-	struct node *list;
-	struct node *alts;
-
-	alts = transform_alts(group);
-	if (alts == NULL) {
-		return NULL;
-	}
-
-	list = node_create_choice(alts);
-
-	node_collapse(&list);
-
-	return list;
-}
-
-static struct node *
-single_term(const struct ast_term *term)
-{
-	switch (term->type) {
-	case TYPE_EMPTY:   return transform_empty();
-	case TYPE_RULE:
-	case TYPE_LITERAL:
-	case TYPE_TOKEN:   return transform_leaf (term);
-	case TYPE_GROUP:   return transform_group(term->u.group);
 	}
 
 	return NULL;
