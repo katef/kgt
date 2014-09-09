@@ -69,7 +69,7 @@ dim_name(struct node *n, struct node **np, int depth, void *arg)
 	(void) arg;
 	(void) depth;
 
-	n->size.w = strlen(n->u.name) + 4;
+	n->size.w = strlen(n->u.name) + 2;
 	n->size.h = 1;
 	n->y = 0;
 
@@ -84,7 +84,7 @@ dim_terminal(struct node *n, struct node **np, int depth, void *arg)
 	(void) depth;
 
 
-	n->size.w = strlen(n->u.terminal) + 2;
+	n->size.w = strlen(n->u.terminal) + 4;
 	n->size.h = 1;
 	n->y = 0;
 
@@ -377,8 +377,8 @@ render_loop(struct node *n, struct node **np, int depth, void *arg)
 
 static struct node_walker w_render = {
 	0,
-	render_terminal, render_name,
-	render_choice,   render_sequence,
+	render_name,   render_terminal,
+	render_choice, render_sequence,
 	render_loop
 };
 
@@ -436,7 +436,7 @@ rrtext_output(const struct ast_rule *grammar)
 			node_walk(&rrd, &w_render, 0, &ctx);
 
 			for (i = 0; i < ctx.size.h; i++) {
-				printf("	%s\n", ctx.lines[i]);
+				printf("    %s\n", ctx.lines[i]);
 				free(ctx.lines[i]);
 			}
 
