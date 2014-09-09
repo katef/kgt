@@ -40,14 +40,14 @@ process_loop_leaf(struct node *loop, struct stack *bp)
 {
 	struct node *a, *b;
 
-	if (bp == NULL || (bp->node->type != NODE_TERMINAL && bp->node->type != NODE_RULE)) {
+	if (bp == NULL) {
 		return 0;
 	}
 
 	a = loop->u.loop.backward;
 	b = bp->node;
 
-	if (leaves_eq(a, b)) {
+	if (node_compare(a, b)) {
 		struct node *tmp;
 
 		tmp = loop->u.loop.forward;
@@ -94,7 +94,7 @@ loop_switch_sides(int suflen, struct node *loop, struct stack **rl)
 		struct node *skip;
 
 		skip = node_create_skip();
-		node_free(loop->u.loop.backward);
+		/*node_free(loop->u.loop.backward);*/
 		loop->u.loop.backward = skip;
 	}
 
@@ -123,20 +123,7 @@ process_loop_list(struct node *loop, struct stack *bp)
 
 	/* linkedlistcmp() */
 	for (rp = rl; rp != NULL && bp != NULL; rp = rp->next, bp = bp->next) {
-		struct node *a, *b;
-
-		if (rp->node->type != NODE_TERMINAL && rp->node->type != NODE_RULE) {
-			break;
-		}
-
-		if (bp->node->type != NODE_TERMINAL && bp->node->type != NODE_RULE) {
-			break;
-		}
-
-		a = rp->node;
-		b = bp->node;
-
-		if (!leaves_eq(a, b)) {
+		if (!node_compare(rp->node, bp->node)) {
 			break;
 		}
 

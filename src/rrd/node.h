@@ -29,5 +29,8 @@ node_create_loop(struct node *forward, struct node *backward);
 void
 node_collapse(struct node **n);
 
+int
+node_compare(struct node *a, struct node *b);
+
 #endif
 

@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "rrd.h" /* XXX */
 #include "node.h"
@@ -175,3 +176,51 @@ node_collapse(struct node **n)
 	node_collapse(n);
 }
 
+static int
+node_compare_list(struct node *a, struct node *b, int once)
+{
+	struct node *pa = NULL, *pb = NULL;
+	int result = 1;
+
+	if (a->type != b->type) {
+		return 0;
+	}
+
+	for (pa = a, pb = b; pa != NULL && pb != NULL; pa = pa->next, pb = pb->next) {
+		switch (a->type) {
+		case NODE_SKIP:
+			break;
+		case NODE_TERMINAL:
+			result = result && 0 == strcmp(a->u.terminal, b->u.terminal);
+			break;
+		case NODE_RULE:
+			result = result && 0 == strcmp(a->u.name, b->u.name);
+			break;
+		case NODE_CHOICE:
+			result = result && node_compare_list(a->u.choice, b->u.choice, 0);
+			break;
+		case NODE_SEQUENCE:
+			result = result && node_compare_list(a->u.sequence, b->u.sequence, 0);
+			break;
+		case NODE_LOOP:
+			result = result &&
+				node_compare_list(a->u.loop.forward, a->u.loop.forward, 0) &&
+			    node_compare_list(a->u.loop.backward, a->u.loop.backward, 0);
+			break;
+		}
+		if (once) {
+			break;
+		}
+	}
+
+	if (!once && (pa != NULL || pb != NULL)) {
+		/* lists are of different length */
+		return 0;
+	}
+
+	return result;
+}
+
+int node_compare(struct node *a, struct node *b) {
+	return node_compare_list(a, b, 1);
+}
