@@ -166,7 +166,6 @@ static struct node *
 zeroormore_term(const struct ast_term *term)
 {
 	struct node *skip;
-	struct node *choice;
 	struct node *loop;
 	struct node *n;
 
