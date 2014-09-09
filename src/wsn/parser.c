@@ -1042,7 +1042,7 @@ ZL0:;
 							ast_free_rule(t->u.rule);
 
 							t->type    = TYPE_TOKEN;
-							t->u.token = t->u.rule->name;
+							t->u.token = token;
 						}
 					}
 				}
