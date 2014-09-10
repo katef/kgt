@@ -1,0 +1,24 @@
+(* transcribed from http://json.org *)
+
+object
+	= '{', [ string, ':', value, { ',', string, ':', value } ], '}' ;
+
+array
+	= '[', [ value, { ',', value } ], ']' ;
+
+value
+	= string
+	| number
+	| object
+	| array
+	| 'true'
+	| 'false'
+	| 'null'
+	;
+
+string
+	= '"', {
+		char
+		| '\', ( '"' | '\' | '/' | 'b' | 'f' | 'n' | 'r' | 't' | 'u', hex )
+	}, '"' ;
+
