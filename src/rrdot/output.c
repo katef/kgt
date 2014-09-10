@@ -120,7 +120,7 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 			break;
 
 		case NODE_LOOP:
-			printf("label = \"<b> &larr;|LOOP|<r> &rarr;\""); /* TODO: utf */
+			printf("label = \"<b> &larr;|LOOP|<f> &rarr;\""); /* TODO: utf */
 			break;
 
 		default:
