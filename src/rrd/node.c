@@ -135,6 +135,9 @@ node_create_loop(struct node *forward, struct node *backward)
 	new->u.loop.forward  = forward;
 	new->u.loop.backward = backward;
 
+	new->u.loop.min = 0;
+	new->u.loop.max = 0;
+
 	return new;
 }
 

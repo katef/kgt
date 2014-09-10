@@ -177,6 +177,36 @@ zeroormore_term(const struct ast_term *term)
 }
 
 static struct node *
+finite_term(const struct ast_term *term)
+{
+	struct node *skip;
+	struct node *loop;
+	struct node *n;
+
+	n = single_term(term);
+	if (n == NULL) {
+		return NULL;
+	}
+
+	skip = node_create_skip();
+
+	if (term->min > 0) {
+		loop = node_create_loop(n, skip);
+		loop->u.loop.min = term->min - 1;
+		loop->u.loop.max = term->max - 1;
+	} else {
+		loop = node_create_loop(skip, n);
+		loop->u.loop.min = term->min;
+		loop->u.loop.max = term->max;
+	}
+
+	node_collapse(&loop->u.loop.forward);
+	node_collapse(&loop->u.loop.backward);
+
+	return loop;
+}
+
+static struct node *
 transform_term(const struct ast_term *term)
 {
 	size_t i;
@@ -192,16 +222,13 @@ transform_term(const struct ast_term *term)
 		{ 0, 0, zeroormore_term }
 	};
 
-	/* TODO: our rrd tree can't express finite term repetition */
-	assert(term->max <= 1);
-
 	for (i = 0; i < sizeof a / sizeof *a; i++) {
 		if (term->min == a[i].min && term->max == a[i].max) {
 			return a[i].f(term);
 		}
 	}
 
-	return NULL;
+	return finite_term(term);
 }
 
 struct node *

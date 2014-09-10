@@ -30,6 +30,8 @@ struct node {
 		struct {
 			struct node *forward;
 			struct node *backward;
+			unsigned int min;
+			unsigned int max;
 		} loop;
 	} u;
 

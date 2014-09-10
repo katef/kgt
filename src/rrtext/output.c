@@ -6,7 +6,10 @@
  * Output a plaintext diagram of the abstract representation of railroads
  */
 
+#define _BSD_SOURCE
+
 #include <assert.h>
+#include <limits.h>
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -152,10 +155,34 @@ dim_choice(struct node *n, struct node **np, int depth, void *arg)
 	return 1;
 }
 
+static size_t
+loop_label(struct node *loop, char *s)
+{
+	char buffer[128];
+
+	if (s == NULL) {
+		s = buffer;
+	}
+
+	if (loop->u.loop.max == 1 && loop->u.loop.min == 1) {
+		return sprintf(s, "(exactly once)");
+	} else if (loop->u.loop.max == 0 && loop->u.loop.min > 0) {
+		return sprintf(s, "(at least %d times)", loop->u.loop.min);
+	} else if (loop->u.loop.max > 0 && loop->u.loop.min == 0) {
+		return sprintf(s, "(up to %d times)", loop->u.loop.max);
+	} else if (loop->u.loop.max > 0 && loop->u.loop.min == loop->u.loop.max) {
+		return sprintf(s, "(%d times)", loop->u.loop.max);
+	} else if (loop->u.loop.max > 1 && loop->u.loop.min > 1) {
+		return sprintf(s, "(%d-%d times)", loop->u.loop.min, loop->u.loop.max);
+	}
+
+	return 0;
+}
+
 static int
 dim_loop(struct node *n, struct node **np, int depth, void *arg)
 {
-	int wf, wb;
+	int wf, wb, cw;
 
 	(void) np;
 	(void) arg;
@@ -169,6 +196,17 @@ dim_loop(struct node *n, struct node **np, int depth, void *arg)
 	n->size.w = (wf > wb ? wf : wb) + 6;
 	n->size.h = n->u.loop.forward->size.h + n->u.loop.backward->size.h + 1;
 	n->y = n->u.loop.forward->y;
+
+	cw = loop_label(n, NULL);
+
+	if (cw > 0) {
+		if (cw + 6 > n->size.w) {
+			n->size.w = cw + 6;
+		}
+		if (n->u.loop.backward->type != NODE_SKIP) {
+			n->size.h += 2;
+		}
+	}
 
 	return 1;
 }
@@ -335,7 +373,7 @@ render_loop(struct node *n, struct node **np, int depth, void *arg)
 {
 	struct render_context *ctx = arg;
 	int x = ctx->x, y = ctx->y;
-	int i;
+	int i, cw;
 
 	(void) np;
 
@@ -360,7 +398,24 @@ render_loop(struct node *n, struct node **np, int depth, void *arg)
 	bprintf(ctx, !ctx->rtl ? "^" : ">");
 	ctx->x += 1;
 	ctx->rtl = !ctx->rtl;
+
+	cw = loop_label(n, NULL);
+
 	justify(ctx, depth + 1, n->u.loop.backward, n->size.w - 2);
+
+	if (cw > 0) {
+		int y = ctx->y;
+		char c;
+		ctx->x = x + 1 + (n->size.w - cw - 2) / 2;
+		if (n->u.loop.backward->type != NODE_SKIP) {
+			ctx->y += 2;
+		}
+		/* still less horrible than malloc() */
+		c = ctx->lines[ctx->y][ctx->x + cw];
+		loop_label(n, ctx->lines[ctx->y] + ctx->x);
+		ctx->lines[ctx->y][ctx->x + cw] = c;
+		ctx->y = y;
+	}
 
 	ctx->rtl = !ctx->rtl;
 	ctx->x = x + n->size.w - 1;
@@ -394,6 +449,7 @@ rrtext_output(const struct ast_rule *grammar)
 		}
 
 		if (prettify) {
+			rrd_pretty_prefixes(&rrd);
 			rrd_pretty_suffixes(&rrd);
 			rrd_pretty_redundant(&rrd);
 			rrd_pretty_bottom(&rrd);
