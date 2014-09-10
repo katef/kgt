@@ -43,7 +43,9 @@
 
 # spaces are permitted within EBNF names
 # XXX: I am unsure that this is correct. EBNF is far too complicated.
-/[a-z]([-a-z0-9_\t\r\n\v\f ]*[-a-z0-9_])?/i -> $ident;
+# TODO: when lx permits, we could remove rtrim() and write this using group
+#       capture to consume whitespace here, but disregard it.
+/[a-z]([-a-z0-9_\t\r\n\v\f ]*)?/i -> $ident;
 
 /[0-9]+/ -> $count;
 
