@@ -1,0 +1,11 @@
+<expr> ::= <term> "+" <expr>
+        |  <term>
+
+<term> ::= <factor> "*" <term>
+        |  <factor>
+
+<factor> ::= "(" <expr> ")"
+          |  <const>
+
+<const> ::= <integer>
+
