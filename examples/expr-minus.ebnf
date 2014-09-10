@@ -1,4 +1,4 @@
-expr = term , [ ( "+" | "-" ) , expr ] ;
+expr = term , { ( "+" | "-" ) , term } ;
 
 term = [ "-" ] , factor , [ "*" , term ] ;
 
