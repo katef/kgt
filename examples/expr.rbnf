@@ -2,7 +2,7 @@
 
 <term> ::= <factor> [ <*> <term> ]
 
-<factor> ::= "(" <expr> ")"
+<factor> ::= <(> <expr> <)>
           |  <const>
 
 <const> ::= <INTEGER>
