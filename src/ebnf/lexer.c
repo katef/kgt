@@ -410,7 +410,7 @@ z2(struct lx_ebnf_lx *lx)
 		}
 
 		switch (state) {
-		case S1: /* e.g. "`" */
+		case S1: /* e.g. "'" */
 			switch (c) {
 			default:  lx_ebnf_ungetc(lx, c); return lx->z = z4, TOK_LITERAL;
 			}
@@ -422,7 +422,7 @@ z2(struct lx_ebnf_lx *lx)
 
 		case S3: /* start */
 			switch (c) {
-			case '`': state = S1;      continue;
+			case '\'': state = S1;      continue;
 			default:  state = S2;     continue;
 			}
 		}
@@ -535,7 +535,7 @@ z4(struct lx_ebnf_lx *lx)
 		case S2:
 		case S3:
 		case S4:
-		case S18:
+		case S5:
 			break;
 
 		default:
@@ -645,41 +645,46 @@ z4(struct lx_ebnf_lx *lx)
 			default:  lx_ebnf_ungetc(lx, c); return lx->z = z1, lx->z(lx);
 			}
 
-		case S5: /* e.g. "(" */
+		case S5: /* e.g. "'" */
+			switch (c) {
+			default:  lx_ebnf_ungetc(lx, c); return lx->z = z2, lx->z(lx);
+			}
+
+		case S6: /* e.g. "(" */
 			switch (c) {
 			case '*': state = S2;      continue;
-			case '/': state = S16;      continue;
+			case '/': state = S17;      continue;
 			case ':': state = S20;      continue;
 			default:  lx_ebnf_ungetc(lx, c); return TOK_STARTGROUP;
 			}
 
-		case S6: /* e.g. ")" */
+		case S7: /* e.g. ")" */
 			switch (c) {
 			default:  lx_ebnf_ungetc(lx, c); return TOK_ENDGROUP;
 			}
 
-		case S7: /* e.g. "*" */
+		case S8: /* e.g. "*" */
 			switch (c) {
 			default:  lx_ebnf_ungetc(lx, c); return TOK_STAR;
 			}
 
-		case S8: /* e.g. "," */
+		case S9: /* e.g. "," */
 			switch (c) {
 			default:  lx_ebnf_ungetc(lx, c); return TOK_CAT;
 			}
 
-		case S9: /* e.g. "-" */
+		case S10: /* e.g. "-" */
 			switch (c) {
 			default:  lx_ebnf_ungetc(lx, c); return TOK_EXCEPT;
 			}
 
-		case S10: /* e.g. "/" */
+		case S11: /* e.g. "/" */
 			switch (c) {
-			case ')': state = S17;      continue;
+			case ')': state = S18;      continue;
 			default:  lx_ebnf_ungetc(lx, c); return TOK_ALT;
 			}
 
-		case S11: /* e.g. "0" */
+		case S12: /* e.g. "0" */
 			switch (c) {
 			case '0':	          continue;
 			case '1':	          continue;
@@ -694,40 +699,35 @@ z4(struct lx_ebnf_lx *lx)
 			default:  lx_ebnf_ungetc(lx, c); return TOK_COUNT;
 			}
 
-		case S12: /* e.g. ":" */
+		case S13: /* e.g. ":" */
 			switch (c) {
 			case ')': state = S22;      continue;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
 			}
 
-		case S13: /* e.g. "." */
+		case S14: /* e.g. "." */
 			switch (c) {
 			default:  lx_ebnf_ungetc(lx, c); return TOK_SEP;
 			}
 
-		case S14: /* e.g. "=" */
+		case S15: /* e.g. "=" */
 			switch (c) {
 			default:  lx_ebnf_ungetc(lx, c); return TOK_EQUALS;
 			}
 
-		case S15: /* e.g. "?" */
+		case S16: /* e.g. "?" */
 			switch (c) {
 			default:  lx_ebnf_ungetc(lx, c); return TOK_OPT;
 			}
 
-		case S16: /* e.g. "[" */
+		case S17: /* e.g. "[" */
 			switch (c) {
 			default:  lx_ebnf_ungetc(lx, c); return TOK_STARTOPT;
 			}
 
-		case S17: /* e.g. "]" */
+		case S18: /* e.g. "]" */
 			switch (c) {
 			default:  lx_ebnf_ungetc(lx, c); return TOK_ENDOPT;
-			}
-
-		case S18: /* e.g. "`" */
-			switch (c) {
-			default:  lx_ebnf_ungetc(lx, c); return lx->z = z2, lx->z(lx);
 			}
 
 		case S19: /* e.g. "a" */
@@ -830,27 +830,28 @@ z4(struct lx_ebnf_lx *lx)
 			case ' ': state = S3;      continue;
 			case '!': state = S21;      continue;
 			case '\"': state = S4;      continue;
-			case '(': state = S5;      continue;
-			case ')': state = S6;      continue;
-			case '*': state = S7;      continue;
-			case ',': state = S8;      continue;
-			case '-': state = S9;      continue;
-			case '.': state = S13;      continue;
-			case '/': state = S10;      continue;
-			case '0': state = S11;      continue;
-			case '1': state = S11;      continue;
-			case '2': state = S11;      continue;
-			case '3': state = S11;      continue;
-			case '4': state = S11;      continue;
-			case '5': state = S11;      continue;
-			case '6': state = S11;      continue;
-			case '7': state = S11;      continue;
-			case '8': state = S11;      continue;
-			case '9': state = S11;      continue;
-			case ':': state = S12;      continue;
-			case ';': state = S13;      continue;
-			case '=': state = S14;      continue;
-			case '?': state = S15;      continue;
+			case '\'': state = S5;      continue;
+			case '(': state = S6;      continue;
+			case ')': state = S7;      continue;
+			case '*': state = S8;      continue;
+			case ',': state = S9;      continue;
+			case '-': state = S10;      continue;
+			case '.': state = S14;      continue;
+			case '/': state = S11;      continue;
+			case '0': state = S12;      continue;
+			case '1': state = S12;      continue;
+			case '2': state = S12;      continue;
+			case '3': state = S12;      continue;
+			case '4': state = S12;      continue;
+			case '5': state = S12;      continue;
+			case '6': state = S12;      continue;
+			case '7': state = S12;      continue;
+			case '8': state = S12;      continue;
+			case '9': state = S12;      continue;
+			case ':': state = S13;      continue;
+			case ';': state = S14;      continue;
+			case '=': state = S15;      continue;
+			case '?': state = S16;      continue;
 			case 'A': state = S19;      continue;
 			case 'B': state = S19;      continue;
 			case 'C': state = S19;      continue;
@@ -877,9 +878,8 @@ z4(struct lx_ebnf_lx *lx)
 			case 'X': state = S19;      continue;
 			case 'Y': state = S19;      continue;
 			case 'Z': state = S19;      continue;
-			case '[': state = S16;      continue;
-			case ']': state = S17;      continue;
-			case '`': state = S18;      continue;
+			case '[': state = S17;      continue;
+			case ']': state = S18;      continue;
 			case 'a': state = S19;      continue;
 			case 'b': state = S19;      continue;
 			case 'c': state = S19;      continue;
@@ -920,19 +920,19 @@ z4(struct lx_ebnf_lx *lx)
 	case S2: return TOK_EOF;
 	case S3: return TOK_EOF;
 	case S4: return TOK_EOF;
-	case S5: return TOK_STARTGROUP;
-	case S6: return TOK_ENDGROUP;
-	case S7: return TOK_STAR;
-	case S8: return TOK_CAT;
-	case S9: return TOK_EXCEPT;
-	case S10: return TOK_ALT;
-	case S11: return TOK_COUNT;
-	case S13: return TOK_SEP;
-	case S14: return TOK_EQUALS;
-	case S15: return TOK_OPT;
-	case S16: return TOK_STARTOPT;
-	case S17: return TOK_ENDOPT;
-	case S18: return TOK_EOF;
+	case S5: return TOK_EOF;
+	case S6: return TOK_STARTGROUP;
+	case S7: return TOK_ENDGROUP;
+	case S8: return TOK_STAR;
+	case S9: return TOK_CAT;
+	case S10: return TOK_EXCEPT;
+	case S11: return TOK_ALT;
+	case S12: return TOK_COUNT;
+	case S14: return TOK_SEP;
+	case S15: return TOK_EQUALS;
+	case S16: return TOK_OPT;
+	case S17: return TOK_STARTOPT;
+	case S18: return TOK_ENDOPT;
 	case S19: return TOK_IDENT;
 	case S20: return TOK_STARTSTAR;
 	case S21: return TOK_ALT;
@@ -983,7 +983,7 @@ lx_ebnf_example(enum lx_ebnf_token (*z)(struct lx_ebnf_lx *), enum lx_ebnf_token
 	} else
 	if (z == z2) {
 		switch (t) {
-		case TOK_LITERAL: return "`";
+		case TOK_LITERAL: return "'";
 		case TOK_CHAR: return "a";
 		default: goto error;
 		}
