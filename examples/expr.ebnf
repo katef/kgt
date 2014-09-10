@@ -1,0 +1,10 @@
+expr = term , [ "+" , expr ] ;
+
+term = factor , [ "*" , term ] ;
+
+factor = "(" , expr , ")"
+       |  const
+       ;
+
+const = INTEGER ;
+
