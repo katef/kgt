@@ -162,6 +162,7 @@ rrdump_output(const struct ast_rule *grammar)
 			node_walk(&rrd, &rrd_print, 1, stdout);
 			printf("\n");
 
+			rrd_pretty_prefixes(&rrd);
 			rrd_pretty_suffixes(&rrd);
 			rrd_pretty_redundant(&rrd);
 			rrd_pretty_bottom(&rrd);
