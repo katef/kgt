@@ -29,6 +29,7 @@
 	EQUALS;
 	ALT;
 	SEP;
+	!REP;
 	!EXCEPT;
 
 	STAR;

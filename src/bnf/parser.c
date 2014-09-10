@@ -130,10 +130,10 @@ static void prod_body(lex_state, act_state);
 extern void prod_bnf(lex_state, act_state, map_rule *);
 static void prod_term(lex_state, act_state, map_term *);
 static void prod_rule(lex_state, act_state, map_rule *);
-static void prod_71(lex_state, act_state, map_rule *);
-static void prod_72(lex_state, act_state, map_term *, map_alt *);
-static void prod_73(lex_state, act_state, map_term *);
+static void prod_72(lex_state, act_state, map_rule *);
+static void prod_73(lex_state, act_state, map_term *, map_alt *);
 static void prod_74(lex_state, act_state, map_term *);
+static void prod_75(lex_state, act_state, map_term *);
 
 /* BEGINNING OF STATIC VARIABLES */
 
@@ -198,7 +198,7 @@ prod_list_Hof_Hterms(lex_state lex_state, act_state act_state, map_term *ZOl)
 	}
 	{
 		prod_factor (lex_state, act_state, &ZIl);
-		prod_73 (lex_state, act_state, &ZIl);
+		prod_74 (lex_state, act_state, &ZIl);
 		if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 			RESTORE_LEXER;
 			goto ZL1;
@@ -222,7 +222,7 @@ prod_list_Hof_Hrules(lex_state lex_state, act_state act_state, map_rule *ZOl)
 	}
 	{
 		prod_rule (lex_state, act_state, &ZIl);
-		prod_71 (lex_state, act_state, &ZIl);
+		prod_72 (lex_state, act_state, &ZIl);
 		if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 			RESTORE_LEXER;
 			goto ZL1;
@@ -248,7 +248,7 @@ prod_list_Hof_Halts(lex_state lex_state, act_state act_state, map_alt *ZOl)
 		map_term ZIt;
 
 		prod_list_Hof_Hterms (lex_state, act_state, &ZIt);
-		prod_72 (lex_state, act_state, &ZIt, &ZIl);
+		prod_73 (lex_state, act_state, &ZIt, &ZIl);
 		if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 			RESTORE_LEXER;
 			goto ZL1;
@@ -271,7 +271,7 @@ ZL2_body:;
 		{
 			map_char ZIc;
 
-			/* BEGINNING OF INLINE: 51 */
+			/* BEGINNING OF INLINE: 52 */
 			{
 				{
 					switch (CURRENT_TERMINAL) {
@@ -294,7 +294,7 @@ ZL2_body:;
 					ADVANCE_LEXER;
 				}
 			}
-			/* END OF INLINE: 51 */
+			/* END OF INLINE: 52 */
 			/* BEGINNING OF ACTION: pattern-char */
 			{
 #line 187 "src/parser.act"
@@ -386,7 +386,7 @@ prod_term(lex_state lex_state, act_state act_state, map_term *ZOt)
 	case (TOK_NAME): case (TOK_LITERAL): case (TOK_CHAR):
 		{
 			prod_body (lex_state, act_state);
-			prod_74 (lex_state, act_state, &ZIt);
+			prod_75 (lex_state, act_state, &ZIt);
 			if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 				RESTORE_LEXER;
 				goto ZL1;
@@ -452,7 +452,7 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 #line 453 "src/bnf/parser.c"
 		}
 		/* END OF ACTION: pattern-buffer */
-		/* BEGINNING OF INLINE: 66 */
+		/* BEGINNING OF INLINE: 67 */
 		{
 			{
 				switch (CURRENT_TERMINAL) {
@@ -478,7 +478,7 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			}
 		ZL2:;
 		}
-		/* END OF INLINE: 66 */
+		/* END OF INLINE: 67 */
 		prod_list_Hof_Halts (lex_state, act_state, &ZIa);
 		if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 			RESTORE_LEXER;
@@ -493,7 +493,7 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 #line 494 "src/bnf/parser.c"
 		}
 		/* END OF ACTION: make-rule */
-		/* BEGINNING OF INLINE: 67 */
+		/* BEGINNING OF INLINE: 68 */
 		{
 			switch (CURRENT_TERMINAL) {
 			case (TOK_EOF):
@@ -524,7 +524,7 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			}
 		ZL4:;
 		}
-		/* END OF INLINE: 67 */
+		/* END OF INLINE: 68 */
 	}
 	goto ZL0;
 ZL1:;
@@ -535,7 +535,7 @@ ZL0:;
 }
 
 static void
-prod_71(lex_state lex_state, act_state act_state, map_rule *ZIl)
+prod_72(lex_state lex_state, act_state act_state, map_rule *ZIl)
 {
 	switch (CURRENT_TERMINAL) {
 	case (TOK_NAME): case (TOK_CHAR):
@@ -578,7 +578,7 @@ ZL1:;
 }
 
 static void
-prod_72(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
+prod_73(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 {
 	map_alt ZIl;
 
@@ -587,7 +587,7 @@ prod_72(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 		{
 			map_alt ZIa;
 
-			/* BEGINNING OF INLINE: 62 */
+			/* BEGINNING OF INLINE: 63 */
 			{
 				{
 					switch (CURRENT_TERMINAL) {
@@ -613,7 +613,7 @@ prod_72(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 				}
 			ZL2:;
 			}
-			/* END OF INLINE: 62 */
+			/* END OF INLINE: 63 */
 			prod_list_Hof_Halts (lex_state, act_state, &ZIa);
 			if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 				RESTORE_LEXER;
@@ -665,7 +665,7 @@ ZL0:;
 }
 
 static void
-prod_73(lex_state lex_state, act_state act_state, map_term *ZIl)
+prod_74(lex_state lex_state, act_state act_state, map_term *ZIl)
 {
 	switch (CURRENT_TERMINAL) {
 	case (TOK_EMPTY): case (TOK_NAME): case (TOK_LITERAL): case (TOK_CHAR):
@@ -701,7 +701,7 @@ ZL1:;
 }
 
 static void
-prod_74(lex_state lex_state, act_state act_state, map_term *ZOt)
+prod_75(lex_state lex_state, act_state act_state, map_term *ZOt)
 {
 	map_term ZIt;
 
@@ -813,7 +813,7 @@ ZL0:;
 
 /* BEGINNING OF TRAILER */
 
-#line 466 "src/parser.act"
+#line 468 "src/parser.act"
 
 
 	static int
@@ -841,6 +841,8 @@ ZL0:;
 
 		struct LX_STATE *lx;
 		struct ast_rule *g;
+
+		(void) rtrim; /* for dialects which don't use it */
 
 		assert(f != NULL);
 
@@ -936,6 +938,6 @@ ZL0:;
 		return g;
 	}
 
-#line 940 "src/bnf/parser.c"
+#line 942 "src/bnf/parser.c"
 
 /* END OF FILE */
