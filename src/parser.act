@@ -93,6 +93,18 @@
 	extern int allow_undefined;
 
 	static void
+	rtrim(char *s)
+	{
+		char *p = s + strlen(s) - 1;
+
+		assert(strlen(s) > 0);
+
+		while (p >= s && isspace((unsigned char) *p)) {
+			*p-- = '\0';
+		}
+	}
+
+	static void
 	err(const struct lex_state *lex_state, const char *fmt, ...)
 	{
 		va_list ap;
@@ -144,6 +156,15 @@
 	@};
 
 	IDENT: () -> (s :string) = @{
+		/*
+		 * This is for the sake of EBNF, which would require n-token lookahead
+		 * in order to lex just an ident (as ident may contain whitespace).
+		 *
+		 * I'm trimming here (for all grammars) because it's simpler than
+		 * doing this for just EBNF specifically, and harmless to others.
+		 */
+		rtrim(lex_state->buf.a);
+
 		@s = xstrdup(lex_state->buf.a);
 		if (@s == NULL) {
 			perror("xstrdup");
