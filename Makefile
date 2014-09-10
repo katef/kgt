@@ -17,6 +17,7 @@ PREFIX ?= /usr/local
 SUBDIR += src/bnf
 SUBDIR += src/dot
 SUBDIR += src/ebnf
+SUBDIR += src/rbnf
 SUBDIR += src/sid
 SUBDIR += src/trd
 SUBDIR += src/wsn

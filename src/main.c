@@ -12,6 +12,7 @@
 #include "bnf/io.h"
 #include "wsn/io.h"
 #include "ebnf/io.h"
+#include "rbnf/io.h"
 #include "sid/io.h"
 #include "trd/io.h"
 #include "dot/io.h"
@@ -33,6 +34,7 @@ struct io {
 	{ "bnf",    bnf_input,  bnf_output    },
 	{ "wsn",    wsn_input,  wsn_output    },
 	{ "ebnf",   ebnf_input, ebnf_output   },
+	{ "rbnf",   rbnf_input, rbnf_output   },
 	{ "sid",    NULL,       sid_output    },
 	{ "trd",    NULL,       trd_output    },
 	{ "dot",    NULL,       dot_output    },

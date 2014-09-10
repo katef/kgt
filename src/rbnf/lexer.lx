@@ -1,0 +1,52 @@
+# $Id$
+
+# Routing Backus-Naur Form (RBNF): RFC 5511
+
+# 2.3.1. White Space
+/[ \t\v\f\r]+/;
+
+# 2.2.1. Assignment
+'::=' -> $equals;
+
+# 2.1.1. All rule names are enclosed by angle brackets ("<" and ">").
+# Rule names MAY include any printable characters, but MUST NOT include tabs
+# or line feeds/breaks.
+"<" .. ">" -> $name {
+	/./ - /[\t\v\f\r\n]/ -> $char;
+}
+
+# 2.3.2. Line Breaks
+# Line breaks within an assignment are ignored but SHOULD be used for
+# readability.
+#
+# Line breaks are often used to imply grouping within the precedence
+# rules set out in Section 2.4, but explicit grouping (Section 2.2.6)
+# or intermediary constructs (Section 2.2.4) SHOULD be used in new
+# definitions.
+#
+# A line break MUST NOT be present between the left-hand side of an
+# assignment and the assignment operator (see Section 2.2.1).
+#
+# New assignments (i.e., new construct or message definitions) MUST
+# begin on a new line.
+
+# Newlines are whitespace, except for a double newline,
+# which acts as a production separator.
+# XXX: I am not sure this is correct, per RBNF
+"\n\n" -> $sep;
+"\n";
+
+# 2.2.3. Optional Presence
+'[' -> $startopt;
+']' -> $endopt;
+
+# 2.2.4. Alternatives
+'|'   -> $alt;
+
+# 2.2.5. Repetition
+'...' -> $rep;
+
+# 2.2.6. Grouping
+'(' -> $startgroup;
+')' -> $endgroup;
+
