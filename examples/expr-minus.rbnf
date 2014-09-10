@@ -1,0 +1,9 @@
+<expr> ::= <term> [ ( <+> | <-> ) <term> ... ]
+
+<term> ::= [ <-> ] <factor> [ <*> <term> ]
+
+<factor> ::= <(> <expr> <)>
+          | <const>
+
+<const> ::= <INTEGER>
+
