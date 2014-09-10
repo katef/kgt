@@ -17,25 +17,6 @@
 #include "node.h"
 
 static int
-leaves_eq(struct node *a, struct node *b)
-{
-	if (a->type != b->type) {
-		return 0;
-	}
-
-	switch (a->type) {
-	case NODE_LITERAL:
-		return 0 == strcmp(a->u.literal, b->u.literal);
-
-	case NODE_RULE:
-		return 0 == strcmp(a->u.name, b->u.name);
-
-	default:
-		return 0;
-	}
-}
-
-static int
 process_loop_leaf(struct node *loop, struct stack *bp)
 {
 	struct node *a, *b;
