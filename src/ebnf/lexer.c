@@ -459,6 +459,9 @@ z3(struct lx_ebnf_lx *lx)
 	while (c = lx_getc(lx), c != EOF) {
 		switch (state) {
 		case S1:
+		case S2:
+		case S3:
+		case S4:
 			break;
 
 		default:
@@ -480,12 +483,12 @@ z3(struct lx_ebnf_lx *lx)
 		case S2: /* e.g. "*" */
 			switch (c) {
 			case ')': state = S1;      continue;
-			default:  lx_ebnf_ungetc(lx, c); return TOK_CHAR;
+			default:  lx_ebnf_ungetc(lx, c); return lx->z(lx);
 			}
 
 		case S3: /* e.g. "a" */
 			switch (c) {
-			default:  lx_ebnf_ungetc(lx, c); return TOK_CHAR;
+			default:  lx_ebnf_ungetc(lx, c); return lx->z(lx);
 			}
 
 		case S4: /* start */
@@ -500,8 +503,8 @@ z3(struct lx_ebnf_lx *lx)
 
 	switch (state) {
 	case S1: return TOK_EOF;
-	case S2: return TOK_CHAR;
-	case S3: return TOK_CHAR;
+	case S2: return TOK_EOF;
+	case S3: return TOK_EOF;
 	default: errno = EINVAL; return TOK_ERROR;
 	}
 }
@@ -987,7 +990,6 @@ lx_ebnf_example(enum lx_ebnf_token (*z)(struct lx_ebnf_lx *), enum lx_ebnf_token
 	} else
 	if (z == z3) {
 		switch (t) {
-		case TOK_CHAR: return "*";
 		default: goto error;
 		}
 	} else
