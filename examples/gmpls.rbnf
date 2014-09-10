@@ -1,0 +1,70 @@
+
+<sender descriptor> ::=  <SENDER_TEMPLATE> <SENDER_TSPEC>
+                         [ <ADSPEC> ]
+                         [ <RECORD_ROUTE> ]
+                         [ <SUGGESTED_LABEL> ]
+                         [ <RECOVERY_LABEL> ]
+                         <UPSTREAM_LABEL>
+
+<PathErr Message> ::=    <Common Header> [ <INTEGRITY> ]
+                         [ [<MESSAGE_ID_ACK> | <MESSAGE_ID_NACK>] ... ]
+                         [ <MESSAGE_ID> ]
+                         <SESSION> <ERROR_SPEC>
+                         [ <ACCEPTABLE_LABEL_SET> ... ]
+                         [ <POLICY_DATA> ... ]
+                         <sender descriptor>
+
+<Resv Message> ::=       <Common Header> [ <INTEGRITY> ]
+                         [ [<MESSAGE_ID_ACK> | <MESSAGE_ID_NACK>] ... ]
+                         [ <MESSAGE_ID> ]
+                         <SESSION> <RSVP_HOP>
+                         <TIME_VALUES>
+                         [ <RESV_CONFIRM> ]  [ <SCOPE> ]
+                         [ <NOTIFY_REQUEST> ]
+                         [ <ADMIN_STATUS> ]
+                         [ <POLICY_DATA> ... ]
+                         <STYLE> <flow descriptor list>
+
+<ResvErr Message> ::=    <Common Header> [ <INTEGRITY> ]
+                         [ [<MESSAGE_ID_ACK> | <MESSAGE_ID_NACK>] ... ]
+                         [ <MESSAGE_ID> ]
+                         <SESSION> <RSVP_HOP>
+                         <ERROR_SPEC> [ <SCOPE> ]
+                         [ <ACCEPTABLE_LABEL_SET> ... ]
+                         [ <POLICY_DATA> ... ]
+                         <STYLE> <error flow descriptor>
+
+<Hello Message> ::= <Common Header> [ <INTEGRITY> ] <HELLO>
+                    [ <RESTART_CAP> ]
+
+   <Notify message>            ::= <Common Header> [<INTEGRITY>]
+                        [ [<MESSAGE_ID_ACK> | <MESSAGE_ID_NACK>] ... ]
+                                   [ <MESSAGE_ID> ]
+                                   <ERROR_SPEC> <notify session list>
+
+   <notify session list>       ::= [ <notify session list> ]
+                                   <upstream notify session> |
+                                   <downstream notify session>
+
+   <upstream notify session>   ::= <SESSION> [ <ADMIN_STATUS> ]
+                                   [<POLICY_DATA>...]
+                                   <sender descriptor>
+
+   <downstream notify session> ::= <SESSION> [<POLICY_DATA>...]
+                                   <flow descriptor list>
+
+<Path Message> ::=       <Common Header> [ <INTEGRITY> ]
+                         [ [<MESSAGE_ID_ACK> | <MESSAGE_ID_NACK>] ... ]
+                         [ <MESSAGE_ID> ]
+                         <SESSION> <RSVP_HOP>
+                         <TIME_VALUES>
+                         [ <EXPLICIT_ROUTE> ]
+                         <LABEL_REQUEST>
+                         [ <PROTECTION> ]
+                         [ <LABEL_SET> ... ]
+                         [ <SESSION_ATTRIBUTE> ]
+                         [ <NOTIFY_REQUEST> ]
+                         [ <ADMIN_STATUS> ]
+                         [ <POLICY_DATA> ... ]
+                         <sender descriptor>
+
