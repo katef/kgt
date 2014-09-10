@@ -369,6 +369,8 @@
 		struct LX_STATE *lx;
 		struct ast_rule *g;
 
+		(void) rtrim; /* for dialects which don't use it */
+
 		assert(f != NULL);
 
 		g = NULL;
