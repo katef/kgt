@@ -9,7 +9,7 @@
 
 /* BEGINNING OF HEADER */
 
-#line 136 "src/parser.act"
+#line 137 "src/parser.act"
 
 
 	typedef struct lex_state * lex_state;
@@ -24,7 +24,7 @@
 extern void prod_ebnf(lex_state, act_state, map_rule *);
 /* BEGINNING OF TRAILER */
 
-#line 467 "src/parser.act"
+#line 468 "src/parser.act"
 
 
 #line 31 "src/ebnf/parser.h"
