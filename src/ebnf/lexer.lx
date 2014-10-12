@@ -39,7 +39,7 @@
 '(' -> $startgroup; ')' -> $endgroup;
 '-' -> $except;
 '*' -> $star;
-'?' -> $opt;
+# XXX: '?' -> $opt;
 
 # spaces are permitted within EBNF names
 # XXX: I am unsure that this is correct. EBNF is far too complicated.
@@ -48,4 +48,7 @@
 /[a-z]([-a-z0-9_\t\r\n\v\f ]*)?/i -> $ident;
 
 /[0-9]+/ -> $count;
+
+# TODO:
+'?' .. '?';
 
