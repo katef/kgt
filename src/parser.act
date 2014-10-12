@@ -287,6 +287,26 @@
 		@t = ast_make_group_term(@a);
 	@};
 
+	<make-range-term>: (m :char, n :char) -> (t :ast_term) = @{
+		struct ast_alt *a;
+		int i;
+
+		a = NULL;
+
+		for (i = @m; i <= @n; i++) {
+			struct ast_alt *new;
+			struct ast_term *t;
+
+			t = ast_make_char_term(i);
+			new = ast_make_alt(t);
+
+			new->next = a;
+			a = new;
+		}
+
+		@t = ast_make_group_term(a);
+	@};
+
 
 	<make-alt>: (t :ast_term) -> (a :ast_alt) = @{
 		@a = ast_make_alt(@t);
