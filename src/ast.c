@@ -35,6 +35,24 @@ ast_make_rule_term(struct ast_rule *rule)
 }
 
 struct ast_term *
+ast_make_char_term(char c)
+{
+	struct ast_term *new;
+	char *s;
+
+	s = xmalloc(2); /* XXX: i don't like this */
+	s[0] = c;
+	s[1] = '\0';
+
+	new = xmalloc(sizeof *new);
+	new->type      = TYPE_LITERAL;
+	new->next      = NULL;
+	new->u.literal = s;
+
+	return new;
+}
+
+struct ast_term *
 ast_make_literal_term(const char *literal)
 {
 	struct ast_term *new;

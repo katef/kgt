@@ -68,6 +68,9 @@ struct ast_term *
 ast_make_rule_term(struct ast_rule *rule);
 
 struct ast_term *
+ast_make_char_term(char c);
+
+struct ast_term *
 ast_make_literal_term(const char *literal);
 
 struct ast_term *
