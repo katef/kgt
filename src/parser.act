@@ -376,6 +376,23 @@
 		@r->next = @l;
 	@};
 
+	<current-rules>: () -> (l :ast_rule) = @{
+		fprintf(stderr, "unimplemented\n");
+		@l = NULL;
+		@!;
+	@};
+
+	<find-rule>: (l :ast_rule, n :string) -> (r :ast_rule) = @{
+		assert(@n != NULL);
+
+		@r = ast_find_rule(@l, @n);
+	@};
+
+	<add-alts>: (r :ast_rule, a :ast_alt) -> () = @{
+		fprintf(stderr, "unimplemented\n");
+		@!;
+	@};
+
 
 	<err-syntax> = @{
 		err(lex_state, "Syntax error");

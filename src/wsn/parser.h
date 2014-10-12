@@ -24,7 +24,7 @@
 extern void prod_wsn(lex_state, act_state, map_rule *);
 /* BEGINNING OF TRAILER */
 
-#line 523 "src/parser.act"
+#line 540 "src/parser.act"
 
 
 #line 31 "src/wsn/parser.h"

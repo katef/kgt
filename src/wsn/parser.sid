@@ -79,6 +79,10 @@
 	<add-alt-to-list>:  (:ast_alt, :ast_alt)   -> ();
 	<add-rule-to-list>: (:ast_rule, :ast_rule) -> ();
 
+	!<current-rules>: () -> (:ast_rule);
+	!<find-rule>:     (:ast_rule, :string)  -> (:ast_rule);
+	!<add-alts>:      (:ast_rule, :ast_alt) -> ();
+
 	<err-syntax>;
 	<err-expected-alt>;
 	<err-expected-sep>;
