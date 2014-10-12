@@ -6,7 +6,6 @@
 enum lx_ebnf_token {
 	TOK_COUNT,
 	TOK_IDENT,
-	TOK_OPT,
 	TOK_STAR,
 	TOK_EXCEPT,
 	TOK_ENDGROUP,

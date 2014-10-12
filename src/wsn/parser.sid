@@ -43,6 +43,14 @@
 	IDENT:  () -> (:string);
 	!COUNT: () -> (:count);
 
+	!BINSTR:   () -> (:string);
+	!DECSTR:   () -> (:string);
+	!HEXSTR:   () -> (:string);
+
+	!BINRANGE: () -> (:char, :char);
+	!DECRANGE: () -> (:char, :char);
+	!HEXRANGE: () -> (:char, :char);
+
 %productions%
 
 	<pattern-char>:   (:char) -> ();

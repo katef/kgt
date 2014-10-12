@@ -158,7 +158,7 @@
 
 	IDENT: () -> (s :string) = @{
 		/*
-		 * This is for the sake of EBNF, which would require n-token lookahead
+		 * This rtrim() is for EBNF, which would require n-token lookahead
 		 * in order to lex just an ident (as ident may contain whitespace).
 		 *
 		 * I'm trimming here (for all grammars) because it's simpler than
@@ -176,6 +176,39 @@
 	COUNT: () -> (n :count) = @{
 		@n = strtoul(lex_state->buf.a, NULL, 10);
 		/* TODO: range check */
+	@};
+
+	BINSTR: () -> (s :string) = @{
+		@s = "";
+		fprintf(stderr, "unimplemented\n");
+	@};
+
+	DECSTR: () -> (s :string) = @{
+		@s = "";
+		fprintf(stderr, "unimplemented\n");
+	@};
+
+	HEXSTR: () -> (s :string) = @{
+		@s = "";
+		fprintf(stderr, "unimplemented\n");
+	@};
+
+	BINRANGE: () -> (m :char, n :char) = @{
+		@m = '\0';
+		@n = '\0';
+		fprintf(stderr, "unimplemented\n");
+	@};
+
+	DECRANGE: () -> (m :char, n :char) = @{
+		@m = '\0';
+		@n = '\0';
+		fprintf(stderr, "unimplemented\n");
+	@};
+
+	HEXRANGE: () -> (m :char, n :char) = @{
+		@m = '\0';
+		@n = '\0';
+		fprintf(stderr, "unimplemented\n");
 	@};
 
 %actions%
