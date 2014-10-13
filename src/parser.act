@@ -325,7 +325,7 @@
 		if (-1 == string(lex_state->buf.a, @s,  8)) {
 			if (errno == ERANGE) {
 				err(lex_state, "octal sequence %s out of range: expected %s0..%s%o inclusive",
-					lex_state->buf.a, prefix(2), prefix(2), UCHAR_MAX);
+					lex_state->buf.a, prefix(8), prefix(8), UCHAR_MAX);
 			} else {
 				err(lex_state, "%s: %s", lex_state->buf.a, strerror(errno));
 			}
@@ -345,7 +345,7 @@
 		if (-1 == string(lex_state->buf.a, @s, 10)) {
 			if (errno == ERANGE) {
 				err(lex_state, "decimal sequence %s out of range: expected %s0..%s%u inclusive",
-					lex_state->buf.a, prefix(2), prefix(2), UCHAR_MAX);
+					lex_state->buf.a, prefix(10), prefix(10), UCHAR_MAX);
 			} else {
 				err(lex_state, "%s: %s", lex_state->buf.a, strerror(errno));
 			}
@@ -365,7 +365,7 @@
 		if (-1 == string(lex_state->buf.a, @s, 16)) {
 			if (errno == ERANGE) {
 				err(lex_state, "hex sequence %s out of range: expected %s0..%s%x inclusive",
-					lex_state->buf.a, prefix(2), prefix(2), UCHAR_MAX);
+					lex_state->buf.a, prefix(16), prefix(16), UCHAR_MAX);
 			} else {
 				err(lex_state, "%s: %s", lex_state->buf.a, strerror(errno));
 			}
@@ -391,7 +391,7 @@
 		if (-1 == range(lex_state->buf.a, &@m, &@n,  8)) {
 			if (errno == ERANGE) {
 				err(lex_state, "octal sequence %s out of range: expected %s0..%s%o inclusive",
-					lex_state->buf.a, prefix(2), prefix(2), UCHAR_MAX);
+					lex_state->buf.a, prefix(8), prefix(8), UCHAR_MAX);
 			} else {
 				err(lex_state, "%s: %s", lex_state->buf.a, strerror(errno));
 			}
@@ -401,14 +401,24 @@
 
 	DECRANGE: () -> (m :char, n :char) = @{
 		if (-1 == range(lex_state->buf.a, &@m, &@n, 10)) {
-			err(lex_state, "%s: %s", lex_state->buf.a, strerror(errno));
+			if (errno == ERANGE) {
+				err(lex_state, "decimal sequence %s out of range: expected %s0..%s%u inclusive",
+					lex_state->buf.a, prefix(10), prefix(10), UCHAR_MAX);
+			} else {
+				err(lex_state, "%s: %s", lex_state->buf.a, strerror(errno));
+			}
 			@!;
 		}
 	@};
 
 	HEXRANGE: () -> (m :char, n :char) = @{
 		if (-1 == range(lex_state->buf.a, &@m, &@n, 16)) {
-			err(lex_state, "%s: %s", lex_state->buf.a, strerror(errno));
+			if (errno == ERANGE) {
+				err(lex_state, "hex sequence %s out of range: expected %s0..%s%x inclusive",
+					lex_state->buf.a, prefix(16), prefix(16), UCHAR_MAX);
+			} else {
+				err(lex_state, "%s: %s", lex_state->buf.a, strerror(errno));
+			}
 			@!;
 		}
 	@};
