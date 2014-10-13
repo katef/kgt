@@ -108,6 +108,56 @@
 	}
 
 	static int
+	string(const char *p, char *q, int base)
+	{
+		assert(p != NULL);
+		assert(q != NULL);
+		assert(base > 0);
+
+		{
+			const char *s;
+			size_t z;
+
+			s = prefix(base);
+			z = strlen(s);
+
+			assert(0 == strncmp(p, s, z));
+
+			p += z;
+		}
+
+		for (;;) {
+			unsigned long n;
+			char *e;
+
+			n = strtoul(p, &e, base);
+			if (n == ULONG_MAX) {
+				return -1;
+			}
+
+			if (n > UCHAR_MAX) {
+				errno = ERANGE;
+				return -1;
+			}
+
+			*q++ = (unsigned char) n;
+
+			if (*e == '\0') {
+				break;
+			}
+
+			assert(*e == '.');
+
+			p = e + 1;
+		}
+
+		/* XXX: need to support \0 in strings */
+		*q = '\0';
+
+		return 0;
+	}
+
+	static int
 	range(const char *p,
 		unsigned char *a, unsigned char *b,
 		int base)
@@ -246,18 +296,48 @@
 	@};
 
 	BINSTR: () -> (s :string) = @{
-		@s = "";
-		fprintf(stderr, "unimplemented\n");
+		if (-1 == string(lex_state->buf.a, lex_state->buf.a,  2)) {
+			perror(lex_state->buf.a);
+			/* TODO: sensible error message */
+			@!;
+		}
+
+		@s = xstrdup(lex_state->buf.a);
+		if (@s == NULL) {
+			perror("xstrdup");
+			exit(EXIT_FAILURE);
+		}
+		/* TODO: free */
 	@};
 
 	DECSTR: () -> (s :string) = @{
-		@s = "";
-		fprintf(stderr, "unimplemented\n");
+		if (-1 == string(lex_state->buf.a, lex_state->buf.a, 10)) {
+			perror(lex_state->buf.a);
+			/* TODO: sensible error message */
+			@!;
+		}
+
+		@s = xstrdup(lex_state->buf.a);
+		if (@s == NULL) {
+			perror("xstrdup");
+			exit(EXIT_FAILURE);
+		}
+		/* TODO: free */
 	@};
 
 	HEXSTR: () -> (s :string) = @{
-		@s = "";
-		fprintf(stderr, "unimplemented\n");
+		if (-1 == string(lex_state->buf.a, lex_state->buf.a, 16)) {
+			perror(lex_state->buf.a);
+			/* TODO: sensible error message */
+			@!;
+		}
+
+		@s = xstrdup(lex_state->buf.a);
+		if (@s == NULL) {
+			perror("xstrdup");
+			exit(EXIT_FAILURE);
+		}
+		/* TODO: free */
 	@};
 
 	BINRANGE: () -> (m :char, n :char) = @{
@@ -513,8 +593,9 @@
 		struct ast_rule *g;
 
 		/* for dialects which don't use these */
-		(void) rtrim;
+		(void) string;
 		(void) range;
+		(void) rtrim;
 
 		assert(f != NULL);
 
