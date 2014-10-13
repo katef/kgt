@@ -310,6 +310,21 @@
 		/* TODO: free */
 	@};
 
+	OCTSTR: () -> (s :string) = @{
+		if (-1 == string(lex_state->buf.a, lex_state->buf.a,  8)) {
+			perror(lex_state->buf.a);
+			/* TODO: sensible error message */
+			@!;
+		}
+
+		@s = xstrdup(lex_state->buf.a);
+		if (@s == NULL) {
+			perror("xstrdup");
+			exit(EXIT_FAILURE);
+		}
+		/* TODO: free */
+	@};
+
 	DECSTR: () -> (s :string) = @{
 		if (-1 == string(lex_state->buf.a, lex_state->buf.a, 10)) {
 			perror(lex_state->buf.a);
@@ -342,6 +357,14 @@
 
 	BINRANGE: () -> (m :char, n :char) = @{
 		if (-1 == range(lex_state->buf.a, &@m, &@n,  2)) {
+			perror(lex_state->buf.a);
+			/* TODO: sensible error message */
+			@!;
+		}
+	@};
+
+	OCTRANGE: () -> (m :char, n :char) = @{
+		if (-1 == range(lex_state->buf.a, &@m, &@n,  8)) {
 			perror(lex_state->buf.a);
 			/* TODO: sensible error message */
 			@!;
