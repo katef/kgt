@@ -27,10 +27,12 @@
 %header% @{
 
 	#include <assert.h>
+	#include <limits.h>
 	#include <string.h>
 	#include <stdlib.h>
 	#include <stdarg.h>
 	#include <stdio.h>
+	#include <errno.h>
 	#include <ctype.h>
 
 	#include "../ast.h"
@@ -92,6 +94,71 @@
 	#define RESTORE_LEXER    do { act_state->lex_tok = act_state->lex_tok_save; } while (0)
 
 	extern int allow_undefined;
+
+	static const char *
+	prefix(int base)
+	{
+		switch (base) {
+		case 16: return "%x";
+		case 10: return "%d";
+		case  8: return "%o";
+		case  2: return "%b";
+		default: return "";
+		}
+	}
+
+	static int
+	range(const char *p,
+		unsigned char *a, unsigned char *b,
+		int base)
+	{
+		unsigned long m, n;
+		char *e;
+
+		assert(p != NULL);
+		assert(a != NULL);
+		assert(b != NULL);
+		assert(base > 0);
+
+		{
+			const char *s;
+			size_t z;
+
+			s = prefix(base);
+			z = strlen(s);
+
+			assert(0 == strncmp(p, s, z));
+
+			p += z;
+		}
+
+		m = strtoul(p, &e, base);
+		if (m == ULONG_MAX) {
+			return -1;
+		}
+
+		p = e;
+
+		assert(*p == '-');
+		p++;
+
+		n = strtoul(p, &e, base);
+		if (n == ULONG_MAX) {
+			return -1;
+		}
+
+		assert(*e == '\0');
+
+		if (m > UCHAR_MAX || n > UCHAR_MAX) {
+			errno = ERANGE;
+			return -1;
+		}
+
+		*a = m;
+		*b = n;
+
+		return 0;
+	}
 
 	static void
 	rtrim(char *s)
@@ -194,21 +261,27 @@
 	@};
 
 	BINRANGE: () -> (m :char, n :char) = @{
-		@m = '\0';
-		@n = '\0';
-		fprintf(stderr, "unimplemented\n");
+		if (-1 == range(lex_state->buf.a, &@m, &@n,  2)) {
+			perror(lex_state->buf.a);
+			/* TODO: sensible error message */
+			@!;
+		}
 	@};
 
 	DECRANGE: () -> (m :char, n :char) = @{
-		@m = '\0';
-		@n = '\0';
-		fprintf(stderr, "unimplemented\n");
+		if (-1 == range(lex_state->buf.a, &@m, &@n, 10)) {
+			perror(lex_state->buf.a);
+			/* TODO: sensible error message */
+			@!;
+		}
 	@};
 
 	HEXRANGE: () -> (m :char, n :char) = @{
-		@m = '\0';
-		@n = '\0';
-		fprintf(stderr, "unimplemented\n");
+		if (-1 == range(lex_state->buf.a, &@m, &@n, 16)) {
+			perror(lex_state->buf.a);
+			/* TODO: sensible error message */
+			@!;
+		}
 	@};
 
 %actions%
@@ -439,7 +512,9 @@
 		struct LX_STATE *lx;
 		struct ast_rule *g;
 
-		(void) rtrim; /* for dialects which don't use it */
+		/* for dialects which don't use these */
+		(void) rtrim;
+		(void) range;
 
 		assert(f != NULL);
 
