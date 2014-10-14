@@ -16,6 +16,7 @@ PREFIX ?= /usr/local
 # layout
 SUBDIR += src/bnf
 SUBDIR += src/dot
+SUBDIR += src/abnf
 SUBDIR += src/ebnf
 SUBDIR += src/rbnf
 SUBDIR += src/sid

@@ -11,6 +11,7 @@
 
 #include "bnf/io.h"
 #include "wsn/io.h"
+#include "abnf/io.h"
 #include "ebnf/io.h"
 #include "rbnf/io.h"
 #include "sid/io.h"
@@ -33,6 +34,7 @@ struct io {
 } io[] = {
 	{ "bnf",    bnf_input,  bnf_output    },
 	{ "wsn",    wsn_input,  wsn_output    },
+	{ "abnf",   abnf_input, NULL          },
 	{ "ebnf",   ebnf_input, ebnf_output   },
 	{ "rbnf",   rbnf_input, rbnf_output   },
 	{ "sid",    NULL,       sid_output    },

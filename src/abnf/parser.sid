@@ -1,0 +1,281 @@
+/* $Id$ */
+
+/*
+ * Augmented BNF per RFC 5234
+ */
+
+%types%
+
+	char;
+	string;
+	count;
+
+	ast_rule;
+	ast_term;
+	ast_alt;
+
+%terminals%
+
+	!ERROR;
+	!UNRECOGNISED;
+	EOF;
+
+	EQUALS;
+	ALT;
+	ALTINC;
+	!SEP;
+	REP;
+	!EXCEPT;
+
+	STARTGROUP; ENDGROUP;
+	STARTOPT;   ENDOPT;
+	!STARTSTAR; !ENDSTAR;
+
+	!EMPTY;
+	NAME;
+	LITERAL;
+
+	!ESC:  () -> (:char);
+	CHAR:  () -> (:char);
+	IDENT: () -> (:string);
+	COUNT: () -> (:count);
+
+	BINSTR:   () -> (:string);
+	DECSTR:   () -> (:string);
+	HEXSTR:   () -> (:string);
+
+	BINRANGE: () -> (:char, :char);
+	DECRANGE: () -> (:char, :char);
+	HEXRANGE: () -> (:char, :char);
+
+%productions%
+
+	<pattern-char>:   (:char) -> ();
+	<pattern-buffer>: ()      -> (:string);
+
+	<rep-one>:          () -> (:count, :count);
+	!<rep-one-or-more>: () -> (:count, :count);
+	<rep-zero-or-more>: () -> (:count, :count);
+	<rep-zero-or-one>:  () -> (:count, :count);
+
+	<set-repeat>:  (:ast_term, :count, :count) -> ();
+	!<mul-repeat>: (:ast_term, :count)         -> ();
+
+	!<make-empty-term>:  ()             -> (:ast_term);
+	<make-rule-term>:    (:string)      -> (:ast_term);
+	<make-literal-term>: (:string)      -> (:ast_term);
+	!<make-token-term>:  (:string)      -> (:ast_term);
+	<make-group-term>:   (:ast_alt)     -> (:ast_term);
+	<make-range-term>:   (:char, :char) -> (:ast_term);
+
+	<make-alt>:        (:ast_term)         -> (:ast_alt);
+	<make-rule>:       (:string, :ast_alt) -> (:ast_rule);
+	<make-empty-rule>: ()                  -> (:ast_rule);
+
+	<add-term-to-list>: (:ast_term, :ast_term) -> ();
+	<add-alt-to-list>:  (:ast_alt, :ast_alt)   -> ();
+	<add-rule-to-list>: (:ast_rule, :ast_rule) -> ();
+
+	<current-rules>: () -> (:ast_rule);
+	<find-rule>:     (:ast_rule, :string)  -> (:ast_rule);
+	<add-alts>:      (:ast_rule, :ast_alt) -> ();
+
+	<err-syntax>;
+	<err-expected-alt>;
+	<err-expected-sep>;
+	<err-expected-equals>;
+
+	list-of-alts: () -> (:ast_alt);
+
+	escstr: () -> (s :string) = {
+		s = BINSTR;
+	||
+		s = DECSTR;
+	||
+		s = HEXSTR;
+	};
+
+	escrange: () -> (m :char, n :char) = {
+		(m, n) = BINRANGE;
+	||
+		(m, n) = DECRANGE;
+	||
+		(m, n) = HEXRANGE;
+	};
+
+	body: () -> () = {
+		{
+			c = CHAR;
+			/* TODO: ESC and friends here */
+		};
+		<pattern-char>(c);
+		body;
+	||
+		$;
+	};
+
+	term: () -> (t :ast_term) = {
+		body;
+		LITERAL;
+/* TODO: case insensitive; possibly expand out to alts? */
+		s = <pattern-buffer>;
+		t = <make-literal-term>(s);
+	||
+		body;
+		NAME;
+/* TODO: case insensitive */
+		s = <pattern-buffer>;
+		t = <make-rule-term>(s);
+	||
+		s = IDENT;
+/* TODO: case insensitive */
+		t = <make-rule-term>(s);
+	||
+		s = escstr;
+		t = <make-literal-term>(s);
+	||
+		(m, n) = escrange;
+		t = <make-range-term>(m, n);
+	};
+
+	factor: () -> (t :ast_term) [
+
+		element: () -> (t :ast_term) = {
+			t = term;
+		||
+			STARTGROUP;
+			a = list-of-alts;
+			ENDGROUP;
+
+			t = <make-group-term>(a);
+		};
+
+	] = {
+		t = element;
+
+		(min, max) = <rep-one>;
+		<set-repeat>(t, min, max);
+	||
+		{
+			min = COUNT;
+		||
+			(min, !) = <rep-zero-or-more>;
+		};
+		REP;
+		{
+			max = COUNT;
+		||
+			(!, max) = <rep-zero-or-more>;
+		};
+
+		t = element;
+
+		<set-repeat>(t, min, max);
+	||
+		n = COUNT;
+
+		t = element;
+
+		<set-repeat>(t, n, n);
+	||
+		STARTOPT;
+		a = list-of-alts;
+		(min, max) = <rep-zero-or-one>;
+		ENDOPT;
+
+		t = <make-group-term>(a);
+
+		<set-repeat>(t, min, max);
+	};
+
+	list-of-terms: () -> (l :ast_term) = {
+		l = factor;
+	||
+		l = factor;
+		t = list-of-terms;
+		<add-term-to-list>(t, l);
+	};
+
+	list-of-alts: () -> (l :ast_alt) = {
+		t = list-of-terms;
+		l = <make-alt>(t);
+	||
+		t = list-of-terms;
+
+		{
+			ALT;
+		##
+			<err-expected-alt>;
+		};
+
+		a = list-of-alts;
+		l = <make-alt>(t);
+		<add-alt-to-list>(a, l);
+	};
+
+	rule: () -> (r :ast_rule) = {
+		{
+			body;
+			NAME;
+			s = <pattern-buffer>;
+/* TODO: case insensitive! */
+		||
+			s = IDENT;
+/* TODO: case insensitive! */
+		};
+/* TODO: maybe need to flag case insensitivity in the AST for rule names,
+but expand out alts for literals */
+
+		{
+			{
+				EQUALS;
+			##
+				<err-expected-equals>;
+			};
+
+			a = list-of-alts;
+			r = <make-rule>(s, a);
+		||
+			{
+				ALTINC;
+			##
+				<err-expected-equals>;
+			};
+
+			l = <current-rules>;
+			/* XXX: can't <find-rule> here because there is no list to search */
+
+			a = list-of-alts;
+			r = <find-rule>(l, s);
+			<add-alts>(r, a);
+		};
+
+		{
+			SEP;
+		||
+			EOF;
+		##
+			<err-expected-sep>;
+		};
+	};
+
+	list-of-rules: () -> (l :ast_rule) = {
+		l = rule;
+	||
+		l = rule;
+		r = list-of-rules();
+		<add-rule-to-list>(r, l);
+	};
+
+	abnf: () -> (l :ast_rule) = {
+		l = list-of-rules;
+		EOF;
+	##
+		l = <make-empty-rule>;
+		<err-syntax>;
+	};
+
+%entry%
+
+	abnf;
+

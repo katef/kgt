@@ -1,0 +1,67 @@
+# $Id$
+
+# Augmented BNF, RFC 5234
+# XXX: guesswork
+/[ \t\v\f\r]+/;
+
+';' .. "\n";
+
+# 2.1. Rule Naming
+# case insenstive!
+/[a-z][-a-z0-9]*/i -> $ident;
+
+# case insenstive!
+"<" .. ">" -> $name {
+	/[-a-z0-9_]/i -> $char;
+}
+
+# 2.2. Rule form
+"\n\n" -> $sep;
+"\n";
+'=' -> $equals;
+
+# 2.3. Terminal Values
+# XXX: beware; ABNF explicitly defines a character as "a non-negative integer"
+# so I presume %x00 is permitted. kgt's AST will therefore need to permit '\0'
+bin = /[01]+/;
+dec = /[0-9]+/;
+hex = /[0-9a-f]+/i; # XXX: case insensitive?
+
+# XXX: would use group matching here to just emit the numbers' spellings, and not the '%b' or '.'
+'%b' bin ('.' bin)* -> $binstr;
+'%d' dec ('.' dec)* -> $decstr;
+'%x' hex ('.' hex)* -> $hexstr;
+
+# XXX: would use group matching here to just emit the numbers' spellings, and not the '%b' or '-'
+'%b' bin '-' bin -> $binrange;
+'%d' dec '-' dec -> $decrange;
+'%x' hex '-' hex -> $hexrange;
+
+# 2.3. Terminal Values
+# case insenstive!
+'"' .. '"' -> $literal {
+	# TODO: explicitly "printable" characters only
+	/[^"]/ -> $char;
+}
+
+# TODO: is the empty string permitted? I don't think so.
+# '""' -> $empty;
+
+# 3.2. Alternatives
+# 3.3. Incremental Alternatives
+'/'  -> $alt;
+'=/' -> $altinc;
+
+# 3.5. Sequence Group
+'(' -> $startgroup;
+')' -> $endgroup;
+
+# 3.6. Variable Repetition
+# 3.7. Specific Repetition
+'*'      -> $rep;
+/[0-9]+/ -> $count;
+
+# 3.8. Optional Sequence
+'[' -> $startopt;
+']' -> $endopt;
+
