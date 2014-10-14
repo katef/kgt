@@ -116,6 +116,16 @@ main(int argc, char *argv[])
 		}
 	}
 
+	if (in->in == NULL) {
+		fprintf(stderr, "Unsupported input language: %s\n", in->name);
+		exit(EXIT_FAILURE);
+	}
+
+	if (out->out == NULL) {
+		fprintf(stderr, "Unsupported output language: %s\n", out->name);
+		exit(EXIT_FAILURE);
+	}
+
 	g = in->in(kgt_fgetc, stdin);
 
 	out->out(g);
