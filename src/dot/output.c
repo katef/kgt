@@ -18,57 +18,50 @@
 
 static void output_alt(const struct ast_rule *grammar, const struct ast_alt *alt);
 
-static void
+static int
 escputc(int c, FILE *f)
 {
 	size_t i;
 
-	struct {
-		int in;
-		const char *out;
-	} esc[] = {
+	const struct {
+		int c;
+		const char *s;
+	} a[] = {
 		{ '&',  "&amp;"  },
 		{ '\"', "&quot;" },
 		{ '<',  "&#x3C;" },
-		{ '>',  "&#x3E;" },
-
-		{ '\\', "\\\\"   },
-		{ '\f', "\\f"    },
-		{ '\n', "\\n"    },
-		{ '\r', "\\r"    },
-		{ '\t', "\\t"    },
-		{ '\v', "\\v"    },
-
-		{ '|',  "\\|"    },
-		{ '{',  "\\{"    },
-		{ '}',  "\\}"    }
+		{ '>',  "&#x3E;" }
 	};
 
 	assert(f != NULL);
 
-	for (i = 0; i < sizeof esc / sizeof *esc; i++) {
-		if (esc[i].in == c) {
-			fputs(esc[i].out, f);
-			return;
+	for (i = 0; i < sizeof a / sizeof *a; i++) {
+		if (a[i].c == c) {
+			return fputs(a[i].s, f);
 		}
 	}
 
-	if (!isprint(c)) {
-		fprintf(f, "\\x%x", (unsigned char) c);
-		return;
+	if (!isprint((unsigned char) c)) {
+		return fprintf(f, "&#x%X;", (unsigned char) c);
 	}
 
-	putc(c, f);
+	return putc(c, f);
 }
 
-static void
+static int
 escputs(const char *s, FILE *f)
 {
 	const char *p;
+	int r;
 
 	for (p = s; *p != '\0'; p++) {
-		escputc(*p, f);
+		r = escputc(*p, f);
+		if (r < 0) {
+			return -1;
+		}
 	}
+
+	return 0;
 }
 
 static void
