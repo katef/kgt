@@ -26,6 +26,7 @@ escputc(int c, FILE *f)
 		int c;
 		const char *s;
 	} a[] = {
+		{ '\\', "\\\\"   },
 		{ '&',  "&amp;"  },
 		{ '\"', "&quot;" },
 		{ '<',  "&#x3C;" },
