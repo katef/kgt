@@ -172,7 +172,7 @@ rrdot_output(const struct ast_rule *grammar)
 		node_free(rrd);
 	}
 
-	printf("};\n");
+	printf("}\n");
 	printf("\n");
 }
 
