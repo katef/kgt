@@ -45,6 +45,11 @@ struct io {
 	{ "rrtext", NULL,       rrtext_output }
 };
 
+enum io_dir {
+	IO_IN,
+	IO_OUT
+};
+
 static void
 xusage(void)
 {
@@ -65,17 +70,42 @@ kgt_fgetc(void *opaque)
 }
 
 static struct io *
-lang(const char *s)
+lang(enum io_dir dir, const char *s)
 {
 	size_t i;
 
 	for (i = 0; i < sizeof io / sizeof *io; i++) {
+		if (dir == IO_IN && io[i].in == NULL) {
+			continue;
+		}
+
+		if (dir == IO_OUT && io[i].out == NULL) {
+			continue;
+		}
+
 		if (0 == strcmp(s, io[i].name)) {
 			return &io[i];
 		}
 	}
 
-	fprintf(stderr, "Unsupported language: %s\n", s);
+	fprintf(stderr, "Unrecognised %s language \"%s\"; supported languages are:",
+		dir == IO_IN ? "input" : "output",
+		s);
+
+	for (i = 0; i < sizeof io / sizeof *io; i++) {
+		if (dir == IO_IN && io[i].in == NULL) {
+			continue;
+		}
+
+		if (dir == IO_OUT && io[i].out == NULL) {
+			continue;
+		}
+
+		fprintf(stderr, " %s", io[i].name);
+	}
+
+	fprintf(stderr, "\n");
+
 	exit(EXIT_FAILURE);
 }
 
@@ -85,7 +115,7 @@ main(int argc, char *argv[])
 	struct ast_rule *g;
 	struct io *in, *out;
 
-	in  = lang("bnf");
+	in  = lang(IO_IN, "bnf");
 	out = in;
 
 	{
@@ -93,8 +123,8 @@ main(int argc, char *argv[])
 
 		while ((c = getopt(argc, argv, "hnl:e:u")) != -1) {
 			switch (c) {
-			case 'l': in  = lang(optarg); break;
-			case 'e': out = lang(optarg); break;
+			case 'l': in  = lang(IO_IN,  optarg); break;
+			case 'e': out = lang(IO_OUT, optarg); break;
 
 			case 'n':
 				prettify = 0;
@@ -118,15 +148,8 @@ main(int argc, char *argv[])
 		}
 	}
 
-	if (in->in == NULL) {
-		fprintf(stderr, "Unsupported input language: %s\n", in->name);
-		exit(EXIT_FAILURE);
-	}
-
-	if (out->out == NULL) {
-		fprintf(stderr, "Unsupported output language: %s\n", out->name);
-		exit(EXIT_FAILURE);
-	}
+	assert(io->in  != NULL);
+	assert(io->out != NULL);
 
 	g = in->in(kgt_fgetc, stdin);
 
