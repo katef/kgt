@@ -79,7 +79,7 @@ loop_switch_sides(int suflen, struct node *loop, struct stack **rl)
 		loop->u.loop.backward = skip;
 	}
 
-	if (loop->u.loop.backward->type == NODE_CHOICE || loop->u.loop.backward->type == NODE_SEQUENCE) {
+	if (loop->u.loop.backward->type == NODE_ALT || loop->u.loop.backward->type == NODE_SEQUENCE) {
 		node_collapse(&loop->u.loop.backward);
 	}
 }
@@ -94,7 +94,7 @@ process_loop_list(struct node *loop, struct stack *bp)
 
 	list = loop->u.loop.backward;
 
-	if (list->type == NODE_CHOICE) {
+	if (list->type == NODE_ALT) {
 		return 0;
 	}
 
@@ -128,7 +128,7 @@ process_loop(struct node *loop, struct stack *bp)
 		return 0;
 	}
 
-	if (loop->u.loop.backward->type == NODE_CHOICE || loop->u.loop.backward->type == NODE_SEQUENCE) {
+	if (loop->u.loop.backward->type == NODE_ALT || loop->u.loop.backward->type == NODE_SEQUENCE) {
 		return process_loop_list(loop, bp);
 	}
 

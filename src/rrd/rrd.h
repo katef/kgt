@@ -15,7 +15,7 @@ struct node {
 		NODE_SKIP,
 		NODE_LITERAL,
 		NODE_RULE,
-		NODE_CHOICE,
+		NODE_ALT,
 		NODE_SEQUENCE,
 		NODE_LOOP
 	} type;
@@ -24,7 +24,7 @@ struct node {
 		const char *literal; /* TODO: point to ast_literal instead */
 		const char *name;    /* TODO: point to ast_rule instead */
 
-		struct node *choice;
+		struct node *alt;
 		struct node *sequence;
 
 		struct {
@@ -49,7 +49,7 @@ struct node_walker {
 	int (*visit_skip    )(struct node *, struct node **, int, void *);
 	int (*visit_name    )(struct node *, struct node **, int, void *);
 	int (*visit_literal )(struct node *, struct node **, int, void *);
-	int (*visit_choice  )(struct node *, struct node **, int, void *);
+	int (*visit_alt     )(struct node *, struct node **, int, void *);
 	int (*visit_sequence)(struct node *, struct node **, int, void *);
 	int (*visit_loop    )(struct node *, struct node **, int, void *);
 };

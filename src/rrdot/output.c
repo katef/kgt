@@ -101,8 +101,8 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 			printf("\\>\"");
 			break;
 
-		case NODE_CHOICE:
-			printf("label = \"CHOICE\"");
+		case NODE_ALT:
+			printf("label = \"ALT\"");
 			break;
 
 		case NODE_SEQUENCE:
@@ -120,8 +120,8 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 		printf(" ];\n");
 
 		switch (p->type) {
-		case NODE_CHOICE:
-			rrd_print_dot(prefix, p, "", p->u.choice);
+		case NODE_ALT:
+			rrd_print_dot(prefix, p, "", p->u.alt);
 			break;
 
 		case NODE_SEQUENCE:

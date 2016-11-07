@@ -18,12 +18,12 @@
 static struct node_walker pretty_redundant;
 
 static int
-redundant_choice(struct node *n, struct node **np, int depth, void *opaque)
+redundant_alt(struct node *n, struct node **np, int depth, void *opaque)
 {
 	int nc = 0, isopt = 0;
 	struct node **p, **loop = NULL;
 
-	for (p = &n->u.choice; *p != NULL; p = &(**p).next) {
+	for (p = &n->u.alt; *p != NULL; p = &(**p).next) {
 		nc++;
 
 		if (!node_walk(p, &pretty_redundant, depth + 1, opaque)) {
@@ -44,7 +44,7 @@ redundant_choice(struct node *n, struct node **np, int depth, void *opaque)
 
 		l = *loop;
 
-		/* special case: if an optional loop has an empty half, we can elide the NODE_CHOICE */
+		/* special case: if an optional loop has an empty half, we can elide the NODE_ALT */
 		if (l->u.loop.forward->type == NODE_SKIP) {
 			*np = *loop;
 			*loop = NULL;
@@ -63,21 +63,21 @@ redundant_choice(struct node *n, struct node **np, int depth, void *opaque)
 	} else {
 		struct node **next;
 
-		/* fold nested choices into this one */
-		for (p = &n->u.choice; *p != NULL; p = next) {
+		/* fold nested alts into this one */
+		for (p = &n->u.alt; *p != NULL; p = next) {
 			struct node **head, **tail;
 			struct node *dead;
 
 			next = &(*p)->next;
 
-			if ((*p)->type != NODE_CHOICE) {
+			if ((*p)->type != NODE_ALT) {
 				continue;
 			}
 
 			dead = *p;
 
 			/* incoming inner list */
-			head = &(*p)->u.choice;
+			head = &(*p)->u.alt;
 
 			for (tail = head; *tail != NULL; tail = &(*tail)->next)
 				;
@@ -141,7 +141,7 @@ redundant_loop(struct node *n, struct node **np, int depth, void *opaque)
 static struct node_walker pretty_redundant = {
 	NULL,
 	NULL, NULL,
-	redundant_choice, NULL,
+	redundant_alt, NULL,
 	redundant_loop
 };
 

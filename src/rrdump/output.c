@@ -69,15 +69,15 @@ visit_literal(struct node *n, struct node **np, int depth, void *opaque)
 }
 
 static int
-visit_choice(struct node *n, struct node **np, int depth, void *opaque)
+visit_alt(struct node *n, struct node **np, int depth, void *opaque)
 {
 	FILE *f = opaque;
 
 	(void) np;
 
 	print_indent(f, depth);
-	fprintf(f, "CHOICE: [\n");
-	if (!node_walk_list(&n->u.choice, &rrd_print, depth + 1, opaque)) {
+	fprintf(f, "ALT: [\n");
+	if (!node_walk_list(&n->u.alt, &rrd_print, depth + 1, opaque)) {
 		return 0;
 	}
 	print_indent(f, depth);
@@ -134,8 +134,8 @@ visit_loop(struct node *n, struct node **np, int depth, void *opaque)
 
 static struct node_walker rrd_print = {
 	visit_skip,
-	visit_name,   visit_literal,
-	visit_choice, visit_sequence,
+	visit_name, visit_literal,
+	visit_alt,  visit_sequence,
 	visit_loop
 };
 

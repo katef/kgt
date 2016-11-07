@@ -27,8 +27,8 @@ node_free(struct node *n)
 		case NODE_RULE:
 			break;
 
-		case NODE_CHOICE:
-			node_free(n->u.choice);
+		case NODE_ALT:
+			node_free(n->u.alt);
 			break;
 
 		case NODE_SEQUENCE:
@@ -93,16 +93,16 @@ node_create_name(const char *name)
 }
 
 struct node *
-node_create_choice(struct node *choice)
+node_create_alt(struct node *alt)
 {
 	struct node *new;
 
 	new = xmalloc(sizeof *new);
 
-	new->type = NODE_CHOICE;
+	new->type = NODE_ALT;
 	new->next = NULL;
 
-	new->u.choice = choice;
+	new->u.alt = alt;
 
 	return new;
 }
@@ -149,14 +149,14 @@ node_collapse(struct node **n)
 	list = *n;
 
 	switch (list->type) {
-	case NODE_CHOICE:
+	case NODE_ALT:
 		/* TODO: list_count() */
-		if (list->u.choice == NULL || list->u.choice->next != NULL) {
+		if (list->u.alt == NULL || list->u.alt->next != NULL) {
 			return;
 		}
 
-		*n = list->u.choice;
-		list->u.choice = NULL;
+		*n = list->u.alt;
+		list->u.alt = NULL;
 
 		break;
 
@@ -202,8 +202,8 @@ node_compare_list(struct node *a, struct node *b, int once)
 			result = result && 0 == strcmp(a->u.name, b->u.name);
 			break;
 
-		case NODE_CHOICE:
-			result = result && node_compare_list(a->u.choice, b->u.choice, 0);
+		case NODE_ALT:
+			result = result && node_compare_list(a->u.alt, b->u.alt, 0);
 			break;
 
 		case NODE_SEQUENCE:

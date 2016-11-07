@@ -126,7 +126,7 @@ dim_sequence(struct node *n, struct node **np, int depth, void *opaque)
 }
 
 static int
-dim_choice(struct node *n, struct node **np, int depth, void *opaque)
+dim_alt(struct node *n, struct node **np, int depth, void *opaque)
 {
 	int w = 0, h = -1;
 	struct node *p;
@@ -134,16 +134,16 @@ dim_choice(struct node *n, struct node **np, int depth, void *opaque)
 	(void) np;
 	(void) opaque;
 
-	node_walk_list(&n->u.choice, &w_dimension, depth + 1, opaque);
+	node_walk_list(&n->u.alt, &w_dimension, depth + 1, opaque);
 
-	for (p = n->u.choice; p != NULL; p = p->next) {
+	for (p = n->u.alt; p != NULL; p = p->next) {
 		h += 1 + p->size.h;
 
 		if (p->size.w > w) {
 			w = p->size.w;
 		}
 
-		if (p == n->u.choice) {
+		if (p == n->u.alt) {
 			if (p->type == NODE_SKIP && p->next && !p->next->next) {
 				n->y = 2 + p->y + p->next->y;
 			} else {
@@ -217,7 +217,7 @@ dim_loop(struct node *n, struct node **np, int depth, void *opaque)
 static struct node_walker w_dimension = {
 	dim_nothing,
 	dim_name, dim_literal,
-	dim_choice,     dim_sequence,
+	dim_alt,  dim_sequence,
 	dim_loop
 };
 
@@ -320,20 +320,20 @@ justify(struct render_context *ctx, int depth, struct node *n, int space)
 }
 
 static int
-render_choice(struct node *n, struct node **np, int depth, void *opaque)
+render_alt(struct node *n, struct node **np, int depth, void *opaque)
 {
 	struct render_context *ctx = opaque;
 	struct node *p;
 	int x = ctx->x, y = ctx->y;
 	int line = y + n->y;
-	char *a_in	= (n->y - n->u.choice->y) ? "v" : "^";
-	char *a_out = (n->y - n->u.choice->y) ? "^" : "v";
+	char *a_in	= (n->y - n->u.alt->y) ? "v" : "^";
+	char *a_out = (n->y - n->u.alt->y) ? "^" : "v";
 
-	ctx->y += n->u.choice->y;
+	ctx->y += n->u.alt->y;
 
 	(void) np;
 
-	for (p = n->u.choice; p != NULL; p = p->next) {
+	for (p = n->u.alt; p != NULL; p = p->next) {
 		int i, flush = ctx->y == line;
 
 		ctx->x = x;
@@ -432,8 +432,8 @@ render_loop(struct node *n, struct node **np, int depth, void *opaque)
 
 static struct node_walker w_render = {
 	NULL,
-	render_name,   render_literal,
-	render_choice, render_sequence,
+	render_name, render_literal,
+	render_alt,  render_sequence,
 	render_loop
 };
 

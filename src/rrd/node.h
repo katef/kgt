@@ -18,7 +18,7 @@ struct node *
 node_create_name(const char *name);
 
 struct node *
-node_create_choice(struct node *choice);
+node_create_alt(struct node *alt);
 
 struct node *
 node_create_sequence(struct node *sequence);

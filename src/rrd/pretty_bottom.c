@@ -58,7 +58,7 @@ bottom_loop(struct node *n, struct node **np, int depth, void *opaque)
 	ctx->everything = 0;
 
 	do {
-		struct node *choice;
+		struct node *alt;
 		struct node *tmp, *skip;
 
 		if (n->u.loop.forward->type != NODE_SKIP) {
@@ -74,14 +74,14 @@ bottom_loop(struct node *n, struct node **np, int depth, void *opaque)
 			break;
 		}
 
-		if (n->u.loop.backward->type == NODE_CHOICE) {
+		if (n->u.loop.backward->type == NODE_ALT) {
 			struct node *p;
 			int c;
 
 			c = 0;
 
-			for (p = n->u.loop.backward->u.choice; p != NULL; p = p->next) {
-				if (p->type == NODE_CHOICE || p->type == NODE_SEQUENCE || p->type == NODE_LOOP) {
+			for (p = n->u.loop.backward->u.alt; p != NULL; p = p->next) {
+				if (p->type == NODE_ALT || p->type == NODE_SEQUENCE || p->type == NODE_LOOP) {
 					c = 1;
 				}
 			}
@@ -98,10 +98,10 @@ bottom_loop(struct node *n, struct node **np, int depth, void *opaque)
 		/* short-circuit */
 		skip = node_create_skip();
 		skip->next = n;
-		choice = node_create_choice(skip);
-		choice->next = n->next;
+		alt = node_create_alt(skip);
+		alt->next = n->next;
 		n->next = NULL;
-		*np = choice;
+		*np = alt;
 
 		if (!node_walk(&skip->next, &pretty_bottom, depth + 1, ctx)) {
 			return 0;
@@ -135,7 +135,7 @@ static struct node_walker pretty_bottom = {
 
 /*
  * for loops with nothing on top and more than one thing on the bottom,
- * flip the loop over and add a choice to skip the loop altogether.
+ * flip the loop over and add an alt to skip the loop altogether.
  * this results in a bulkier diagram, but avoids reversing the contents of
  * the sequence.
  */

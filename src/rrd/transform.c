@@ -99,7 +99,7 @@ single_term(const struct ast_term *term)
 			return NULL;
 		}
 
-		list = node_create_choice(alts);
+		list = node_create_alt(alts);
 
 		node_collapse(&list);
 
@@ -129,7 +129,7 @@ optional_term(const struct ast_term *term)
 
 	skip->next = n;
 
-	return node_create_choice(skip);
+	return node_create_alt(skip);
 }
 
 static struct node *
@@ -234,7 +234,7 @@ transform_term(const struct ast_term *term)
 struct node *
 ast_to_rrd(const struct ast_rule *ast)
 {
-	struct node *choice;
+	struct node *alt;
 	struct node *n;
 
 	n = transform_alts(ast->alts);
@@ -242,11 +242,11 @@ ast_to_rrd(const struct ast_rule *ast)
 		return NULL;
 	}
 
-	choice = node_create_choice(n);
+	alt = node_create_alt(n);
 
-	node_collapse(&choice);
+	node_collapse(&alt);
 
-	return choice;
+	return alt;
 }
 
 static int
@@ -262,7 +262,7 @@ node_call_walker(struct node **n, const struct node_walker *ws, int depth, void 
 	case NODE_SKIP:     return ws->visit_skip     ? ws->visit_skip(*n, n, depth, a)       : -1;
 	case NODE_LITERAL:  return ws->visit_literal  ? ws->visit_literal(node, n, depth, a)  : -1;
 	case NODE_RULE:     return ws->visit_name     ? ws->visit_name(node, n, depth, a)     : -1;
-	case NODE_CHOICE:   return ws->visit_choice   ? ws->visit_choice(node, n, depth, a)   : -1;
+	case NODE_ALT:      return ws->visit_alt      ? ws->visit_alt(node, n, depth, a)   : -1;
 	case NODE_SEQUENCE: return ws->visit_sequence ? ws->visit_sequence(node, n, depth, a) : -1;
 	case NODE_LOOP:     return ws->visit_loop     ? ws->visit_loop(node, n, depth, a)     : -1;
 	}
@@ -302,8 +302,8 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque
 	}
 
 	switch (node->type) {
-	case NODE_CHOICE:
-		if (!node_walk_list(&node->u.choice, ws, depth + 1, opaque)) {
+	case NODE_ALT:
+		if (!node_walk_list(&node->u.alt, ws, depth + 1, opaque)) {
 			return 0;
 		}
 
