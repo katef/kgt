@@ -16,7 +16,7 @@ struct node {
 		NODE_LITERAL,
 		NODE_RULE,
 		NODE_ALT,
-		NODE_SEQUENCE,
+		NODE_SEQ,
 		NODE_LOOP
 	} type;
 
@@ -25,7 +25,7 @@ struct node {
 		const char *name;    /* TODO: point to ast_rule instead */
 
 		struct node *alt;
-		struct node *sequence;
+		struct node *seq;
 
 		struct {
 			struct node *forward;
@@ -46,12 +46,12 @@ struct node {
  * they are free to replace the node they visited via said pointer. cf. beautify
  */
 struct node_walker {
-	int (*visit_skip    )(struct node *, struct node **, int, void *);
-	int (*visit_name    )(struct node *, struct node **, int, void *);
-	int (*visit_literal )(struct node *, struct node **, int, void *);
-	int (*visit_alt     )(struct node *, struct node **, int, void *);
-	int (*visit_sequence)(struct node *, struct node **, int, void *);
-	int (*visit_loop    )(struct node *, struct node **, int, void *);
+	int (*visit_skip   )(struct node *, struct node **, int, void *);
+	int (*visit_name   )(struct node *, struct node **, int, void *);
+	int (*visit_literal)(struct node *, struct node **, int, void *);
+	int (*visit_alt    )(struct node *, struct node **, int, void *);
+	int (*visit_seq    )(struct node *, struct node **, int, void *);
+	int (*visit_loop   )(struct node *, struct node **, int, void *);
 };
 
 int node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque);

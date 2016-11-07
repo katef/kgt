@@ -105,8 +105,8 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 			printf("label = \"ALT\"");
 			break;
 
-		case NODE_SEQUENCE:
-			printf("label = \"SEQUENCE\"");
+		case NODE_SEQ:
+			printf("label = \"SEQ\"");
 			break;
 
 		case NODE_LOOP:
@@ -124,8 +124,8 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 			rrd_print_dot(prefix, p, "", p->u.alt);
 			break;
 
-		case NODE_SEQUENCE:
-			rrd_print_dot(prefix, p, "", p->u.sequence);
+		case NODE_SEQ:
+			rrd_print_dot(prefix, p, "", p->u.seq);
 			break;
 
 		case NODE_LOOP:

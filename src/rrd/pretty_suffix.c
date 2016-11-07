@@ -50,9 +50,9 @@ loop_switch_sides(int suflen, struct node *loop, struct stack **rl)
 	if (suflen > 1) {
 		struct node *seq;
 
-		seq = node_create_sequence(NULL);
+		seq = node_create_seq(NULL);
 
-		n = &seq->u.sequence;
+		n = &seq->u.seq;
 		node_free(loop->u.loop.forward);
 		loop->u.loop.forward = seq;
 
@@ -79,7 +79,7 @@ loop_switch_sides(int suflen, struct node *loop, struct stack **rl)
 		loop->u.loop.backward = skip;
 	}
 
-	if (loop->u.loop.backward->type == NODE_ALT || loop->u.loop.backward->type == NODE_SEQUENCE) {
+	if (loop->u.loop.backward->type == NODE_ALT || loop->u.loop.backward->type == NODE_SEQ) {
 		node_collapse(&loop->u.loop.backward);
 	}
 }
@@ -98,7 +98,7 @@ process_loop_list(struct node *loop, struct stack *bp)
 		return 0;
 	}
 
-	for (p = list->u.sequence; p != NULL; p = p->next) {
+	for (p = list->u.seq; p != NULL; p = p->next) {
 		stack_push(&rl, p);
 	}
 
@@ -128,7 +128,7 @@ process_loop(struct node *loop, struct stack *bp)
 		return 0;
 	}
 
-	if (loop->u.loop.backward->type == NODE_ALT || loop->u.loop.backward->type == NODE_SEQUENCE) {
+	if (loop->u.loop.backward->type == NODE_ALT || loop->u.loop.backward->type == NODE_SEQ) {
 		return process_loop_list(loop, bp);
 	}
 
@@ -142,12 +142,12 @@ process_loop(struct node *loop, struct stack *bp)
 static struct node_walker pretty_collapse_suffixes;
 
 static int
-collapse_sequence(struct node *n, struct node **np, int depth, void *opaque)
+collapse_seq(struct node *n, struct node **np, int depth, void *opaque)
 {
 	struct node *p;
 	struct stack *rl = NULL;
 
-	for (p = n->u.sequence; p != NULL; p = p->next) {
+	for (p = n->u.seq; p != NULL; p = p->next) {
 		int i, suffix_len;
 
 		if (p->type != NODE_LOOP) {
@@ -172,14 +172,14 @@ collapse_sequence(struct node *n, struct node **np, int depth, void *opaque)
 			if (rl) {
 				rl->node->next = p;
 			} else {
-				n->u.sequence = p;
+				n->u.seq = p;
 			}
 		}
 	}
 
 	stack_free(&rl);
 
-	if (!node_walk_list(&n->u.sequence, &pretty_collapse_suffixes, depth + 1, opaque)) {
+	if (!node_walk_list(&n->u.seq, &pretty_collapse_suffixes, depth + 1, opaque)) {
 		return 0;
 	}
 
@@ -191,7 +191,7 @@ collapse_sequence(struct node *n, struct node **np, int depth, void *opaque)
 static struct node_walker pretty_collapse_suffixes = {
 	NULL,
 	NULL, NULL,
-	NULL, collapse_sequence,
+	NULL, collapse_seq,
 	NULL
 };
 

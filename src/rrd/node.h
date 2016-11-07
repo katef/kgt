@@ -21,7 +21,7 @@ struct node *
 node_create_alt(struct node *alt);
 
 struct node *
-node_create_sequence(struct node *sequence);
+node_create_seq(struct node *seq);
 
 struct node *
 node_create_loop(struct node *forward, struct node *backward);

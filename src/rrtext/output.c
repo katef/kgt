@@ -98,7 +98,7 @@ dim_literal(struct node *n, struct node **np, int depth, void *opaque)
 }
 
 static int
-dim_sequence(struct node *n, struct node **np, int depth, void *opaque)
+dim_seq(struct node *n, struct node **np, int depth, void *opaque)
 {
 	int w = 0, top = 0, bot = 1;
 	struct node *p;
@@ -106,9 +106,9 @@ dim_sequence(struct node *n, struct node **np, int depth, void *opaque)
 	(void) np;
 	(void) opaque;
 
-	node_walk_list(&n->u.sequence, &w_dimension, depth + 1, opaque);
+	node_walk_list(&n->u.seq, &w_dimension, depth + 1, opaque);
 
-	for (p = n->u.sequence; p != NULL; p = p->next) {
+	for (p = n->u.seq; p != NULL; p = p->next) {
 		w += p->size.w + 2;
 		if (p->y > top) {
 			top = p->y;
@@ -217,7 +217,7 @@ dim_loop(struct node *n, struct node **np, int depth, void *opaque)
 static struct node_walker w_dimension = {
 	dim_nothing,
 	dim_name, dim_literal,
-	dim_alt,  dim_sequence,
+	dim_alt,  dim_seq,
 	dim_loop
 };
 
@@ -263,7 +263,7 @@ segment(struct render_context *ctx, struct node *n, int depth, int delim)
 }
 
 static int
-render_sequence(struct node *n, struct node **np, int depth, void *opaque)
+render_seq(struct node *n, struct node **np, int depth, void *opaque)
 {
 	/* ->-item1->-item2 */
 	struct render_context *ctx = opaque;
@@ -274,7 +274,7 @@ render_sequence(struct node *n, struct node **np, int depth, void *opaque)
 
 	ctx->y += n->y;
 	if (!ctx->rtl) {
-		for (p = n->u.sequence; p != NULL; p = p->next) {
+		for (p = n->u.seq; p != NULL; p = p->next) {
 			segment(ctx, p, depth + 1, !!p->next);
 		}
 	} else {
@@ -282,7 +282,7 @@ render_sequence(struct node *n, struct node **np, int depth, void *opaque)
 
 		rl = NULL;
 
-		for (p = n->u.sequence; p != NULL; p = p->next) {
+		for (p = n->u.seq; p != NULL; p = p->next) {
 			stack_push(&rl, p);
 		}
 
@@ -433,7 +433,7 @@ render_loop(struct node *n, struct node **np, int depth, void *opaque)
 static struct node_walker w_render = {
 	NULL,
 	render_name, render_literal,
-	render_alt,  render_sequence,
+	render_alt,  render_seq,
 	render_loop
 };
 

@@ -15,7 +15,7 @@ process_loop(struct node *loop) {
 		return 0;
 	}
 
-	if (loop->u.loop.backward->type != NODE_SEQUENCE) {
+	if (loop->u.loop.backward->type != NODE_SEQ) {
 		struct node *tmp;
 		if (!node_compare(loop->u.loop.backward, loop->next)) {
 			return 0;
@@ -28,7 +28,7 @@ process_loop(struct node *loop) {
 		return 1;
 	}
 
-	for (a = loop->u.loop.backward->u.sequence, b = loop->next; a != NULL && b != NULL; a = a->next, b = b->next) {
+	for (a = loop->u.loop.backward->u.seq, b = loop->next; a != NULL && b != NULL; a = a->next, b = b->next) {
 		if (!node_compare(a, b)) {
 			break;
 		}
@@ -41,7 +41,7 @@ process_loop(struct node *loop) {
 		loop->u.loop.backward = *tail;
 		*tail = NULL;
 		node_free(loop->u.loop.forward);
-		loop->u.loop.forward = node_create_sequence(seq);
+		loop->u.loop.forward = node_create_seq(seq);
 	}
 
 	return suflen;
@@ -50,11 +50,11 @@ process_loop(struct node *loop) {
 static struct node_walker pretty_collapse_prefixes;
 
 static int
-collapse_sequence(struct node *n, struct node **np, int depth, void *opaque)
+collapse_seq(struct node *n, struct node **np, int depth, void *opaque)
 {
 	struct node *p;
 
-	for (p = n->u.sequence; p != NULL; p = p->next) {
+	for (p = n->u.seq; p != NULL; p = p->next) {
 		int i, suffix_len;
 
 		if (p->type != NODE_LOOP) {
@@ -71,7 +71,7 @@ collapse_sequence(struct node *n, struct node **np, int depth, void *opaque)
 		}
 	}
 
-	if (!node_walk_list(&n->u.sequence, &pretty_collapse_prefixes, depth + 1, opaque)) {
+	if (!node_walk_list(&n->u.seq, &pretty_collapse_prefixes, depth + 1, opaque)) {
 		return 0;
 	}
 
@@ -83,7 +83,7 @@ collapse_sequence(struct node *n, struct node **np, int depth, void *opaque)
 static struct node_walker pretty_collapse_prefixes = {
 	NULL,
 	NULL, NULL,
-	NULL, collapse_sequence,
+	NULL, collapse_seq,
 	NULL
 };
 

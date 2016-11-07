@@ -31,8 +31,8 @@ node_free(struct node *n)
 			node_free(n->u.alt);
 			break;
 
-		case NODE_SEQUENCE:
-			node_free(n->u.sequence);
+		case NODE_SEQ:
+			node_free(n->u.seq);
 			break;
 
 		case NODE_LOOP:
@@ -108,16 +108,16 @@ node_create_alt(struct node *alt)
 }
 
 struct node *
-node_create_sequence(struct node *sequence)
+node_create_seq(struct node *seq)
 {
 	struct node *new;
 
 	new = xmalloc(sizeof *new);
 
-	new->type = NODE_SEQUENCE;
+	new->type = NODE_SEQ;
 	new->next = NULL;
 
-	new->u.sequence = sequence;
+	new->u.seq = seq;
 
 	return new;
 }
@@ -160,13 +160,13 @@ node_collapse(struct node **n)
 
 		break;
 
-	case NODE_SEQUENCE:
-		if (list->u.sequence == NULL || list->u.sequence->next != NULL) {
+	case NODE_SEQ:
+		if (list->u.seq == NULL || list->u.seq->next != NULL) {
 			return;
 		}
 
-		*n = list->u.sequence;
-		list->u.sequence = NULL;
+		*n = list->u.seq;
+		list->u.seq = NULL;
 
 		break;
 
@@ -206,8 +206,8 @@ node_compare_list(struct node *a, struct node *b, int once)
 			result = result && node_compare_list(a->u.alt, b->u.alt, 0);
 			break;
 
-		case NODE_SEQUENCE:
-			result = result && node_compare_list(a->u.sequence, b->u.sequence, 0);
+		case NODE_SEQ:
+			result = result && node_compare_list(a->u.seq, b->u.seq, 0);
 			break;
 
 		case NODE_LOOP:
