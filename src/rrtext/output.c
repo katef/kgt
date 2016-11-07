@@ -35,18 +35,19 @@ struct render_context {
 };
 
 static void
-bprintf(struct render_context *ctx, const char *fmt, ...)
+bprintf(char *scratch, char *p, const char *fmt, ...)
 {
 	va_list ap;
 	int s;
-	char *d;
+
+	assert(scratch != NULL);
+	assert(p != NULL);
 
 	va_start(ap, fmt);
-	s = vsprintf(ctx->scratch, fmt, ap);
+	s = vsprintf(scratch, fmt, ap);
 	va_end(ap);
-	d = ctx->lines[ctx->y] + ctx->x;
 
-	memcpy(d, ctx->scratch, s);
+	memcpy(p, scratch, s);
 }
 
 static struct node_walker w_dimension, w_render;
@@ -226,7 +227,7 @@ render_literal(struct node *n, struct node **np, int depth, void *arg)
 	(void) np;
 	(void) depth;
 
-	bprintf(ctx, " \"%s\" ", n->u.literal);
+	bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, " \"%s\" ", n->u.literal);
 
 	return 1;
 }
@@ -239,7 +240,7 @@ render_name(struct node *n, struct node **np, int depth, void *arg)
 	(void) np;
 	(void) depth;
 
-	bprintf(ctx, " %s ", n->u.name);
+	bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, " %s ", n->u.name);
 
 	return 1;
 }
@@ -254,7 +255,7 @@ segment(struct render_context *ctx, struct node *n, int depth, int delim)
 	ctx->x += n->size.w;
 	ctx->y = y;
 	if (delim) {
-		bprintf(ctx, "--");
+		bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "--");
 		ctx->x += 2;
 	}
 }
@@ -301,7 +302,7 @@ justify(struct render_context *ctx, int depth, struct node *n, int space)
 	int off = (space - n->size.w) / 2;
 
 	for (; ctx->x < x + off; ctx->x++) {
-		bprintf(ctx, "-");
+		bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "-");
 	}
 
 	ctx->y -= n->y;
@@ -310,7 +311,7 @@ justify(struct render_context *ctx, int depth, struct node *n, int space)
 	ctx->y += n->y;
 	ctx->x += n->size.w;
 	for (; ctx->x < x + space; ctx->x++) {
-		bprintf(ctx, "-");
+		bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "-");
 	}
 
 	ctx->x = x;
@@ -335,9 +336,9 @@ render_choice(struct node *n, struct node **np, int depth, void *arg)
 
 		ctx->x = x;
 		if (!ctx->rtl) {
-			bprintf(ctx, flush ? a_out : ">");
+			bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, flush ? a_out : ">");
 		} else {
-			bprintf(ctx, flush ? "<" : a_in);
+			bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, flush ? "<" : a_in);
 		}
 
 		ctx->x += 1;
@@ -345,18 +346,18 @@ render_choice(struct node *n, struct node **np, int depth, void *arg)
 
 		ctx->x = x + n->size.w - 1;
 		if (!ctx->rtl) {
-			bprintf(ctx, flush ? ">" : a_in);
+			bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, flush ? ">" : a_in);
 		} else {
-			bprintf(ctx, flush ? a_out : "<");
+			bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, flush ? a_out : "<");
 		}
 		ctx->y++;
 
 		if (p->next) {
 			for (i = 0; i < p->size.h - p->y + p->next->y; i++) {
 				ctx->x = x;
-				bprintf(ctx, "|");
+				bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "|");
 				ctx->x = x + n->size.w - 1;
-				bprintf(ctx, "|");
+				bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "|");
 				ctx->y++;
 			}
 		}
@@ -378,24 +379,24 @@ render_loop(struct node *n, struct node **np, int depth, void *arg)
 	(void) np;
 
 	ctx->y += n->y;
-	bprintf(ctx, !ctx->rtl ? ">" : "v");
+	bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, !ctx->rtl ? ">" : "v");
 	ctx->x += 1;
 
 	justify(ctx, depth + 1, n->u.loop.forward, n->size.w - 2);
 	ctx->x = x + n->size.w - 1;
-	bprintf(ctx, !ctx->rtl ? "v" : "<");
+	bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, !ctx->rtl ? "v" : "<");
 	ctx->y++;
 
 	for (i = 0; i < n->u.loop.forward->size.h - n->u.loop.forward->y + n->u.loop.backward->y; i++) {
 		ctx->x = x;
-		bprintf(ctx, "|");
+		bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "|");
 		ctx->x = x + n->size.w - 1;
-		bprintf(ctx, "|");
+		bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "|");
 		ctx->y++;
 	}
 
 	ctx->x = x;
-	bprintf(ctx, !ctx->rtl ? "^" : ">");
+	bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, !ctx->rtl ? "^" : ">");
 	ctx->x += 1;
 	ctx->rtl = !ctx->rtl;
 
@@ -419,7 +420,7 @@ render_loop(struct node *n, struct node **np, int depth, void *arg)
 
 	ctx->rtl = !ctx->rtl;
 	ctx->x = x + n->size.w - 1;
-	bprintf(ctx, !ctx->rtl ? "<" : "^");
+	bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, !ctx->rtl ? "<" : "^");
 
 	ctx->x = x;
 	ctx->y = y;
@@ -479,10 +480,10 @@ rrtext_output(const struct ast_rule *grammar)
 			ctx.scratch = xmalloc(ctx.size.w + 1);
 
 			ctx.y = rrd->y;
-			bprintf(&ctx, "||--");
+			bprintf(ctx.scratch, ctx.lines[ctx.y] + ctx.x, "||--");
 
 			ctx.x = ctx.size.w - 4;
-			bprintf(&ctx, "--||");
+			bprintf(ctx.scratch, ctx.lines[ctx.y] + ctx.x, "--||");
 
 			ctx.x = 4;
 			ctx.y = 0;
