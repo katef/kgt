@@ -184,12 +184,12 @@ node_compare_list(struct node *a, struct node *b, int once)
 {
 	struct node *pa = NULL, *pb = NULL;
 
-	if (a->type != b->type) {
-		return 0;
-	}
-
 	for (pa = a, pb = b; pa != NULL && pb != NULL; pa = pa->next, pb = pb->next) {
 		int r;
+
+		if (pa->type != pb->type) {
+			return 0;
+		}
 
 		switch (a->type) {
 		case NODE_SKIP:
