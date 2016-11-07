@@ -133,15 +133,15 @@ static struct node_walker pretty_bottom = {
 	bottom_loop
 };
 
+/*
+ * for loops with nothing on top and more than one thing on the bottom,
+ * flip the loop over and add a choice to skip the loop altogether.
+ * this results in a bulkier diagram, but avoids reversing the contents of
+ * the sequence.
+ */
 void
 rrd_pretty_bottom(struct node **rrd)
 {
-	/*
-	 * for loops with nothing on top and more than one thing on the bottom,
-	 * flip the loop over and add a choice to skip the loop altogether.
-	 * this results in a bulkier diagram, but avoids reversing the contents of
-	 * the sequence.
-	 */
 	struct bottom_context ctx = { 0, 0 };
 	node_walk(rrd, &pretty_bottom, 0, &ctx);
 }

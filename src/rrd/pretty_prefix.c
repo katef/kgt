@@ -92,3 +92,4 @@ rrd_pretty_prefixes(struct node **rrd)
 {
 	node_walk(rrd, &pretty_collapse_prefixes, 0, NULL);
 }
+

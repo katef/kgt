@@ -335,3 +335,4 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque
 
 	return 1;
 }
+

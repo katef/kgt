@@ -195,19 +195,19 @@ static struct node_walker pretty_collapse_suffixes = {
 	NULL
 };
 
+/*
+ * look for bits of diagram like this:
+ * -->--XYZ-->-------------------->--
+ *           |                    |
+ *           ^--<--ZYX--<--SEP--<--
+ * and replace them with the prettier equivalent:
+ * -->---XYZ--->--
+ *   |         |
+ *   ^--<--SEP--
+ */
 void
 rrd_pretty_suffixes(struct node **rrd)
 {
-	/*
-	 * look for bits of diagram like this:
-	 * -->--XYZ-->-------------------->--
-	 *           |                    |
-	 *           ^--<--ZYX--<--SEP--<--
-	 * and replace them with the prettier equivalent:
-	 * -->---XYZ--->--
-	 *   |         |
-	 *   ^--<--SEP--
-	 */
 	node_walk(rrd, &pretty_collapse_suffixes, 0, NULL);
 }
 
