@@ -23,9 +23,9 @@ struct bottom_context {
 };
 
 static int
-bottom_sequence(struct node *n, struct node **np, int depth, void *arg)
+bottom_sequence(struct node *n, struct node **np, int depth, void *opaque)
 {
-	struct bottom_context *ctx = arg;
+	struct bottom_context *ctx = opaque;
 	struct node **p;
 	int anything = 0;
 
@@ -51,9 +51,9 @@ bottom_sequence(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static int
-bottom_loop(struct node *n, struct node **np, int depth, void *arg)
+bottom_loop(struct node *n, struct node **np, int depth, void *opaque)
 {
-	struct bottom_context *ctx = arg;
+	struct bottom_context *ctx = opaque;
 	int everything = ctx->everything;
 	ctx->everything = 0;
 

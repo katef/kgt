@@ -142,7 +142,7 @@ process_loop(struct node *loop, struct stack *bp)
 static struct node_walker pretty_collapse_suffixes;
 
 static int
-collapse_sequence(struct node *n, struct node **np, int depth, void *arg)
+collapse_sequence(struct node *n, struct node **np, int depth, void *opaque)
 {
 	struct node *p;
 	struct stack *rl = NULL;
@@ -179,7 +179,7 @@ collapse_sequence(struct node *n, struct node **np, int depth, void *arg)
 
 	stack_free(&rl);
 
-	if (!node_walk_list(&n->u.sequence, &pretty_collapse_suffixes, depth + 1, arg)) {
+	if (!node_walk_list(&n->u.sequence, &pretty_collapse_suffixes, depth + 1, opaque)) {
 		return 0;
 	}
 
@@ -208,6 +208,6 @@ rrd_pretty_suffixes(struct node **rrd)
 	 *   |         |
 	 *   ^--<--SEP--
 	 */
-	node_walk(rrd, &pretty_collapse_suffixes, 0, 0);
+	node_walk(rrd, &pretty_collapse_suffixes, 0, NULL);
 }
 

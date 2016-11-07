@@ -1,3 +1,5 @@
+#include <stddef.h>
+
 #include "../xalloc.h"
 
 #include "rrd.h"
@@ -48,7 +50,7 @@ process_loop(struct node *loop) {
 static struct node_walker pretty_collapse_prefixes;
 
 static int
-collapse_sequence(struct node *n, struct node **np, int depth, void *arg)
+collapse_sequence(struct node *n, struct node **np, int depth, void *opaque)
 {
 	struct node *p;
 
@@ -69,7 +71,7 @@ collapse_sequence(struct node *n, struct node **np, int depth, void *arg)
 		}
 	}
 
-	if (!node_walk_list(&n->u.sequence, &pretty_collapse_prefixes, depth + 1, arg)) {
+	if (!node_walk_list(&n->u.sequence, &pretty_collapse_prefixes, depth + 1, opaque)) {
 		return 0;
 	}
 
@@ -88,5 +90,5 @@ static struct node_walker pretty_collapse_prefixes = {
 void
 rrd_pretty_prefixes(struct node **rrd)
 {
-	node_walk(rrd, &pretty_collapse_prefixes, 0, 0);
+	node_walk(rrd, &pretty_collapse_prefixes, 0, NULL);
 }

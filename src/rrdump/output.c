@@ -29,9 +29,9 @@ print_indent(FILE *f, int n)
 static struct node_walker rrd_print;
 
 static int
-visit_skip(struct node *n, struct node **np, int depth, void *arg)
+visit_skip(struct node *n, struct node **np, int depth, void *opaque)
 {
-	FILE *f = arg;
+	FILE *f = opaque;
 
 	(void) n;
 	(void) np;
@@ -43,9 +43,9 @@ visit_skip(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static int
-visit_name(struct node *n, struct node **np, int depth, void *arg)
+visit_name(struct node *n, struct node **np, int depth, void *opaque)
 {
-	FILE *f = arg;
+	FILE *f = opaque;
 
 	(void) np;
 
@@ -56,9 +56,9 @@ visit_name(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static int
-visit_literal(struct node *n, struct node **np, int depth, void *arg)
+visit_literal(struct node *n, struct node **np, int depth, void *opaque)
 {
-	FILE *f = arg;
+	FILE *f = opaque;
 
 	(void) np;
 
@@ -69,15 +69,15 @@ visit_literal(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static int
-visit_choice(struct node *n, struct node **np, int depth, void *arg)
+visit_choice(struct node *n, struct node **np, int depth, void *opaque)
 {
-	FILE *f = arg;
+	FILE *f = opaque;
 
 	(void) np;
 
 	print_indent(f, depth);
 	fprintf(f, "CHOICE: [\n");
-	if (!node_walk_list(&n->u.choice, &rrd_print, depth + 1, arg)) {
+	if (!node_walk_list(&n->u.choice, &rrd_print, depth + 1, opaque)) {
 		return 0;
 	}
 	print_indent(f, depth);
@@ -87,15 +87,15 @@ visit_choice(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static int
-visit_sequence(struct node *n, struct node **np, int depth, void *arg)
+visit_sequence(struct node *n, struct node **np, int depth, void *opaque)
 {
-	FILE *f = arg;
+	FILE *f = opaque;
 
 	(void) np;
 
 	print_indent(f, depth);
 	fprintf(f, "SEQUENCE: [\n");
-	if (!node_walk_list(&n->u.sequence, &rrd_print, depth + 1, arg)) {
+	if (!node_walk_list(&n->u.sequence, &rrd_print, depth + 1, opaque)) {
 		return 0;
 	}
 	print_indent(f, depth);
@@ -105,9 +105,9 @@ visit_sequence(struct node *n, struct node **np, int depth, void *arg)
 }
 
 static int
-visit_loop(struct node *n, struct node **np, int depth, void *arg)
+visit_loop(struct node *n, struct node **np, int depth, void *opaque)
 {
-	FILE *f = arg;
+	FILE *f = opaque;
 
 	(void) np;
 
@@ -116,7 +116,7 @@ visit_loop(struct node *n, struct node **np, int depth, void *arg)
 	if (n->u.loop.forward->type != NODE_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".forward:\n");
-		if (!node_walk_list(&n->u.loop.forward, &rrd_print, depth + 2, arg)) {
+		if (!node_walk_list(&n->u.loop.forward, &rrd_print, depth + 2, opaque)) {
 			return 0;
 		}
 	}
@@ -124,7 +124,7 @@ visit_loop(struct node *n, struct node **np, int depth, void *arg)
 	if (n->u.loop.backward->type != NODE_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".backward:\n");
-		if (!node_walk_list(&n->u.loop.backward, &rrd_print, depth + 2, arg)) {
+		if (!node_walk_list(&n->u.loop.backward, &rrd_print, depth + 2, opaque)) {
 			return 0;
 		}
 	}
