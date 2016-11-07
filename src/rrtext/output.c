@@ -494,6 +494,7 @@ rrtext_output(const struct ast_rule *grammar)
 			}
 
 			free(ctx.lines);
+			free(ctx.scratch);
 		}
 
 		printf("\n");
