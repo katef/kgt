@@ -34,20 +34,22 @@ struct render_context {
 	int x, y;
 };
 
-static void
+static int
 bprintf(char *scratch, char *p, const char *fmt, ...)
 {
 	va_list ap;
-	int s;
+	int n;
 
 	assert(scratch != NULL);
 	assert(p != NULL);
 
 	va_start(ap, fmt);
-	s = vsprintf(scratch, fmt, ap);
+	n = vsprintf(scratch, fmt, ap);
 	va_end(ap);
 
-	memcpy(p, scratch, s);
+	memcpy(p, scratch, n);
+
+	return n;
 }
 
 static struct node_walker w_dimension, w_render;
