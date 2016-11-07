@@ -183,38 +183,43 @@ static int
 node_compare_list(struct node *a, struct node *b, int once)
 {
 	struct node *pa = NULL, *pb = NULL;
-	int result = 1;
 
 	if (a->type != b->type) {
 		return 0;
 	}
 
 	for (pa = a, pb = b; pa != NULL && pb != NULL; pa = pa->next, pb = pb->next) {
+		int r;
+
 		switch (a->type) {
 		case NODE_SKIP:
+			r = 1;
 			break;
 
 		case NODE_LITERAL:
-			result = result && 0 == strcmp(a->u.literal, b->u.literal);
+			r = 0 == strcmp(a->u.literal, b->u.literal);
 			break;
 
 		case NODE_RULE:
-			result = result && 0 == strcmp(a->u.name, b->u.name);
+			r = 0 == strcmp(a->u.name, b->u.name);
 			break;
 
 		case NODE_ALT:
-			result = result && node_compare_list(a->u.alt, b->u.alt, 0);
+			r = node_compare_list(a->u.alt, b->u.alt, 0);
 			break;
 
 		case NODE_SEQ:
-			result = result && node_compare_list(a->u.seq, b->u.seq, 0);
+			r = node_compare_list(a->u.seq, b->u.seq, 0);
 			break;
 
 		case NODE_LOOP:
-			result = result &&
-				node_compare_list(a->u.loop.forward,  a->u.loop.forward,  0) &&
+			r = node_compare_list(a->u.loop.forward,  a->u.loop.forward,  0) &&
 			    node_compare_list(a->u.loop.backward, a->u.loop.backward, 0);
 			break;
+		}
+
+		if (!r) {
+			return 0;
 		}
 
 		if (once) {
@@ -227,7 +232,7 @@ node_compare_list(struct node *a, struct node *b, int once)
 		return 0;
 	}
 
-	return result;
+	return 1;
 }
 
 int node_compare(struct node *a, struct node *b) {
