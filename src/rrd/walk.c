@@ -12,7 +12,7 @@
 #include "node.h"
 
 static int
-node_call_walker(struct node **n, const struct node_walker *ws, int depth, void *a)
+node_call_walker(struct node **n, const struct node_walker *ws, int depth, void *opaque)
 {
 	struct node *node;
 
@@ -21,12 +21,12 @@ node_call_walker(struct node **n, const struct node_walker *ws, int depth, void 
 	node = *n;
 
 	switch (node->type) {
-	case NODE_SKIP:    return ws->visit_skip    ? ws->visit_skip(*n, n, depth, a)      : -1;
-	case NODE_LITERAL: return ws->visit_literal ? ws->visit_literal(node, n, depth, a) : -1;
-	case NODE_RULE:    return ws->visit_name    ? ws->visit_name(node, n, depth, a)    : -1;
-	case NODE_ALT:     return ws->visit_alt     ? ws->visit_alt(node, n, depth, a)     : -1;
-	case NODE_SEQ:     return ws->visit_seq     ? ws->visit_seq(node, n, depth, a)     : -1;
-	case NODE_LOOP:    return ws->visit_loop    ? ws->visit_loop(node, n, depth, a)    : -1;
+	case NODE_SKIP:    return ws->visit_skip    ? ws->visit_skip(node, n, depth, opaque)    : -1;
+	case NODE_LITERAL: return ws->visit_literal ? ws->visit_literal(node, n, depth, opaque) : -1;
+	case NODE_RULE:    return ws->visit_name    ? ws->visit_name(node, n, depth, opaque)    : -1;
+	case NODE_ALT:     return ws->visit_alt     ? ws->visit_alt(node, n, depth, opaque)     : -1;
+	case NODE_SEQ:     return ws->visit_seq     ? ws->visit_seq(node, n, depth, opaque)     : -1;
+	case NODE_LOOP:    return ws->visit_loop    ? ws->visit_loop(node, n, depth, opaque)    : -1;
 	}
 
 	return -1;
