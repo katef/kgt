@@ -3,6 +3,7 @@
 SRC += src/rrd/node.c
 SRC += src/rrd/transform.c
 SRC += src/rrd/stack.c
+SRC += src/rrd/walk.c
 
 SRC += src/rrd/pretty_prefix.c
 SRC += src/rrd/pretty_suffix.c
