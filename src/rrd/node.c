@@ -14,10 +14,6 @@ node_free(struct node *n)
 {
 	struct node *p, *next;
 
-	if (n == NULL) {
-		return;
-	}
-
 	for (p = n; p != NULL; p = next) {
 		next = p->next;
 
