@@ -26,8 +26,8 @@
 
 #include "io.h"
 
-static int
-node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque);
+static int node_walk_dim(struct node **n, int depth, void *opaque);
+static int node_walk_render(struct node **n, int depth, void *opaque);
 
 struct render_context {
 	struct box_size size;
@@ -54,8 +54,6 @@ bprintf(char *scratch, char *p, const char *fmt, ...)
 
 	return n;
 }
-
-static struct node_walker w_dimension, w_render;
 
 static int
 dim_nothing(struct node *n, struct node **np, int depth, void *opaque)
@@ -110,7 +108,7 @@ dim_seq(struct node *n, struct node **np, int depth, void *opaque)
 	(void) opaque;
 
 	for (q = &n->u.seq; *q != NULL; q = &(**q).next) {
-		if (!node_walk(q, &w_dimension, depth + 1, opaque)) {
+		if (!node_walk_dim(q, depth + 1, opaque)) {
 			return 0;
 		}
 	}
@@ -142,7 +140,7 @@ dim_alt(struct node *n, struct node **np, int depth, void *opaque)
 	(void) opaque;
 
 	for (q = &n->u.alt; *q != NULL; q = &(**q).next) {
-		if (!node_walk(q, &w_dimension, depth + 1, opaque)) {
+		if (!node_walk_dim(q, depth + 1, opaque)) {
 			return 0;
 		}
 	}
@@ -201,10 +199,10 @@ dim_loop(struct node *n, struct node **np, int depth, void *opaque)
 	(void) np;
 	(void) opaque;
 
-	node_walk(&n->u.loop.forward, &w_dimension, depth + 1, opaque);
+	node_walk_dim(&n->u.loop.forward, depth + 1, opaque);
 	wf = n->u.loop.forward->size.w;
 
-	node_walk(&n->u.loop.backward, &w_dimension, depth + 1, opaque);
+	node_walk_dim(&n->u.loop.backward, depth + 1, opaque);
 	wb = n->u.loop.backward->size.w;
 
 	n->size.w = (wf > wb ? wf : wb) + 6;
@@ -225,12 +223,65 @@ dim_loop(struct node *n, struct node **np, int depth, void *opaque)
 	return 1;
 }
 
-static struct node_walker w_dimension = {
-	dim_nothing,
-	dim_name, dim_literal,
-	dim_alt,  dim_seq,
-	dim_loop
-};
+static int
+node_walk_dim(struct node **n, int depth, void *opaque)
+{
+	struct node *node;
+
+	assert(n != NULL);
+
+	node = *n;
+
+	switch (node->type) {
+	case NODE_SKIP:    return dim_nothing(node, n, depth, opaque);
+	case NODE_LITERAL: return dim_literal(node, n, depth, opaque);
+	case NODE_RULE:    return dim_name(node, n, depth, opaque);
+	case NODE_ALT:     return dim_alt(node, n, depth, opaque);
+	case NODE_SEQ:     return dim_seq(node, n, depth, opaque);
+	case NODE_LOOP:    return dim_loop(node, n, depth, opaque);
+	}
+
+	switch (node->type) {
+		struct node **p;
+
+	case NODE_ALT:
+		for (p = &node->u.alt; *p != NULL; p = &(**p).next) {
+			if (!node_walk_dim(p, depth + 1, opaque)) {
+				return 0;
+			}
+		}
+
+		break;
+
+	case NODE_SEQ:
+		for (p = &node->u.seq; *p != NULL; p = &(**p).next) {
+			if (!node_walk_dim(p, depth + 1, opaque)) {
+				return 0;
+			}
+		}
+
+		break;
+
+	case NODE_LOOP:
+		if (!node_walk_dim(&node->u.loop.forward, depth + 1, opaque)) {
+			return 0;
+		}
+
+		if (!node_walk_dim(&node->u.loop.backward, depth + 1, opaque)) {
+			return 0;
+		}
+
+		break;
+
+	case NODE_SKIP:
+	case NODE_RULE:
+	case NODE_LITERAL:
+		break;
+	}
+
+	return 1;
+}
+
 
 static int
 render_literal(struct node *n, struct node **np, int depth, void *opaque)
@@ -263,7 +314,7 @@ segment(struct render_context *ctx, struct node *n, int depth, int delim)
 {
 	int y = ctx->y;
 	ctx->y -= n->y;
-	node_walk(&n, &w_render, depth, ctx);
+	node_walk_render(&n, depth, ctx);
 
 	ctx->x += n->size.w;
 	ctx->y = y;
@@ -319,7 +370,7 @@ justify(struct render_context *ctx, int depth, struct node *n, int space)
 	}
 
 	ctx->y -= n->y;
-	node_walk(&n, &w_render, depth, ctx);
+	node_walk_render(&n, depth, ctx);
 
 	ctx->y += n->y;
 	ctx->x += n->size.w;
@@ -441,35 +492,21 @@ render_loop(struct node *n, struct node **np, int depth, void *opaque)
 	return 1;
 }
 
-static struct node_walker w_render = {
-	NULL,
-	render_name, render_literal,
-	render_alt,  render_seq,
-	render_loop
-};
-
 static int
-node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque)
+node_walk_render(struct node **n, int depth, void *opaque)
 {
-	int (*f)(struct node *, struct node **, int, void *);
 	struct node *node;
 
 	assert(n != NULL);
-	assert(ws != NULL);
 
 	node = *n;
 
 	switch (node->type) {
-	case NODE_SKIP:    f = ws->visit_skip;    break;
-	case NODE_LITERAL: f = ws->visit_literal; break;
-	case NODE_RULE:    f = ws->visit_name;    break;
-	case NODE_ALT:     f = ws->visit_alt;     break;
-	case NODE_SEQ:     f = ws->visit_seq;     break;
-	case NODE_LOOP:    f = ws->visit_loop;    break;
-	}
-
-	if (f != NULL) {
-		return f(node, n, depth, opaque);
+	case NODE_LITERAL: return render_literal(node, n, depth, opaque);
+	case NODE_RULE:    return render_name(node, n, depth, opaque);
+	case NODE_ALT:     return render_alt(node, n, depth, opaque);
+	case NODE_SEQ:     return render_seq(node, n, depth, opaque);
+	case NODE_LOOP:    return render_loop(node, n, depth, opaque);
 	}
 
 	switch (node->type) {
@@ -477,7 +514,7 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque
 
 	case NODE_ALT:
 		for (p = &node->u.alt; *p != NULL; p = &(**p).next) {
-			if (!node_walk(p, ws, depth + 1, opaque)) {
+			if (!node_walk_render(p, depth + 1, opaque)) {
 				return 0;
 			}
 		}
@@ -486,7 +523,7 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque
 
 	case NODE_SEQ:
 		for (p = &node->u.seq; *p != NULL; p = &(**p).next) {
-			if (!node_walk(p, ws, depth + 1, opaque)) {
+			if (!node_walk_render(p, depth + 1, opaque)) {
 				return 0;
 			}
 		}
@@ -494,11 +531,11 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque
 		break;
 
 	case NODE_LOOP:
-		if (!node_walk(&node->u.loop.forward, ws, depth + 1, opaque)) {
+		if (!node_walk_render(&node->u.loop.forward, depth + 1, opaque)) {
 			return 0;
 		}
 
-		if (!node_walk(&node->u.loop.backward, ws, depth + 1, opaque)) {
+		if (!node_walk_render(&node->u.loop.backward, depth + 1, opaque)) {
 			return 0;
 		}
 
@@ -540,7 +577,7 @@ rrtext_output(const struct ast_rule *grammar)
 			struct render_context ctx;
 			int i;
 
-			node_walk(&rrd, &w_dimension, 0, NULL);
+			node_walk_dim(&rrd, 0, NULL);
 
 			ctx.size = rrd->size;
 			ctx.size.w += 8;
@@ -565,7 +602,7 @@ rrtext_output(const struct ast_rule *grammar)
 
 			ctx.x = 4;
 			ctx.y = 0;
-			node_walk(&rrd, &w_render, 0, &ctx);
+			node_walk_render(&rrd, 0, &ctx);
 
 			for (i = 0; i < ctx.size.h; i++) {
 				printf("    %s\n", ctx.lines[i]);

@@ -17,7 +17,7 @@
 #include "node.h"
 
 static int
-node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque);
+node_walk(struct node **n, int depth, void *opaque);
 
 static int
 process_loop_leaf(struct node *loop, struct stack *bp)
@@ -142,8 +142,6 @@ process_loop(struct node *loop, struct stack *bp)
 	return 0;
 }
 
-static struct node_walker pretty_collapse_suffixes;
-
 static int
 collapse_seq(struct node *n, struct node **np, int depth, void *opaque)
 {
@@ -183,7 +181,7 @@ collapse_seq(struct node *n, struct node **np, int depth, void *opaque)
 	stack_free(&rl);
 
 	for (q = &n->u.seq; *q != NULL; q = &(**q).next) {
-		if (!node_walk(q, &pretty_collapse_suffixes, depth + 1, opaque)) {
+		if (!node_walk(q, depth + 1, opaque)) {
 			return 0;
 		}
 	}
@@ -193,35 +191,18 @@ collapse_seq(struct node *n, struct node **np, int depth, void *opaque)
 	return 1;
 }
 
-static struct node_walker pretty_collapse_suffixes = {
-	NULL,
-	NULL, NULL,
-	NULL, collapse_seq,
-	NULL
-};
-
 static int
-node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque)
+node_walk(struct node **n, int depth, void *opaque)
 {
 	int (*f)(struct node *, struct node **, int, void *);
 	struct node *node;
 
 	assert(n != NULL);
-	assert(ws != NULL);
 
 	node = *n;
 
 	switch (node->type) {
-	case NODE_SKIP:    f = ws->visit_skip;    break;
-	case NODE_LITERAL: f = ws->visit_literal; break;
-	case NODE_RULE:    f = ws->visit_name;    break;
-	case NODE_ALT:     f = ws->visit_alt;     break;
-	case NODE_SEQ:     f = ws->visit_seq;     break;
-	case NODE_LOOP:    f = ws->visit_loop;    break;
-	}
-
-	if (f != NULL) {
-		return f(node, n, depth, opaque);
+	case NODE_SEQ: return collapse_seq(node, n, depth, opaque);
 	}
 
 	switch (node->type) {
@@ -229,7 +210,7 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque
 
 	case NODE_ALT:
 		for (p = &node->u.alt; *p != NULL; p = &(**p).next) {
-			if (!node_walk(p, ws, depth + 1, opaque)) {
+			if (!node_walk(p, depth + 1, opaque)) {
 				return 0;
 			}
 		}
@@ -238,7 +219,7 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque
 
 	case NODE_SEQ:
 		for (p = &node->u.seq; *p != NULL; p = &(**p).next) {
-			if (!node_walk(p, ws, depth + 1, opaque)) {
+			if (!node_walk(p, depth + 1, opaque)) {
 				return 0;
 			}
 		}
@@ -246,11 +227,11 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque
 		break;
 
 	case NODE_LOOP:
-		if (!node_walk(&node->u.loop.forward, ws, depth + 1, opaque)) {
+		if (!node_walk(&node->u.loop.forward, depth + 1, opaque)) {
 			return 0;
 		}
 
-		if (!node_walk(&node->u.loop.backward, ws, depth + 1, opaque)) {
+		if (!node_walk(&node->u.loop.backward, depth + 1, opaque)) {
 			return 0;
 		}
 
@@ -278,6 +259,6 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque
 void
 rrd_pretty_suffixes(struct node **rrd)
 {
-	node_walk(rrd, &pretty_collapse_suffixes, 0, NULL);
+	node_walk(rrd, 0, NULL);
 }
 

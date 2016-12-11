@@ -41,19 +41,6 @@ struct node {
 	struct node *next;
 };
 
-/* node traversal - visit functions are passed a pointer to the pointer that ties
- * the visited node into the tree.
- * they are free to replace the node they visited via said pointer. cf. beautify
- */
-struct node_walker {
-	int (*visit_skip   )(struct node *, struct node **, int, void *);
-	int (*visit_name   )(struct node *, struct node **, int, void *);
-	int (*visit_literal)(struct node *, struct node **, int, void *);
-	int (*visit_alt    )(struct node *, struct node **, int, void *);
-	int (*visit_seq    )(struct node *, struct node **, int, void *);
-	int (*visit_loop   )(struct node *, struct node **, int, void *);
-};
-
 struct node *ast_to_rrd(const struct ast_rule *);
 
 #endif

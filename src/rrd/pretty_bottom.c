@@ -16,9 +16,7 @@
 #include "node.h"
 
 static int
-node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque);
-
-static struct node_walker pretty_bottom;
+node_walk(struct node **n, int depth, void *opaque);
 
 struct bottom_context {
 	int applied;
@@ -37,7 +35,7 @@ bottom_seq(struct node *n, struct node **np, int depth, void *opaque)
 	for (p = &n->u.seq; *p != NULL; p = &(**p).next) {
 		ctx->applied = 0;
 
-		if (!node_walk(p, &pretty_bottom, depth + 1, ctx)) {
+		if (!node_walk(p, depth + 1, ctx)) {
 			return 0;
 		}
 
@@ -48,7 +46,7 @@ bottom_seq(struct node *n, struct node **np, int depth, void *opaque)
 		ctx->everything = 1;
 
 		for (p = &n->u.seq; *p != NULL; p = &(**p).next) {
-			if (!node_walk(p, &pretty_bottom, depth + 1, ctx)) {
+			if (!node_walk(p, depth + 1, ctx)) {
 				/* XXX: handle? */
 			}
         }
@@ -112,7 +110,7 @@ bottom_loop(struct node *n, struct node **np, int depth, void *opaque)
 		n->next = NULL;
 		*np = alt;
 
-		if (!node_walk(&skip->next, &pretty_bottom, depth + 1, ctx)) {
+		if (!node_walk(&skip->next, depth + 1, ctx)) {
 			return 0;
 		}
 
@@ -121,11 +119,11 @@ bottom_loop(struct node *n, struct node **np, int depth, void *opaque)
 		return 1;
 	} while (0);
 
-	if (!node_walk(&n->u.loop.forward, &pretty_bottom, depth + 1, ctx)) {
+	if (!node_walk(&n->u.loop.forward, depth + 1, ctx)) {
 		return 0;
 	}
 
-	if (!node_walk(&n->u.loop.backward, &pretty_bottom, depth + 1, ctx)) {
+	if (!node_walk(&n->u.loop.backward, depth + 1, ctx)) {
 		return 0;
 	}
 
@@ -135,35 +133,18 @@ bottom_loop(struct node *n, struct node **np, int depth, void *opaque)
 	return 1;
 }
 
-static struct node_walker pretty_bottom = {
-	NULL,
-	NULL, NULL,
-	NULL, bottom_seq,
-	bottom_loop
-};
-
 static int
-node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque)
+node_walk(struct node **n, int depth, void *opaque)
 {
-	int (*f)(struct node *, struct node **, int, void *);
 	struct node *node;
 
 	assert(n != NULL);
-	assert(ws != NULL);
 
 	node = *n;
 
 	switch (node->type) {
-	case NODE_SKIP:    f = ws->visit_skip;    break;
-	case NODE_LITERAL: f = ws->visit_literal; break;
-	case NODE_RULE:    f = ws->visit_name;    break;
-	case NODE_ALT:     f = ws->visit_alt;     break;
-	case NODE_SEQ:     f = ws->visit_seq;     break;
-	case NODE_LOOP:    f = ws->visit_loop;    break;
-	}
-
-	if (f != NULL) {
-		return f(node, n, depth, opaque);
+	case NODE_SEQ:  return bottom_seq(node, n, depth, opaque);
+	case NODE_LOOP: return bottom_loop(node, n, depth, opaque);
 	}
 
 	switch (node->type) {
@@ -171,7 +152,7 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque
 
 	case NODE_ALT:
 		for (p = &node->u.alt; *p != NULL; p = &(**p).next) {
-			if (!node_walk(p, ws, depth + 1, opaque)) {
+			if (!node_walk(p, depth + 1, opaque)) {
 				return 0;
 			}
 		}
@@ -180,7 +161,7 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque
 
 	case NODE_SEQ:
 		for (p = &node->u.seq; *p != NULL; p = &(**p).next) {
-			if (!node_walk(p, ws, depth + 1, opaque)) {
+			if (!node_walk(p, depth + 1, opaque)) {
 				return 0;
 			}
 		}
@@ -188,11 +169,11 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque
 		break;
 
 	case NODE_LOOP:
-		if (!node_walk(&node->u.loop.forward, ws, depth + 1, opaque)) {
+		if (!node_walk(&node->u.loop.forward, depth + 1, opaque)) {
 			return 0;
 		}
 
-		if (!node_walk(&node->u.loop.backward, ws, depth + 1, opaque)) {
+		if (!node_walk(&node->u.loop.backward, depth + 1, opaque)) {
 			return 0;
 		}
 
@@ -217,6 +198,6 @@ void
 rrd_pretty_bottom(struct node **rrd)
 {
 	struct bottom_context ctx = { 0, 0 };
-	node_walk(rrd, &pretty_bottom, 0, &ctx);
+	node_walk(rrd, 0, &ctx);
 }
 
