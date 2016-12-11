@@ -193,24 +193,24 @@ node_compare_list(struct node *a, struct node *b, int once)
 			break;
 
 		case NODE_LITERAL:
-			r = 0 == strcmp(a->u.literal, b->u.literal);
+			r = 0 == strcmp(pa->u.literal, pb->u.literal);
 			break;
 
 		case NODE_RULE:
-			r = 0 == strcmp(a->u.name, b->u.name);
+			r = 0 == strcmp(pa->u.name, pb->u.name);
 			break;
 
 		case NODE_ALT:
-			r = node_compare_list(a->u.alt, b->u.alt, 0);
+			r = node_compare_list(pa->u.alt, pb->u.alt, 0);
 			break;
 
 		case NODE_SEQ:
-			r = node_compare_list(a->u.seq, b->u.seq, 0);
+			r = node_compare_list(pa->u.seq, pb->u.seq, 0);
 			break;
 
 		case NODE_LOOP:
-			r = node_compare_list(a->u.loop.forward,  a->u.loop.forward,  0) &&
-			    node_compare_list(a->u.loop.backward, a->u.loop.backward, 0);
+			r = node_compare_list(pa->u.loop.forward,  pa->u.loop.forward,  0) &&
+			    node_compare_list(pa->u.loop.backward, pa->u.loop.backward, 0);
 			break;
 		}
 
