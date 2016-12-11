@@ -233,50 +233,23 @@ node_walk_dim(struct node **n, int depth, void *opaque)
 	node = *n;
 
 	switch (node->type) {
-	case NODE_SKIP:    return dim_nothing(node, n, depth, opaque);
-	case NODE_LITERAL: return dim_literal(node, n, depth, opaque);
-	case NODE_RULE:    return dim_name(node, n, depth, opaque);
-	case NODE_ALT:     return dim_alt(node, n, depth, opaque);
-	case NODE_SEQ:     return dim_seq(node, n, depth, opaque);
-	case NODE_LOOP:    return dim_loop(node, n, depth, opaque);
-	}
+	case NODE_SKIP:
+		return dim_nothing(node, n, depth, opaque);
 
-	switch (node->type) {
-		struct node **p;
+	case NODE_LITERAL:
+		return dim_literal(node, n, depth, opaque);
+
+	case NODE_RULE:
+		return dim_name(node, n, depth, opaque);
 
 	case NODE_ALT:
-		for (p = &node->u.alt; *p != NULL; p = &(**p).next) {
-			if (!node_walk_dim(p, depth + 1, opaque)) {
-				return 0;
-			}
-		}
-
-		break;
+		return dim_alt(node, n, depth, opaque);
 
 	case NODE_SEQ:
-		for (p = &node->u.seq; *p != NULL; p = &(**p).next) {
-			if (!node_walk_dim(p, depth + 1, opaque)) {
-				return 0;
-			}
-		}
-
-		break;
+		return dim_seq(node, n, depth, opaque);
 
 	case NODE_LOOP:
-		if (!node_walk_dim(&node->u.loop.forward, depth + 1, opaque)) {
-			return 0;
-		}
-
-		if (!node_walk_dim(&node->u.loop.backward, depth + 1, opaque)) {
-			return 0;
-		}
-
-		break;
-
-	case NODE_SKIP:
-	case NODE_RULE:
-	case NODE_LITERAL:
-		break;
+		return dim_loop(node, n, depth, opaque);
 	}
 
 	return 1;
@@ -502,48 +475,22 @@ node_walk_render(struct node **n, int depth, void *opaque)
 	node = *n;
 
 	switch (node->type) {
-	case NODE_LITERAL: return render_literal(node, n, depth, opaque);
-	case NODE_RULE:    return render_name(node, n, depth, opaque);
-	case NODE_ALT:     return render_alt(node, n, depth, opaque);
-	case NODE_SEQ:     return render_seq(node, n, depth, opaque);
-	case NODE_LOOP:    return render_loop(node, n, depth, opaque);
-	}
+	case NODE_LITERAL:
+		return render_literal(node, n, depth, opaque);
 
-	switch (node->type) {
-		struct node **p;
+	case NODE_RULE:
+		return render_name(node, n, depth, opaque);
 
 	case NODE_ALT:
-		for (p = &node->u.alt; *p != NULL; p = &(**p).next) {
-			if (!node_walk_render(p, depth + 1, opaque)) {
-				return 0;
-			}
-		}
-
-		break;
+		return render_alt(node, n, depth, opaque);
 
 	case NODE_SEQ:
-		for (p = &node->u.seq; *p != NULL; p = &(**p).next) {
-			if (!node_walk_render(p, depth + 1, opaque)) {
-				return 0;
-			}
-		}
-
-		break;
+		return render_seq(node, n, depth, opaque);
 
 	case NODE_LOOP:
-		if (!node_walk_render(&node->u.loop.forward, depth + 1, opaque)) {
-			return 0;
-		}
-
-		if (!node_walk_render(&node->u.loop.backward, depth + 1, opaque)) {
-			return 0;
-		}
-
-		break;
+		return render_loop(node, n, depth, opaque);
 
 	case NODE_SKIP:
-	case NODE_RULE:
-	case NODE_LITERAL:
 		break;
 	}
 

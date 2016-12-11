@@ -149,38 +149,19 @@ node_walk(struct node **n, int depth, void *opaque)
 	node = *n;
 
 	switch (node->type) {
-	case NODE_ALT:     return redundant_alt(node, n, depth, opaque);
-	case NODE_LOOP:    return redundant_loop(node, n, depth, opaque);
-	}
-
-	switch (node->type) {
 		struct node **p;
 
 	case NODE_ALT:
-		for (p = &node->u.alt; *p != NULL; p = &(**p).next) {
-			if (!node_walk(p, depth + 1, opaque)) {
-				return 0;
-			}
-		}
+		return redundant_alt(node, n, depth, opaque);
 
-		break;
+	case NODE_LOOP:
+		return redundant_loop(node, n, depth, opaque);
 
 	case NODE_SEQ:
 		for (p = &node->u.seq; *p != NULL; p = &(**p).next) {
 			if (!node_walk(p, depth + 1, opaque)) {
 				return 0;
 			}
-		}
-
-		break;
-
-	case NODE_LOOP:
-		if (!node_walk(&node->u.loop.forward, depth + 1, opaque)) {
-			return 0;
-		}
-
-		if (!node_walk(&node->u.loop.backward, depth + 1, opaque)) {
-			return 0;
 		}
 
 		break;
