@@ -43,7 +43,13 @@ bottom_seq(struct node *n, struct node **np, int depth, void *opaque)
 
 	if (0 && anything) {
 		ctx->everything = 1;
-		node_walk_list(&n->u.seq, &pretty_bottom, depth + 1, ctx);
+
+		for (p = &n->u.seq; *p != NULL; p = &(**p).next) {
+			if (!node_walk(p, &pretty_bottom, depth + 1, ctx)) {
+				/* XXX: handle? */
+			}
+        }
+
 		ctx->everything = 0;
 	}
 

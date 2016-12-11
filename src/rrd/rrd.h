@@ -55,7 +55,6 @@ struct node_walker {
 };
 
 int node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque);
-int node_walk_list(struct node **n, const struct node_walker *ws, int depth, void *opaque);
 
 struct node *ast_to_rrd(const struct ast_rule *);
 

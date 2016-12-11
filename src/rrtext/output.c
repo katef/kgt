@@ -101,12 +101,16 @@ static int
 dim_seq(struct node *n, struct node **np, int depth, void *opaque)
 {
 	int w = 0, top = 0, bot = 1;
-	struct node *p;
+	struct node *p, **q;
 
 	(void) np;
 	(void) opaque;
 
-	node_walk_list(&n->u.seq, &w_dimension, depth + 1, opaque);
+	for (q = &n->u.seq; *q != NULL; q = &(**q).next) {
+		if (!node_walk(q, &w_dimension, depth + 1, opaque)) {
+			return 0;
+		}
+	}
 
 	for (p = n->u.seq; p != NULL; p = p->next) {
 		w += p->size.w + 2;
@@ -129,12 +133,16 @@ static int
 dim_alt(struct node *n, struct node **np, int depth, void *opaque)
 {
 	int w = 0, h = -1;
-	struct node *p;
+	struct node *p, **q;
 
 	(void) np;
 	(void) opaque;
 
-	node_walk_list(&n->u.alt, &w_dimension, depth + 1, opaque);
+	for (q = &n->u.alt; *q != NULL; q = &(**q).next) {
+		if (!node_walk(q, &w_dimension, depth + 1, opaque)) {
+			return 0;
+		}
+	}
 
 	for (p = n->u.alt; p != NULL; p = p->next) {
 		h += 1 + p->size.h;

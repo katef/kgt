@@ -71,14 +71,17 @@ visit_literal(struct node *n, struct node **np, int depth, void *opaque)
 static int
 visit_alt(struct node *n, struct node **np, int depth, void *opaque)
 {
+	struct node **p;
 	FILE *f = opaque;
 
 	(void) np;
 
 	print_indent(f, depth);
 	fprintf(f, "ALT: [\n");
-	if (!node_walk_list(&n->u.alt, &rrd_print, depth + 1, opaque)) {
-		return 0;
+	for (p = &n->u.alt; *p != NULL; p = &(**p).next) {
+		if (!node_walk(p, &rrd_print, depth + 1, f)) {
+			return 0;
+		}
 	}
 	print_indent(f, depth);
 	fprintf(f, "]\n");
@@ -89,14 +92,17 @@ visit_alt(struct node *n, struct node **np, int depth, void *opaque)
 static int
 visit_seq(struct node *n, struct node **np, int depth, void *opaque)
 {
+	struct node **p;
 	FILE *f = opaque;
 
 	(void) np;
 
 	print_indent(f, depth);
 	fprintf(f, "SEQ: [\n");
-	if (!node_walk_list(&n->u.seq, &rrd_print, depth + 1, opaque)) {
-		return 0;
+	for (p = &n->u.seq; *p != NULL; p = &(**p).next) {
+		if (!node_walk(p, &rrd_print, depth + 1, f)) {
+			return 0;
+		}
 	}
 	print_indent(f, depth);
 	fprintf(f, "]\n");
@@ -107,6 +113,7 @@ visit_seq(struct node *n, struct node **np, int depth, void *opaque)
 static int
 visit_loop(struct node *n, struct node **np, int depth, void *opaque)
 {
+	struct node **p;
 	FILE *f = opaque;
 
 	(void) np;
@@ -116,16 +123,20 @@ visit_loop(struct node *n, struct node **np, int depth, void *opaque)
 	if (n->u.loop.forward->type != NODE_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".forward:\n");
-		if (!node_walk_list(&n->u.loop.forward, &rrd_print, depth + 2, opaque)) {
-			return 0;
+		for (p = &n->u.loop.forward; *p != NULL; p = &(**p).next) {
+			if (!node_walk(p, &rrd_print, depth + 2, f)) {
+				return 0;
+			}
 		}
 	}
 
 	if (n->u.loop.backward->type != NODE_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".backward:\n");
-		if (!node_walk_list(&n->u.loop.backward, &rrd_print, depth + 2, opaque)) {
-			return 0;
+		for (p = &n->u.loop.backward; *p != NULL; p = &(**p).next) {
+			if (!node_walk(p, &rrd_print, depth + 2, f)) {
+				return 0;
+			}
 		}
 	}
 

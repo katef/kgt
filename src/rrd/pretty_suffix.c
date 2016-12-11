@@ -144,7 +144,7 @@ static struct node_walker pretty_collapse_suffixes;
 static int
 collapse_seq(struct node *n, struct node **np, int depth, void *opaque)
 {
-	struct node *p;
+	struct node *p, **q;
 	struct stack *rl = NULL;
 
 	for (p = n->u.seq; p != NULL; p = p->next) {
@@ -179,8 +179,10 @@ collapse_seq(struct node *n, struct node **np, int depth, void *opaque)
 
 	stack_free(&rl);
 
-	if (!node_walk_list(&n->u.seq, &pretty_collapse_suffixes, depth + 1, opaque)) {
-		return 0;
+	for (q = &n->u.seq; *q != NULL; q = &(**q).next) {
+		if (!node_walk(q, &pretty_collapse_suffixes, depth + 1, opaque)) {
+			return 0;
+		}
 	}
 
 	node_collapse(np);

@@ -33,18 +33,6 @@ node_call_walker(struct node **n, const struct node_walker *ws, int depth, void 
 }
 
 int
-node_walk_list(struct node **n, const struct node_walker *ws, int depth, void *opaque)
-{
-	for (; *n != NULL; n = &(**n).next) {
-		if (!node_walk(n, ws, depth, opaque)) {
-			return 0;
-		}
-	}
-
-	return 1;
-}
-
-int
 node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque)
 {
 	struct node *node;
@@ -64,16 +52,22 @@ node_walk(struct node **n, const struct node_walker *ws, int depth, void *opaque
 	}
 
 	switch (node->type) {
+		struct node **p;
+
 	case NODE_ALT:
-		if (!node_walk_list(&node->u.alt, ws, depth + 1, opaque)) {
-			return 0;
+		for (p = &node->u.alt; *p != NULL; p = &(**p).next) {
+			if (!node_walk(p, ws, depth + 1, opaque)) {
+				return 0;
+			}
 		}
 
 		break;
 
 	case NODE_SEQ:
-		if (!node_walk_list(&node->u.seq, ws, depth + 1, opaque)) {
-			return 0;
+		for (p = &node->u.seq; *p != NULL; p = &(**p).next) {
+			if (!node_walk(p, ws, depth + 1, opaque)) {
+				return 0;
+			}
 		}
 
 		break;
