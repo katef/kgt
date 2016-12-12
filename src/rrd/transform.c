@@ -99,11 +99,7 @@ single_term(const struct ast_term *term)
 			return NULL;
 		}
 
-		list = node_create_alt(alts);
-
-		node_collapse(&list);
-
-		return list;
+		return node_create_alt(alts);
 	}
 
 	default:
@@ -148,9 +144,6 @@ oneormore_term(const struct ast_term *term)
 
 	loop = node_create_loop(n, skip);
 
-	node_collapse(&loop->u.loop.forward);
-	node_collapse(&loop->u.loop.backward);
-
 	return loop;
 }
 
@@ -168,12 +161,7 @@ zeroormore_term(const struct ast_term *term)
 
 	skip = node_create_skip();
 
-	loop = node_create_loop(skip, n);
-
-	node_collapse(&loop->u.loop.forward);
-	node_collapse(&loop->u.loop.backward);
-
-	return loop;
+	return node_create_loop(skip, n);
 }
 
 static struct node *
@@ -199,9 +187,6 @@ finite_term(const struct ast_term *term)
 		loop->u.loop.min = term->min;
 		loop->u.loop.max = term->max;
 	}
-
-	node_collapse(&loop->u.loop.forward);
-	node_collapse(&loop->u.loop.backward);
 
 	return loop;
 }
@@ -242,10 +227,6 @@ ast_to_rrd(const struct ast_rule *ast)
 		return NULL;
 	}
 
-	alt = node_create_alt(n);
-
-	node_collapse(&alt);
-
-	return alt;
+	return node_create_alt(n);
 }
 
