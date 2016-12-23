@@ -66,7 +66,7 @@ transform_alts(const struct ast_alt *alts)
 			goto error;
 		}
 
-		list_push(&list, node);
+		list_push(tail, node);
 		tail = &(*tail)->next;
 	}
 
