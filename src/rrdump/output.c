@@ -199,6 +199,7 @@ rrdump_output(const struct ast_rule *grammar)
 			rrd_pretty_suffixes(&rrd);
 			rrd_pretty_redundant(&rrd);
 			rrd_pretty_bottom(&rrd);
+			rrd_pretty_collapse(&rrd);
 
 			printf("%s: (after prettify)\n", p->name);
 			node_walk(&rrd, 1, stdout);

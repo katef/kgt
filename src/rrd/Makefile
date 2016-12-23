@@ -5,6 +5,7 @@ SRC += src/rrd/transform.c
 SRC += src/rrd/list.c
 SRC += src/rrd/stack.c
 
+SRC += src/rrd/pretty_collapse.c
 SRC += src/rrd/pretty_prefix.c
 SRC += src/rrd/pretty_suffix.c
 SRC += src/rrd/pretty_bottom.c

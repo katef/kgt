@@ -138,44 +138,6 @@ node_create_loop(struct node *forward, struct node *backward)
 	return new;
 }
 
-void
-node_collapse(struct node **n)
-{
-	struct node *node;
-
-	node = *n;
-
-	switch (node->type) {
-	case NODE_ALT:
-		/* TODO: node_count() */
-		if (node->u.alt == NULL || node->u.alt->next != NULL) {
-			return;
-		}
-
-		*n = node->u.alt->node;
-		node->u.alt = NULL;
-
-		break;
-
-	case NODE_SEQ:
-		if (node->u.seq == NULL || node->u.seq->next != NULL) {
-			return;
-		}
-
-		*n = node->u.seq->node;
-		node->u.seq = NULL;
-
-		break;
-
-	default:
-		return;
-	}
-
-	node_free(node);
-
-	node_collapse(n);
-}
-
 int
 node_compare(struct node *a, struct node *b)
 {
