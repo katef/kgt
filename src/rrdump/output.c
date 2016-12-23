@@ -13,6 +13,7 @@
 #include "../rrd/rrd.h"
 #include "../rrd/pretty.h"
 #include "../rrd/node.h"
+#include "../rrd/list.h"
 
 #include "io.h"
 
@@ -72,7 +73,7 @@ visit_literal(struct node *n, struct node **np, int depth, void *opaque)
 static int
 visit_alt(struct node *n, struct node **np, int depth, void *opaque)
 {
-	struct node **p;
+	struct list **p;
 	FILE *f = opaque;
 
 	(void) np;
@@ -80,7 +81,7 @@ visit_alt(struct node *n, struct node **np, int depth, void *opaque)
 	print_indent(f, depth);
 	fprintf(f, "ALT: [\n");
 	for (p = &n->u.alt; *p != NULL; p = &(**p).next) {
-		if (!node_walk(p, depth + 1, f)) {
+		if (!node_walk(&(*p)->node, depth + 1, f)) {
 			return 0;
 		}
 	}
@@ -93,7 +94,7 @@ visit_alt(struct node *n, struct node **np, int depth, void *opaque)
 static int
 visit_seq(struct node *n, struct node **np, int depth, void *opaque)
 {
-	struct node **p;
+	struct list **p;
 	FILE *f = opaque;
 
 	(void) np;
@@ -101,7 +102,7 @@ visit_seq(struct node *n, struct node **np, int depth, void *opaque)
 	print_indent(f, depth);
 	fprintf(f, "SEQ: [\n");
 	for (p = &n->u.seq; *p != NULL; p = &(**p).next) {
-		if (!node_walk(p, depth + 1, f)) {
+		if (!node_walk(&(*p)->node, depth + 1, f)) {
 			return 0;
 		}
 	}
@@ -114,7 +115,6 @@ visit_seq(struct node *n, struct node **np, int depth, void *opaque)
 static int
 visit_loop(struct node *n, struct node **np, int depth, void *opaque)
 {
-	struct node **p;
 	FILE *f = opaque;
 
 	(void) np;
@@ -124,20 +124,16 @@ visit_loop(struct node *n, struct node **np, int depth, void *opaque)
 	if (n->u.loop.forward->type != NODE_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".forward:\n");
-		for (p = &n->u.loop.forward; *p != NULL; p = &(**p).next) {
-			if (!node_walk(p, depth + 2, f)) {
-				return 0;
-			}
+		if (!node_walk(&n->u.loop.forward, depth + 2, f)) {
+			return 0;
 		}
 	}
 
 	if (n->u.loop.backward->type != NODE_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".backward:\n");
-		for (p = &n->u.loop.backward; *p != NULL; p = &(**p).next) {
-			if (!node_walk(p, depth + 2, f)) {
-				return 0;
-			}
+		if (!node_walk(&n->u.loop.backward, depth + 2, f)) {
+			return 0;
 		}
 	}
 

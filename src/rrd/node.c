@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "rrd.h" /* XXX */
+#include "list.h"
 #include "node.h"
 
 #include "../xalloc.h"
@@ -12,33 +13,39 @@
 void
 node_free(struct node *n)
 {
-	struct node *p, *next;
+	struct list *p, *next;
 
-	for (p = n; p != NULL; p = next) {
-		next = p->next;
+	switch (n->type) {
+	case NODE_SKIP:
+	case NODE_LITERAL:
+	case NODE_RULE:
+		break;
 
-		switch (n->type) {
-		case NODE_SKIP:
-		case NODE_LITERAL:
-		case NODE_RULE:
-			break;
+	case NODE_ALT:
+		for (p = n->u.alt; p != NULL; p = next) {
+			next = p->next;
 
-		case NODE_ALT:
-			node_free(n->u.alt);
-			break;
-
-		case NODE_SEQ:
-			node_free(n->u.seq);
-			break;
-
-		case NODE_LOOP:
-			node_free(n->u.loop.forward);
-			node_free(n->u.loop.backward);
-			break;
+			node_free(p->node);
+			free(p);
 		}
+		break;
 
-		free(p);
+	case NODE_SEQ:
+		for (p = n->u.seq; p != NULL; p = next) {
+			next = p->next;
+
+			node_free(p->node);
+			free(p);
+		}
+		break;
+
+	case NODE_LOOP:
+		node_free(n->u.loop.forward);
+		node_free(n->u.loop.backward);
+		break;
 	}
+
+	free(p);
 }
 
 struct node *
@@ -49,7 +56,6 @@ node_create_skip(void)
 	new = xmalloc(sizeof *new);
 
 	new->type = NODE_SKIP;
-	new->next = NULL;
 
 	return new;
 }
@@ -64,7 +70,6 @@ node_create_literal(const char *literal)
 	new = xmalloc(sizeof *new);
 
 	new->type = NODE_LITERAL;
-	new->next = NULL;
 
 	new->u.literal = literal;
 
@@ -81,7 +86,6 @@ node_create_name(const char *name)
 	new = xmalloc(sizeof *new);
 
 	new->type = NODE_RULE;
-	new->next = NULL;
 
 	new->u.name = name;
 
@@ -89,14 +93,13 @@ node_create_name(const char *name)
 }
 
 struct node *
-node_create_alt(struct node *alt)
+node_create_alt(struct list *alt)
 {
 	struct node *new;
 
 	new = xmalloc(sizeof *new);
 
 	new->type = NODE_ALT;
-	new->next = NULL;
 
 	new->u.alt = alt;
 
@@ -104,14 +107,13 @@ node_create_alt(struct node *alt)
 }
 
 struct node *
-node_create_seq(struct node *seq)
+node_create_seq(struct list *seq)
 {
 	struct node *new;
 
 	new = xmalloc(sizeof *new);
 
 	new->type = NODE_SEQ;
-	new->next = NULL;
 
 	new->u.seq = seq;
 
@@ -126,7 +128,6 @@ node_create_loop(struct node *forward, struct node *backward)
 	new = xmalloc(sizeof *new);
 
 	new->type = NODE_LOOP;
-	new->next = NULL;
 
 	new->u.loop.forward  = forward;
 	new->u.loop.backward = backward;
@@ -140,29 +141,29 @@ node_create_loop(struct node *forward, struct node *backward)
 void
 node_collapse(struct node **n)
 {
-	struct node *list;
+	struct node *node;
 
-	list = *n;
+	node = *n;
 
-	switch (list->type) {
+	switch (node->type) {
 	case NODE_ALT:
-		/* TODO: list_count() */
-		if (list->u.alt == NULL || list->u.alt->next != NULL) {
+		/* TODO: node_count() */
+		if (node->u.alt == NULL || node->u.alt->next != NULL) {
 			return;
 		}
 
-		*n = list->u.alt;
-		list->u.alt = NULL;
+		*n = node->u.alt->node;
+		node->u.alt = NULL;
 
 		break;
 
 	case NODE_SEQ:
-		if (list->u.seq == NULL || list->u.seq->next != NULL) {
+		if (node->u.seq == NULL || node->u.seq->next != NULL) {
 			return;
 		}
 
-		*n = list->u.seq;
-		list->u.seq = NULL;
+		*n = node->u.seq->node;
+		node->u.seq = NULL;
 
 		break;
 
@@ -170,68 +171,66 @@ node_collapse(struct node **n)
 		return;
 	}
 
-	node_free(list);
+	node_free(node);
 
 	node_collapse(n);
 }
 
-static int
-node_compare_list(struct node *a, struct node *b, int once)
+int
+node_compare(struct node *a, struct node *b)
 {
-	struct node *pa = NULL, *pb = NULL;
+	assert(a != NULL);
+	assert(b != NULL);
 
-	for (pa = a, pb = b; pa != NULL && pb != NULL; pa = pa->next, pb = pb->next) {
-		int r;
-
-		if (pa->type != pb->type) {
-			return 0;
-		}
-
-		switch (a->type) {
-		case NODE_SKIP:
-			r = 1;
-			break;
-
-		case NODE_LITERAL:
-			r = 0 == strcmp(pa->u.literal, pb->u.literal);
-			break;
-
-		case NODE_RULE:
-			r = 0 == strcmp(pa->u.name, pb->u.name);
-			break;
-
-		case NODE_ALT:
-			r = node_compare_list(pa->u.alt, pb->u.alt, 0);
-			break;
-
-		case NODE_SEQ:
-			r = node_compare_list(pa->u.seq, pb->u.seq, 0);
-			break;
-
-		case NODE_LOOP:
-			r = node_compare_list(pa->u.loop.forward,  pa->u.loop.forward,  0) &&
-			    node_compare_list(pa->u.loop.backward, pa->u.loop.backward, 0);
-			break;
-		}
-
-		if (!r) {
-			return 0;
-		}
-
-		if (once) {
-			break;
-		}
-	}
-
-	if (!once && (pa != NULL || pb != NULL)) {
-		/* lists are of different length */
+	if (a->type != b->type) {
 		return 0;
 	}
 
-	return 1;
-}
+	switch (a->type) {
+		struct list *p, *q;
 
-int node_compare(struct node *a, struct node *b) {
-	return node_compare_list(a, b, 1);
+	case NODE_SKIP:
+		return 1;
+
+	case NODE_LITERAL:
+		return 0 == strcmp(a->u.literal, b->u.literal);
+
+	case NODE_RULE:
+		return 0 == strcmp(a->u.name, b->u.name);
+
+	case NODE_ALT:
+		for (p = a->u.alt, q = b->u.alt; p != NULL && q != NULL; p = p->next, q = q->next) {
+			if (!node_compare(p->node, q->node)) {
+				return 0;
+			}
+		}
+
+		if (p != NULL || q != NULL) {
+			/* lists are of different length */
+			return 0;
+		}
+
+		return 1;
+
+	case NODE_SEQ:
+		for (p = a->u.seq, q = b->u.seq; p != NULL && q != NULL; p = p->next, q = q->next) {
+			if (!node_compare(p->node, q->node)) {
+				return 0;
+			}
+		}
+
+		if (p != NULL || q != NULL) {
+			/* lists are of different length */
+			return 0;
+		}
+
+		return 1;
+
+	case NODE_LOOP:
+		return node_compare(a->u.loop.forward,  b->u.loop.forward) &&
+		       node_compare(a->u.loop.backward, b->u.loop.backward);
+	}
+
+	return 1;
 }
 

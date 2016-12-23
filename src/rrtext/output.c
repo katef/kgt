@@ -22,6 +22,7 @@
 #include "../rrd/pretty.h"
 #include "../rrd/node.h"
 #include "../rrd/rrd.h"
+#include "../rrd/list.h"
 #include "../rrd/stack.h"
 
 #include "io.h"
@@ -102,24 +103,24 @@ static int
 dim_seq(struct node *n, struct node **np, int depth, void *opaque)
 {
 	int w = 0, top = 0, bot = 1;
-	struct node *p, **q;
+	struct list *p, **q;
 
 	(void) np;
 	(void) opaque;
 
 	for (q = &n->u.seq; *q != NULL; q = &(**q).next) {
-		if (!node_walk_dim(q, depth + 1, opaque)) {
+		if (!node_walk_dim(&(*q)->node, depth + 1, opaque)) {
 			return 0;
 		}
 	}
 
 	for (p = n->u.seq; p != NULL; p = p->next) {
-		w += p->size.w + 2;
-		if (p->y > top) {
-			top = p->y;
+		w += p->node->size.w + 2;
+		if (p->node->y > top) {
+			top = p->node->y;
 		}
-		if (p->size.h - p->y > bot) {
-			bot = p->size.h - p->y;
+		if (p->node->size.h - p->node->y > bot) {
+			bot = p->node->size.h - p->node->y;
 		}
 	}
 
@@ -134,29 +135,29 @@ static int
 dim_alt(struct node *n, struct node **np, int depth, void *opaque)
 {
 	int w = 0, h = -1;
-	struct node *p, **q;
+	struct list *p, **q;
 
 	(void) np;
 	(void) opaque;
 
 	for (q = &n->u.alt; *q != NULL; q = &(**q).next) {
-		if (!node_walk_dim(q, depth + 1, opaque)) {
+		if (!node_walk_dim(&(*q)->node, depth + 1, opaque)) {
 			return 0;
 		}
 	}
 
 	for (p = n->u.alt; p != NULL; p = p->next) {
-		h += 1 + p->size.h;
+		h += 1 + p->node->size.h;
 
-		if (p->size.w > w) {
-			w = p->size.w;
+		if (p->node->size.w > w) {
+			w = p->node->size.w;
 		}
 
 		if (p == n->u.alt) {
-			if (p->type == NODE_SKIP && p->next && !p->next->next) {
-				n->y = 2 + p->y + p->next->y;
+			if (p->node->type == NODE_SKIP && p->next && !p->next->next) {
+				n->y = 2 + p->node->y + p->next->node->y;
 			} else {
-				n->y = p->y;
+				n->y = p->node->y;
 			}
 		}
 	}
@@ -302,7 +303,8 @@ render_seq(struct node *n, struct node **np, int depth, void *opaque)
 {
 	/* ->-item1->-item2 */
 	struct render_context *ctx = opaque;
-	struct node *p;
+	struct list *p;
+	struct node *q;
 	int x = ctx->x, y = ctx->y;
 
 	(void) np;
@@ -310,7 +312,7 @@ render_seq(struct node *n, struct node **np, int depth, void *opaque)
 	ctx->y += n->y;
 	if (!ctx->rtl) {
 		for (p = n->u.seq; p != NULL; p = p->next) {
-			segment(ctx, p, depth + 1, !!p->next);
+			segment(ctx, p->node, depth + 1, !!p->next);
 		}
 	} else {
 		struct stack *rl;
@@ -318,11 +320,11 @@ render_seq(struct node *n, struct node **np, int depth, void *opaque)
 		rl = NULL;
 
 		for (p = n->u.seq; p != NULL; p = p->next) {
-			stack_push(&rl, p);
+			stack_push(&rl, p->node);
 		}
 
-		while (p = stack_pop(&rl), p != NULL) {
-			segment(ctx, p, depth + 1, !!rl);
+		while (q = stack_pop(&rl), q != NULL) {
+			segment(ctx, q, depth + 1, !!rl);
 		}
 	}
 
@@ -358,13 +360,15 @@ static int
 render_alt(struct node *n, struct node **np, int depth, void *opaque)
 {
 	struct render_context *ctx = opaque;
-	struct node *p;
+	struct list *p;
 	int x = ctx->x, y = ctx->y;
 	int line = y + n->y;
-	char *a_in	= (n->y - n->u.alt->y) ? "v" : "^";
-	char *a_out = (n->y - n->u.alt->y) ? "^" : "v";
 
-	ctx->y += n->u.alt->y;
+	/* XXX: suspicious. is n->u.alt->node always present? */
+	char *a_in	= (n->y - n->u.alt->node->y) ? "v" : "^";
+	char *a_out = (n->y - n->u.alt->node->y) ? "^" : "v";
+
+	ctx->y += n->u.alt->node->y;
 
 	(void) np;
 
@@ -379,7 +383,7 @@ render_alt(struct node *n, struct node **np, int depth, void *opaque)
 		}
 
 		ctx->x += 1;
-		justify(ctx, depth + 1, p, n->size.w - 2);
+		justify(ctx, depth + 1, p->node, n->size.w - 2);
 
 		ctx->x = x + n->size.w - 1;
 		if (!ctx->rtl) {
@@ -390,7 +394,7 @@ render_alt(struct node *n, struct node **np, int depth, void *opaque)
 		ctx->y++;
 
 		if (p->next) {
-			for (i = 0; i < p->size.h - p->y + p->next->y; i++) {
+			for (i = 0; i < p->node->size.h - p->node->y + p->next->node->y; i++) {
 				ctx->x = x;
 				bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "|");
 				ctx->x = x + n->size.w - 1;

@@ -14,6 +14,7 @@
 #include "rrd.h"
 #include "pretty.h"
 #include "node.h"
+#include "list.h"
 
 static int
 node_walk(struct node **n, int depth, void *opaque);
@@ -22,21 +23,24 @@ static int
 redundant_alt(struct node *n, struct node **np, int depth, void *opaque)
 {
 	int nc = 0, isopt = 0;
-	struct node **p, **loop = NULL;
+	struct list **p;
+	struct node **loop;
+
+	loop = NULL;
 
 	for (p = &n->u.alt; *p != NULL; p = &(**p).next) {
 		nc++;
 
-		if (!node_walk(p, depth + 1, opaque)) {
+		if (!node_walk(&(*p)->node, depth + 1, opaque)) {
 			return 0;
 		}
 
-		if ((**p).type == NODE_SKIP) {
+		if ((*p)->node->type == NODE_SKIP) {
 			isopt = 1;
 		}
 
-		if ((**p).type == NODE_LOOP) {
-			loop = p;
+		if ((*p)->node->type == NODE_LOOP) {
+			loop = &(*p)->node;
 		}
 	}
 
@@ -62,23 +66,23 @@ redundant_alt(struct node *n, struct node **np, int depth, void *opaque)
 			node_free(n);
 		}
 	} else {
-		struct node **next;
+		struct list **next;
 
 		/* fold nested alts into this one */
 		for (p = &n->u.alt; *p != NULL; p = next) {
-			struct node **head, **tail;
-			struct node *dead;
+			struct list **head, **tail;
+			struct list *dead;
 
 			next = &(*p)->next;
 
-			if ((*p)->type != NODE_ALT) {
+			if ((*p)->node->type != NODE_ALT) {
 				continue;
 			}
 
 			dead = *p;
 
 			/* incoming inner list */
-			head = &(*p)->u.alt;
+			head = &(*p)->node->u.alt;
 
 			for (tail = head; *tail != NULL; tail = &(*tail)->next)
 				;
@@ -91,7 +95,8 @@ redundant_alt(struct node *n, struct node **np, int depth, void *opaque)
 
 			next = p;
 
-			node_free(dead);
+			node_free(dead->node);
+			list_free(&dead);
 		}
 	}
 
@@ -149,7 +154,7 @@ node_walk(struct node **n, int depth, void *opaque)
 	node = *n;
 
 	switch (node->type) {
-		struct node **p;
+		struct list **p;
 
 	case NODE_ALT:
 		return redundant_alt(node, n, depth, opaque);
@@ -159,7 +164,7 @@ node_walk(struct node **n, int depth, void *opaque)
 
 	case NODE_SEQ:
 		for (p = &node->u.seq; *p != NULL; p = &(**p).next) {
-			if (!node_walk(p, depth + 1, opaque)) {
+			if (!node_walk(&(*p)->node, depth + 1, opaque)) {
 				return 0;
 			}
 		}

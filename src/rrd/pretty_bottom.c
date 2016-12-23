@@ -14,6 +14,7 @@
 #include "rrd.h"
 #include "pretty.h"
 #include "node.h"
+#include "list.h"
 
 static int
 node_walk(struct node **n, int depth, void *opaque);
@@ -27,7 +28,7 @@ static int
 bottom_seq(struct node *n, struct node **np, int depth, void *opaque)
 {
 	struct bottom_context *ctx = opaque;
-	struct node **p;
+	struct list **p;
 	int anything = 0;
 
 	(void) np;
@@ -35,7 +36,7 @@ bottom_seq(struct node *n, struct node **np, int depth, void *opaque)
 	for (p = &n->u.seq; *p != NULL; p = &(**p).next) {
 		ctx->applied = 0;
 
-		if (!node_walk(p, depth + 1, ctx)) {
+		if (!node_walk(&(*p)->node, depth + 1, ctx)) {
 			return 0;
 		}
 
@@ -46,7 +47,7 @@ bottom_seq(struct node *n, struct node **np, int depth, void *opaque)
 		ctx->everything = 1;
 
 		for (p = &n->u.seq; *p != NULL; p = &(**p).next) {
-			if (!node_walk(p, depth + 1, ctx)) {
+			if (!node_walk(&(*p)->node, depth + 1, ctx)) {
 				/* XXX: handle? */
 			}
         }
@@ -66,7 +67,7 @@ bottom_loop(struct node *n, struct node **np, int depth, void *opaque)
 
 	do {
 		struct node *alt;
-		struct node *tmp, *skip;
+		struct list *new;
 
 		if (n->u.loop.forward->type != NODE_SKIP) {
 			break;
@@ -82,13 +83,13 @@ bottom_loop(struct node *n, struct node **np, int depth, void *opaque)
 		}
 
 		if (n->u.loop.backward->type == NODE_ALT) {
-			struct node *p;
+			struct list *p;
 			int c;
 
 			c = 0;
 
 			for (p = n->u.loop.backward->u.alt; p != NULL; p = p->next) {
-				if (p->type == NODE_ALT || p->type == NODE_SEQ || p->type == NODE_LOOP) {
+				if (p->node->type == NODE_ALT || p->node->type == NODE_SEQ || p->node->type == NODE_LOOP) {
 					c = 1;
 				}
 			}
@@ -98,19 +99,31 @@ bottom_loop(struct node *n, struct node **np, int depth, void *opaque)
 			}
 		}
 
-		tmp = n->u.loop.backward;
-		n->u.loop.backward = n->u.loop.forward;
-		n->u.loop.forward  = tmp;
+		{
+			struct node *tmp;
+
+			tmp = n->u.loop.backward;
+			n->u.loop.backward = n->u.loop.forward;
+			n->u.loop.forward  = tmp;
+		}
 
 		/* short-circuit */
-		skip = node_create_skip();
-		skip->next = n;
-		alt = node_create_alt(skip);
-		alt->next = n->next;
-		n->next = NULL;
-		*np = alt;
+		{
+			struct list *a;
 
-		if (!node_walk(&skip->next, depth + 1, ctx)) {
+			a = xmalloc(sizeof *a);
+			a->node = n;
+			a->next = NULL;
+
+			new = xmalloc(sizeof *new);
+			new->node = node_create_skip();
+			new->next = a;
+
+			alt = node_create_alt(new);
+			*np = alt;
+		}
+
+		if (!node_walk(&new->next->node, depth + 1, ctx)) {
 			return 0;
 		}
 
@@ -143,7 +156,7 @@ node_walk(struct node **n, int depth, void *opaque)
 	node = *n;
 
 	switch (node->type) {
-		struct node **p;
+		struct list **p;
 
 	case NODE_SEQ:
 		return bottom_seq(node, n, depth, opaque);
@@ -153,7 +166,7 @@ node_walk(struct node **n, int depth, void *opaque)
 
 	case NODE_ALT:
 		for (p = &node->u.alt; *p != NULL; p = &(**p).next) {
-			if (!node_walk(p, depth + 1, opaque)) {
+			if (!node_walk(&(*p)->node, depth + 1, opaque)) {
 				return 0;
 			}
 		}

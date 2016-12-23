@@ -24,8 +24,8 @@ struct node {
 		const char *literal; /* TODO: point to ast_literal instead */
 		const char *name;    /* TODO: point to ast_rule instead */
 
-		struct node *alt;
-		struct node *seq;
+		struct list *alt;
+		struct list *seq;
 
 		struct {
 			struct node *forward;
@@ -37,8 +37,6 @@ struct node {
 
 	int y;
 	struct box_size size;
-
-	struct node *next;
 };
 
 struct node *ast_to_rrd(const struct ast_rule *);

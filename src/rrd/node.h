@@ -18,10 +18,10 @@ struct node *
 node_create_name(const char *name);
 
 struct node *
-node_create_alt(struct node *alt);
+node_create_alt(struct list *alt);
 
 struct node *
-node_create_seq(struct node *seq);
+node_create_seq(struct list *seq);
 
 struct node *
 node_create_loop(struct node *forward, struct node *backward);

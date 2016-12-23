@@ -14,64 +14,83 @@
 
 #include "rrd.h"
 #include "node.h"
+#include "list.h"
 
 static struct node *
 transform_term(const struct ast_term *term);
 
 static struct node *
-transform_alt(const struct ast_alt *alt)
+transform_terms(const struct ast_alt *alt)
 {
-	struct node *list, **tail;
+	struct list *list, **tail;
 	const struct ast_term *p;
 
 	list = NULL;
 	tail = &list;
 
 	for (p = alt->terms; p != NULL; p = p->next) {
+		struct list *new;
+
 		/* TODO: node_append */
-		if (p->type == TYPE_EMPTY) {
-			continue;
+
+		new = xmalloc(sizeof *new);
+		new->next = NULL;
+		new->node = transform_term(p);
+		if (new->node == NULL) {
+			goto error;
 		}
-		*tail = transform_term(p);
-		if (*tail == NULL) {
-			node_free(list);
-			return NULL;
-		}
+
+		*tail = new;
 
 		while (*tail) {
 			tail = &(**tail).next;
 		}
 	}
 
-	if (list == NULL) {
-		return node_create_skip();
-	} else if (list->next == NULL) {
-		return list;
-	} else {
-		return node_create_seq(list);
-	}
+	return node_create_seq(list);
+
+error:
+
+	list_free(&list);
+
+	return NULL;
 }
 
 static struct node *
 transform_alts(const struct ast_alt *alts)
 {
-	struct node *list = NULL, **head = &list;
+	struct list *list, **head;
 	const struct ast_alt *p;
 
+	list = NULL;
+	head = &list;
+
 	for (p = alts; p != NULL; p = p->next) {
-		/* TODO: node_add */
-		*head = transform_alt(p);
-		if (*head == NULL) {
-			node_free(list);
-			return NULL;
+		struct list *new;
+
+		/* TODO: node_prepend */
+
+		new = xmalloc(sizeof *new);
+		new->next = NULL;
+		new->node = transform_terms(p);
+		if (new->node == NULL) {
+			goto error;
 		}
+
+		*head = new;
 
 		while (*head) {
 			head = &(**head).next;
 		}
 	}
 
-	return list;
+	return node_create_alt(list);
+
+error:
+
+	list_free(&list);
+
+	return NULL;
 }
 
 static struct node *
@@ -90,42 +109,32 @@ single_term(const struct ast_term *term)
 	case TYPE_TOKEN:
 		return node_create_name(term->u.token);
 
-	case TYPE_GROUP: {
-		struct node *list;
-		struct node *alts;
-
-		alts = transform_alts(term->u.group);
-		if (alts == NULL) {
-			return NULL;
-		}
-
-		return node_create_alt(alts);
+	case TYPE_GROUP:
+		return transform_alts(term->u.group);
 	}
-
-	default:
-		errno = EINVAL;
-		return NULL;
-	}
-
-	return NULL;
 }
 
 static struct node *
 optional_term(const struct ast_term *term)
 {
-	struct node *skip;
-	struct node *n;
+	struct list *a, *b;
 
-	n = single_term(term);
-	if (n == NULL) {
+	/* TODO: list_concat(), or list_push() twice */
+
+	a = xmalloc(sizeof *a);
+	a->node = single_term(term);
+	if (a->node == NULL) {
+		list_free(&a);
 		return NULL;
 	}
 
-	skip = node_create_skip();
+	b = xmalloc(sizeof *b);
+	b->node = node_create_skip();
 
-	skip->next = n;
+	b->next = NULL;
+	a->next = b;
 
-	return node_create_alt(skip);
+	return node_create_alt(a);
 }
 
 static struct node *
@@ -151,7 +160,6 @@ static struct node *
 zeroormore_term(const struct ast_term *term)
 {
 	struct node *skip;
-	struct node *loop;
 	struct node *n;
 
 	n = single_term(term);
@@ -219,14 +227,8 @@ transform_term(const struct ast_term *term)
 struct node *
 ast_to_rrd(const struct ast_rule *ast)
 {
-	struct node *alt;
-	struct node *n;
+	assert(ast != NULL);
 
-	n = transform_alts(ast->alts);
-	if (n == NULL) {
-		return NULL;
-	}
-
-	return node_create_alt(n);
+	return transform_alts(ast->alts);
 }
 

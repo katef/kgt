@@ -15,6 +15,7 @@
 #include "stack.h"
 #include "pretty.h"
 #include "node.h"
+#include "list.h"
 
 static int
 node_walk(struct node **n, int depth, void *opaque);
@@ -23,6 +24,9 @@ static int
 process_loop_leaf(struct node *loop, struct stack *bp)
 {
 	struct node *a, *b;
+	struct node *tmp;
+
+	assert(loop != NULL);
 
 	if (bp == NULL) {
 		return 0;
@@ -31,23 +35,21 @@ process_loop_leaf(struct node *loop, struct stack *bp)
 	a = loop->u.loop.backward;
 	b = bp->node;
 
-	if (node_compare(a, b)) {
-		struct node *tmp;
-
-		tmp = loop->u.loop.forward;
-		loop->u.loop.forward  = loop->u.loop.backward;
-		loop->u.loop.backward = tmp;
-
-		return 1;
+	if (!node_compare(a, b)) {
+		return 0;
 	}
 
-	return 0;
+	tmp = loop->u.loop.forward;
+	loop->u.loop.forward  = loop->u.loop.backward;
+	loop->u.loop.backward = tmp;
+
+	return 1;
 }
 
 static void
 loop_switch_sides(int suflen, struct node *loop, struct stack **rl)
 {
-	struct node *v, **n;
+	struct list *v, **n;
 	int i;
 
 	if (suflen > 1) {
@@ -60,27 +62,36 @@ loop_switch_sides(int suflen, struct node *loop, struct stack **rl)
 		loop->u.loop.forward = seq;
 
 		for (i = 0; i < suflen; i++) {
-			v = stack_pop(rl);
-			v->next = *n;
-			*n = v;
+			struct list *new;
+
+			new = xmalloc(sizeof *new);
+			new->next = *n;
+			new->node = stack_pop(rl);
+
+			*n = new;
 		}
 	} else {
 		node_free(loop->u.loop.forward);
-		v = stack_pop(rl);
-		v->next = NULL;
-		loop->u.loop.forward = v;
+
+		loop->u.loop.forward = stack_pop(rl);
 	}
 
-	v = stack_pop(rl);
+	v = xmalloc(sizeof *v);
+
+	v->node = stack_pop(rl);
 	if (v != NULL) {
 		v->next = NULL;
 	} else {
 		struct node *skip;
 
+/* XXX: v->next? */
+
 		skip = node_create_skip();
 		/*node_free(loop->u.loop.backward);*/
 		loop->u.loop.backward = skip;
 	}
+
+/* XXX: where does v get output? */
 
 	if (loop->u.loop.backward->type == NODE_ALT || loop->u.loop.backward->type == NODE_SEQ) {
 		node_collapse(&loop->u.loop.backward);
@@ -91,7 +102,7 @@ static int
 process_loop_list(struct node *loop, struct stack *bp)
 {
 	struct node *list;
-	struct node *p;
+	struct list *p;
 	struct stack *rl = NULL, *rp;
 	int suffix = 0;
 
@@ -102,7 +113,7 @@ process_loop_list(struct node *loop, struct stack *bp)
 	}
 
 	for (p = list->u.seq; p != NULL; p = p->next) {
-		stack_push(&rl, p);
+		stack_push(&rl, p->node);
 	}
 
 	/* linkedlistcmp() */
@@ -145,43 +156,53 @@ process_loop(struct node *loop, struct stack *bp)
 static int
 collapse_seq(struct node *n, struct node **np, int depth, void *opaque)
 {
-	struct node *p, **q;
-	struct stack *rl = NULL;
+	struct list *p, **q;
+	struct stack *rl;
+
+	rl = NULL;
 
 	for (p = n->u.seq; p != NULL; p = p->next) {
 		int i, suffix_len;
 
-		if (p->type != NODE_LOOP) {
-			stack_push(&rl, p);
+		if (p->node->type != NODE_LOOP) {
+			stack_push(&rl, p->node);
 			continue;
 		}
 
-		suffix_len = process_loop(p, rl);
+		/* TODO: instead of finding the suffix length and then collapsing,
+		 * i'd rather collapse one node at a time as we go */
+
+		suffix_len = process_loop(p->node, rl);
 
 		/* delete suffix_len things from the list */
 		for (i = 0; i < suffix_len; i++) {
-			struct node *q;
+			struct node *t;
 
-			q = stack_pop(&rl);
-			if (q == NULL) {
+			t = stack_pop(&rl);
+			if (t == NULL) {
 				return 0;
 			}
 
-			q->next = NULL;
-			node_free(q);
+			node_free(t);
 
+/* XXX:
 			if (rl) {
-				rl->node->next = p;
-			} else {
-				n->u.seq = p;
-			}
+				rl->node->next = t;
+??? */
+			struct list *new;
+
+			new = xmalloc(sizeof *new);
+			new->next = NULL;
+			new->node = stack_pop(&rl);
+
+			n->u.seq = new;
 		}
 	}
 
 	stack_free(&rl);
 
 	for (q = &n->u.seq; *q != NULL; q = &(**q).next) {
-		if (!node_walk(q, depth + 1, opaque)) {
+		if (!node_walk(&(*q)->node, depth + 1, opaque)) {
 			return 0;
 		}
 	}
@@ -194,7 +215,6 @@ collapse_seq(struct node *n, struct node **np, int depth, void *opaque)
 static int
 node_walk(struct node **n, int depth, void *opaque)
 {
-	int (*f)(struct node *, struct node **, int, void *);
 	struct node *node;
 
 	assert(n != NULL);
@@ -202,14 +222,14 @@ node_walk(struct node **n, int depth, void *opaque)
 	node = *n;
 
 	switch (node->type) {
-		struct node **p;
+		struct list **p;
 
 	case NODE_SEQ:
 		return collapse_seq(node, n, depth, opaque);
 
 	case NODE_ALT:
 		for (p = &node->u.alt; *p != NULL; p = &(**p).next) {
-			if (!node_walk(p, depth + 1, opaque)) {
+			if (!node_walk(&(*p)->node, depth + 1, opaque)) {
 				return 0;
 			}
 		}
