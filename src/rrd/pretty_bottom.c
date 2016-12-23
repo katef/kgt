@@ -102,7 +102,8 @@ node_walk(struct node **n)
 	case NODE_LOOP:
 		if (bottom_loop(n)) {
 			/* node changed */
-			return node_walk(n);
+			node_walk(n);
+			return;
 		}
 
 		node_walk(&(*n)->u.loop.forward);

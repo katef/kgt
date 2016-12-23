@@ -189,7 +189,7 @@ collapse_seq(struct node *n)
 	stack_free(&rl);
 }
 
-static int
+static void
 node_walk(struct node **n)
 {
 	assert(n != NULL);
