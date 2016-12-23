@@ -33,11 +33,8 @@ print_indent(FILE *f, int n)
 }
 
 static int
-visit_skip(FILE *f, struct node *n, struct node **np, int depth)
+visit_skip(FILE *f, int depth)
 {
-	(void) n;
-	(void) np;
-
 	assert(f != NULL);
 
 	print_indent(f, depth);
@@ -47,11 +44,10 @@ visit_skip(FILE *f, struct node *n, struct node **np, int depth)
 }
 
 static int
-visit_name(FILE *f, struct node *n, struct node **np, int depth)
+visit_name(FILE *f, struct node *n, int depth)
 {
-	(void) np;
-
 	assert(f != NULL);
+	assert(n != NULL);
 
 	print_indent(f, depth);
 	fprintf(f, "NAME: <%s>\n", n->u.name);
@@ -60,10 +56,8 @@ visit_name(FILE *f, struct node *n, struct node **np, int depth)
 }
 
 static int
-visit_literal(FILE *f, struct node *n, struct node **np, int depth)
+visit_literal(FILE *f, struct node *n, int depth)
 {
-	(void) np;
-
 	assert(f != NULL);
 
 	print_indent(f, depth);
@@ -73,11 +67,9 @@ visit_literal(FILE *f, struct node *n, struct node **np, int depth)
 }
 
 static int
-visit_alt(FILE *f, struct node *n, struct node **np, int depth)
+visit_alt(FILE *f, struct node *n, int depth)
 {
 	struct list **p;
-
-	(void) np;
 
 	assert(f != NULL);
 
@@ -95,11 +87,9 @@ visit_alt(FILE *f, struct node *n, struct node **np, int depth)
 }
 
 static int
-visit_seq(FILE *f, struct node *n, struct node **np, int depth)
+visit_seq(FILE *f, struct node *n, int depth)
 {
 	struct list **p;
-
-	(void) np;
 
 	assert(f != NULL);
 
@@ -117,10 +107,8 @@ visit_seq(FILE *f, struct node *n, struct node **np, int depth)
 }
 
 static int
-visit_loop(FILE *f, struct node *n, struct node **np, int depth)
+visit_loop(FILE *f, struct node *n, int depth)
 {
-	(void) np;
-
 	assert(f != NULL);
 
 	print_indent(f, depth);
@@ -147,31 +135,27 @@ visit_loop(FILE *f, struct node *n, struct node **np, int depth)
 static int
 node_walk(FILE *f, struct node **n, int depth)
 {
-	struct node *node;
-
 	assert(f != NULL);
 	assert(n != NULL);
 
-	node = *n;
-
-	switch (node->type) {
+	switch ((*n)->type) {
 	case NODE_SKIP:
-		return visit_skip(f, node, n, depth);
+		return visit_skip(f, depth);
 
 	case NODE_LITERAL:
-		return visit_literal(f, node, n, depth);
+		return visit_literal(f, *n, depth);
 
 	case NODE_RULE:
-		return visit_name(f, node, n, depth);
+		return visit_name(f, *n, depth);
 
 	case NODE_ALT:
-		return visit_alt(f, node, n, depth);
+		return visit_alt(f, *n, depth);
 
 	case NODE_SEQ:
-		return visit_seq(f, node, n, depth);
+		return visit_seq(f, *n, depth);
 
 	case NODE_LOOP:
-		return visit_loop(f, node, n, depth);
+		return visit_loop(f, *n, depth);
 	}
 
 	return 1;
