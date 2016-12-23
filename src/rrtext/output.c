@@ -332,6 +332,7 @@ render_alt(struct node *n, struct render_context *ctx)
 	struct list *p;
 	int x, y;
 	int line;
+	char *a_in, *a_out;
 
 	assert(ctx != NULL);
 
@@ -340,8 +341,8 @@ render_alt(struct node *n, struct render_context *ctx)
 	line = y + n->y;
 
 	/* XXX: suspicious. is n->u.alt->node always present? */
-	char *a_in	= (n->y - n->u.alt->node->y) ? "v" : "^";
-	char *a_out = (n->y - n->u.alt->node->y) ? "^" : "v";
+	a_in  = (n->y - n->u.alt->node->y) ? "v" : "^";
+	a_out = (n->y - n->u.alt->node->y) ? "^" : "v";
 
 	ctx->y += n->u.alt->node->y;
 
