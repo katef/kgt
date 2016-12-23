@@ -18,7 +18,7 @@
 #include "list.h"
 
 static int
-node_walk(struct node **n, int depth, void *opaque);
+node_walk(struct node **n);
 
 static int
 process_loop_leaf(struct node *loop, struct stack *bp)
@@ -92,10 +92,6 @@ loop_switch_sides(int suflen, struct node *loop, struct stack **rl)
 	}
 
 /* XXX: where does v get output? */
-
-	if (loop->u.loop.backward->type == NODE_ALT || loop->u.loop.backward->type == NODE_SEQ) {
-		node_collapse(&loop->u.loop.backward);
-	}
 }
 
 static int
@@ -154,7 +150,7 @@ process_loop(struct node *loop, struct stack *bp)
 }
 
 static int
-collapse_seq(struct node *n, struct node **np, int depth, void *opaque)
+collapse_seq(struct node *n)
 {
 	struct list *p, **q;
 	struct stack *rl;
@@ -202,34 +198,28 @@ collapse_seq(struct node *n, struct node **np, int depth, void *opaque)
 	stack_free(&rl);
 
 	for (q = &n->u.seq; *q != NULL; q = &(**q).next) {
-		if (!node_walk(&(*q)->node, depth + 1, opaque)) {
+		if (!node_walk(&(*q)->node)) {
 			return 0;
 		}
 	}
-
-	node_collapse(np);
 
 	return 1;
 }
 
 static int
-node_walk(struct node **n, int depth, void *opaque)
+node_walk(struct node **n)
 {
-	struct node *node;
-
 	assert(n != NULL);
 
-	node = *n;
-
-	switch (node->type) {
+	switch ((*n)->type) {
 		struct list **p;
 
 	case NODE_SEQ:
-		return collapse_seq(node, n, depth, opaque);
+		return collapse_seq(*n);
 
 	case NODE_ALT:
-		for (p = &node->u.alt; *p != NULL; p = &(**p).next) {
-			if (!node_walk(&(*p)->node, depth + 1, opaque)) {
+		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
+			if (!node_walk(&(*p)->node)) {
 				return 0;
 			}
 		}
@@ -237,11 +227,11 @@ node_walk(struct node **n, int depth, void *opaque)
 		break;
 
 	case NODE_LOOP:
-		if (!node_walk(&node->u.loop.forward, depth + 1, opaque)) {
+		if (!node_walk(&(*n)->u.loop.forward)) {
 			return 0;
 		}
 
-		if (!node_walk(&node->u.loop.backward, depth + 1, opaque)) {
+		if (!node_walk(&(*n)->u.loop.backward)) {
 			return 0;
 		}
 
@@ -269,6 +259,6 @@ node_walk(struct node **n, int depth, void *opaque)
 void
 rrd_pretty_suffixes(struct node **rrd)
 {
-	node_walk(rrd, 0, NULL);
+	node_walk(rrd);
 }
 
