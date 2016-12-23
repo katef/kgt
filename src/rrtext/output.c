@@ -414,11 +414,7 @@ rrtext_output(const struct ast_rule *grammar)
 		}
 
 		if (prettify) {
-			rrd_pretty_prefixes(&rrd);
-			rrd_pretty_suffixes(&rrd);
-			rrd_pretty_redundant(&rrd);
-			rrd_pretty_bottom(&rrd);
-			rrd_pretty_collapse(&rrd);
+			rrd_pretty(&rrd);
 		}
 
 		printf("%s:\n", p->name);

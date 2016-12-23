@@ -11,4 +11,6 @@ void rrd_pretty_bottom(struct node **);
 void rrd_pretty_redundant(struct node **);
 void rrd_pretty_collapse(struct node **);
 
+void rrd_pretty(struct node **rrd);
+
 #endif
