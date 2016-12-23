@@ -77,7 +77,7 @@ bottom_loop(struct node **np)
 	return 1;
 }
 
-static int
+static void
 node_walk(struct node **n)
 {
 	assert(n != NULL);
@@ -87,21 +87,17 @@ node_walk(struct node **n)
 
 	case NODE_ALT:
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			if (!node_walk(&(*p)->node)) {
-				return 0;
-			}
+			node_walk(&(*p)->node);
 		}
 
 		break;
 
 	case NODE_SEQ:
 		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
-			if (!node_walk(&(*p)->node)) {
-				return 0;
-			}
+			node_walk(&(*p)->node);
 		}
 
-		return 1;
+		break;
 
 	case NODE_LOOP:
 		if (bottom_loop(n)) {
@@ -109,23 +105,16 @@ node_walk(struct node **n)
 			return node_walk(n);
 		}
 
-		if (!node_walk(&(*n)->u.loop.forward)) {
-			return 0;
-		}
+		node_walk(&(*n)->u.loop.forward);
+		node_walk(&(*n)->u.loop.backward);
 
-		if (!node_walk(&(*n)->u.loop.backward)) {
-			return 0;
-		}
-
-		return 1;
+		break;
 
 	case NODE_SKIP:
 	case NODE_RULE:
 	case NODE_LITERAL:
 		break;
 	}
-
-	return 1;
 }
 
 /*

@@ -17,9 +17,6 @@
 
 #include "io.h"
 
-static int
-node_walk(FILE *f, struct node **n, int depth);
-
 static void
 print_indent(FILE *f, int n)
 {
@@ -32,133 +29,73 @@ print_indent(FILE *f, int n)
 	}
 }
 
-static int
-visit_skip(FILE *f, int depth)
-{
-	assert(f != NULL);
-
-	print_indent(f, depth);
-	fprintf(f, "SKIP\n");
-
-	return 1;
-}
-
-static int
-visit_name(FILE *f, struct node *n, int depth)
-{
-	assert(f != NULL);
-	assert(n != NULL);
-
-	print_indent(f, depth);
-	fprintf(f, "NAME: <%s>\n", n->u.name);
-
-	return 1;
-}
-
-static int
-visit_literal(FILE *f, struct node *n, int depth)
-{
-	assert(f != NULL);
-
-	print_indent(f, depth);
-	fprintf(f, "LITERAL: \"%s\"\n", n->u.literal);
-
-	return 1;
-}
-
-static int
-visit_alt(FILE *f, struct node *n, int depth)
-{
-	struct list **p;
-
-	assert(f != NULL);
-
-	print_indent(f, depth);
-	fprintf(f, "ALT: [\n");
-	for (p = &n->u.alt; *p != NULL; p = &(**p).next) {
-		if (!node_walk(f, &(*p)->node, depth + 1)) {
-			return 0;
-		}
-	}
-	print_indent(f, depth);
-	fprintf(f, "]\n");
-
-	return 1;
-}
-
-static int
-visit_seq(FILE *f, struct node *n, int depth)
-{
-	struct list **p;
-
-	assert(f != NULL);
-
-	print_indent(f, depth);
-	fprintf(f, "SEQ: [\n");
-	for (p = &n->u.seq; *p != NULL; p = &(**p).next) {
-		if (!node_walk(f, &(*p)->node, depth + 1)) {
-			return 0;
-		}
-	}
-	print_indent(f, depth);
-	fprintf(f, "]\n");
-
-	return 1;
-}
-
-static int
-visit_loop(FILE *f, struct node *n, int depth)
-{
-	assert(f != NULL);
-
-	print_indent(f, depth);
-	fprintf(f, "LOOP:\n");
-	if (n->u.loop.forward->type != NODE_SKIP) {
-		print_indent(f, depth + 1);
-		fprintf(f, ".forward:\n");
-		if (!node_walk(f, &n->u.loop.forward, depth + 2)) {
-			return 0;
-		}
-	}
-
-	if (n->u.loop.backward->type != NODE_SKIP) {
-		print_indent(f, depth + 1);
-		fprintf(f, ".backward:\n");
-		if (!node_walk(f, &n->u.loop.backward, depth + 2)) {
-			return 0;
-		}
-	}
-
-	return 1;
-}
-
-static int
+static void
 node_walk(FILE *f, struct node **n, int depth)
 {
 	assert(f != NULL);
 	assert(n != NULL);
 
 	switch ((*n)->type) {
+		struct list **p;
+
 	case NODE_SKIP:
-		return visit_skip(f, depth);
+		print_indent(f, depth);
+		fprintf(f, "SKIP\n");
+
+		break;
 
 	case NODE_LITERAL:
-		return visit_literal(f, *n, depth);
+		print_indent(f, depth);
+		fprintf(f, "LITERAL: \"%s\"\n", (*n)->u.literal);
+
+		break;
 
 	case NODE_RULE:
-		return visit_name(f, *n, depth);
+		print_indent(f, depth);
+		fprintf(f, "NAME: <%s>\n", (*n)->u.name);
+
+		break;
 
 	case NODE_ALT:
-		return visit_alt(f, *n, depth);
+		print_indent(f, depth);
+		fprintf(f, "ALT: [\n");
+		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
+			node_walk(f, &(*p)->node, depth + 1);
+		}
+		print_indent(f, depth);
+		fprintf(f, "]\n");
+
+		break;
 
 	case NODE_SEQ:
-		return visit_seq(f, *n, depth);
+		print_indent(f, depth);
+		fprintf(f, "SEQ: [\n");
+		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
+			node_walk(f, &(*p)->node, depth + 1);
+		}
+		print_indent(f, depth);
+		fprintf(f, "]\n");
+
+		break;
 
 	case NODE_LOOP:
-		return visit_loop(f, *n, depth);
-	}
+		print_indent(f, depth);
+		fprintf(f, "LOOP:\n");
 
-	return 1;
+		if ((*n)->u.loop.forward->type != NODE_SKIP) {
+			print_indent(f, depth + 1);
+			fprintf(f, ".forward:\n");
+			node_walk(f, &(*n)->u.loop.forward, depth + 2);
+		}
+
+		if ((*n)->u.loop.backward->type != NODE_SKIP) {
+			print_indent(f, depth + 1);
+			fprintf(f, ".backward:\n");
+			node_walk(f, &(*n)->u.loop.backward, depth + 2);
+		}
+
+		break;
+	}
 }
 
 void

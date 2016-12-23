@@ -16,7 +16,7 @@
 #include "node.h"
 #include "list.h"
 
-static int
+static void
 redundant_alt(struct node *n, struct node **np)
 {
 	int nc = 0, isopt = 0;
@@ -92,11 +92,9 @@ redundant_alt(struct node *n, struct node **np)
 			list_free(&dead);
 		}
 	}
-
-	return 1;
 }
 
-static int
+static void
 redundant_loop(struct node *n, struct node **np)
 {
 	struct node **inner = NULL;
@@ -125,11 +123,9 @@ redundant_loop(struct node *n, struct node **np)
 		*inner = NULL;
 		node_free(n);
 	}
-
-	return 1;
 }
 
-static int
+static void
 node_walk(struct node **n)
 {
 	struct node *node;
@@ -143,40 +139,33 @@ node_walk(struct node **n)
 
 	case NODE_ALT:
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			if (!node_walk(&(*p)->node)) {
-				return 0;
-			}
+			node_walk(&(*p)->node);
 		}
 
-		return redundant_alt(node, n);
+		redundant_alt(node, n);
+
+		return;
 
 	case NODE_SEQ:
 		for (p = &node->u.seq; *p != NULL; p = &(**p).next) {
-			if (!node_walk(&(*p)->node)) {
-				return 0;
-			}
+			node_walk(&(*p)->node);
 		}
 
 		break;
 
 	case NODE_LOOP:
-		if (!node_walk(&(*n)->u.loop.forward)) {
-			return 0;
-		}
+		node_walk(&(*n)->u.loop.forward);
+		node_walk(&(*n)->u.loop.backward);
 
-		if (!node_walk(&(*n)->u.loop.backward)) {
-			return 0;
-		}
+		redundant_loop(node, n);
 
-		return redundant_loop(node, n);
+		return;
 
 	case NODE_SKIP:
 	case NODE_RULE:
 	case NODE_LITERAL:
 		break;
 	}
-
-	return 1;
 }
 
 void

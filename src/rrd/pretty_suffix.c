@@ -139,7 +139,7 @@ process_loop(struct node *loop, struct stack *bp)
 	return 0;
 }
 
-static int
+static void
 collapse_seq(struct node *n)
 {
 	struct list *p;
@@ -166,8 +166,9 @@ collapse_seq(struct node *n)
 			struct list *new;
 
 			t = stack_pop(&rl);
+			assert(t != NULL);
 			if (t == NULL) {
-				return 0;
+				return;
 			}
 
 			node_free(t);
@@ -186,8 +187,6 @@ collapse_seq(struct node *n)
 	}
 
 	stack_free(&rl);
-
-	return 1;
 }
 
 static int
@@ -200,34 +199,23 @@ node_walk(struct node **n)
 
 	case NODE_ALT:
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			if (!node_walk(&(*p)->node)) {
-				return 0;
-			}
+			node_walk(&(*p)->node);
 		}
 
 		break;
 
 	case NODE_SEQ:
-		if (!collapse_seq(*n)) {
-			return 0;
-		}
+		collapse_seq(*n);
 
 		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
-			if (!node_walk(&(*p)->node)) {
-				return 0;
-			}
+			node_walk(&(*p)->node);
 		}
 
-		return 1;
+		break;
 
 	case NODE_LOOP:
-		if (!node_walk(&(*n)->u.loop.forward)) {
-			return 0;
-		}
-
-		if (!node_walk(&(*n)->u.loop.backward)) {
-			return 0;
-		}
+		node_walk(&(*n)->u.loop.forward);
+		node_walk(&(*n)->u.loop.backward);
 
 		break;
 
@@ -236,8 +224,6 @@ node_walk(struct node **n)
 	case NODE_LITERAL:
 		break;
 	}
-
-	return 1;
 }
 
 /*

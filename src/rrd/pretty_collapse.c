@@ -25,14 +25,14 @@ node_walk(struct node **n)
 			/* node changed */
 			node_walk(n);
 
-			return;
+			break;
 		}
 
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
 			node_walk(&(*p)->node);
 		}
 
-		return;
+		break;
 
 	case NODE_SEQ:
 		if (list_count((*n)->u.seq) == 1) {
@@ -46,25 +46,25 @@ node_walk(struct node **n)
 			/* node changed */
 			node_walk(n);
 
-			return;
+			break;
 		}
 
 		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
 			node_walk(&(*p)->node);
 		}
 
-		return;
+		break;
 
 	case NODE_LOOP:
 		node_walk(&(*n)->u.loop.forward);
 		node_walk(&(*n)->u.loop.backward);
 
-		return;
+		break;
 
 	case NODE_SKIP:
 	case NODE_RULE:
 	case NODE_LITERAL:
-		return;
+		break;
 	}
 }
 
