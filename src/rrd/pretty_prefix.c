@@ -17,8 +17,8 @@ process_loop(struct node *loop, struct list *next)
 	int suflen;
 	struct list *a, *b, *seq = NULL, **tail = &seq;
 
-	assert(node != NULL);
-	assert(node->type == NODE_LOOP);
+	assert(loop != NULL);
+	assert(loop->type == NODE_LOOP);
 
 	if (next == NULL || loop->u.loop.forward->type != NODE_SKIP) {
 		return 0;
