@@ -10,6 +10,9 @@ struct list {
 	struct list *next;
 };
 
+void
+list_push(struct list **list, struct node *node);
+
 struct node *
 list_pop(struct list **list);
 
