@@ -33,3 +33,18 @@ list_free(struct list **list)
 	}
 }
 
+unsigned
+list_count(const struct list *list)
+{
+	const struct list *p;
+	unsigned n;
+
+	n = 0;
+
+	for (p = list; p != NULL; p = p->next) {
+		n++;
+	}
+
+	return n;
+}
+

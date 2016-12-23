@@ -16,8 +16,7 @@ node_walk(struct node **n)
 
 	switch (node->type) {
 	case NODE_ALT:
-		/* TODO: list_count() */
-		if (node->u.alt == NULL || node->u.alt->next != NULL) {
+		if (list_count(node->u.alt) != 1) {
 			return;
 		}
 
@@ -27,7 +26,7 @@ node_walk(struct node **n)
 		break;
 
 	case NODE_SEQ:
-		if (node->u.seq == NULL || node->u.seq->next != NULL) {
+		if (list_count(node->u.seq) != 1) {
 			return;
 		}
 

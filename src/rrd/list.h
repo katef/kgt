@@ -16,4 +16,7 @@ list_pop(struct list **list);
 void
 list_free(struct list **list);
 
+unsigned
+list_count(const struct list *list);
+
 #endif
