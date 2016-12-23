@@ -27,9 +27,6 @@
 
 #include "io.h"
 
-static int node_walk_dim(struct node **n);
-static int node_walk_render(struct node **n, void *opaque);
-
 struct render_context {
 	struct box_size size;
 	char **lines;
@@ -37,6 +34,9 @@ struct render_context {
 	int rtl;
 	int x, y;
 };
+
+static int node_walk_dim(struct node **n);
+static int node_walk_render(struct node **n, struct render_context *ctx);
 
 static int
 bprintf(char *scratch, char *p, const char *fmt, ...)
@@ -232,9 +232,9 @@ node_walk_dim(struct node **n)
 
 
 static int
-render_literal(struct node *n, void *opaque)
+render_literal(struct node *n, struct render_context *ctx)
 {
-	struct render_context *ctx = opaque;
+	assert(ctx != NULL);
 
 	bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, " \"%s\" ", n->u.literal);
 
@@ -242,9 +242,9 @@ render_literal(struct node *n, void *opaque)
 }
 
 static int
-render_name(struct node *n, void *opaque)
+render_name(struct node *n, struct render_context *ctx)
 {
-	struct render_context *ctx = opaque;
+	assert(ctx != NULL);
 
 	bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, " %s ", n->u.name);
 
@@ -267,13 +267,17 @@ segment(struct render_context *ctx, struct node *n, int delim)
 }
 
 static int
-render_seq(struct node *n, void *opaque)
+render_seq(struct node *n, struct render_context *ctx)
 {
 	/* ->-item1->-item2 */
-	struct render_context *ctx = opaque;
 	struct list *p;
 	struct node *q;
-	int x = ctx->x, y = ctx->y;
+	int x, y;
+
+	assert(ctx != NULL);
+
+	x = ctx->x;
+	y = ctx->y;
 
 	ctx->y += n->y;
 	if (!ctx->rtl) {
@@ -323,12 +327,17 @@ justify(struct render_context *ctx, struct node *n, int space)
 }
 
 static int
-render_alt(struct node *n, void *opaque)
+render_alt(struct node *n, struct render_context *ctx)
 {
-	struct render_context *ctx = opaque;
 	struct list *p;
-	int x = ctx->x, y = ctx->y;
-	int line = y + n->y;
+	int x, y;
+	int line;
+
+	assert(ctx != NULL);
+
+	x = ctx->x;
+	y = ctx->y;
+	line = y + n->y;
 
 	/* XXX: suspicious. is n->u.alt->node always present? */
 	char *a_in	= (n->y - n->u.alt->node->y) ? "v" : "^";
@@ -375,9 +384,8 @@ render_alt(struct node *n, void *opaque)
 }
 
 static int
-render_loop(struct node *n, void *opaque)
+render_loop(struct node *n, struct render_context *ctx)
 {
-	struct render_context *ctx = opaque;
 	int x = ctx->x, y = ctx->y;
 	int i, cw;
 
@@ -432,25 +440,25 @@ render_loop(struct node *n, void *opaque)
 }
 
 static int
-node_walk_render(struct node **n, void *opaque)
+node_walk_render(struct node **n, struct render_context *ctx)
 {
 	assert(n != NULL);
 
 	switch ((*n)->type) {
 	case NODE_LITERAL:
-		return render_literal(*n, opaque);
+		return render_literal(*n, ctx);
 
 	case NODE_RULE:
-		return render_name(*n, opaque);
+		return render_name(*n, ctx);
 
 	case NODE_ALT:
-		return render_alt(*n, opaque);
+		return render_alt(*n, ctx);
 
 	case NODE_SEQ:
-		return render_seq(*n, opaque);
+		return render_seq(*n, ctx);
 
 	case NODE_LOOP:
-		return render_loop(*n, opaque);
+		return render_loop(*n, ctx);
 
 	case NODE_SKIP:
 		break;

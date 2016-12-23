@@ -18,12 +18,14 @@
 #include "io.h"
 
 static int
-node_walk(struct node **n, int depth, void *opaque);
+node_walk(FILE *f, struct node **n, int depth);
 
 static void
 print_indent(FILE *f, int n)
 {
 	int i;
+
+	assert(f != NULL);
 
 	for (i = 0; i < n; i++) {
 		fprintf(f, "    ");
@@ -31,12 +33,12 @@ print_indent(FILE *f, int n)
 }
 
 static int
-visit_skip(struct node *n, struct node **np, int depth, void *opaque)
+visit_skip(FILE *f, struct node *n, struct node **np, int depth)
 {
-	FILE *f = opaque;
-
 	(void) n;
 	(void) np;
+
+	assert(f != NULL);
 
 	print_indent(f, depth);
 	fprintf(f, "SKIP\n");
@@ -45,11 +47,11 @@ visit_skip(struct node *n, struct node **np, int depth, void *opaque)
 }
 
 static int
-visit_name(struct node *n, struct node **np, int depth, void *opaque)
+visit_name(FILE *f, struct node *n, struct node **np, int depth)
 {
-	FILE *f = opaque;
-
 	(void) np;
+
+	assert(f != NULL);
 
 	print_indent(f, depth);
 	fprintf(f, "NAME: <%s>\n", n->u.name);
@@ -58,11 +60,11 @@ visit_name(struct node *n, struct node **np, int depth, void *opaque)
 }
 
 static int
-visit_literal(struct node *n, struct node **np, int depth, void *opaque)
+visit_literal(FILE *f, struct node *n, struct node **np, int depth)
 {
-	FILE *f = opaque;
-
 	(void) np;
+
+	assert(f != NULL);
 
 	print_indent(f, depth);
 	fprintf(f, "LITERAL: \"%s\"\n", n->u.literal);
@@ -71,17 +73,18 @@ visit_literal(struct node *n, struct node **np, int depth, void *opaque)
 }
 
 static int
-visit_alt(struct node *n, struct node **np, int depth, void *opaque)
+visit_alt(FILE *f, struct node *n, struct node **np, int depth)
 {
 	struct list **p;
-	FILE *f = opaque;
 
 	(void) np;
+
+	assert(f != NULL);
 
 	print_indent(f, depth);
 	fprintf(f, "ALT: [\n");
 	for (p = &n->u.alt; *p != NULL; p = &(**p).next) {
-		if (!node_walk(&(*p)->node, depth + 1, f)) {
+		if (!node_walk(f, &(*p)->node, depth + 1)) {
 			return 0;
 		}
 	}
@@ -92,17 +95,18 @@ visit_alt(struct node *n, struct node **np, int depth, void *opaque)
 }
 
 static int
-visit_seq(struct node *n, struct node **np, int depth, void *opaque)
+visit_seq(FILE *f, struct node *n, struct node **np, int depth)
 {
 	struct list **p;
-	FILE *f = opaque;
 
 	(void) np;
+
+	assert(f != NULL);
 
 	print_indent(f, depth);
 	fprintf(f, "SEQ: [\n");
 	for (p = &n->u.seq; *p != NULL; p = &(**p).next) {
-		if (!node_walk(&(*p)->node, depth + 1, f)) {
+		if (!node_walk(f, &(*p)->node, depth + 1)) {
 			return 0;
 		}
 	}
@@ -113,18 +117,18 @@ visit_seq(struct node *n, struct node **np, int depth, void *opaque)
 }
 
 static int
-visit_loop(struct node *n, struct node **np, int depth, void *opaque)
+visit_loop(FILE *f, struct node *n, struct node **np, int depth)
 {
-	FILE *f = opaque;
-
 	(void) np;
+
+	assert(f != NULL);
 
 	print_indent(f, depth);
 	fprintf(f, "LOOP:\n");
 	if (n->u.loop.forward->type != NODE_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".forward:\n");
-		if (!node_walk(&n->u.loop.forward, depth + 2, f)) {
+		if (!node_walk(f, &n->u.loop.forward, depth + 2)) {
 			return 0;
 		}
 	}
@@ -132,7 +136,7 @@ visit_loop(struct node *n, struct node **np, int depth, void *opaque)
 	if (n->u.loop.backward->type != NODE_SKIP) {
 		print_indent(f, depth + 1);
 		fprintf(f, ".backward:\n");
-		if (!node_walk(&n->u.loop.backward, depth + 2, f)) {
+		if (!node_walk(f, &n->u.loop.backward, depth + 2)) {
 			return 0;
 		}
 	}
@@ -141,32 +145,33 @@ visit_loop(struct node *n, struct node **np, int depth, void *opaque)
 }
 
 static int
-node_walk(struct node **n, int depth, void *opaque)
+node_walk(FILE *f, struct node **n, int depth)
 {
 	struct node *node;
 
+	assert(f != NULL);
 	assert(n != NULL);
 
 	node = *n;
 
 	switch (node->type) {
 	case NODE_SKIP:
-		return visit_skip(node, n, depth, opaque);
+		return visit_skip(f, node, n, depth);
 
 	case NODE_LITERAL:
-		return visit_literal(node, n, depth, opaque);
+		return visit_literal(f, node, n, depth);
 
 	case NODE_RULE:
-		return visit_name(node, n, depth, opaque);
+		return visit_name(f, node, n, depth);
 
 	case NODE_ALT:
-		return visit_alt(node, n, depth, opaque);
+		return visit_alt(f, node, n, depth);
 
 	case NODE_SEQ:
-		return visit_seq(node, n, depth, opaque);
+		return visit_seq(f, node, n, depth);
 
 	case NODE_LOOP:
-		return visit_loop(node, n, depth, opaque);
+		return visit_loop(f, node, n, depth);
 	}
 
 	return 1;
@@ -188,11 +193,11 @@ rrdump_output(const struct ast_rule *grammar)
 
 		if (!prettify) {
 			printf("%s:\n", p->name);
-			node_walk(&rrd, 1, stdout);
+			node_walk(stdout, &rrd, 1);
 			printf("\n");
 		} else {
 			printf("%s: (before prettify)\n", p->name);
-			node_walk(&rrd, 1, stdout);
+			node_walk(stdout, &rrd, 1);
 			printf("\n");
 
 			rrd_pretty_prefixes(&rrd);
@@ -202,7 +207,7 @@ rrdump_output(const struct ast_rule *grammar)
 			rrd_pretty_collapse(&rrd);
 
 			printf("%s: (after prettify)\n", p->name);
-			node_walk(&rrd, 1, stdout);
+			node_walk(stdout, &rrd, 1);
 			printf("\n");
 		}
 

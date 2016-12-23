@@ -14,20 +14,22 @@
 #include "node.h"
 #include "list.h"
 
-static int
-node_walk(struct node **n, void *opaque);
-
 struct bottom_context {
 	int applied;
 	int everything;
 };
 
 static int
-bottom_seq(struct node *n, void *opaque)
+node_walk(struct node **n, struct bottom_context *ctx);
+
+static int
+bottom_seq(struct node *n, struct bottom_context *ctx)
 {
-	struct bottom_context *ctx = opaque;
 	struct list **p;
 	int anything = 0;
+
+	assert(n != NULL);
+	assert(ctx != NULL);
 
 	for (p = &n->u.seq; *p != NULL; p = &(**p).next) {
 		ctx->applied = 0;
@@ -55,11 +57,15 @@ bottom_seq(struct node *n, void *opaque)
 }
 
 static int
-bottom_loop(struct node **np, void *opaque)
+bottom_loop(struct node **np, struct bottom_context *ctx)
 {
 	struct node *n = *np;
-	struct bottom_context *ctx = opaque;
-	int everything = ctx->everything;
+	int everything;
+
+	assert(n != NULL);
+	assert(ctx != NULL);
+
+	everything = ctx->everything;
 	ctx->everything = 0;
 
 	do {
@@ -139,22 +145,23 @@ bottom_loop(struct node **np, void *opaque)
 }
 
 static int
-node_walk(struct node **n, void *opaque)
+node_walk(struct node **n, struct bottom_context *ctx)
 {
 	assert(n != NULL);
+	assert(ctx != NULL);
 
 	switch ((*n)->type) {
 		struct list **p;
 
 	case NODE_SEQ:
-		return bottom_seq(*n, opaque);
+		return bottom_seq(*n, ctx);
 
 	case NODE_LOOP:
-		return bottom_loop(n, opaque);
+		return bottom_loop(n, ctx);
 
 	case NODE_ALT:
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			if (!node_walk(&(*p)->node, opaque)) {
+			if (!node_walk(&(*p)->node, ctx)) {
 				return 0;
 			}
 		}
