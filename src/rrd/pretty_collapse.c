@@ -10,38 +10,60 @@
 static void
 node_walk(struct node **n)
 {
-	struct node *node;
+	switch ((*n)->type) {
+		struct list **p;
 
-	node = *n;
-
-	switch (node->type) {
 	case NODE_ALT:
-		if (list_count(node->u.alt) != 1) {
+		if (list_count((*n)->u.alt) == 1) {
+			struct node *dead;
+
+			dead = *n;
+			*n = (*n)->u.alt->node;
+			dead->u.alt = NULL;
+			node_free(dead);
+
+			node_walk(n);
+
 			return;
 		}
 
-		*n = node->u.alt->node;
-		node->u.alt = NULL;
+		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
+			node_walk(&(*p)->node);
+		}
 
-		break;
+		return;
 
 	case NODE_SEQ:
-		if (list_count(node->u.seq) != 1) {
+		if (list_count((*n)->u.seq) == 1) {
+			struct node *dead;
+
+			dead = *n;
+			*n = (*n)->u.seq->node;
+			dead->u.seq = NULL;
+			node_free(dead);
+
+			node_walk(n);
+
 			return;
 		}
 
-		*n = node->u.seq->node;
-		node->u.seq = NULL;
+		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
+			node_walk(&(*p)->node);
+		}
 
-		break;
+		return;
 
-	default:
+	case NODE_LOOP:
+		node_walk(&(*n)->u.loop.forward);
+		node_walk(&(*n)->u.loop.backward);
+
+		return;
+
+	case NODE_SKIP:
+	case NODE_RULE:
+	case NODE_LITERAL:
 		return;
 	}
-
-	node_free(node);
-
-	node_walk(n);
 }
 
 void
