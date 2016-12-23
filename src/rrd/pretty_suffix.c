@@ -18,9 +18,6 @@
 #include "list.h"
 
 static int
-node_walk(struct node **n);
-
-static int
 process_loop_leaf(struct node *loop, struct stack *bp)
 {
 	struct node *a, *b;
@@ -145,7 +142,7 @@ process_loop(struct node *loop, struct stack *bp)
 static int
 collapse_seq(struct node *n)
 {
-	struct list *p, **q;
+	struct list *p;
 	struct stack *rl;
 
 	rl = NULL;
@@ -166,6 +163,7 @@ collapse_seq(struct node *n)
 		/* delete suffix_len things from the list */
 		for (i = 0; i < suffix_len; i++) {
 			struct node *t;
+			struct list *new;
 
 			t = stack_pop(&rl);
 			if (t == NULL) {
@@ -178,7 +176,6 @@ collapse_seq(struct node *n)
 			if (rl) {
 				rl->node->next = t;
 ??? */
-			struct list *new;
 
 			new = NULL;
 
@@ -189,12 +186,6 @@ collapse_seq(struct node *n)
 	}
 
 	stack_free(&rl);
-
-	for (q = &n->u.seq; *q != NULL; q = &(**q).next) {
-		if (!node_walk(&(*q)->node)) {
-			return 0;
-		}
-	}
 
 	return 1;
 }
@@ -207,9 +198,6 @@ node_walk(struct node **n)
 	switch ((*n)->type) {
 		struct list **p;
 
-	case NODE_SEQ:
-		return collapse_seq(*n);
-
 	case NODE_ALT:
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
 			if (!node_walk(&(*p)->node)) {
@@ -218,6 +206,19 @@ node_walk(struct node **n)
 		}
 
 		break;
+
+	case NODE_SEQ:
+		if (!collapse_seq(*n)) {
+			return 0;
+		}
+
+		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
+			if (!node_walk(&(*p)->node)) {
+				return 0;
+			}
+		}
+
+		return 1;
 
 	case NODE_LOOP:
 		if (!node_walk(&(*n)->u.loop.forward)) {

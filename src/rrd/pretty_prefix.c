@@ -9,9 +9,6 @@
 #include "list.h"
 
 static int
-node_walk(struct node **n);
-
-static int
 process_loop(struct node *loop, struct list *next)
 {
 	int suflen;
@@ -59,10 +56,10 @@ process_loop(struct node *loop, struct list *next)
 	return suflen;
 }
 
-static int
+static void
 collapse_seq(struct node *n)
 {
-	struct list *p, **q;
+	struct list *p;
 
 	for (p = n->u.seq; p != NULL; p = p->next) {
 		int i, suffix_len;
@@ -84,14 +81,6 @@ collapse_seq(struct node *n)
 			list_free(&t);
 		}
 	}
-
-	for (q = &n->u.seq; *q != NULL; q = &(**q).next) {
-		if (!node_walk(&(*q)->node)) {
-			return 0;
-		}
-	}
-
-	return 1;
 }
 
 static int
@@ -102,11 +91,19 @@ node_walk(struct node **n)
 	switch ((*n)->type) {
 		struct list **p;
 
-	case NODE_SEQ:
-		return collapse_seq(*n);
-
 	case NODE_ALT:
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
+			if (!node_walk(&(*p)->node)) {
+				return 0;
+			}
+		}
+
+		break;
+
+	case NODE_SEQ:
+		collapse_seq(*n);
+
+		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
 			if (!node_walk(&(*p)->node)) {
 				return 0;
 			}

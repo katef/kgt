@@ -22,6 +22,7 @@ node_walk(struct node **n)
 			dead->u.alt = NULL;
 			node_free(dead);
 
+			/* node changed */
 			node_walk(n);
 
 			return;
@@ -42,6 +43,7 @@ node_walk(struct node **n)
 			dead->u.seq = NULL;
 			node_free(dead);
 
+			/* node changed */
 			node_walk(n);
 
 			return;

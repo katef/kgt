@@ -17,9 +17,6 @@
 #include "list.h"
 
 static int
-node_walk(struct node **n);
-
-static int
 redundant_alt(struct node *n, struct node **np)
 {
 	int nc = 0, isopt = 0;
@@ -30,10 +27,6 @@ redundant_alt(struct node *n, struct node **np)
 
 	for (p = &n->u.alt; *p != NULL; p = &(**p).next) {
 		nc++;
-
-		if (!node_walk(&(*p)->node)) {
-			return 0;
-		}
 
 		if ((*p)->node->type == NODE_SKIP) {
 			isopt = 1;
@@ -109,14 +102,6 @@ redundant_loop(struct node *n, struct node **np)
 	struct node **inner = NULL;
 	struct node *loop;
 
-	if (!node_walk(&n->u.loop.forward)) {
-		return 0;
-	}
-
-	if (!node_walk(&n->u.loop.backward)) {
-		return 0;
-	}
-
 	if (n->u.loop.forward->type == NODE_LOOP && n->u.loop.backward->type == NODE_SKIP) {
 		loop = n->u.loop.forward;
 		if (loop->u.loop.forward->type == NODE_SKIP || loop->u.loop.backward->type == NODE_SKIP) {
@@ -157,10 +142,13 @@ node_walk(struct node **n)
 		struct list **p;
 
 	case NODE_ALT:
-		return redundant_alt(node, n);
+		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
+			if (!node_walk(&(*p)->node)) {
+				return 0;
+			}
+		}
 
-	case NODE_LOOP:
-		return redundant_loop(node, n);
+		return redundant_alt(node, n);
 
 	case NODE_SEQ:
 		for (p = &node->u.seq; *p != NULL; p = &(**p).next) {
@@ -170,6 +158,17 @@ node_walk(struct node **n)
 		}
 
 		break;
+
+	case NODE_LOOP:
+		if (!node_walk(&(*n)->u.loop.forward)) {
+			return 0;
+		}
+
+		if (!node_walk(&(*n)->u.loop.backward)) {
+			return 0;
+		}
+
+		return redundant_loop(node, n);
 
 	case NODE_SKIP:
 	case NODE_RULE:
