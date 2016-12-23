@@ -14,61 +14,36 @@
 #include "node.h"
 #include "list.h"
 
-struct bottom_context {
-	int applied;
-	int everything;
-};
+static int
+node_walk(struct node **n);
 
 static int
-node_walk(struct node **n, struct bottom_context *ctx);
-
-static int
-bottom_seq(struct node *n, struct bottom_context *ctx)
+bottom_seq(struct node *n)
 {
 	struct list **p;
-	int anything = 0;
 
 	assert(n != NULL);
-	assert(ctx != NULL);
 
 	for (p = &n->u.seq; *p != NULL; p = &(**p).next) {
-		ctx->applied = 0;
-
-		if (!node_walk(&(*p)->node, ctx)) {
+		if (!node_walk(&(*p)->node)) {
 			return 0;
 		}
-
-		anything = anything || ctx->applied;
-	}
-
-	if (0 && anything) {
-		ctx->everything = 1;
-
-		for (p = &n->u.seq; *p != NULL; p = &(**p).next) {
-			if (!node_walk(&(*p)->node, ctx)) {
-				/* XXX: handle? */
-			}
-        }
-
-		ctx->everything = 0;
 	}
 
 	return 1;
 }
 
 static int
-bottom_loop(struct node **np, struct bottom_context *ctx)
+bottom_loop(struct node **np)
 {
 	struct node *n = *np;
 	int everything;
 
 	assert(n != NULL);
-	assert(ctx != NULL);
-
-	everything = ctx->everything;
-	ctx->everything = 0;
 
 	do {
+		struct list *new;
+
 		if (n->u.loop.forward->type != NODE_SKIP) {
 			break;
 		}
@@ -78,7 +53,7 @@ bottom_loop(struct node **np, struct bottom_context *ctx)
 			break;
 		}
 
-		if (!everything && (n->u.loop.backward->type == NODE_LITERAL || n->u.loop.backward->type == NODE_RULE)) {
+		if (n->u.loop.backward->type == NODE_LITERAL || n->u.loop.backward->type == NODE_RULE) {
 			break;
 		}
 
@@ -119,43 +94,37 @@ bottom_loop(struct node **np, struct bottom_context *ctx)
 			*np = node_create_alt(new);
 		}
 
-		ctx->applied = 1;
-		ctx->everything = everything;
 		return 1;
 	} while (0);
 
-	if (!node_walk(&n->u.loop.forward, ctx)) {
+	if (!node_walk(&n->u.loop.forward)) {
 		return 0;
 	}
 
-	if (!node_walk(&n->u.loop.backward, ctx)) {
+	if (!node_walk(&n->u.loop.backward)) {
 		return 0;
 	}
-
-	ctx->applied = 0;
-	ctx->everything = everything;
 
 	return 1;
 }
 
 static int
-node_walk(struct node **n, struct bottom_context *ctx)
+node_walk(struct node **n)
 {
 	assert(n != NULL);
-	assert(ctx != NULL);
 
 	switch ((*n)->type) {
 		struct list **p;
 
 	case NODE_SEQ:
-		return bottom_seq(*n, ctx);
+		return bottom_seq(*n);
 
 	case NODE_LOOP:
-		return bottom_loop(n, ctx);
+		return bottom_loop(n);
 
 	case NODE_ALT:
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			if (!node_walk(&(*p)->node, ctx)) {
+			if (!node_walk(&(*p)->node)) {
 				return 0;
 			}
 		}
@@ -180,7 +149,6 @@ node_walk(struct node **n, struct bottom_context *ctx)
 void
 rrd_pretty_bottom(struct node **rrd)
 {
-	struct bottom_context ctx = { 0, 0 };
-	node_walk(rrd, &ctx);
+	node_walk(rrd);
 }
 
