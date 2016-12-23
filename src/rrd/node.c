@@ -13,7 +13,7 @@
 void
 node_free(struct node *n)
 {
-	struct list *p, *next;
+	struct list *p;
 
 	switch (n->type) {
 	case NODE_SKIP:
@@ -22,21 +22,17 @@ node_free(struct node *n)
 		break;
 
 	case NODE_ALT:
-		for (p = n->u.alt; p != NULL; p = next) {
-			next = p->next;
-
+		for (p = n->u.alt; p != NULL; p = p->next) {
 			node_free(p->node);
-			free(p);
 		}
+		list_free(&n->u.alt);
 		break;
 
 	case NODE_SEQ:
-		for (p = n->u.seq; p != NULL; p = next) {
-			next = p->next;
-
+		for (p = n->u.seq; p != NULL; p = p->next) {
 			node_free(p->node);
-			free(p);
 		}
+		list_free(&n->u.seq);
 		break;
 
 	case NODE_LOOP:
