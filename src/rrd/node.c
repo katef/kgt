@@ -41,7 +41,7 @@ node_free(struct node *n)
 		break;
 	}
 
-	free(p);
+	free(n);
 }
 
 struct node *
