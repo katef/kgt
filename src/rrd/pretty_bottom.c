@@ -9,8 +9,6 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "../xalloc.h"
-
 #include "rrd.h"
 #include "pretty.h"
 #include "node.h"
@@ -65,7 +63,6 @@ bottom_loop(struct node **np, void *opaque)
 	ctx->everything = 0;
 
 	do {
-		struct node *alt;
 		struct list *new;
 
 		if (n->u.loop.forward->type != NODE_SKIP) {
@@ -108,18 +105,14 @@ bottom_loop(struct node **np, void *opaque)
 
 		/* short-circuit */
 		{
-			struct list *a;
+			struct list *new;
 
-			a = xmalloc(sizeof *a);
-			a->node = n;
-			a->next = NULL;
+			new  = NULL;
 
-			new = xmalloc(sizeof *new);
-			new->node = node_create_skip();
-			new->next = a;
+			list_push(&new, n);
+			list_push(&new, node_create_skip());
 
-			alt = node_create_alt(new);
-			*np = alt;
+			*np = node_create_alt(new);
 		}
 
 		if (!node_walk(&new->next->node, ctx)) {

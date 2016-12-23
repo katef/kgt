@@ -3,7 +3,24 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "../xalloc.h"
+
 #include "list.h"
+
+void
+list_push(struct list **list, struct node *node)
+{
+	struct list *new;
+
+	assert(list != NULL);
+	assert(node != NULL);
+
+	new = xmalloc(sizeof *new);
+	new->node = node;
+	new->next = *list;
+
+	*list = new;
+}
 
 struct node *
 list_pop(struct list **list)

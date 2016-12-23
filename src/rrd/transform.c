@@ -29,22 +29,15 @@ transform_terms(const struct ast_alt *alt)
 	tail = &list;
 
 	for (p = alt->terms; p != NULL; p = p->next) {
-		struct list *new;
+		struct node *node;
 
-		/* TODO: node_append */
-
-		new = xmalloc(sizeof *new);
-		new->next = NULL;
-		new->node = transform_term(p);
-		if (new->node == NULL) {
+		node = transform_term(p);
+		if (node == NULL) {
 			goto error;
 		}
 
-		*tail = new;
-
-		while (*tail) {
-			tail = &(**tail).next;
-		}
+		list_push(tail, node);
+		tail = &(*tail)->next;
 	}
 
 	return node_create_seq(list);
@@ -59,29 +52,22 @@ error:
 static struct node *
 transform_alts(const struct ast_alt *alts)
 {
-	struct list *list, **head;
+	struct list *list, **tail;
 	const struct ast_alt *p;
 
 	list = NULL;
-	head = &list;
+	tail = &list;
 
 	for (p = alts; p != NULL; p = p->next) {
-		struct list *new;
+		struct node *node;
 
-		/* TODO: node_prepend */
-
-		new = xmalloc(sizeof *new);
-		new->next = NULL;
-		new->node = transform_terms(p);
-		if (new->node == NULL) {
+		node = transform_terms(p);
+		if (node == NULL) {
 			goto error;
 		}
 
-		*head = new;
-
-		while (*head) {
-			head = &(**head).next;
-		}
+		list_push(&list, node);
+		tail = &(*tail)->next;
 	}
 
 	return node_create_alt(list);
@@ -117,24 +103,22 @@ single_term(const struct ast_term *term)
 static struct node *
 optional_term(const struct ast_term *term)
 {
-	struct list *a, *b;
+	struct node *skip, *n;
+	struct list *list;
 
-	/* TODO: list_concat(), or list_push() twice */
-
-	a = xmalloc(sizeof *a);
-	a->node = single_term(term);
-	if (a->node == NULL) {
-		list_free(&a);
+	n = single_term(term);
+	if (n == NULL) {
 		return NULL;
 	}
 
-	b = xmalloc(sizeof *b);
-	b->node = node_create_skip();
+	skip = node_create_skip();
 
-	b->next = NULL;
-	a->next = b;
+	list = NULL;
 
-	return node_create_alt(a);
+	list_push(&list, n);
+	list_push(&list, skip);
+
+	return node_create_alt(list);
 }
 
 static struct node *

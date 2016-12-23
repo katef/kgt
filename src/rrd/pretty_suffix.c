@@ -49,27 +49,20 @@ process_loop_leaf(struct node *loop, struct stack *bp)
 static void
 loop_switch_sides(int suflen, struct node *loop, struct stack **rl)
 {
-	struct list *v, **n;
+	struct list *v;
 	int i;
 
 	if (suflen > 1) {
-		struct node *seq;
+		struct list *list;
 
-		seq = node_create_seq(NULL);
-
-		n = &seq->u.seq;
-		node_free(loop->u.loop.forward);
-		loop->u.loop.forward = seq;
+		list = NULL;
 
 		for (i = 0; i < suflen; i++) {
-			struct list *new;
-
-			new = xmalloc(sizeof *new);
-			new->next = *n;
-			new->node = stack_pop(rl);
-
-			*n = new;
+			list_push(&list, stack_pop(rl));
 		}
+
+		node_free(loop->u.loop.forward);
+		loop->u.loop.forward = node_create_seq(list);
 	} else {
 		node_free(loop->u.loop.forward);
 
@@ -187,9 +180,9 @@ collapse_seq(struct node *n)
 ??? */
 			struct list *new;
 
-			new = xmalloc(sizeof *new);
-			new->next = NULL;
-			new->node = stack_pop(&rl);
+			new = NULL;
+
+			list_push(&new, stack_pop(&rl));
 
 			n->u.seq = new;
 		}
