@@ -69,8 +69,6 @@ bottom_loop(struct node **np, struct bottom_context *ctx)
 	ctx->everything = 0;
 
 	do {
-		struct list *new;
-
 		if (n->u.loop.forward->type != NODE_SKIP) {
 			break;
 		}
@@ -119,10 +117,6 @@ bottom_loop(struct node **np, struct bottom_context *ctx)
 			list_push(&new, node_create_skip());
 
 			*np = node_create_alt(new);
-		}
-
-		if (!node_walk(&new->next->node, ctx)) {
-			return 0;
 		}
 
 		ctx->applied = 1;
