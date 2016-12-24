@@ -74,7 +74,7 @@ bottom_loop(struct node **np)
 }
 
 static void
-node_walk(struct node **n)
+node_walk(int *changed, struct node **n)
 {
 	assert(n != NULL);
 
@@ -83,27 +83,27 @@ node_walk(struct node **n)
 
 	case NODE_ALT:
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			node_walk(&(*p)->node);
+			node_walk(changed, &(*p)->node);
 		}
 
 		break;
 
 	case NODE_SEQ:
 		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
-			node_walk(&(*p)->node);
+			node_walk(changed, &(*p)->node);
 		}
 
 		break;
 
 	case NODE_LOOP:
 		if (bottom_loop(n)) {
-			/* node changed */
-			node_walk(n);
+			*changed = 1;
+			node_walk(changed, n);
 			return;
 		}
 
-		node_walk(&(*n)->u.loop.forward);
-		node_walk(&(*n)->u.loop.backward);
+		node_walk(changed, &(*n)->u.loop.forward);
+		node_walk(changed, &(*n)->u.loop.backward);
 
 		break;
 
@@ -121,8 +121,8 @@ node_walk(struct node **n)
  * the sequence.
  */
 void
-rrd_pretty_bottom(struct node **rrd)
+rrd_pretty_bottom(int *changed, struct node **rrd)
 {
-	node_walk(rrd);
+	node_walk(changed, rrd);
 }
 

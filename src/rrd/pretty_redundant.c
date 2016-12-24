@@ -13,7 +13,7 @@
 #include "list.h"
 
 static void
-redundant_alt(struct node *n, struct node **np)
+redundant_alt(int *changed, struct node *n, struct node **np)
 {
 	int nc = 0, isopt = 0;
 	struct list **p;
@@ -43,6 +43,8 @@ redundant_alt(struct node *n, struct node **np)
 			*np = *loop;
 			*loop = NULL;
 			node_free(n);
+
+			*changed = 1;
 		} else if (l->u.loop.backward->type == NODE_SKIP) {
 			struct node *tmp;
 
@@ -52,7 +54,11 @@ redundant_alt(struct node *n, struct node **np)
 			*np = *loop;
 			*loop = NULL;
 
+/* XXX:
 			node_free(n);
+*/
+
+			*changed = 1;
 		}
 	} else {
 		struct list **next;
@@ -86,12 +92,14 @@ redundant_alt(struct node *n, struct node **np)
 
 			node_free(dead->node);
 			list_free(&dead);
+
+			*changed = 1;
 		}
 	}
 }
 
 static void
-redundant_loop(struct node *n, struct node **np)
+redundant_loop(int *changed, struct node *n, struct node **np)
 {
 	struct node **inner = NULL;
 	struct node *loop;
@@ -118,11 +126,12 @@ redundant_loop(struct node *n, struct node **np)
 		*np = *inner;
 		*inner = NULL;
 		node_free(n);
+		*changed = 1;
 	}
 }
 
 static void
-node_walk(struct node **n)
+node_walk(int *changed, struct node **n)
 {
 	struct node *node;
 
@@ -135,25 +144,25 @@ node_walk(struct node **n)
 
 	case NODE_ALT:
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			node_walk(&(*p)->node);
+			node_walk(changed, &(*p)->node);
 		}
 
-		redundant_alt(node, n);
+		redundant_alt(changed, node, n);
 
 		return;
 
 	case NODE_SEQ:
 		for (p = &node->u.seq; *p != NULL; p = &(**p).next) {
-			node_walk(&(*p)->node);
+			node_walk(changed, &(*p)->node);
 		}
 
 		break;
 
 	case NODE_LOOP:
-		node_walk(&(*n)->u.loop.forward);
-		node_walk(&(*n)->u.loop.backward);
+		node_walk(changed, &(*n)->u.loop.forward);
+		node_walk(changed, &(*n)->u.loop.backward);
 
-		redundant_loop(node, n);
+		redundant_loop(changed, node, n);
 
 		return;
 
@@ -165,8 +174,8 @@ node_walk(struct node **n)
 }
 
 void
-rrd_pretty_redundant(struct node **rrd)
+rrd_pretty_redundant(int *changed, struct node **rrd)
 {
-	node_walk(rrd);
+	node_walk(changed, rrd);
 }
 

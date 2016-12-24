@@ -17,10 +17,19 @@
 void
 rrd_pretty(struct node **rrd)
 {
-	rrd_pretty_prefixes(rrd);
-	rrd_pretty_suffixes(rrd);
-	rrd_pretty_redundant(rrd);
-	rrd_pretty_bottom(rrd);
-	rrd_pretty_collapse(rrd);
+	int changed;
+	int limit;
+
+	limit = 20;
+
+	do {
+		changed = 0;
+
+		rrd_pretty_collapse(&changed, rrd);
+		rrd_pretty_prefixes(&changed, rrd);
+		rrd_pretty_suffixes(&changed, rrd);
+		rrd_pretty_redundant(&changed, rrd);
+		rrd_pretty_bottom(&changed, rrd);
+	} while (changed && !limit--);
 }
 

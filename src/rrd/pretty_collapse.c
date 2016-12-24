@@ -8,7 +8,7 @@
 #include "list.h"
 
 static void
-node_walk(struct node **n)
+node_walk(int *changed, struct node **n)
 {
 	switch ((*n)->type) {
 		struct list **p;
@@ -23,13 +23,13 @@ node_walk(struct node **n)
 			node_free(dead);
 
 			/* node changed */
-			node_walk(n);
+			node_walk(changed, n);
 
 			break;
 		}
 
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			node_walk(&(*p)->node);
+			node_walk(changed, &(*p)->node);
 		}
 
 		break;
@@ -43,21 +43,21 @@ node_walk(struct node **n)
 			dead->u.seq = NULL;
 			node_free(dead);
 
-			/* node changed */
-			node_walk(n);
+			*changed = 1;
+			node_walk(changed, n);
 
 			break;
 		}
 
 		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
-			node_walk(&(*p)->node);
+			node_walk(changed, &(*p)->node);
 		}
 
 		break;
 
 	case NODE_LOOP:
-		node_walk(&(*n)->u.loop.forward);
-		node_walk(&(*n)->u.loop.backward);
+		node_walk(changed, &(*n)->u.loop.forward);
+		node_walk(changed, &(*n)->u.loop.backward);
 
 		break;
 
@@ -69,8 +69,8 @@ node_walk(struct node **n)
 }
 
 void
-rrd_pretty_collapse(struct node **rrd)
+rrd_pretty_collapse(int *changed, struct node **rrd)
 {
-	node_walk(rrd);
+	node_walk(changed, rrd);
 }
 

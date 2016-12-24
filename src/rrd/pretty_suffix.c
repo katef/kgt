@@ -136,7 +136,7 @@ process_loop(struct node *loop, struct stack *bp)
 }
 
 static void
-collapse_seq(struct node *n)
+collapse_seq(int *changed, struct node *n)
 {
 	struct list *p;
 	struct stack *rl;
@@ -179,6 +179,8 @@ collapse_seq(struct node *n)
 			list_push(&new, stack_pop(&rl));
 
 			n->u.seq = new;
+
+			*changed = 1;
 		}
 	}
 
@@ -186,7 +188,7 @@ collapse_seq(struct node *n)
 }
 
 static void
-node_walk(struct node **n)
+node_walk(int *changed, struct node **n)
 {
 	assert(n != NULL);
 
@@ -195,23 +197,23 @@ node_walk(struct node **n)
 
 	case NODE_ALT:
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			node_walk(&(*p)->node);
+			node_walk(changed, &(*p)->node);
 		}
 
 		break;
 
 	case NODE_SEQ:
-		collapse_seq(*n);
+		collapse_seq(changed, *n);
 
 		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
-			node_walk(&(*p)->node);
+			node_walk(changed, &(*p)->node);
 		}
 
 		break;
 
 	case NODE_LOOP:
-		node_walk(&(*n)->u.loop.forward);
-		node_walk(&(*n)->u.loop.backward);
+		node_walk(changed, &(*n)->u.loop.forward);
+		node_walk(changed, &(*n)->u.loop.backward);
 
 		break;
 
@@ -233,8 +235,8 @@ node_walk(struct node **n)
  *   ^--<--SEP--
  */
 void
-rrd_pretty_suffixes(struct node **rrd)
+rrd_pretty_suffixes(int *changed, struct node **rrd)
 {
-	node_walk(rrd);
+	node_walk(changed, rrd);
 }
 

@@ -57,7 +57,7 @@ process_loop(struct node *loop, struct list *next)
 }
 
 static void
-collapse_seq(struct node *n)
+collapse_seq(int *changed, struct node *n)
 {
 	struct list *p;
 
@@ -73,6 +73,10 @@ collapse_seq(struct node *n)
 
 		suffix_len = process_loop(p->node, p->next);
 
+		if (suffix_len > 0) {
+			*changed = 1;
+		}
+
 		for (i = 0; i < suffix_len; i++) {
 			struct list *t = p->next;
 			p->next = t->next;
@@ -84,7 +88,7 @@ collapse_seq(struct node *n)
 }
 
 static void
-node_walk(struct node **n)
+node_walk(int *changed, struct node **n)
 {
 	assert(n != NULL);
 
@@ -93,23 +97,23 @@ node_walk(struct node **n)
 
 	case NODE_ALT:
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			node_walk(&(*p)->node);
+			node_walk(changed, &(*p)->node);
 		}
 
 		break;
 
 	case NODE_SEQ:
-		collapse_seq(*n);
+		collapse_seq(changed, *n);
 
 		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
-			node_walk(&(*p)->node);
+			node_walk(changed, &(*p)->node);
 		}
 
 		break;
 
 	case NODE_LOOP:
-		node_walk(&(*n)->u.loop.forward);
-		node_walk(&(*n)->u.loop.backward);
+		node_walk(changed, &(*n)->u.loop.forward);
+		node_walk(changed, &(*n)->u.loop.backward);
 
 		break;
 
@@ -121,8 +125,8 @@ node_walk(struct node **n)
 }
 
 void
-rrd_pretty_prefixes(struct node **rrd)
+rrd_pretty_prefixes(int *changed, struct node **rrd)
 {
-	node_walk(rrd);
+	node_walk(changed, rrd);
 }
 
