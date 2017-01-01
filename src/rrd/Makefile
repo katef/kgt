@@ -6,8 +6,7 @@ SRC += src/rrd/list.c
 SRC += src/rrd/stack.c
 
 SRC += src/rrd/pretty_collapse.c
-SRC += src/rrd/pretty_prefix.c
-SRC += src/rrd/pretty_suffix.c
+SRC += src/rrd/pretty_affix.c
 SRC += src/rrd/pretty_bottom.c
 SRC += src/rrd/pretty_redundant.c
 SRC += src/rrd/pretty_roll.c

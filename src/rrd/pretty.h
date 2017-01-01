@@ -5,7 +5,7 @@
 
 #include "rrd.h"
 
-void rrd_pretty_prefixes(int *changed, struct node **);
+void rrd_pretty_affixes(int *changed, struct node **);
 void rrd_pretty_bottom(int *changed, struct node **);
 void rrd_pretty_redundant(int *changed, struct node **);
 void rrd_pretty_collapse(int *changed, struct node **);

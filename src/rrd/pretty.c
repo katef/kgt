@@ -26,10 +26,9 @@ rrd_pretty(struct node **rrd)
 		changed = 0;
 
 		rrd_pretty_collapse(&changed, rrd);
-		rrd_pretty_prefixes(&changed, rrd);
-		rrd_pretty_suffixes(&changed, rrd);
-		rrd_pretty_roll(&changed, rrd);
 		rrd_pretty_redundant(&changed, rrd);
+		rrd_pretty_roll(&changed, rrd);
+		rrd_pretty_affixes(&changed, rrd);
 		rrd_pretty_bottom(&changed, rrd);
 	} while (changed && !limit--);
 }
