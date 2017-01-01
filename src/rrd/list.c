@@ -45,12 +45,13 @@ list_pop(struct list **list)
 void
 list_cat(struct list **dst, struct list *src)
 {
-	struct list **tail;
+	struct list **p;
 
-	tail = list_tail(dst);
+	for (p = dst; *p != NULL; p = &(*p)->next)
+		;
 
-	src->next = *tail;
-	*tail = src;
+	src->next = *p;
+	*p = src;
 }
 
 struct list **
