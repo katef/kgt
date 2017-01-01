@@ -33,7 +33,7 @@ list_pop(struct list **list)
 	}
 
 	n = *list;
-	*list = (**list).next;
+	*list = n->next;
 
 	node = n->node;
 
@@ -42,10 +42,26 @@ list_pop(struct list **list)
 	return node;
 }
 
+struct list **
+list_tail(struct list **head)
+{
+	struct list **p;
+
+	/* TODO: rewrite legibly */
+	for (p = head; *p != NULL && (*p)->next != NULL; p = &(*p)->next)
+		;
+
+	if (*p == NULL) {
+		return NULL;
+	}
+
+	return p;
+}
+
 void
 list_free(struct list **list)
 {
-	while (*list) {
+	while (*list != NULL) {
 		(void) list_pop(list);
 	}
 }
