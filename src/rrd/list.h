@@ -16,6 +16,9 @@ list_push(struct list **list, struct node *node);
 struct node *
 list_pop(struct list **list);
 
+void
+list_cat(struct list **dst, struct list *src);
+
 struct list **
 list_tail(struct list **head);
 

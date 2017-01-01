@@ -42,6 +42,17 @@ list_pop(struct list **list)
 	return node;
 }
 
+void
+list_cat(struct list **dst, struct list *src)
+{
+	struct list **tail;
+
+	tail = list_tail(dst);
+
+	src->next = *tail;
+	*tail = src;
+}
+
 struct list **
 list_tail(struct list **head)
 {
