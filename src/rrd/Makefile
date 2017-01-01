@@ -10,6 +10,7 @@ SRC += src/rrd/pretty_prefix.c
 SRC += src/rrd/pretty_suffix.c
 SRC += src/rrd/pretty_bottom.c
 SRC += src/rrd/pretty_redundant.c
+SRC += src/rrd/pretty_roll.c
 SRC += src/rrd/pretty.c
 
 PART += rrd
