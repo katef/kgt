@@ -134,6 +134,25 @@ node_create_loop(struct node *forward, struct node *backward)
 	return new;
 }
 
+void
+node_make_seq(struct node **n)
+{
+	struct list *new;
+
+	assert(*n != NULL);
+	assert(n != NULL);
+
+	if ((*n)->type == NODE_SEQ) {
+		return;
+	}
+
+	new = NULL;
+
+	list_push(&new, *n);
+
+	*n = node_create_seq(new);
+}
+
 int
 node_compare(struct node *a, struct node *b)
 {

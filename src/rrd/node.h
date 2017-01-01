@@ -26,6 +26,9 @@ node_create_seq(struct list *seq);
 struct node *
 node_create_loop(struct node *forward, struct node *backward);
 
+void
+node_make_seq(struct node **n);
+
 int
 node_compare(struct node *a, struct node *b);
 
