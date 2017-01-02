@@ -156,20 +156,14 @@ collapse_prefix(int *changed, struct list **head, struct node *loop)
 	*changed = 1;
 }
 
-static void
-node_walk(int *changed, struct node **n)
+void
+rrd_pretty_affixes(int *changed, struct node **n)
 {
 	assert(n != NULL);
+	assert(*n != NULL);
 
 	switch ((*n)->type) {
 		struct list **p;
-
-	case NODE_ALT:
-		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			node_walk(changed, &(*p)->node);
-		}
-
-		break;
 
 	case NODE_SEQ:
 		/*
@@ -199,7 +193,6 @@ node_walk(int *changed, struct node **n)
 		}
 
 		for (p = &(*n)->u.seq; *p != NULL; p = &(*p)->next) {
-
 			if ((*p)->node->type == NODE_LOOP) {
 				if ((*p)->node->u.loop.backward->type == NODE_SKIP) {
 					/* TODO: collapse_prefix() for forward only */
@@ -212,28 +205,7 @@ node_walk(int *changed, struct node **n)
 			}
 		}
 
-		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
-			node_walk(changed, &(*p)->node);
-		}
-
-		break;
-
-	case NODE_LOOP:
-		node_walk(changed, &(*n)->u.loop.forward);
-		node_walk(changed, &(*n)->u.loop.backward);
-
-		break;
-
-	case NODE_SKIP:
-	case NODE_RULE:
-	case NODE_LITERAL:
 		break;
 	}
-}
-
-void
-rrd_pretty_affixes(int *changed, struct node **rrd)
-{
-	node_walk(changed, rrd);
 }
 

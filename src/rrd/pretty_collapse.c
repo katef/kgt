@@ -1,5 +1,6 @@
 /* $Id$ */
 
+#include <assert.h>
 #include <stddef.h>
 
 #include "rrd.h"
@@ -7,12 +8,13 @@
 #include "node.h"
 #include "list.h"
 
-static void
-node_walk(int *changed, struct node **n)
+void
+rrd_pretty_collapse(int *changed, struct node **n)
 {
-	switch ((*n)->type) {
-		struct list **p;
+	assert(n != NULL);
+	assert(*n != NULL);
 
+	switch ((*n)->type) {
 	case NODE_ALT:
 		if (list_count((*n)->u.alt) == 1) {
 			struct node *dead;
@@ -22,16 +24,8 @@ node_walk(int *changed, struct node **n)
 			dead->u.alt = NULL;
 			node_free(dead);
 
-			/* node changed */
-			node_walk(changed, n);
-
-			break;
+			*changed = 1;
 		}
-
-		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			node_walk(changed, &(*p)->node);
-		}
-
 		break;
 
 	case NODE_SEQ:
@@ -44,33 +38,8 @@ node_walk(int *changed, struct node **n)
 			node_free(dead);
 
 			*changed = 1;
-			node_walk(changed, n);
-
-			break;
 		}
-
-		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
-			node_walk(changed, &(*p)->node);
-		}
-
-		break;
-
-	case NODE_LOOP:
-		node_walk(changed, &(*n)->u.loop.forward);
-		node_walk(changed, &(*n)->u.loop.backward);
-
-		break;
-
-	case NODE_SKIP:
-	case NODE_RULE:
-	case NODE_LITERAL:
 		break;
 	}
-}
-
-void
-rrd_pretty_collapse(int *changed, struct node **rrd)
-{
-	node_walk(changed, rrd);
 }
 

@@ -90,8 +90,6 @@ roll_prefix(int *changed, struct list **entry, struct node *loop)
 	/* destroy the other node */
 	node_free(list_pop(p));
 
-	/* TODO: update loop's .min/.max accordingly */
-
 	*changed = 1;
 }
 
@@ -176,25 +174,17 @@ roll_suffix(int *changed, struct list **exit, struct node *loop)
 	/* destroy the other node */
 	node_free(list_pop(p));
 
-	/* TODO: update loop's .min/.max accordingly */
-
 	*changed = 1;
 }
 
-static void
-node_walk(int *changed, struct node **n)
+void
+rrd_pretty_roll(int *changed, struct node **n)
 {
 	assert(n != NULL);
+	assert(*n != NULL);
 
 	switch ((*n)->type) {
 		struct list **p;
-
-	case NODE_ALT:
-		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			node_walk(changed, &(*p)->node);
-		}
-
-		break;
 
 	case NODE_SEQ:
 		/*
@@ -223,28 +213,7 @@ node_walk(int *changed, struct node **n)
 			}
 		}
 
-		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
-			node_walk(changed, &(*p)->node);
-		}
-
-		break;
-
-	case NODE_LOOP:
-		node_walk(changed, &(*n)->u.loop.forward);
-		node_walk(changed, &(*n)->u.loop.backward);
-
-		break;
-
-	case NODE_SKIP:
-	case NODE_RULE:
-	case NODE_LITERAL:
 		break;
 	}
-}
-
-void
-rrd_pretty_roll(int *changed, struct node **rrd)
-{
-	node_walk(changed, rrd);
 }
 

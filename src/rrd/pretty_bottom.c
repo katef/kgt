@@ -73,47 +73,6 @@ bottom_loop(struct node **np)
 	return 1;
 }
 
-static void
-node_walk(int *changed, struct node **n)
-{
-	assert(n != NULL);
-
-	switch ((*n)->type) {
-		struct list **p;
-
-	case NODE_ALT:
-		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			node_walk(changed, &(*p)->node);
-		}
-
-		break;
-
-	case NODE_SEQ:
-		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
-			node_walk(changed, &(*p)->node);
-		}
-
-		break;
-
-	case NODE_LOOP:
-		if (bottom_loop(n)) {
-			*changed = 1;
-			node_walk(changed, n);
-			return;
-		}
-
-		node_walk(changed, &(*n)->u.loop.forward);
-		node_walk(changed, &(*n)->u.loop.backward);
-
-		break;
-
-	case NODE_SKIP:
-	case NODE_RULE:
-	case NODE_LITERAL:
-		break;
-	}
-}
-
 /*
  * for loops with nothing on top and more than one thing on the bottom,
  * flip the loop over and add an alt to skip the loop altogether.
@@ -121,8 +80,17 @@ node_walk(int *changed, struct node **n)
  * the sequence.
  */
 void
-rrd_pretty_bottom(int *changed, struct node **rrd)
+rrd_pretty_bottom(int *changed, struct node **n)
 {
-	node_walk(changed, rrd);
+	assert(n != NULL);
+	assert(*n != NULL);
+
+	switch ((*n)->type) {
+	case NODE_LOOP:
+		if (bottom_loop(n)) {
+			*changed = 1;
+		}
+		break;
+	}
 }
 

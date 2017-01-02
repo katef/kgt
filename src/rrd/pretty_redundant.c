@@ -130,52 +130,20 @@ redundant_loop(int *changed, struct node *n, struct node **np)
 	}
 }
 
-static void
-node_walk(int *changed, struct node **n)
+void
+rrd_pretty_redundant(int *changed, struct node **n)
 {
-	struct node *node;
-
 	assert(n != NULL);
+	assert(*n != NULL);
 
-	node = *n;
-
-	switch (node->type) {
-		struct list **p;
-
+	switch ((*n)->type) {
 	case NODE_ALT:
-		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			node_walk(changed, &(*p)->node);
-		}
-
-		redundant_alt(changed, node, n);
-
-		return;
-
-	case NODE_SEQ:
-		for (p = &node->u.seq; *p != NULL; p = &(**p).next) {
-			node_walk(changed, &(*p)->node);
-		}
-
+		redundant_alt(changed, *n, n);
 		break;
 
 	case NODE_LOOP:
-		node_walk(changed, &(*n)->u.loop.forward);
-		node_walk(changed, &(*n)->u.loop.backward);
-
-		redundant_loop(changed, node, n);
-
-		return;
-
-	case NODE_SKIP:
-	case NODE_RULE:
-	case NODE_LITERAL:
+		redundant_loop(changed, *n, n);
 		break;
 	}
-}
-
-void
-rrd_pretty_redundant(int *changed, struct node **rrd)
-{
-	node_walk(changed, rrd);
 }
 
