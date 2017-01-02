@@ -3,7 +3,7 @@
 #ifndef KGT_RRD_PRETTY_H
 #define KGT_RRD_PRETTY_H
 
-#include "rrd.h"
+struct node;
 
 void rrd_pretty_affixes(int *changed, struct node **);
 void rrd_pretty_bottom(int *changed, struct node **);

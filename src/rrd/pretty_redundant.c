@@ -1,13 +1,10 @@
 /* $Id$ */
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <assert.h>
+#include <stddef.h>
 
 #include "../xalloc.h"
 
-#include "rrd.h"
 #include "pretty.h"
 #include "node.h"
 #include "list.h"

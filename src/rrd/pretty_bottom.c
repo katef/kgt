@@ -1,11 +1,9 @@
 /* $Id$ */
 
 #include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <stddef.h>
 #include <assert.h>
 
-#include "rrd.h"
 #include "pretty.h"
 #include "node.h"
 #include "list.h"

@@ -4,14 +4,12 @@
  * Railroad diagram beautification
  */
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <stddef.h>
 #include <assert.h>
 
 #include "../xalloc.h"
 
-#include "rrd.h"
+#include "node.h"
 #include "list.h"
 #include "pretty.h"
 

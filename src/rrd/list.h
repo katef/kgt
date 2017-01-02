@@ -3,7 +3,7 @@
 #ifndef KGT_RRD_LIST_H
 #define KGT_RRD_LIST_H
 
-#include "../ast.h"
+struct node;
 
 struct list {
 	struct node *node;

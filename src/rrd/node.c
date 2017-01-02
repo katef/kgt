@@ -2,9 +2,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <string.h>
 
-#include "rrd.h" /* XXX */
 #include "list.h"
 #include "node.h"
 

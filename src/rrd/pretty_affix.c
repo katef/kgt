@@ -1,10 +1,8 @@
 #include <assert.h>
 #include <stddef.h>
-#include <stdio.h> /* XXX */
 
 #include "../xalloc.h"
 
-#include "rrd.h"
 #include "pretty.h"
 #include "node.h"
 #include "list.h"
