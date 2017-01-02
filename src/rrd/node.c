@@ -163,8 +163,6 @@ node_compare(struct node *a, struct node *b)
 	}
 
 	switch (a->type) {
-		struct list *p, *q;
-
 	case NODE_SKIP:
 		return 1;
 
@@ -175,32 +173,10 @@ node_compare(struct node *a, struct node *b)
 		return 0 == strcmp(a->u.name, b->u.name);
 
 	case NODE_ALT:
-		for (p = a->u.alt, q = b->u.alt; p != NULL && q != NULL; p = p->next, q = q->next) {
-			if (!node_compare(p->node, q->node)) {
-				return 0;
-			}
-		}
-
-		if (p != NULL || q != NULL) {
-			/* lists are of different length */
-			return 0;
-		}
-
-		return 1;
+		return list_compare(a->u.alt, b->u.alt);
 
 	case NODE_SEQ:
-		for (p = a->u.seq, q = b->u.seq; p != NULL && q != NULL; p = p->next, q = q->next) {
-			if (!node_compare(p->node, q->node)) {
-				return 0;
-			}
-		}
-
-		if (p != NULL || q != NULL) {
-			/* lists are of different length */
-			return 0;
-		}
-
-		return 1;
+		return list_compare(a->u.seq, b->u.seq);
 
 	case NODE_LOOP:
 		return node_compare(a->u.loop.forward,  b->u.loop.forward) &&

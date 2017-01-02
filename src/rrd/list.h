@@ -19,6 +19,9 @@ list_pop(struct list **list);
 void
 list_cat(struct list **dst, struct list *src);
 
+int
+list_compare(struct list *a, struct list *b);
+
 struct list **
 list_tail(struct list **head);
 

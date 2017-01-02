@@ -54,6 +54,25 @@ list_cat(struct list **dst, struct list *src)
 	*p = src;
 }
 
+int
+list_compare(struct list *a, struct list *b)
+{
+	const struct list *p, *q;
+
+	for (p = a, q = b; p != NULL && q != NULL; p = p->next, q = q->next) {
+		if (!node_compare(p->node, q->node)) {
+			return 0;
+		}
+	}
+
+	if (p != NULL || q != NULL) {
+		/* lists are of different length */
+		return 0;
+	}
+
+	return 1;
+}
+
 struct list **
 list_tail(struct list **head)
 {
