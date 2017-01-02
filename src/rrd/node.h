@@ -62,7 +62,7 @@ void
 node_make_seq(struct node **n);
 
 int
-node_compare(struct node *a, struct node *b);
+node_compare(const struct node *a, const struct node *b);
 
 #endif
 

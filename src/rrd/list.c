@@ -55,7 +55,7 @@ list_cat(struct list **dst, struct list *src)
 }
 
 int
-list_compare(struct list *a, struct list *b)
+list_compare(const struct list *a, const struct list *b)
 {
 	const struct list *p, *q;
 

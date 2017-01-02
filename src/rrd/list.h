@@ -20,7 +20,7 @@ void
 list_cat(struct list **dst, struct list *src);
 
 int
-list_compare(struct list *a, struct list *b);
+list_compare(const struct list *a, const struct list *b);
 
 struct list **
 list_tail(struct list **head);
