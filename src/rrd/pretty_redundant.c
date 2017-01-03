@@ -43,11 +43,8 @@ redundant_alt(int *changed, struct node *n, struct node **np)
 
 			*changed = 1;
 		} else if (l->u.loop.backward->type == NODE_SKIP) {
-			struct node *tmp;
+			loop_flip(l);
 
-			tmp = l->u.loop.backward;
-			l->u.loop.backward = l->u.loop.forward;
-			l->u.loop.forward = tmp;
 			*np = *loop;
 			*loop = NULL;
 
@@ -111,10 +108,7 @@ redundant_loop(int *changed, struct node *n, struct node **np)
 		if (loop->u.loop.forward->type == NODE_SKIP) {
 			inner = &n->u.loop.backward;
 		} else if (loop->u.loop.backward->type == NODE_SKIP) {
-			struct node *tmp;
-			tmp = loop->u.loop.backward;
-			loop->u.loop.backward = loop->u.loop.forward;
-			loop->u.loop.forward = tmp;
+			loop_flip(loop);
 			inner = &n->u.loop.backward;
 		}
 	}

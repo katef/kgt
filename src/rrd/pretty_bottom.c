@@ -48,13 +48,7 @@ bottom_loop(struct node **np)
 		}
 	}
 
-	{
-		struct node *tmp;
-
-		tmp = n->u.loop.backward;
-		n->u.loop.backward = n->u.loop.forward;
-		n->u.loop.forward  = tmp;
-	}
+	loop_flip(n);
 
 	/* short-circuit */
 	{

@@ -186,3 +186,16 @@ node_compare(const struct node *a, const struct node *b)
 	return 1;
 }
 
+void
+loop_flip(struct node *n)
+{
+	struct node *tmp;
+
+	assert(n != NULL);
+	assert(n->type == NODE_LOOP);
+
+	tmp = n->u.loop.backward;
+	n->u.loop.backward = n->u.loop.forward;
+	n->u.loop.forward  = tmp;
+}
+

@@ -64,5 +64,8 @@ node_make_seq(struct node **n);
 int
 node_compare(const struct node *a, const struct node *b);
 
+void
+loop_flip(struct node *n);
+
 #endif
 
