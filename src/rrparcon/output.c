@@ -1,7 +1,11 @@
 /* $Id$ */
 
 /*
- * Output a plaintext dump of the railroad tree
+ * parcon.railroad DSL Railroad Diagram Output.
+ * http://www.opengroove.org/parcon/parcon-tutorial.html
+ *
+ * Output adapted from the following example:
+ * https://github.com/javawizard/parcon/blob/master/parcon/railroad/raildraw.py
  */
 
 #include <assert.h>
