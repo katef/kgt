@@ -15,11 +15,11 @@
 #include "ebnf/io.h"
 #include "rbnf/io.h"
 #include "sid/io.h"
-#include "trd/io.h"
 #include "dot/io.h"
 #include "rrdot/io.h"
 #include "rrdump/io.h"
 #include "rrparcon/io.h"
+#include "rrta/io.h"
 #include "rrtext/io.h"
 
 #include "ast.h"
@@ -39,11 +39,11 @@ struct io {
 	{ "ebnf",     ebnf_input, ebnf_output     },
 	{ "rbnf",     rbnf_input, rbnf_output     },
 	{ "sid",      NULL,       sid_output      },
-	{ "trd",      NULL,       trd_output      },
 	{ "dot",      NULL,       dot_output      },
 	{ "rrdot",    NULL,       rrdot_output    },
 	{ "rrdump",   NULL,       rrdump_output   },
 	{ "rrparcon", NULL,       rrparcon_output },
+	{ "rrta",     NULL,       rrta_output     },
 	{ "rrtext",   NULL,       rrtext_output   }
 };
 
