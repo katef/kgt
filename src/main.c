@@ -19,6 +19,7 @@
 #include "dot/io.h"
 #include "rrdot/io.h"
 #include "rrdump/io.h"
+#include "rrparcon/io.h"
 #include "rrtext/io.h"
 
 #include "ast.h"
@@ -32,17 +33,18 @@ struct io {
 	struct ast_rule *(*in)(int (*f)(void *), void *);
 	void (*out)(const struct ast_rule *);
 } io[] = {
-	{ "bnf",    bnf_input,  bnf_output    },
-	{ "wsn",    wsn_input,  wsn_output    },
-	{ "abnf",   abnf_input, NULL          },
-	{ "ebnf",   ebnf_input, ebnf_output   },
-	{ "rbnf",   rbnf_input, rbnf_output   },
-	{ "sid",    NULL,       sid_output    },
-	{ "trd",    NULL,       trd_output    },
-	{ "dot",    NULL,       dot_output    },
-	{ "rrdot",  NULL,       rrdot_output  },
-	{ "rrdump", NULL,       rrdump_output },
-	{ "rrtext", NULL,       rrtext_output }
+	{ "bnf",      bnf_input,  bnf_output      },
+	{ "wsn",      wsn_input,  wsn_output      },
+	{ "abnf",     abnf_input, NULL            },
+	{ "ebnf",     ebnf_input, ebnf_output     },
+	{ "rbnf",     rbnf_input, rbnf_output     },
+	{ "sid",      NULL,       sid_output      },
+	{ "trd",      NULL,       trd_output      },
+	{ "dot",      NULL,       dot_output      },
+	{ "rrdot",    NULL,       rrdot_output    },
+	{ "rrdump",   NULL,       rrdump_output   },
+	{ "rrparcon", NULL,       rrparcon_output },
+	{ "rrtext",   NULL,       rrtext_output   }
 };
 
 enum io_dir {

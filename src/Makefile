@@ -17,7 +17,8 @@ ${BUILD}/bin/kgt: ${BUILD}/src/xalloc.o
 
 .for part in ${PART:Mbnf} ${PART:Mabnf} ${PART:Mebnf} ${PART:Mrbnf} \
 	${PART:Msid} ${PART:Mdot} ${PART:Mwsn} ${PART:Mtrd} \
-	${PART:Mrrd} ${PART:Mrrdump} ${PART:Mrrtext} ${PART:Mrrdot}
+	${PART:Mrrd} ${PART:Mrrdot} ${PART:Mrrdump} \
+	${PART:Mrrparcon} ${PART:Mrrtext}
 ${BUILD}/bin/kgt: ${BUILD}/lib/${part}.o
 .endfor
 
