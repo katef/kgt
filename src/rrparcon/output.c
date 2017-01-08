@@ -169,9 +169,23 @@ rrparcon_output(const struct ast_rule *grammar)
 	printf("\n");
 
 	printf("options = {\n");
-	printf("  \"raildraw_title_before\":20,\n");
-	printf("  \"raildraw_title_after\": 30,\n");
-	printf("  \"raildraw_scale\": 0.7\n");
+
+	printf("  \"raildraw_arrow_width\":       8,\n"); /* 0 also looks nice */
+	printf("  \"raildraw_arrow_height\":      8,\n");
+	printf("  \"raildraw_then_before_arrow\": 8,\n");
+	printf("  \"raildraw_then_after_arrow\":  0,\n");
+	printf("  \"raildraw_or_before\":         8,\n");
+	printf("  \"raildraw_or_after\":          8,\n");
+
+	printf("  \"raildraw_token_padding\":     2,\n");
+	printf("  \"raildraw_bullet_radius\":     4,\n");
+	printf("  \"raildraw_or_radius\":        10,\n");
+	printf("  \"raildraw_line_size\":         2,\n");
+
+	printf("  \"raildraw_title_before\":     20,\n");
+	printf("  \"raildraw_title_after\":      30,\n");
+	printf("  \"raildraw_scale\":             1\n");
+
 	printf("}\n");
 	printf("\n");
 
