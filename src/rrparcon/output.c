@@ -5,7 +5,7 @@
  * http://www.opengroove.org/parcon/parcon-tutorial.html
  *
  * Output adapted from the following example:
- * https://github.com/javawizard/parcon/blob/master/parcon/railroad/raildraw.py
+ * https://github.com/javawizard/everything/blob/4912dc91f7fe458d2324177d678618c22961ee99/projects/misc/sd-example.py
  */
 
 #include <assert.h>
