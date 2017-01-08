@@ -91,6 +91,30 @@ escputs(const char *s, FILE *f)
 	return n;
 }
 
+int
+normal(const struct list *list)
+{
+	/*
+	 * This is an imperfect heuristic to guess which item in a list
+	 * is the most visually sensible default.
+	 */
+
+	if (list_count(list) == 2) {
+		const struct node *a = list->node;
+		const struct node *b = list->next->node;
+
+		if (a->type == NODE_SKIP && b->type == NODE_RULE) {
+			return 1;
+		}
+
+		if (a->type == NODE_RULE && b->type == NODE_SKIP) {
+			return 0;
+		}
+	}
+
+	return 0;
+}
+
 static void
 node_walk(FILE *f, struct node **n, int depth)
 {
@@ -124,7 +148,7 @@ node_walk(FILE *f, struct node **n, int depth)
 
 	case NODE_ALT:
 		print_indent(f, depth);
-		fprintf(f, "Choice(0,\n"); /* TODO: find a way to indicate the "normal" choice */
+		fprintf(f, "Choice(%d,\n", normal((*n)->u.alt));
 
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
 			node_walk(f, &(*p)->node, depth + 1);
