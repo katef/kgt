@@ -95,13 +95,13 @@ escputs(const char *s, FILE *f)
 }
 
 static void
-node_walk(FILE *f, struct node **n, int depth)
+node_walk(FILE *f, const struct node *n, int depth)
 {
 	assert(f != NULL);
 	assert(n != NULL);
 
-	switch ((*n)->type) {
-		struct list **p;
+	switch (n->type) {
+		const struct list *p;
 
 	case NODE_SKIP:
 		print_indent(f, depth);
@@ -112,7 +112,7 @@ node_walk(FILE *f, struct node **n, int depth)
 	case NODE_LITERAL:
 		print_indent(f, depth);
 		fprintf(f, "text(\"");
-		escputs((*n)->u.literal, f);
+		escputs(n->u.literal, f);
 		fprintf(f, "\")");
 
 		break;
@@ -120,7 +120,7 @@ node_walk(FILE *f, struct node **n, int depth)
 	case NODE_RULE:
 		print_indent(f, depth);
 		fprintf(f, "production(\"");
-		escputs((*n)->u.name, f);
+		escputs(n->u.name, f);
 		fprintf(f, "\")");
 
 		break;
@@ -128,9 +128,9 @@ node_walk(FILE *f, struct node **n, int depth)
 	case NODE_ALT:
 		print_indent(f, depth);
 		fprintf(f, "Or(\n");
-		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			node_walk(f, &(*p)->node, depth + 1);
-			if ((**p).next != NULL) {
+		for (p = n->u.alt; p != NULL; p = p->next) {
+			node_walk(f, p->node, depth + 1);
+			if (p->next != NULL) {
 				fprintf(f, ",");
 				fprintf(f, "\n");
 			}
@@ -145,9 +145,9 @@ node_walk(FILE *f, struct node **n, int depth)
 	case NODE_SEQ:
 		print_indent(f, depth);
 		fprintf(f, "Then(\n");
-		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
-			node_walk(f, &(*p)->node, depth + 1);
-			if ((**p).next != NULL) {
+		for (p = n->u.seq; p != NULL; p = p->next) {
+			node_walk(f, p->node, depth + 1);
+			if (p->next != NULL) {
 				fprintf(f, ",");
 				fprintf(f, "\n");
 			}
@@ -163,10 +163,10 @@ node_walk(FILE *f, struct node **n, int depth)
 		print_indent(f, depth);
 		fprintf(f, "Loop(\n");
 
-		node_walk(f, &(*n)->u.loop.forward, depth + 1);
+		node_walk(f, n->u.loop.forward, depth + 1);
 		fprintf(f, ",\n");
 
-		node_walk(f, &(*n)->u.loop.backward, depth + 1);
+		node_walk(f, n->u.loop.backward, depth + 1);
 		fprintf(f, "\n");
 
 		print_indent(f, depth);
@@ -217,7 +217,7 @@ rrparcon_output(const struct ast_rule *grammar)
 		printf("    Then(\n");
 		printf("      Bullet(),\n");
 
-		node_walk(stdout, &rrd, 3);
+		node_walk(stdout, rrd, 3);
 		printf(",");
 		printf("\n");
 

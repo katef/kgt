@@ -30,13 +30,13 @@ print_indent(FILE *f, int n)
 }
 
 static void
-node_walk(FILE *f, struct node **n, int depth)
+node_walk(FILE *f, const struct node *n, int depth)
 {
 	assert(f != NULL);
 	assert(n != NULL);
 
-	switch ((*n)->type) {
-		struct list **p;
+	switch (n->type) {
+		const struct list *p;
 
 	case NODE_SKIP:
 		print_indent(f, depth);
@@ -46,21 +46,21 @@ node_walk(FILE *f, struct node **n, int depth)
 
 	case NODE_LITERAL:
 		print_indent(f, depth);
-		fprintf(f, "LITERAL: \"%s\"\n", (*n)->u.literal);
+		fprintf(f, "LITERAL: \"%s\"\n", n->u.literal);
 
 		break;
 
 	case NODE_RULE:
 		print_indent(f, depth);
-		fprintf(f, "NAME: <%s>\n", (*n)->u.name);
+		fprintf(f, "NAME: <%s>\n", n->u.name);
 
 		break;
 
 	case NODE_ALT:
 		print_indent(f, depth);
 		fprintf(f, "ALT: [\n");
-		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
-			node_walk(f, &(*p)->node, depth + 1);
+		for (p = n->u.alt; p != NULL; p = p->next) {
+			node_walk(f, p->node, depth + 1);
 		}
 		print_indent(f, depth);
 		fprintf(f, "]\n");
@@ -70,8 +70,8 @@ node_walk(FILE *f, struct node **n, int depth)
 	case NODE_SEQ:
 		print_indent(f, depth);
 		fprintf(f, "SEQ: [\n");
-		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
-			node_walk(f, &(*p)->node, depth + 1);
+		for (p = n->u.seq; p != NULL; p = p->next) {
+			node_walk(f, p->node, depth + 1);
 		}
 		print_indent(f, depth);
 		fprintf(f, "]\n");
@@ -82,16 +82,16 @@ node_walk(FILE *f, struct node **n, int depth)
 		print_indent(f, depth);
 		fprintf(f, "LOOP:\n");
 
-		if ((*n)->u.loop.forward->type != NODE_SKIP) {
+		if (n->u.loop.forward->type != NODE_SKIP) {
 			print_indent(f, depth + 1);
 			fprintf(f, ".forward:\n");
-			node_walk(f, &(*n)->u.loop.forward, depth + 2);
+			node_walk(f, n->u.loop.forward, depth + 2);
 		}
 
-		if ((*n)->u.loop.backward->type != NODE_SKIP) {
+		if (n->u.loop.backward->type != NODE_SKIP) {
 			print_indent(f, depth + 1);
 			fprintf(f, ".backward:\n");
-			node_walk(f, &(*n)->u.loop.backward, depth + 2);
+			node_walk(f, n->u.loop.backward, depth + 2);
 		}
 
 		break;
@@ -114,17 +114,17 @@ rrdump_output(const struct ast_rule *grammar)
 
 		if (!prettify) {
 			printf("%s:\n", p->name);
-			node_walk(stdout, &rrd, 1);
+			node_walk(stdout, rrd, 1);
 			printf("\n");
 		} else {
 			printf("%s: (before prettify)\n", p->name);
-			node_walk(stdout, &rrd, 1);
+			node_walk(stdout, rrd, 1);
 			printf("\n");
 
 			rrd_pretty(&rrd);
 
 			printf("%s: (after prettify)\n", p->name);
-			node_walk(stdout, &rrd, 1);
+			node_walk(stdout, rrd, 1);
 			printf("\n");
 		}
 
