@@ -31,6 +31,66 @@ print_indent(FILE *f, int n)
 	}
 }
 
+/* javascript/json */
+static int
+escputc(int c, FILE *f)
+{
+	size_t i;
+
+	const struct {
+		int c;
+		const char *s;
+	} a[] = {
+		{ '\\', "\\\\" },
+		{ '\"', "\\\"" },
+		{ '/',  "\\/"  },
+
+		{ '\b', "\\b"  },
+		{ '\f', "\\f"  },
+		{ '\n', "\\n"  },
+		{ '\r', "\\r"  },
+		{ '\t', "\\t"  }
+	};
+
+	assert(f != NULL);
+
+	for (i = 0; i < sizeof a / sizeof *a; i++) {
+		if (a[i].c == c) {
+			return fputs(a[i].s, f);
+		}
+	}
+
+	if (!isprint((unsigned char) c)) {
+		return fprintf(f, "\\u%04x", (unsigned char) c);
+	}
+
+	return fprintf(f, "%c", c);
+}
+
+/* TODO: centralise, maybe with callback */
+static int
+escputs(const char *s, FILE *f)
+{
+	const char *p;
+	int r, n;
+
+	assert(s != NULL);
+	assert(f != NULL);
+
+	n = 0;
+
+	for (p = s; *p != '\0'; p++) {
+		r = escputc(*p, f);
+		if (r < 0) {
+			return -1;
+		}
+
+		n += r;
+	}
+
+	return n;
+}
+
 static void
 node_walk(FILE *f, struct node **n, int depth)
 {
@@ -48,13 +108,17 @@ node_walk(FILE *f, struct node **n, int depth)
 
 	case NODE_LITERAL:
 		print_indent(f, depth);
-		fprintf(f, "Terminal(\"%s\")", (*n)->u.literal); /* XXX: escape */
+		fprintf(f, "Terminal(\"");
+		escputs((*n)->u.literal, f);
+		fprintf(f, "\")");
 
 		break;
 
 	case NODE_RULE:
 		print_indent(f, depth);
-		fprintf(f, "NonTerminal(\"%s\")", (*n)->u.name); /* XXX: escape */
+		fprintf(f, "NonTerminal(\"");
+		escputs((*n)->u.name, f);
+		fprintf(f, "\")");
 
 		break;
 
@@ -119,7 +183,9 @@ rrta_output(const struct ast_rule *grammar)
 			rrd_pretty(&rrd);
 		}
 
-		printf("add('%s', Diagram(\n", p->name); /* XXX: escape */
+		printf("add('");
+		escputs(p->name, stdout);
+		printf("', Diagram(\n");
 
 		node_walk(stdout, &rrd, 1);
 		printf("));\n");

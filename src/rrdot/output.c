@@ -55,6 +55,9 @@ escputs(const char *s, FILE *f)
 	const char *p;
 	int r;
 
+	assert(f != NULL);
+	assert(s != NULL);
+
 	for (p = s; *p != '\0'; p++) {
 		r = escputc(*p, f);
 		if (r < 0) {
