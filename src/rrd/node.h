@@ -3,11 +3,6 @@
 #ifndef KGT_RRD_NODE_H
 #define KGT_RRD_NODE_H
 
-struct box_size {
-	int w;
-	int h;
-};
-
 struct node {
 	enum {
 		NODE_SKIP,
@@ -32,9 +27,6 @@ struct node {
 			unsigned int max;
 		} loop;
 	} u;
-
-	int y;
-	struct box_size size;
 };
 
 void

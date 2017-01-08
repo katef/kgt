@@ -27,6 +27,11 @@
 
 #include "io.h"
 
+struct box_size {
+	int w;
+	int h;
+};
+
 struct render_context {
 	struct box_size size;
 	char **lines;
@@ -79,119 +84,187 @@ loop_label(const struct node *loop, char *s)
 	return 0;
 }
 
-static void
-node_walk_dim(struct node *n)
+static unsigned
+node_walk_dim_w(const struct node *n)
 {
 	assert(n != NULL);
 
 	switch (n->type) {
 		const struct list *p;
+		unsigned w;
 
 	case NODE_SKIP:
-		n->size.w = 0;
-		n->size.h = 1;
-		n->y = 0;
-
-		break;
+		return 0;
 
 	case NODE_LITERAL:
-		n->size.w = strlen(n->u.literal) + 4;
-		n->size.h = 1;
-		n->y = 0;
-
-		break;
+		return strlen(n->u.literal) + 4;
 
 	case NODE_RULE:
-		n->size.w = strlen(n->u.name) + 2;
-		n->size.h = 1;
-		n->y = 0;
-
-		break;
+		return strlen(n->u.name) + 2;
 
 	case NODE_ALT:
+		w = 0;
+
 		for (p = n->u.alt; p != NULL; p = p->next) {
-			node_walk_dim(p->node);
-		}
+			unsigned wn;
 
-		{
-			int w = 0, h = -1;
-			const struct list *q;
-
-			for (q = n->u.alt; q != NULL; q = q->next) {
-				h += 1 + q->node->size.h;
-
-				if (q->node->size.w > w) {
-					w = q->node->size.w;
-				}
-
-				if (q == n->u.alt) {
-					if (q->node->type == NODE_SKIP && q->next && !q->next->next) {
-						n->y = 2 + q->node->y + q->next->node->y;
-					} else {
-						n->y = q->node->y;
-					}
-				}
+			wn = node_walk_dim_w(p->node);
+			if (wn > w) {
+				w = wn;
 			}
-
-			n->size.w = w + 6;
-			n->size.h = h;
 		}
 
-		break;
+		return w + 6;
 
 	case NODE_SEQ:
+		w = 0;
+
 		for (p = n->u.seq; p != NULL; p = p->next) {
-			node_walk_dim(p->node);
+			w += node_walk_dim_w(p->node) + 2;
 		}
 
-		{
-			int w = 0, top = 0, bot = 1;
-			const struct list *q;
+		return w - 2;
 
-			for (q = n->u.seq; q != NULL; q = q->next) {
-				w += q->node->size.w + 2;
-				if (q->node->y > top) {
-					top = q->node->y;
+	case NODE_LOOP:
+		{
+			unsigned wf, wb, cw;
+
+			wf = node_walk_dim_w(n->u.loop.forward);
+			wb = node_walk_dim_w(n->u.loop.backward);
+
+			w = (wf > wb ? wf : wb) + 6;
+
+			cw = loop_label(n, NULL);
+
+			if (cw > 0) {
+				if (cw + 6 > w) {
+					w = cw + 6;
 				}
-				if (q->node->size.h - q->node->y > bot) {
-					bot = q->node->size.h - q->node->y;
+			}
+		}
+
+		return w;
+	}
+}
+
+static unsigned
+node_walk_dim_y(const struct node *n)
+{
+	assert(n != NULL);
+
+	switch (n->type) {
+		const struct list *p;
+		unsigned y;
+
+	case NODE_SKIP:
+		return 0;
+
+	case NODE_LITERAL:
+		return 0;
+
+	case NODE_RULE:
+		return 0;
+
+	case NODE_ALT:
+		y = 0;
+
+		for (p = n->u.alt; p != NULL; p = p->next) {
+			if (p == n->u.alt) {
+				if (p->node->type == NODE_SKIP && p->next && !p->next->next) {
+					y = 2 + node_walk_dim_y(p->node) + node_walk_dim_y(p->next->node);
+				} else {
+					y = node_walk_dim_y(p->node);
+				}
+			}
+		}
+
+		return y;
+
+	case NODE_SEQ:
+		{
+			unsigned top;
+
+			top = 0;
+
+			for (p = n->u.seq; p != NULL; p = p->next) {
+				unsigned z;
+
+				z = node_walk_dim_y(p->node);
+				if (z > top) {
+					top = z;
 				}
 			}
 
-			n->size.w = w - 2;
-			n->size.h = bot + top;
-			n->y = top;
+			return top;
 		}
 
 		break;
 
 	case NODE_LOOP:
-		node_walk_dim(n->u.loop.forward);
-		node_walk_dim(n->u.loop.backward);
+		return node_walk_dim_y(n->u.loop.forward);
+	}
+}
 
+static unsigned
+node_walk_dim_h(const struct node *n)
+{
+	assert(n != NULL);
+
+	switch (n->type) {
+		const struct list *p;
+		unsigned h;
+
+	case NODE_SKIP:
+		return 1;
+
+	case NODE_LITERAL:
+		return 1;
+
+	case NODE_RULE:
+		return 1;
+
+	case NODE_ALT:
+		h = 0;
+
+		for (p = n->u.alt; p != NULL; p = p->next) {
+			h += 1 + node_walk_dim_h(p->node);
+		}
+
+		return h - 1;
+
+	case NODE_SEQ:
 		{
-			int wf, wb, cw;
+			unsigned top = 0, bot = 1;
 
-			wf = n->u.loop.forward->size.w;
-			wb = n->u.loop.backward->size.w;
+			for (p = n->u.seq; p != NULL; p = p->next) {
+				unsigned y, z;
 
-			n->size.w = (wf > wb ? wf : wb) + 6;
-			n->size.h = n->u.loop.forward->size.h + n->u.loop.backward->size.h + 1;
-			n->y = n->u.loop.forward->y;
-
-			cw = loop_label(n, NULL);
-
-			if (cw > 0) {
-				if (cw + 6 > n->size.w) {
-					n->size.w = cw + 6;
+				y = node_walk_dim_y(p->node);
+				if (y > top) {
+					top = y;
 				}
-				if (n->u.loop.backward->type != NODE_SKIP) {
-					n->size.h += 2;
+
+				z = node_walk_dim_h(p->node);
+				if (z - y > bot) {
+					bot = z - y;
 				}
 			}
+
+			return bot + top;
 		}
 
 		break;
+
+	case NODE_LOOP:
+		h = node_walk_dim_h(n->u.loop.forward) + node_walk_dim_h(n->u.loop.backward) + 1;
+
+		if (loop_label(n, NULL) > 0) {
+			if (n->u.loop.backward->type != NODE_SKIP) {
+				h += 2;
+			}
+		}
+
+		return h;
 	}
 }
 
@@ -199,10 +272,10 @@ static void
 segment(struct render_context *ctx, const struct node *n, int delim)
 {
 	int y = ctx->y;
-	ctx->y -= n->y;
+	ctx->y -= node_walk_dim_y(n);
 	node_walk_render(n, ctx);
 
-	ctx->x += n->size.w;
+	ctx->x += node_walk_dim_w(n);
 	ctx->y = y;
 	if (delim) {
 		bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "--");
@@ -214,17 +287,17 @@ static void
 justify(struct render_context *ctx, const struct node *n, int space)
 {
 	int x = ctx->x;
-	int off = (space - n->size.w) / 2;
+	int off = (space - node_walk_dim_w(n)) / 2;
 
 	for (; ctx->x < x + off; ctx->x++) {
 		bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "-");
 	}
 
-	ctx->y -= n->y;
+	ctx->y -= node_walk_dim_y(n);
 	node_walk_render(n, ctx);
 
-	ctx->y += n->y;
-	ctx->x += n->size.w;
+	ctx->y += node_walk_dim_y(n);
+	ctx->x += node_walk_dim_w(n);
 	for (; ctx->x < x + space; ctx->x++) {
 		bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "-");
 	}
@@ -260,13 +333,13 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 
 			x = ctx->x;
 			y = ctx->y;
-			line = y + n->y;
+			line = y + node_walk_dim_y(n);
 
 			/* XXX: suspicious. is n->u.alt->node always present? */
-			a_in  = (n->y - n->u.alt->node->y) ? "v" : "^";
-			a_out = (n->y - n->u.alt->node->y) ? "^" : "v";
+			a_in  = (node_walk_dim_y(n) - node_walk_dim_y(n->u.alt->node)) ? "v" : "^";
+			a_out = (node_walk_dim_y(n) - node_walk_dim_y(n->u.alt->node)) ? "^" : "v";
 
-			ctx->y += n->u.alt->node->y;
+			ctx->y += node_walk_dim_y(n->u.alt->node);
 
 			for (p = n->u.alt; p != NULL; p = p->next) {
 				int i, flush = ctx->y == line;
@@ -279,9 +352,9 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 				}
 
 				ctx->x += 1;
-				justify(ctx, p->node, n->size.w - 2);
+				justify(ctx, p->node, node_walk_dim_w(n) - 2);
 
-				ctx->x = x + n->size.w - 1;
+				ctx->x = x + node_walk_dim_w(n) - 1;
 				if (!ctx->rtl) {
 					bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, flush ? ">" : a_in);
 				} else {
@@ -290,10 +363,10 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 				ctx->y++;
 
 				if (p->next) {
-					for (i = 0; i < p->node->size.h - p->node->y + p->next->node->y; i++) {
+					for (i = 0; i < node_walk_dim_h(p->node) - node_walk_dim_y(p->node) + node_walk_dim_y(p->next->node); i++) {
 						ctx->x = x;
 						bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "|");
-						ctx->x = x + n->size.w - 1;
+						ctx->x = x + node_walk_dim_w(n) - 1;
 						bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "|");
 						ctx->y++;
 					}
@@ -314,7 +387,7 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 			x = ctx->x;
 			y = ctx->y;
 
-			ctx->y += n->y;
+			ctx->y += node_walk_dim_y(n);
 			if (!ctx->rtl) {
 				for (p = n->u.seq; p != NULL; p = p->next) {
 					segment(ctx, p->node, !!p->next);
@@ -344,19 +417,19 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 			int x = ctx->x, y = ctx->y;
 			int i, cw;
 
-			ctx->y += n->y;
+			ctx->y += node_walk_dim_y(n);
 			bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, !ctx->rtl ? ">" : "v");
 			ctx->x += 1;
 
-			justify(ctx, n->u.loop.forward, n->size.w - 2);
-			ctx->x = x + n->size.w - 1;
+			justify(ctx, n->u.loop.forward, node_walk_dim_w(n) - 2);
+			ctx->x = x + node_walk_dim_w(n) - 1;
 			bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, !ctx->rtl ? "v" : "<");
 			ctx->y++;
 
-			for (i = 0; i < n->u.loop.forward->size.h - n->u.loop.forward->y + n->u.loop.backward->y; i++) {
+			for (i = 0; i < node_walk_dim_h(n->u.loop.forward) - node_walk_dim_y(n->u.loop.forward) + node_walk_dim_y(n->u.loop.backward); i++) {
 				ctx->x = x;
 				bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "|");
-				ctx->x = x + n->size.w - 1;
+				ctx->x = x + node_walk_dim_w(n) - 1;
 				bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "|");
 				ctx->y++;
 			}
@@ -368,12 +441,12 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 
 			cw = loop_label(n, NULL);
 
-			justify(ctx, n->u.loop.backward, n->size.w - 2);
+			justify(ctx, n->u.loop.backward, node_walk_dim_w(n) - 2);
 
 			if (cw > 0) {
 				int y = ctx->y;
 				char c;
-				ctx->x = x + 1 + (n->size.w - cw - 2) / 2;
+				ctx->x = x + 1 + (node_walk_dim_w(n) - cw - 2) / 2;
 				if (n->u.loop.backward->type != NODE_SKIP) {
 					ctx->y += 2;
 				}
@@ -385,7 +458,7 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 			}
 
 			ctx->rtl = !ctx->rtl;
-			ctx->x = x + n->size.w - 1;
+			ctx->x = x + node_walk_dim_w(n) - 1;
 			bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, !ctx->rtl ? "<" : "^");
 
 			ctx->x = x;
@@ -423,10 +496,8 @@ rrtext_output(const struct ast_rule *grammar)
 			struct render_context ctx;
 			int i;
 
-			node_walk_dim(rrd);
-
-			ctx.size = rrd->size;
-			ctx.size.w += 8;
+			ctx.size.w = node_walk_dim_w(rrd) + 8;
+			ctx.size.h = node_walk_dim_h(rrd);
 
 			ctx.lines = xmalloc(sizeof *ctx.lines * ctx.size.h + 1);
 			for (i = 0; i < ctx.size.h; i++) {
@@ -440,7 +511,7 @@ rrtext_output(const struct ast_rule *grammar)
 			ctx.y = 0;
 			ctx.scratch = xmalloc(ctx.size.w + 1);
 
-			ctx.y = rrd->y;
+			ctx.y = node_walk_dim_y(rrd);
 			bprintf(ctx.scratch, ctx.lines[ctx.y] + ctx.x, "||--");
 
 			ctx.x = ctx.size.w - 4;
