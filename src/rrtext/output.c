@@ -27,13 +27,7 @@
 
 #include "io.h"
 
-struct box_size {
-	int w;
-	int h;
-};
-
 struct render_context {
-	struct box_size size;
 	char **lines;
 	char *scratch;
 	int rtl;
@@ -494,34 +488,35 @@ rrtext_output(const struct ast_rule *grammar)
 
 		{
 			struct render_context ctx;
+			unsigned w, h;
 			int i;
 
-			ctx.size.w = node_walk_dim_w(rrd) + 8;
-			ctx.size.h = node_walk_dim_h(rrd);
+			w = node_walk_dim_w(rrd) + 8;
+			h = node_walk_dim_h(rrd);
 
-			ctx.lines = xmalloc(sizeof *ctx.lines * ctx.size.h + 1);
-			for (i = 0; i < ctx.size.h; i++) {
-				ctx.lines[i] = xmalloc(ctx.size.w + 1);
-				memset(ctx.lines[i], ' ', ctx.size.w);
-				ctx.lines[i][ctx.size.w] = '\0';
+			ctx.lines = xmalloc(sizeof *ctx.lines * h + 1);
+			for (i = 0; i < h; i++) {
+				ctx.lines[i] = xmalloc(w + 1);
+				memset(ctx.lines[i], ' ', w);
+				ctx.lines[i][w] = '\0';
 			}
 
 			ctx.rtl = 0;
 			ctx.x = 0;
 			ctx.y = 0;
-			ctx.scratch = xmalloc(ctx.size.w + 1);
+			ctx.scratch = xmalloc(w + 1);
 
 			ctx.y = node_walk_dim_y(rrd);
 			bprintf(ctx.scratch, ctx.lines[ctx.y] + ctx.x, "||--");
 
-			ctx.x = ctx.size.w - 4;
+			ctx.x = w - 4;
 			bprintf(ctx.scratch, ctx.lines[ctx.y] + ctx.x, "--||");
 
 			ctx.x = 4;
 			ctx.y = 0;
 			node_walk_render(rrd, &ctx);
 
-			for (i = 0; i < ctx.size.h; i++) {
+			for (i = 0; i < h; i++) {
 				printf("    %s\n", ctx.lines[i]);
 				free(ctx.lines[i]);
 			}
