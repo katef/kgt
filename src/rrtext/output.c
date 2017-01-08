@@ -36,6 +36,14 @@ struct render_context {
 
 static void node_walk_render(const struct node *n, struct render_context *ctx);
 
+static char *
+xy(struct render_context *ctx, unsigned int x, unsigned int y)
+{
+	assert(ctx != NULL);
+
+	return ctx->lines[y] + x;
+}
+
 static int
 bprintf(char *scratch, char *p, const char *fmt, ...)
 {
@@ -272,7 +280,7 @@ segment(struct render_context *ctx, const struct node *n, int delim)
 	ctx->x += node_walk_dim_w(n);
 	ctx->y = y;
 	if (delim) {
-		bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "--");
+		bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), "--");
 		ctx->x += 2;
 	}
 }
@@ -284,7 +292,7 @@ justify(struct render_context *ctx, const struct node *n, int space)
 	int off = (space - node_walk_dim_w(n)) / 2;
 
 	for (; ctx->x < x + off; ctx->x++) {
-		bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "-");
+		bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), "-");
 	}
 
 	ctx->y -= node_walk_dim_y(n);
@@ -293,7 +301,7 @@ justify(struct render_context *ctx, const struct node *n, int space)
 	ctx->y += node_walk_dim_y(n);
 	ctx->x += node_walk_dim_w(n);
 	for (; ctx->x < x + space; ctx->x++) {
-		bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "-");
+		bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), "-");
 	}
 
 	ctx->x = x;
@@ -310,12 +318,12 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 		const struct list *p;
 
 	case NODE_LITERAL:
-		bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, " \"%s\" ", n->u.literal);
+		bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), " \"%s\" ", n->u.literal);
 
 		break;
 
 	case NODE_RULE:
-		bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, " %s ", n->u.name);
+		bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), " %s ", n->u.name);
 
 		break;
 
@@ -340,9 +348,9 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 
 				ctx->x = x;
 				if (!ctx->rtl) {
-					bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, flush ? a_out : ">");
+					bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), flush ? a_out : ">");
 				} else {
-					bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, flush ? "<" : a_in);
+					bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), flush ? "<" : a_in);
 				}
 
 				ctx->x += 1;
@@ -350,18 +358,18 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 
 				ctx->x = x + node_walk_dim_w(n) - 1;
 				if (!ctx->rtl) {
-					bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, flush ? ">" : a_in);
+					bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), flush ? ">" : a_in);
 				} else {
-					bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, flush ? a_out : "<");
+					bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), flush ? a_out : "<");
 				}
 				ctx->y++;
 
 				if (p->next) {
 					for (i = 0; i < node_walk_dim_h(p->node) - node_walk_dim_y(p->node) + node_walk_dim_y(p->next->node); i++) {
 						ctx->x = x;
-						bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "|");
+						bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), "|");
 						ctx->x = x + node_walk_dim_w(n) - 1;
-						bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "|");
+						bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), "|");
 						ctx->y++;
 					}
 				}
@@ -412,24 +420,24 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 			int i, cw;
 
 			ctx->y += node_walk_dim_y(n);
-			bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, !ctx->rtl ? ">" : "v");
+			bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), !ctx->rtl ? ">" : "v");
 			ctx->x += 1;
 
 			justify(ctx, n->u.loop.forward, node_walk_dim_w(n) - 2);
 			ctx->x = x + node_walk_dim_w(n) - 1;
-			bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, !ctx->rtl ? "v" : "<");
+			bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), !ctx->rtl ? "v" : "<");
 			ctx->y++;
 
 			for (i = 0; i < node_walk_dim_h(n->u.loop.forward) - node_walk_dim_y(n->u.loop.forward) + node_walk_dim_y(n->u.loop.backward); i++) {
 				ctx->x = x;
-				bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "|");
+				bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), "|");
 				ctx->x = x + node_walk_dim_w(n) - 1;
-				bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, "|");
+				bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), "|");
 				ctx->y++;
 			}
 
 			ctx->x = x;
-			bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, !ctx->rtl ? "^" : ">");
+			bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), !ctx->rtl ? "^" : ">");
 			ctx->x += 1;
 			ctx->rtl = !ctx->rtl;
 
@@ -453,7 +461,7 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 
 			ctx->rtl = !ctx->rtl;
 			ctx->x = x + node_walk_dim_w(n) - 1;
-			bprintf(ctx->scratch, ctx->lines[ctx->y] + ctx->x, !ctx->rtl ? "<" : "^");
+			bprintf(ctx->scratch, xy(ctx, ctx->x, ctx->y), !ctx->rtl ? "<" : "^");
 
 			ctx->x = x;
 			ctx->y = y;
@@ -507,10 +515,10 @@ rrtext_output(const struct ast_rule *grammar)
 			ctx.scratch = xmalloc(w + 1);
 
 			ctx.y = node_walk_dim_y(rrd);
-			bprintf(ctx.scratch, ctx.lines[ctx.y] + ctx.x, "||--");
+			bprintf(ctx.scratch, xy(&ctx, ctx.x, ctx.y), "||--");
 
 			ctx.x = w - 4;
-			bprintf(ctx.scratch, ctx.lines[ctx.y] + ctx.x, "--||");
+			bprintf(ctx.scratch, xy(&ctx, ctx.x, ctx.y), "--||");
 
 			ctx.x = 4;
 			ctx.y = 0;
