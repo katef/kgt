@@ -44,7 +44,6 @@ bprintf(struct render_context *ctx, const char *fmt, ...)
 
 	assert(ctx != NULL);
 	assert(ctx->scratch != NULL);
-	assert(p != NULL);
 
 	va_start(ap, fmt);
 	n = vsprintf(ctx->scratch, fmt, ap);
@@ -192,8 +191,6 @@ node_walk_dim_y(const struct node *n)
 
 			return top;
 		}
-
-		break;
 
 	case NODE_LOOP:
 		return node_walk_dim_y(n->u.loop.forward);
@@ -366,7 +363,7 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 						ctx->y++;
 					}
 				}
-			};
+			}
 
 			ctx->x = x;
 			ctx->y = y;
