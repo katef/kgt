@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*
  * Graphviz Dot Diagram Output.
  *

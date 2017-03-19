@@ -1,5 +1,3 @@
-/* $Id: pretty_suffix.c 185 2016-12-23 21:32:07Z kate $ */
-
 /*
  * Railroad diagram beautification
  */

@@ -1,5 +1,3 @@
-# $Id$
-
 # 7.6: Gap-separator
 /[ \t\r\n\v\f]+/;
 

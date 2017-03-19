@@ -1,5 +1,3 @@
-/* $Id$ */
-
 #ifndef KGT_RRTA_IO_H
 #define KGT_RRTA_IO_H
 

@@ -1,5 +1,3 @@
-/* $Id$ */
-
 #ifndef KGT_DOT_IO_H
 #define KGT_DOT_IO_H
 

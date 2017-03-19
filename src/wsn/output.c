@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*
  * Wirth Syntax Notation Output.
  *

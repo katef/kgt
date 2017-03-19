@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*
  * Output a plaintext dump of the railroad tree
  */

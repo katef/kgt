@@ -1,5 +1,3 @@
-/* $Id$ */
-
 #ifndef KGT_RRD_LIST_H
 #define KGT_RRD_LIST_H
 

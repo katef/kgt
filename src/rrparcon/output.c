@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*
  * parcon.railroad DSL Railroad Diagram Output.
  * http://www.opengroove.org/parcon/parcon-tutorial.html

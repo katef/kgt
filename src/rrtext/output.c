@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*
  * Railroad Diagram ASCII-Art Output
  *

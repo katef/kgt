@@ -1,5 +1,3 @@
-# $Id$
-
 # Augmented BNF, RFC 5234
 # XXX: guesswork
 /[ \t\v\f\r]+/;

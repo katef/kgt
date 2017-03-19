@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*
  * Tab Atkins Jr. Railroad Diagram Output.
  * See https://github.com/tabatkins/railroad-diagrams

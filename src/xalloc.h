@@ -1,5 +1,3 @@
-/* $Id$ */
-
 #ifndef KGT_XALLOC_H
 #define KGT_XALLOC_H
 

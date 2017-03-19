@@ -1,5 +1,3 @@
-/* $Id$ */
-
 #ifndef KGT_BNF_IO_H
 #define KGT_BNF_IO_H
 

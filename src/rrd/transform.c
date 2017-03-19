@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*
  * AST to Railroad transformation
  */

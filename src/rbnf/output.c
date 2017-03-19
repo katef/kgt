@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*
  * Backus-Naur Form Output.
  *

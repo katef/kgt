@@ -1,5 +1,3 @@
-/* $Id$ */
-
 #ifndef KGT_WSN_IO_H
 #define KGT_WSN_IO_H
 

@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*
  * Abstract Railroad Diagram tree dump to Graphivz
  */

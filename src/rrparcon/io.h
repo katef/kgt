@@ -1,5 +1,3 @@
-/* $Id$ */
-
 #ifndef KGT_RRPARCON_IO_H
 #define KGT_RRPARCON_IO_H
 

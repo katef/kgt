@@ -1,5 +1,3 @@
-/* $Id$ */
-
 #ifndef KGT_AST_H
 #define KGT_AST_H
 
