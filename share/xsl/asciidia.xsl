@@ -1,5 +1,11 @@
 <?xml version="1.0"?>
 
+<!--
+	Copyright 2014-2017 Katherine Flavel
+
+	See LICENCE for the full copyright terms.
+-->
+
 <xsl:stylesheet version="1.0" 
 	xmlns="http://www.w3.org/2000/svg"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"

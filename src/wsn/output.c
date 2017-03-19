@@ -1,4 +1,10 @@
 /*
+ * Copyright 2014-2017 Katherine Flavel
+ *
+ * See LICENCE for the full copyright terms.
+ */
+
+/*
  * Wirth Syntax Notation Output.
  *
  * TODO: fprintf(fout), instead of stdout

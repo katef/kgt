@@ -1,4 +1,10 @@
 /*
+ * Copyright 2014-2017 Katherine Flavel
+ *
+ * See LICENCE for the full copyright terms.
+ */
+
+/*
  * Railroad Diagram ASCII-Art Output
  *
  * Output a plaintext diagram of the abstract representation of railroads

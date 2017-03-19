@@ -1,4 +1,10 @@
 /*
+ * Copyright 2014-2017 Katherine Flavel
+ *
+ * See LICENCE for the full copyright terms.
+ */
+
+/*
  * Graphviz Dot Diagram Output.
  *
  * TODO: fprintf(fout), instead of stdout
