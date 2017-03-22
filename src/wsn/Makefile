@@ -10,21 +10,21 @@ PARSER += src/wsn/parser.sid
 PART += wsn
 
 .for src in ${LEXER:Msrc/wsn/lexer.lx}
-LX_CFLAGS_${src} += -p lx_wsn_
+LX_CFLAGS.${src} += -p lx_wsn_
 .endfor
 
 .for parser in ${PARSER:Msrc/wsn/parser.sid}
-ACT_${parser} = src/parser.act
+ACT.${parser} = src/parser.act
 .endfor
 
 .for src in ${SRC:Msrc/wsn/lexer.c}
-CFLAGS_${src} += -D LX_HEADER='"lexer.h"'
-DFLAGS_${src} += -D LX_HEADER='"lexer.h"'
+CFLAGS.${src} += -D LX_HEADER='"lexer.h"'
+DFLAGS.${src} += -D LX_HEADER='"lexer.h"'
 .endfor
 
 .for src in ${SRC:Msrc/wsn/parser.c}
-CFLAGS_${src} += -D FORM='wsn'
-DFLAGS_${src} += -D FORM='wsn'
+CFLAGS.${src} += -D FORM='wsn'
+DFLAGS.${src} += -D FORM='wsn'
 .endfor
 
 .for src in ${SRC:Msrc/wsn/*.c}

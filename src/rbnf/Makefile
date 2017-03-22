@@ -10,21 +10,21 @@ PARSER += src/rbnf/parser.sid
 PART += rbnf
 
 .for src in ${LEXER:Msrc/rbnf/lexer.lx}
-LX_CFLAGS_${src} += -p lx_rbnf_
+LX_CFLAGS.${src} += -p lx_rbnf_
 .endfor
 
 .for parser in ${PARSER:Msrc/rbnf/parser.sid}
-ACT_${parser} = src/parser.act
+ACT.${parser} = src/parser.act
 .endfor
 
 .for src in ${SRC:Msrc/rbnf/lexer.c}
-CFLAGS_${src} += -D LX_HEADER='"lexer.h"'
-DFLAGS_${src} += -D LX_HEADER='"lexer.h"'
+CFLAGS.${src} += -D LX_HEADER='"lexer.h"'
+DFLAGS.${src} += -D LX_HEADER='"lexer.h"'
 .endfor
 
 .for src in ${SRC:Msrc/rbnf/parser.c}
-CFLAGS_${src} += -D FORM='rbnf'
-DFLAGS_${src} += -D FORM='rbnf'
+CFLAGS.${src} += -D FORM='rbnf'
+DFLAGS.${src} += -D FORM='rbnf'
 .endfor
 
 .for src in ${SRC:Msrc/rbnf/*.c}
