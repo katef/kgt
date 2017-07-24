@@ -204,6 +204,6 @@ dot_output(const struct ast_rule *grammar)
 		output_rule(grammar, p);
 	}
 
-	printf("};\n");
+	printf("}\n");
 }
 
