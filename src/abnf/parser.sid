@@ -27,7 +27,7 @@
 	EQUALS;
 	ALT;
 	ALTINC;
-	!SEP;
+	SEP;
 	REP;
 	!EXCEPT;
 
@@ -45,12 +45,14 @@
 	COUNT: () -> (:count);
 
 	BINSTR:   () -> (:string);
+	!OCTSTR:  () -> (:string);
 	DECSTR:   () -> (:string);
 	HEXSTR:   () -> (:string);
 
-	BINRANGE: () -> (:char, :char);
-	DECRANGE: () -> (:char, :char);
-	HEXRANGE: () -> (:char, :char);
+	BINRANGE:  () -> (:char, :char);
+	!OCTRANGE: () -> (:char, :char);
+	DECRANGE:  () -> (:char, :char);
+	HEXRANGE:  () -> (:char, :char);
 
 %productions%
 
