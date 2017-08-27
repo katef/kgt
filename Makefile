@@ -29,12 +29,6 @@ SUBDIR += src/rrtext
 SUBDIR += src/rrdot
 SUBDIR += src
 
-#INCDIR += include
-
-# TODO: centralise
-#DIR += ${BUILD}/bin
-DIR += ${BUILD}/lib
-
 .include <subdir.mk>
 .include <sid.mk>
 .include <lx.mk>
