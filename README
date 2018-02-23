@@ -6,6 +6,10 @@ KGT: Kate's Grammar Tool
  Output: Various BNF-like syntaxes, AST dumps, and Railroad Syntax Diagrams
 
 
+Clone with submodules (contains required .mk files):
+
+ ; git clone --recursive https://github.com/katef/kgt.git
+
 To build and install:
 
  ; pmake -r install
