@@ -18,13 +18,17 @@ enum lx_ebnf_token {
 	TOK_STARTOPT,
 	TOK_SEP,
 	TOK_ALT,
-	TOK_LITERAL,
 	TOK_CHAR,
+	TOK_LITERAL,
 	TOK_EOF,
 	TOK_ERROR,
 	TOK_UNKNOWN
 };
 
+/*
+ * .byte is 0-based.
+ * .line and .col are 1-based; 0 means unknown.
+ */
 struct lx_pos {
 	unsigned byte;
 	unsigned line;
@@ -33,18 +37,17 @@ struct lx_pos {
 
 struct lx_ebnf_lx {
 	int (*lgetc)(struct lx_ebnf_lx *lx);
-	void *opaque;
+	void *getc_opaque;
 
 	int c; /* lx_ebnf_ungetc buffer */
 
 	struct lx_pos start;
 	struct lx_pos end;
 
-	void *buf;
-	int  (*push) (struct lx_ebnf_lx *lx, char c);
-	void (*pop)  (struct lx_ebnf_lx *lx);
-	int  (*clear)(struct lx_ebnf_lx *lx);
-	void (*free) (struct lx_ebnf_lx *lx);
+	void *buf_opaque;
+	int  (*push) (void *buf_opaque, char c);
+	int  (*clear)(void *buf_opaque);
+	void (*free) (void *buf_opaque);
 
 	enum lx_ebnf_token (*z)(struct lx_ebnf_lx *lx);
 };
@@ -85,51 +88,15 @@ struct lx_dynbuf {
 	char *a;
 };
 
-/* fixed-size token buffer */
-struct lx_fixedbuf {
-	char *p;
-	size_t len;
-#ifdef LX_FIXED_SIZE
-	char a[LX_FIXED_SIZE];
-#else
-	char *a; /* could be flexible member */
-#endif
-};
-
-/* opaque for lx_ebnf_agetc */
-struct lx_arr {
-	char *p;
-	size_t len;
-};
-
-/* opaque for lx_ebnf_fdgetc */
-struct lx_fd {
-	char *p;
-	size_t len;
-
-	int fd;
-	size_t bufsz; /* number of bytes allocated after this struct */
-};
-
 const char *lx_ebnf_name(enum lx_ebnf_token t);
 const char *lx_ebnf_example(enum lx_ebnf_token (*z)(struct lx_ebnf_lx *), enum lx_ebnf_token t);
 
 void lx_ebnf_init(struct lx_ebnf_lx *lx);
 enum lx_ebnf_token lx_ebnf_next(struct lx_ebnf_lx *lx);
 
-int lx_ebnf_fgetc(struct lx_ebnf_lx *lx);
-int lx_ebnf_sgetc(struct lx_ebnf_lx *lx);
-int lx_ebnf_agetc(struct lx_ebnf_lx *lx);
-int lx_ebnf_dgetc(struct lx_ebnf_lx *lx);
-
-int  lx_ebnf_dynpush(struct lx_ebnf_lx *lx, char c);
-void lx_ebnf_dynpop(struct lx_ebnf_lx *lx);
-int  lx_ebnf_dynclear(struct lx_ebnf_lx *lx);
-void lx_ebnf_dynfree(struct lx_ebnf_lx *lx);
-
-int  lx_ebnf_fixedpush(struct lx_ebnf_lx *lx, char c);
-void lx_ebnf_fixedpop(struct lx_ebnf_lx *lx);
-int  lx_ebnf_fixedclear(struct lx_ebnf_lx *lx);
+int  lx_ebnf_dynpush(void *buf_opaque, char c);
+int  lx_ebnf_dynclear(void *buf_opaque);
+void lx_ebnf_dynfree(void *buf_opaque);
 
 #endif
 

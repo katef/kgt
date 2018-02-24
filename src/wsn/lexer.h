@@ -12,9 +12,9 @@ enum lx_wsn_token {
 	TOK_STARTOPT,
 	TOK_ENDSTAR,
 	TOK_STARTSTAR,
-	TOK_LITERAL,
 	TOK_CHAR,
 	TOK_ESC,
+	TOK_LITERAL,
 	TOK_SEP,
 	TOK_ALT,
 	TOK_EQUALS,
@@ -23,6 +23,10 @@ enum lx_wsn_token {
 	TOK_UNKNOWN
 };
 
+/*
+ * .byte is 0-based.
+ * .line and .col are 1-based; 0 means unknown.
+ */
 struct lx_pos {
 	unsigned byte;
 	unsigned line;
@@ -31,18 +35,17 @@ struct lx_pos {
 
 struct lx_wsn_lx {
 	int (*lgetc)(struct lx_wsn_lx *lx);
-	void *opaque;
+	void *getc_opaque;
 
 	int c; /* lx_wsn_ungetc buffer */
 
 	struct lx_pos start;
 	struct lx_pos end;
 
-	void *buf;
-	int  (*push) (struct lx_wsn_lx *lx, char c);
-	void (*pop)  (struct lx_wsn_lx *lx);
-	int  (*clear)(struct lx_wsn_lx *lx);
-	void (*free) (struct lx_wsn_lx *lx);
+	void *buf_opaque;
+	int  (*push) (void *buf_opaque, char c);
+	int  (*clear)(void *buf_opaque);
+	void (*free) (void *buf_opaque);
 
 	enum lx_wsn_token (*z)(struct lx_wsn_lx *lx);
 };
@@ -83,51 +86,15 @@ struct lx_dynbuf {
 	char *a;
 };
 
-/* fixed-size token buffer */
-struct lx_fixedbuf {
-	char *p;
-	size_t len;
-#ifdef LX_FIXED_SIZE
-	char a[LX_FIXED_SIZE];
-#else
-	char *a; /* could be flexible member */
-#endif
-};
-
-/* opaque for lx_wsn_agetc */
-struct lx_arr {
-	char *p;
-	size_t len;
-};
-
-/* opaque for lx_wsn_fdgetc */
-struct lx_fd {
-	char *p;
-	size_t len;
-
-	int fd;
-	size_t bufsz; /* number of bytes allocated after this struct */
-};
-
 const char *lx_wsn_name(enum lx_wsn_token t);
 const char *lx_wsn_example(enum lx_wsn_token (*z)(struct lx_wsn_lx *), enum lx_wsn_token t);
 
 void lx_wsn_init(struct lx_wsn_lx *lx);
 enum lx_wsn_token lx_wsn_next(struct lx_wsn_lx *lx);
 
-int lx_wsn_fgetc(struct lx_wsn_lx *lx);
-int lx_wsn_sgetc(struct lx_wsn_lx *lx);
-int lx_wsn_agetc(struct lx_wsn_lx *lx);
-int lx_wsn_dgetc(struct lx_wsn_lx *lx);
-
-int  lx_wsn_dynpush(struct lx_wsn_lx *lx, char c);
-void lx_wsn_dynpop(struct lx_wsn_lx *lx);
-int  lx_wsn_dynclear(struct lx_wsn_lx *lx);
-void lx_wsn_dynfree(struct lx_wsn_lx *lx);
-
-int  lx_wsn_fixedpush(struct lx_wsn_lx *lx, char c);
-void lx_wsn_fixedpop(struct lx_wsn_lx *lx);
-int  lx_wsn_fixedclear(struct lx_wsn_lx *lx);
+int  lx_wsn_dynpush(void *buf_opaque, char c);
+int  lx_wsn_dynclear(void *buf_opaque);
+void lx_wsn_dynfree(void *buf_opaque);
 
 #endif
 

@@ -9,7 +9,7 @@
 
 /* BEGINNING OF HEADER */
 
-#line 258 "src/parser.act"
+#line 251 "src/parser.act"
 
 
 	typedef struct lex_state * lex_state;
@@ -24,7 +24,7 @@
 extern void prod_wsn(lex_state, act_state, map_rule *);
 /* BEGINNING OF TRAILER */
 
-#line 759 "src/parser.act"
+#line 756 "src/parser.act"
 
 
 #line 31 "src/wsn/parser.h"
