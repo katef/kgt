@@ -155,7 +155,7 @@ output_rule(const struct ast_rule *rule)
 }
 
 void
-ebnf_output(const struct ast_rule *grammar)
+iso_ebnf_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
 

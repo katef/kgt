@@ -223,7 +223,7 @@
 		<add-rule-to-list>(r, l);
 	};
 
-	ebnf: () -> (l :ast_rule) = {
+	iso-ebnf: () -> (l :ast_rule) = {
 		l = list-of-rules;
 		EOF;
 	##
@@ -233,5 +233,5 @@
 
 %entry%
 
-	ebnf;
+	iso-ebnf;
 

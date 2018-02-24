@@ -15,7 +15,7 @@ ${BUILD}/bin/kgt: ${BUILD}/src/ast.o
 ${BUILD}/bin/kgt: ${BUILD}/src/main.o
 ${BUILD}/bin/kgt: ${BUILD}/src/xalloc.o
 
-.for part in ${PART:Mbnf} ${PART:Mabnf} ${PART:Mebnf} ${PART:Mrbnf} \
+.for part in ${PART:Mbnf} ${PART:Mabnf} ${PART:Miso-ebnf} ${PART:Mrbnf} \
 	${PART:Msid} ${PART:Mdot} ${PART:Mwsn} \
 	${PART:Mrrd} ${PART:Mrrdot} ${PART:Mrrdump} \
 	${PART:Mrrparcon} ${PART:Mrrta} ${PART:Mrrtext}
