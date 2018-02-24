@@ -10,7 +10,7 @@ PARSER += src/wsn/parser.sid
 PART += wsn
 
 .for src in ${LEXER:Msrc/wsn/lexer.lx}
-LX_CFLAGS.${src} += -p lx_wsn_
+LX_CFLAGS.${src} += -b dyn -e lx_wsn_ -t TOK_
 .endfor
 
 .for parser in ${PARSER:Msrc/wsn/parser.sid}

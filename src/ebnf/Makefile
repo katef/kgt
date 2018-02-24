@@ -10,7 +10,7 @@ PARSER += src/ebnf/parser.sid
 PART += ebnf
 
 .for src in ${LEXER:Msrc/ebnf/lexer.lx}
-LX_CFLAGS.${src} += -p lx_ebnf_
+LX_CFLAGS.${src} += -b dyn -e lx_ebnf_ -t TOK_
 .endfor
 
 .for parser in ${PARSER:Msrc/ebnf/parser.sid}

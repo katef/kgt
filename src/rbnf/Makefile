@@ -10,7 +10,7 @@ PARSER += src/rbnf/parser.sid
 PART += rbnf
 
 .for src in ${LEXER:Msrc/rbnf/lexer.lx}
-LX_CFLAGS.${src} += -p lx_rbnf_
+LX_CFLAGS.${src} += -b dyn -e lx_rbnf_ -t TOK_
 .endfor
 
 .for parser in ${PARSER:Msrc/rbnf/parser.sid}

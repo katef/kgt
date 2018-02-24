@@ -9,7 +9,7 @@ PARSER += src/abnf/parser.sid
 PART += abnf
 
 .for src in ${LEXER:Msrc/abnf/lexer.lx}
-LX_CFLAGS.${src} += -p lx_abnf_
+LX_CFLAGS.${src} += -b dyn -e lx_abnf_ -t TOK_
 .endfor
 
 .for parser in ${PARSER:Msrc/abnf/parser.sid}
