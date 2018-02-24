@@ -8,17 +8,17 @@
 
 #include LX_HEADER
 
-static enum lx_ebnf_token z0(struct lx_ebnf_lx *lx);
-static enum lx_ebnf_token z1(struct lx_ebnf_lx *lx);
-static enum lx_ebnf_token z2(struct lx_ebnf_lx *lx);
-static enum lx_ebnf_token z3(struct lx_ebnf_lx *lx);
-static enum lx_ebnf_token z4(struct lx_ebnf_lx *lx);
+static enum lx_iso_ebnf_token z0(struct lx_iso_ebnf_lx *lx);
+static enum lx_iso_ebnf_token z1(struct lx_iso_ebnf_lx *lx);
+static enum lx_iso_ebnf_token z2(struct lx_iso_ebnf_lx *lx);
+static enum lx_iso_ebnf_token z3(struct lx_iso_ebnf_lx *lx);
+static enum lx_iso_ebnf_token z4(struct lx_iso_ebnf_lx *lx);
 
 #if __STDC_VERSION__ >= 199901L
 inline
 #endif
 static int
-lx_getc(struct lx_ebnf_lx *lx)
+lx_getc(struct lx_iso_ebnf_lx *lx)
 {
 	int c;
 
@@ -49,7 +49,7 @@ lx_getc(struct lx_ebnf_lx *lx)
 inline
 #endif
 static void
-lx_ebnf_ungetc(struct lx_ebnf_lx *lx, int c)
+lx_iso_ebnf_ungetc(struct lx_iso_ebnf_lx *lx, int c)
 {
 	assert(lx != NULL);
 	assert(lx->c == EOF);
@@ -67,7 +67,7 @@ lx_ebnf_ungetc(struct lx_ebnf_lx *lx, int c)
 }
 
 int
-lx_ebnf_dynpush(void *buf_opaque, char c)
+lx_iso_ebnf_dynpush(void *buf_opaque, char c)
 {
 	struct lx_dynbuf *t = buf_opaque;
 
@@ -109,7 +109,7 @@ lx_ebnf_dynpush(void *buf_opaque, char c)
 }
 
 int
-lx_ebnf_dynclear(void *buf_opaque)
+lx_iso_ebnf_dynclear(void *buf_opaque)
 {
 	struct lx_dynbuf *t = buf_opaque;
 
@@ -136,7 +136,7 @@ lx_ebnf_dynclear(void *buf_opaque)
 }
 
 void
-lx_ebnf_dynfree(void *buf_opaque)
+lx_iso_ebnf_dynfree(void *buf_opaque)
 {
 	struct lx_dynbuf *t = buf_opaque;
 
@@ -144,8 +144,8 @@ lx_ebnf_dynfree(void *buf_opaque)
 
 	free(t->a);
 }
-static enum lx_ebnf_token
-z0(struct lx_ebnf_lx *lx)
+static enum lx_iso_ebnf_token
+z0(struct lx_iso_ebnf_lx *lx)
 {
 	int c;
 
@@ -432,10 +432,10 @@ z0(struct lx_ebnf_lx *lx)
 			break;
 
 		case S1: /* e.g. "a" */
-			lx_ebnf_ungetc(lx, c); return lx->z(lx);
+			lx_iso_ebnf_ungetc(lx, c); return lx->z(lx);
 
 		case S2: /* e.g. "?" */
-			lx_ebnf_ungetc(lx, c); return lx->z = z4, lx->z(lx);
+			lx_iso_ebnf_ungetc(lx, c); return lx->z = z4, lx->z(lx);
 
 		default:
 			; /* unreached */
@@ -468,8 +468,8 @@ z0(struct lx_ebnf_lx *lx)
 	}
 }
 
-static enum lx_ebnf_token
-z1(struct lx_ebnf_lx *lx)
+static enum lx_iso_ebnf_token
+z1(struct lx_iso_ebnf_lx *lx)
 {
 	int c;
 
@@ -756,10 +756,10 @@ z1(struct lx_ebnf_lx *lx)
 			break;
 
 		case S1: /* e.g. "a" */
-			lx_ebnf_ungetc(lx, c); return TOK_CHAR;
+			lx_iso_ebnf_ungetc(lx, c); return TOK_CHAR;
 
 		case S2: /* e.g. """ */
-			lx_ebnf_ungetc(lx, c); return lx->z = z4, TOK_LITERAL;
+			lx_iso_ebnf_ungetc(lx, c); return lx->z = z4, TOK_LITERAL;
 
 		default:
 			; /* unreached */
@@ -782,8 +782,8 @@ z1(struct lx_ebnf_lx *lx)
 	}
 }
 
-static enum lx_ebnf_token
-z2(struct lx_ebnf_lx *lx)
+static enum lx_iso_ebnf_token
+z2(struct lx_iso_ebnf_lx *lx)
 {
 	int c;
 
@@ -1070,10 +1070,10 @@ z2(struct lx_ebnf_lx *lx)
 			break;
 
 		case S1: /* e.g. "a" */
-			lx_ebnf_ungetc(lx, c); return TOK_CHAR;
+			lx_iso_ebnf_ungetc(lx, c); return TOK_CHAR;
 
 		case S2: /* e.g. "\'" */
-			lx_ebnf_ungetc(lx, c); return lx->z = z4, TOK_LITERAL;
+			lx_iso_ebnf_ungetc(lx, c); return lx->z = z4, TOK_LITERAL;
 
 		default:
 			; /* unreached */
@@ -1096,8 +1096,8 @@ z2(struct lx_ebnf_lx *lx)
 	}
 }
 
-static enum lx_ebnf_token
-z3(struct lx_ebnf_lx *lx)
+static enum lx_iso_ebnf_token
+z3(struct lx_iso_ebnf_lx *lx)
 {
 	int c;
 
@@ -1384,17 +1384,17 @@ z3(struct lx_ebnf_lx *lx)
 			break;
 
 		case S1: /* e.g. "a" */
-			lx_ebnf_ungetc(lx, c); return lx->z(lx);
+			lx_iso_ebnf_ungetc(lx, c); return lx->z(lx);
 
 		case S2: /* e.g. "*" */
 			switch ((unsigned char) c) {
 			case ')': state = S3; break;
-			default:  lx_ebnf_ungetc(lx, c); return lx->z(lx);
+			default:  lx_iso_ebnf_ungetc(lx, c); return lx->z(lx);
 			}
 			break;
 
 		case S3: /* e.g. "*)" */
-			lx_ebnf_ungetc(lx, c); return lx->z = z4, lx->z(lx);
+			lx_iso_ebnf_ungetc(lx, c); return lx->z = z4, lx->z(lx);
 
 		default:
 			; /* unreached */
@@ -1429,8 +1429,8 @@ z3(struct lx_ebnf_lx *lx)
 	}
 }
 
-static enum lx_ebnf_token
-z4(struct lx_ebnf_lx *lx)
+static enum lx_iso_ebnf_token
+z4(struct lx_iso_ebnf_lx *lx)
 {
 	int c;
 
@@ -1557,47 +1557,47 @@ z4(struct lx_ebnf_lx *lx)
 			case '\f':
 			case '\r': break;
 			case ' ': break;
-			default:  lx_ebnf_ungetc(lx, c); return lx->z(lx);
+			default:  lx_iso_ebnf_ungetc(lx, c); return lx->z(lx);
 			}
 			break;
 
 		case S2: /* e.g. "!" */
-			lx_ebnf_ungetc(lx, c); return TOK_ALT;
+			lx_iso_ebnf_ungetc(lx, c); return TOK_ALT;
 
 		case S3: /* e.g. """ */
-			lx_ebnf_ungetc(lx, c); return lx->z = z1, lx->z(lx);
+			lx_iso_ebnf_ungetc(lx, c); return lx->z = z1, lx->z(lx);
 
 		case S4: /* e.g. "\'" */
-			lx_ebnf_ungetc(lx, c); return lx->z = z2, lx->z(lx);
+			lx_iso_ebnf_ungetc(lx, c); return lx->z = z2, lx->z(lx);
 
 		case S5: /* e.g. "(" */
 			switch ((unsigned char) c) {
 			case '*': state = S21; break;
 			case '\x2f': state = S17; break;
 			case ':': state = S19; break;
-			default:  lx_ebnf_ungetc(lx, c); return TOK_STARTGROUP;
+			default:  lx_iso_ebnf_ungetc(lx, c); return TOK_STARTGROUP;
 			}
 			break;
 
 		case S6: /* e.g. ")" */
-			lx_ebnf_ungetc(lx, c); return TOK_ENDGROUP;
+			lx_iso_ebnf_ungetc(lx, c); return TOK_ENDGROUP;
 
 		case S7: /* e.g. "*" */
-			lx_ebnf_ungetc(lx, c); return TOK_STAR;
+			lx_iso_ebnf_ungetc(lx, c); return TOK_STAR;
 
 		case S8: /* e.g. "," */
-			lx_ebnf_ungetc(lx, c); return TOK_CAT;
+			lx_iso_ebnf_ungetc(lx, c); return TOK_CAT;
 
 		case S9: /* e.g. "-" */
-			lx_ebnf_ungetc(lx, c); return TOK_EXCEPT;
+			lx_iso_ebnf_ungetc(lx, c); return TOK_EXCEPT;
 
 		case S10: /* e.g. "." */
-			lx_ebnf_ungetc(lx, c); return TOK_SEP;
+			lx_iso_ebnf_ungetc(lx, c); return TOK_SEP;
 
 		case S11: /* e.g. "\x2f" */
 			switch ((unsigned char) c) {
 			case ')': state = S18; break;
-			default:  lx_ebnf_ungetc(lx, c); return TOK_ALT;
+			default:  lx_iso_ebnf_ungetc(lx, c); return TOK_ALT;
 			}
 			break;
 
@@ -1613,7 +1613,7 @@ z4(struct lx_ebnf_lx *lx)
 			case '7':
 			case '8':
 			case '9': break;
-			default:  lx_ebnf_ungetc(lx, c); return TOK_COUNT;
+			default:  lx_iso_ebnf_ungetc(lx, c); return TOK_COUNT;
 			}
 			break;
 
@@ -1625,10 +1625,10 @@ z4(struct lx_ebnf_lx *lx)
 			break;
 
 		case S14: /* e.g. "=" */
-			lx_ebnf_ungetc(lx, c); return TOK_EQUALS;
+			lx_iso_ebnf_ungetc(lx, c); return TOK_EQUALS;
 
 		case S15: /* e.g. "?" */
-			lx_ebnf_ungetc(lx, c); return lx->z = z0, lx->z(lx);
+			lx_iso_ebnf_ungetc(lx, c); return lx->z = z0, lx->z(lx);
 
 		case S16: /* e.g. "a" */
 			switch ((unsigned char) c) {
@@ -1702,24 +1702,24 @@ z4(struct lx_ebnf_lx *lx)
 			case 'x':
 			case 'y':
 			case 'z': break;
-			default:  lx_ebnf_ungetc(lx, c); return TOK_IDENT;
+			default:  lx_iso_ebnf_ungetc(lx, c); return TOK_IDENT;
 			}
 			break;
 
 		case S17: /* e.g. "[" */
-			lx_ebnf_ungetc(lx, c); return TOK_STARTOPT;
+			lx_iso_ebnf_ungetc(lx, c); return TOK_STARTOPT;
 
 		case S18: /* e.g. "]" */
-			lx_ebnf_ungetc(lx, c); return TOK_ENDOPT;
+			lx_iso_ebnf_ungetc(lx, c); return TOK_ENDOPT;
 
 		case S19: /* e.g. "{" */
-			lx_ebnf_ungetc(lx, c); return TOK_STARTSTAR;
+			lx_iso_ebnf_ungetc(lx, c); return TOK_STARTSTAR;
 
 		case S20: /* e.g. "}" */
-			lx_ebnf_ungetc(lx, c); return TOK_ENDSTAR;
+			lx_iso_ebnf_ungetc(lx, c); return TOK_ENDSTAR;
 
 		case S21: /* e.g. "(*" */
-			lx_ebnf_ungetc(lx, c); return lx->z = z3, lx->z(lx);
+			lx_iso_ebnf_ungetc(lx, c); return lx->z = z3, lx->z(lx);
 
 		default:
 			; /* unreached */
@@ -1773,7 +1773,7 @@ z4(struct lx_ebnf_lx *lx)
 }
 
 const char *
-lx_ebnf_name(enum lx_ebnf_token t)
+lx_iso_ebnf_name(enum lx_iso_ebnf_token t)
 {
 	switch (t) {
 	case TOK_COUNT: return "COUNT";
@@ -1800,7 +1800,7 @@ lx_ebnf_name(enum lx_ebnf_token t)
 }
 
 const char *
-lx_ebnf_example(enum lx_ebnf_token (*z)(struct lx_ebnf_lx *), enum lx_ebnf_token t)
+lx_iso_ebnf_example(enum lx_iso_ebnf_token (*z)(struct lx_iso_ebnf_lx *), enum lx_iso_ebnf_token t)
 {
 	assert(z != NULL);
 
@@ -1855,9 +1855,9 @@ error:
 }
 
 void
-lx_ebnf_init(struct lx_ebnf_lx *lx)
+lx_iso_ebnf_init(struct lx_iso_ebnf_lx *lx)
 {
-	static const struct lx_ebnf_lx lx_default;
+	static const struct lx_iso_ebnf_lx lx_default;
 
 	assert(lx != NULL);
 
@@ -1871,10 +1871,10 @@ lx_ebnf_init(struct lx_ebnf_lx *lx)
 	lx->end.col  = 1;
 }
 
-enum lx_ebnf_token
-lx_ebnf_next(struct lx_ebnf_lx *lx)
+enum lx_iso_ebnf_token
+lx_iso_ebnf_next(struct lx_iso_ebnf_lx *lx)
 {
-	enum lx_ebnf_token t;
+	enum lx_iso_ebnf_token t;
 
 	assert(lx != NULL);
 	assert(lx->z != NULL);

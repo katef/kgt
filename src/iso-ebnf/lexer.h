@@ -3,7 +3,7 @@
 #ifndef LX_H
 #define LX_H
 
-enum lx_ebnf_token {
+enum lx_iso_ebnf_token {
 	TOK_COUNT,
 	TOK_IDENT,
 	TOK_STAR,
@@ -35,11 +35,11 @@ struct lx_pos {
 	unsigned col;
 };
 
-struct lx_ebnf_lx {
-	int (*lgetc)(struct lx_ebnf_lx *lx);
+struct lx_iso_ebnf_lx {
+	int (*lgetc)(struct lx_iso_ebnf_lx *lx);
 	void *getc_opaque;
 
-	int c; /* lx_ebnf_ungetc buffer */
+	int c; /* lx_iso_ebnf_ungetc buffer */
 
 	struct lx_pos start;
 	struct lx_pos end;
@@ -49,7 +49,7 @@ struct lx_ebnf_lx {
 	int  (*clear)(void *buf_opaque);
 	void (*free) (void *buf_opaque);
 
-	enum lx_ebnf_token (*z)(struct lx_ebnf_lx *lx);
+	enum lx_iso_ebnf_token (*z)(struct lx_iso_ebnf_lx *lx);
 };
 
 /*
@@ -88,15 +88,15 @@ struct lx_dynbuf {
 	char *a;
 };
 
-const char *lx_ebnf_name(enum lx_ebnf_token t);
-const char *lx_ebnf_example(enum lx_ebnf_token (*z)(struct lx_ebnf_lx *), enum lx_ebnf_token t);
+const char *lx_iso_ebnf_name(enum lx_iso_ebnf_token t);
+const char *lx_iso_ebnf_example(enum lx_iso_ebnf_token (*z)(struct lx_iso_ebnf_lx *), enum lx_iso_ebnf_token t);
 
-void lx_ebnf_init(struct lx_ebnf_lx *lx);
-enum lx_ebnf_token lx_ebnf_next(struct lx_ebnf_lx *lx);
+void lx_iso_ebnf_init(struct lx_iso_ebnf_lx *lx);
+enum lx_iso_ebnf_token lx_iso_ebnf_next(struct lx_iso_ebnf_lx *lx);
 
-int  lx_ebnf_dynpush(void *buf_opaque, char c);
-int  lx_ebnf_dynclear(void *buf_opaque);
-void lx_ebnf_dynfree(void *buf_opaque);
+int  lx_iso_ebnf_dynpush(void *buf_opaque, char c);
+int  lx_iso_ebnf_dynclear(void *buf_opaque);
+void lx_iso_ebnf_dynfree(void *buf_opaque);
 
 #endif
 
