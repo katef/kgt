@@ -47,9 +47,15 @@
 
 # spaces are permitted within EBNF names
 # XXX: I am unsure that this is correct. EBNF is far too complicated.
+# XXX: The ISO EBNF grammar seems to be ambigious with terminal character
+# containing hyphen, and I don't see how to distinguish that from an "except"
+# operator hyphen. So I'm taking the intuitively reasonable approach of not
+# permitting hyphens at the start and end of gap free symbols. This is my
+# own definition for $ident, rather than repeating the grammar from the spec.
 # TODO: when lx permits, we could remove rtrim() and write this using group
 #       capture to consume whitespace here, but disregard it.
-/[a-z]([-a-z0-9_\t\r\n\v\f ]*)?/i -> $ident;
+word = /[a-z][a-z0-9_]*(-[a-z0-9_]+)*/i;
+word (/[\t\r\n\v\f ]*/ word)* /[\t\r\n\v\f ]*/ -> $ident;
 
 /[0-9]+/ -> $count;
 
