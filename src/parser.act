@@ -251,6 +251,13 @@
 		exit(EXIT_FAILURE);
 	}
 
+	static void
+	err_unimplemented(const struct lex_state *lex_state, const char *s)
+	{
+		err(lex_state, "Unimplemented: %s", s);
+		exit(EXIT_FAILURE);
+	}
+
 @}, @{
 
 	typedef struct lex_state * lex_state;
@@ -628,6 +635,10 @@
 
 	<err-expected-equals> = @{
 		err_expected(lex_state, "production rule assignment");
+	@};
+
+	<err-unimplemented-except> = @{
+		err_unimplemented(lex_state, "\"except\" productions");
 	@};
 
 %trailer% @{

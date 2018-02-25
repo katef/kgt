@@ -89,6 +89,7 @@
 	<err-expected-alt>;
 	<err-expected-sep>;
 	<err-expected-equals>;
+	!<err-unimplemented-except>;
 
 	list-of-terms: () -> (:ast_term);
 	list-of-alts:  () -> (:ast_alt);

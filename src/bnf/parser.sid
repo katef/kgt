@@ -89,6 +89,7 @@
 	<err-expected-alt>;
 	<err-expected-sep>;
 	<err-expected-equals>;
+	!<err-unimplemented-except>;
 
 	body: () -> () = {
 		{
