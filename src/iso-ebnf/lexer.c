@@ -1437,7 +1437,7 @@ z4(struct lx_iso_ebnf_lx *lx)
 	enum {
 		S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, 
 		S10, S11, S12, S13, S14, S15, S16, S17, S18, S19, 
-		S20, S21, NONE
+		S20, S21, S22, S23, NONE
 	} state;
 
 	assert(lx != NULL);
@@ -1572,7 +1572,7 @@ z4(struct lx_iso_ebnf_lx *lx)
 
 		case S5: /* e.g. "(" */
 			switch ((unsigned char) c) {
-			case '*': state = S21; break;
+			case '*': state = S23; break;
 			case '\x2f': state = S17; break;
 			case ':': state = S19; break;
 			default:  lx_iso_ebnf_ungetc(lx, c); return TOK_STARTGROUP;
@@ -1636,9 +1636,9 @@ z4(struct lx_iso_ebnf_lx *lx)
 			case '\n':
 			case '\v':
 			case '\f':
-			case '\r': break;
-			case ' ': break;
-			case '-': break;
+			case '\r': state = S21; break;
+			case ' ': state = S21; break;
+			case '-': state = S22; break;
 			case '0':
 			case '1':
 			case '2':
@@ -1718,7 +1718,140 @@ z4(struct lx_iso_ebnf_lx *lx)
 		case S20: /* e.g. "}" */
 			lx_iso_ebnf_ungetc(lx, c); return TOK_ENDSTAR;
 
-		case S21: /* e.g. "(*" */
+		case S21: /* e.g. "a\t" */
+			switch ((unsigned char) c) {
+			case '\t':
+			case '\n':
+			case '\v':
+			case '\f':
+			case '\r': break;
+			case ' ': break;
+			case 'A':
+			case 'B':
+			case 'C':
+			case 'D':
+			case 'E':
+			case 'F':
+			case 'G':
+			case 'H':
+			case 'I':
+			case 'J':
+			case 'K':
+			case 'L':
+			case 'M':
+			case 'N':
+			case 'O':
+			case 'P':
+			case 'Q':
+			case 'R':
+			case 'S':
+			case 'T':
+			case 'U':
+			case 'V':
+			case 'W':
+			case 'X':
+			case 'Y':
+			case 'Z': state = S16; break;
+			case 'a':
+			case 'b':
+			case 'c':
+			case 'd':
+			case 'e':
+			case 'f':
+			case 'g':
+			case 'h':
+			case 'i':
+			case 'j':
+			case 'k':
+			case 'l':
+			case 'm':
+			case 'n':
+			case 'o':
+			case 'p':
+			case 'q':
+			case 'r':
+			case 's':
+			case 't':
+			case 'u':
+			case 'v':
+			case 'w':
+			case 'x':
+			case 'y':
+			case 'z': state = S16; break;
+			default:  lx_iso_ebnf_ungetc(lx, c); return TOK_IDENT;
+			}
+			break;
+
+		case S22: /* e.g. "a-" */
+			switch ((unsigned char) c) {
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9': state = S16; break;
+			case 'A':
+			case 'B':
+			case 'C':
+			case 'D':
+			case 'E':
+			case 'F':
+			case 'G':
+			case 'H':
+			case 'I':
+			case 'J':
+			case 'K':
+			case 'L':
+			case 'M':
+			case 'N':
+			case 'O':
+			case 'P':
+			case 'Q':
+			case 'R':
+			case 'S':
+			case 'T':
+			case 'U':
+			case 'V':
+			case 'W':
+			case 'X':
+			case 'Y':
+			case 'Z': state = S16; break;
+			case '_': state = S16; break;
+			case 'a':
+			case 'b':
+			case 'c':
+			case 'd':
+			case 'e':
+			case 'f':
+			case 'g':
+			case 'h':
+			case 'i':
+			case 'j':
+			case 'k':
+			case 'l':
+			case 'm':
+			case 'n':
+			case 'o':
+			case 'p':
+			case 'q':
+			case 'r':
+			case 's':
+			case 't':
+			case 'u':
+			case 'v':
+			case 'w':
+			case 'x':
+			case 'y':
+			case 'z': state = S16; break;
+			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
+			}
+			break;
+
+		case S23: /* e.g. "(*" */
 			lx_iso_ebnf_ungetc(lx, c); return lx->z = z3, lx->z(lx);
 
 		default:
@@ -1730,7 +1863,7 @@ z4(struct lx_iso_ebnf_lx *lx)
 		case S3:
 		case S4:
 		case S15:
-		case S21:
+		case S23:
 			break;
 
 		default:
@@ -1767,7 +1900,8 @@ z4(struct lx_iso_ebnf_lx *lx)
 	case S18: return TOK_ENDOPT;
 	case S19: return TOK_STARTSTAR;
 	case S20: return TOK_ENDSTAR;
-	case S21: return TOK_EOF;
+	case S21: return TOK_IDENT;
+	case S23: return TOK_EOF;
 	default: errno = EINVAL; return TOK_ERROR;
 	}
 }
