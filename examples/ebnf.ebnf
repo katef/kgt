@@ -75,7 +75,8 @@ start option symbol = '['  | '(/' ;
 
 start repeat symbol = '{'  | '(:' ;
 
-terminator symbol = '; ' | '.' 
+terminator symbol = '; ' | '.';
+
 (* see 7.5 *) other character
 	= ' ' | ':'  | '+'  | '_'  | '%'  | '@' 
 	| '&'  | '#'  | '$'  | '<'  | '>'  | '\' 
