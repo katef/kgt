@@ -18,6 +18,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #include "../ast.h"
 #include "../xalloc.h"
@@ -39,6 +40,24 @@ struct render_context {
 };
 
 static void node_walk_render(const struct node *n, struct render_context *ctx);
+
+/*
+ * Trim trailing whitespace from a string. Whitespace is defined by isspace().
+ *
+ * Returns s, modified to be terminated at the start of its trailing whitespace.
+ */
+static char *
+rtrim(char *s)
+{
+	char *p = s + strlen(s) - 1;
+
+	while (p >= s && isspace((unsigned char) *p)) {
+		*p = '\0';
+		p--;
+	}
+
+	return s;
+}
 
 static int
 bprintf(struct render_context *ctx, const char *fmt, ...)
@@ -519,6 +538,7 @@ rrtext_output(const struct ast_rule *grammar)
 			node_walk_render(rrd, &ctx);
 
 			for (i = 0; i < h; i++) {
+				rtrim(ctx.lines[i]);
 				printf("    %s\n", ctx.lines[i]);
 				free(ctx.lines[i]);
 			}
