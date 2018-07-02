@@ -99,6 +99,29 @@ escputs(const char *s, FILE *f)
 	return n;
 }
 
+static size_t
+print_loop_label(FILE *f, const struct node *loop, int depth)
+{
+	print_indent(f, depth);
+	fprintf(f, "comment(\"");
+
+	if (loop->u.loop.max == 1 && loop->u.loop.min == 1) {
+		fprintf(f, "(exactly once)");
+	} else if (loop->u.loop.max == 0 && loop->u.loop.min > 0) {
+		fprintf(f, "(at least %d times)", loop->u.loop.min);
+	} else if (loop->u.loop.max > 0 && loop->u.loop.min == 0) {
+		fprintf(f, "(up to %d times)", loop->u.loop.max);
+	} else if (loop->u.loop.max > 0 && loop->u.loop.min == loop->u.loop.max) {
+		fprintf(f, "(%d times)", loop->u.loop.max);
+	} else if (loop->u.loop.max > 1 && loop->u.loop.min > 1) {
+		fprintf(f, "(%d-%d times)", loop->u.loop.min, loop->u.loop.max);
+	}
+
+	fprintf(f, "\")");
+
+	return 0;
+}
+
 static void
 node_walk(FILE *f, const struct node *n, int depth)
 {
@@ -171,7 +194,13 @@ node_walk(FILE *f, const struct node *n, int depth)
 		node_walk(f, n->u.loop.forward, depth + 1);
 		fprintf(f, ",\n");
 
-		node_walk(f, n->u.loop.backward, depth + 1);
+		if (n->u.loop.backward->type != NODE_SKIP) {
+			assert(n->u.loop.min < 1);
+			assert(n->u.loop.max == 0);
+			node_walk(f, n->u.loop.backward, depth + 1);
+		} else {
+			print_loop_label(f, n, depth + 1);
+		}
 		fprintf(f, "\n");
 
 		print_indent(f, depth);
@@ -192,12 +221,13 @@ rrparcon_output(const struct ast_rule *grammar)
 	printf("from collections import OrderedDict\n");
 	printf("\n");
 	printf("from parcon.railroad import Then, Or, Token, Loop, Bullet, Nothing\n");
-	printf("from parcon.railroad import PRODUCTION, TEXT\n");
+	printf("from parcon.railroad import PRODUCTION, TEXT, DESCRIPTION\n");
 	printf("import parcon.railroad.raildraw\n");
 	printf("\n");
 
+	printf("comment    = lambda t: Token(DESCRIPTION, t)\n");
 	printf("production = lambda t: Token(PRODUCTION, t)\n");
-	printf("text = lambda t: Token(TEXT, t)\n");
+	printf("text       = lambda t: Token(TEXT, t)\n");
 	printf("\n");
 
 	printf("productions = OrderedDict([\n");
