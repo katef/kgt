@@ -1003,7 +1003,7 @@ ZL1:;
 		const struct lex_state *lex_state;
 
 		assert(lx != NULL);
-		assert(lx->opaque != NULL);
+		assert(lx->getc_opaque != NULL);
 
 		lex_state = lx->getc_opaque;
 
