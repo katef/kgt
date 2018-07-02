@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 #include <ctype.h>
 
 #include "../ast.h"
@@ -99,27 +100,22 @@ escputs(const char *s, FILE *f)
 	return n;
 }
 
-static size_t
-print_loop_label(FILE *f, const struct node *loop, int depth)
+static void
+print_comment(FILE *f, int depth, const char *fmt, ...)
 {
+	va_list ap;
+
+	assert(f != NULL);
+	assert(fmt != NULL);
+
+	va_start(ap, fmt);
+
 	print_indent(f, depth);
 	fprintf(f, "comment(\"");
-
-	if (loop->u.loop.max == 1 && loop->u.loop.min == 1) {
-		fprintf(f, "(exactly once)");
-	} else if (loop->u.loop.max == 0 && loop->u.loop.min > 0) {
-		fprintf(f, "(at least %d times)", loop->u.loop.min);
-	} else if (loop->u.loop.max > 0 && loop->u.loop.min == 0) {
-		fprintf(f, "(up to %d times)", loop->u.loop.max);
-	} else if (loop->u.loop.max > 0 && loop->u.loop.min == loop->u.loop.max) {
-		fprintf(f, "(%d times)", loop->u.loop.max);
-	} else if (loop->u.loop.max > 1 && loop->u.loop.min > 1) {
-		fprintf(f, "(%d-%d times)", loop->u.loop.min, loop->u.loop.max);
-	}
-
+	vfprintf(f, fmt, ap);
 	fprintf(f, "\")");
 
-	return 0;
+	va_end(ap);
 }
 
 static void
@@ -194,13 +190,25 @@ node_walk(FILE *f, const struct node *n, int depth)
 		node_walk(f, n->u.loop.forward, depth + 1);
 		fprintf(f, ",\n");
 
-		if (n->u.loop.backward->type != NODE_SKIP) {
-			assert(n->u.loop.min < 1);
-			assert(n->u.loop.max == 0);
-			node_walk(f, n->u.loop.backward, depth + 1);
+		if (n->u.loop.max == 1 && n->u.loop.min == 1) {
+			print_comment(f, depth + 1, "(exactly once)");
+			assert(n->u.loop.backward->type == NODE_SKIP);
+		} else if (n->u.loop.max == 0 && n->u.loop.min > 0) {
+			print_comment(f, depth + 1, "(at least %d times)", n->u.loop.min);
+			assert(n->u.loop.backward->type == NODE_SKIP);
+		} else if (n->u.loop.max > 0 && n->u.loop.min == 0) {
+			print_comment(f, depth + 1, "(up to %d times)", n->u.loop.max);
+			assert(n->u.loop.backward->type == NODE_SKIP);
+		} else if (n->u.loop.max > 0 && n->u.loop.min == n->u.loop.max) {
+			print_comment(f, depth + 1, "(%d times)", n->u.loop.max);
+			assert(n->u.loop.backward->type == NODE_SKIP);
+		} else if (n->u.loop.max > 1 && n->u.loop.min > 1) {
+			print_comment(f, depth + 1, "(%d-%d times)", n->u.loop.min, n->u.loop.max);
+			assert(n->u.loop.backward->type == NODE_SKIP);
 		} else {
-			print_loop_label(f, n, depth + 1);
+			node_walk(f, n->u.loop.backward, depth);
 		}
+
 		fprintf(f, "\n");
 
 		print_indent(f, depth);
