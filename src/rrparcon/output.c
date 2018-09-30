@@ -223,6 +223,7 @@ rrparcon_output(const struct ast_rule *grammar)
 	const struct ast_rule *p;
 
 	printf("#!/usr/bin/env python\n");
+	printf("# -*- coding: utf-8 -*-\n");
 	printf("\n");
 
 	printf("import sys\n");
