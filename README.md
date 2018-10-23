@@ -4,6 +4,35 @@
  Input:  Various BNF-like syntaxes  
  Output: Various BNF-like syntaxes, AST dumps, and Railroad Syntax Diagrams
 
+Getting started:
+
+See the [/examples](examples/) directory for grammars in various
+BNF dialects. These have been collated from various sources and
+are of various quality. BNF dialects tend to be poorly specified,
+and these examples are an attempt to keep a corpus of known-good
+examples for each dialect. kgt can't parse them all yet.
+
+kgt reads from _stdin_ in dialect `-l ...` and writes to _stdout_
+in format `-e ...`:
+
+    ; kgt -l bnf -e rrtext < examples/expr.bnf
+    expr:
+        ||--v-- term -- "+" -- expr -->--||
+            |                         |
+            >--------- term ----------^
+    
+    term:
+        ||--v-- factor -- "*" -- term -->--||
+            |                           |
+            >--------- factor ----------^
+    
+    factor:
+        ||--v-- "(" -- expr -- ")" -->--||
+            |                        |
+            >-------- const ---------^
+    
+    const:
+        ||-- integer --||
 
 Clone with submodules (contains required .mk files):
 
