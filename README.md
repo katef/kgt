@@ -1,22 +1,21 @@
 
-KGT: Kate's Grammar Tool
+## KGT: Kate's Grammar Tool
 
-
- Input:  Various BNF-like syntaxes
+ Input:  Various BNF-like syntaxes  
  Output: Various BNF-like syntaxes, AST dumps, and Railroad Syntax Diagrams
 
 
 Clone with submodules (contains required .mk files):
 
- ; git clone --recursive https://github.com/katef/kgt.git
+    ; git clone --recursive https://github.com/katef/kgt.git
 
 To build and install:
 
- ; pmake -r install
+    ; pmake -r install
 
 You can override a few things:
 
- ; CC=clang PREFIX=$HOME pmake -r install
+    ; CC=clang PREFIX=$HOME pmake -r install
 
 Building depends on:
 
@@ -26,7 +25,6 @@ Building depends on:
  * A C compiler. Any should do, but GCC and clang are best supported.
 
  * ar, ld, and a bunch of other stuff you probably already have.
-
 
 Ideas, comments or bugs: kate@elide.org
 
