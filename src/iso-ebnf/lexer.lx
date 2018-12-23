@@ -28,7 +28,7 @@
 '|' -> $alt;
 ';' -> $sep;
 '[' -> $startopt;  ']' -> $endopt;
-'{' -> $startstar; '}' -> $endstar;
+'{' -> $startstar; '}' -> $endstar; # zero or more times
 
 # Table 2: Alternative representation of terminal-characters
 '/' -> $alt;
