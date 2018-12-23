@@ -14,6 +14,7 @@
 #include <stdio.h>
 
 #include "bnf/io.h"
+#include "blab/io.h"
 #include "wsn/io.h"
 #include "abnf/io.h"
 #include "iso-ebnf/io.h"
@@ -38,6 +39,7 @@ struct io {
 	void (*out)(const struct ast_rule *);
 } io[] = {
 	{ "bnf",      bnf_input,      bnf_output      },
+	{ "blab",     NULL,           blab_output     },
 	{ "wsn",      wsn_input,      wsn_output      },
 	{ "abnf",     abnf_input,     NULL            },
 	{ "iso-ebnf", iso_ebnf_input, iso_ebnf_output },
