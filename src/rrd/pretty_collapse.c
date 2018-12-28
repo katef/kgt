@@ -15,7 +15,10 @@ void
 rrd_pretty_collapse(int *changed, struct node **n)
 {
 	assert(n != NULL);
-	assert(*n != NULL);
+
+	if (*n == NULL) {
+		return;
+	}
 
 	switch ((*n)->type) {
 	case NODE_ALT:

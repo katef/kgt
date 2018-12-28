@@ -18,8 +18,11 @@ node_free(struct node *n)
 {
 	struct list *p;
 
+	if (n == NULL) {
+		return;
+	}
+
 	switch (n->type) {
-	case NODE_SKIP:
 	case NODE_LITERAL:
 	case NODE_RULE:
 		break;
@@ -45,18 +48,6 @@ node_free(struct node *n)
 	}
 
 	free(n);
-}
-
-struct node *
-node_create_skip(void)
-{
-	struct node *new;
-
-	new = xmalloc(sizeof *new);
-
-	new->type = NODE_SKIP;
-
-	return new;
 }
 
 struct node *
@@ -142,10 +133,9 @@ node_make_seq(struct node **n)
 {
 	struct list *new;
 
-	assert(*n != NULL);
 	assert(n != NULL);
 
-	if ((*n)->type == NODE_SEQ) {
+	if (*n != NULL && (*n)->type == NODE_SEQ) {
 		return;
 	}
 
@@ -159,17 +149,19 @@ node_make_seq(struct node **n)
 int
 node_compare(const struct node *a, const struct node *b)
 {
-	assert(a != NULL);
-	assert(b != NULL);
+	if (a == NULL && b == NULL) {
+		return 1;
+	}
+
+	if (a == NULL || b == NULL) {
+		return 0;
+	}
 
 	if (a->type != b->type) {
 		return 0;
 	}
 
 	switch (a->type) {
-	case NODE_SKIP:
-		return 1;
-
 	case NODE_LITERAL:
 		return 0 == strcmp(a->u.literal, b->u.literal);
 

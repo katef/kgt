@@ -9,7 +9,6 @@
 
 struct node {
 	enum {
-		NODE_SKIP,
 		NODE_LITERAL,
 		NODE_RULE,
 		NODE_ALT,
@@ -35,9 +34,6 @@ struct node {
 
 void
 node_free(struct node *);
-
-struct node *
-node_create_skip(void);
 
 struct node *
 node_create_literal(const char *literal);

@@ -122,16 +122,16 @@ static void
 node_walk(FILE *f, const struct node *n, int depth)
 {
 	assert(f != NULL);
-	assert(n != NULL);
 
-	switch (n->type) {
-		const struct list *p;
-
-	case NODE_SKIP:
+	if (n == NULL) {
 		print_indent(f, depth);
 		fprintf(f, "Nothing()");
 
-		break;
+		return;
+	}
+
+	switch (n->type) {
+		const struct list *p;
 
 	case NODE_LITERAL:
 		print_indent(f, depth);
@@ -192,19 +192,19 @@ node_walk(FILE *f, const struct node *n, int depth)
 
 		if (n->u.loop.max == 1 && n->u.loop.min == 1) {
 			print_comment(f, depth + 1, "(exactly once)");
-			assert(n->u.loop.backward->type == NODE_SKIP);
+			assert(n->u.loop.backward == NULL);
 		} else if (n->u.loop.max == 0 && n->u.loop.min > 0) {
 			print_comment(f, depth + 1, "(at least %d times)", n->u.loop.min);
-			assert(n->u.loop.backward->type == NODE_SKIP);
+			assert(n->u.loop.backward == NULL);
 		} else if (n->u.loop.max > 0 && n->u.loop.min == 0) {
 			print_comment(f, depth + 1, "(up to %d times)", n->u.loop.max);
-			assert(n->u.loop.backward->type == NODE_SKIP);
+			assert(n->u.loop.backward == NULL);
 		} else if (n->u.loop.max > 0 && n->u.loop.min == n->u.loop.max) {
 			print_comment(f, depth + 1, "(%d times)", n->u.loop.max);
-			assert(n->u.loop.backward->type == NODE_SKIP);
+			assert(n->u.loop.backward == NULL);
 		} else if (n->u.loop.max > 1 && n->u.loop.min > 1) {
 			print_comment(f, depth + 1, "(%d-%d times)", n->u.loop.min, n->u.loop.max);
-			assert(n->u.loop.backward->type == NODE_SKIP);
+			assert(n->u.loop.backward == NULL);
 		} else {
 			node_walk(f, n->u.loop.backward, depth);
 		}
@@ -244,8 +244,7 @@ rrparcon_output(const struct ast_rule *grammar)
 	for (p = grammar; p != NULL; p = p->next) {
 		struct node *rrd;
 
-		rrd = ast_to_rrd(p);
-		if (rrd == NULL) {
+		if (!ast_to_rrd(p, &rrd)) {
 			perror("ast_to_rrd");
 			return;
 		}

@@ -76,6 +76,10 @@ static void
 rrd_print_dot(const char *prefix, const void *parent, const char *port,
 	const struct node *node)
 {
+	if (node == NULL) {
+		return;
+	}
+
 	switch (node->type) {
 		const struct list *p;
 
@@ -107,10 +111,6 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 		prefix, (void *) node);
 
 	switch (node->type) {
-	case NODE_SKIP:
-		printf("label = \"&epsilon;\"");
-		break;
-
 	case NODE_LITERAL:
 		printf("style = filled, shape = box, label = \"\\\"");
 		escputs(node->u.literal, stdout);
@@ -178,8 +178,7 @@ rrdot_output(const struct ast_rule *grammar)
 	for (p = grammar; p != NULL; p = p->next) {
 		struct node *rrd;
 
-		rrd = ast_to_rrd(p);
-		if (rrd == NULL) {
+		if (!ast_to_rrd(p, &rrd)) {
 			perror("ast_to_rrd");
 			return;
 		}

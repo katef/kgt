@@ -108,11 +108,11 @@ normal(const struct list *list)
 		const struct node *a = list->node;
 		const struct node *b = list->next->node;
 
-		if (a->type == NODE_SKIP && b->type == NODE_RULE) {
+		if (a == NULL && b->type == NODE_RULE) {
 			return 1;
 		}
 
-		if (a->type == NODE_RULE && b->type == NODE_SKIP) {
+		if (a->type == NODE_RULE && b == NULL) {
 			return 0;
 		}
 	}
@@ -124,16 +124,16 @@ static void
 node_walk(FILE *f, const struct node *n, int depth)
 {
 	assert(f != NULL);
-	assert(n != NULL);
 
-	switch (n->type) {
-		const struct list *p;
-
-	case NODE_SKIP:
+	if (n == NULL) {
 		print_indent(f, depth);
 		fprintf(f, "Skip()");
 
-		break;
+		return;
+	}
+
+	switch (n->type) {
+		const struct list *p;
 
 	case NODE_LITERAL:
 		print_indent(f, depth);
@@ -202,8 +202,7 @@ rrta_output(const struct ast_rule *grammar)
 	for (p = grammar; p != NULL; p = p->next) {
 		struct node *rrd;
 
-		rrd = ast_to_rrd(p);
-		if (rrd == NULL) {
+		if (!ast_to_rrd(p, &rrd)) {
 			perror("ast_to_rrd");
 			return;
 		}

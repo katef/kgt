@@ -62,11 +62,10 @@ roll_prefix(int *changed, struct list **entry, struct node *loop)
 	assert(loop->u.loop.forward != NULL);
 	assert(loop->u.loop.forward->type == NODE_SEQ);
 	assert(loop->u.loop.forward->u.seq != NULL);
-	assert(loop->u.loop.forward->u.seq->node != NULL);
 
-	/* if destination is a NODE_SKIP, destroy that node first */
+	/* if destination is a skip node, destroy that node first */
 	/* TODO: centralise */
-	if (loop->u.loop.forward->u.seq->node->type == NODE_SKIP) {
+	if (loop->u.loop.forward->u.seq->node == NULL) {
 		node_free(list_pop(&loop->u.loop.forward->u.seq));
 	}
 
@@ -88,7 +87,7 @@ roll_prefix(int *changed, struct list **entry, struct node *loop)
 	/* we don't have empty lists */
 	if (loop->u.loop.backward->u.seq == NULL) {
 		node_free(loop->u.loop.backward);
-		loop->u.loop.backward = node_create_skip();
+		loop->u.loop.backward = NULL;
 	}
 
 	/* destroy the other node */
@@ -144,11 +143,10 @@ roll_suffix(int *changed, struct list **exit, struct node *loop)
 	assert(loop->u.loop.forward != NULL);
 	assert(loop->u.loop.forward->type == NODE_SEQ);
 	assert(loop->u.loop.forward->u.seq != NULL);
-	assert(loop->u.loop.forward->u.seq->node != NULL);
 
-	/* if destination is a NODE_SKIP, destroy that node first */
+	/* if destination is a skip node, destroy that node first */
 	/* TODO: centralise */
-	if (loop->u.loop.forward->u.seq->node->type == NODE_SKIP) {
+	if (loop->u.loop.forward->u.seq->node == NULL) {
 		node_free(list_pop(&loop->u.loop.forward->u.seq));
 	}
 
@@ -172,7 +170,7 @@ roll_suffix(int *changed, struct list **exit, struct node *loop)
 	/* we don't have empty lists */
 	if (loop->u.loop.backward->u.seq == NULL) {
 		node_free(loop->u.loop.backward);
-		loop->u.loop.backward = node_create_skip();
+		loop->u.loop.backward = NULL;
 	}
 
 	/* destroy the other node */
@@ -185,7 +183,10 @@ void
 rrd_pretty_roll(int *changed, struct node **n)
 {
 	assert(n != NULL);
-	assert(*n != NULL);
+
+	if (*n == NULL) {
+		return;
+	}
 
 	switch ((*n)->type) {
 		struct list **p;
@@ -197,7 +198,7 @@ rrd_pretty_roll(int *changed, struct node **n)
 		 * rather than searching from the head each time.
 		 */
 		for (p = &(*n)->u.seq; *p != NULL; p = &(*p)->next) {
-			if ((*p)->next != NULL && (*p)->next->node->type == NODE_LOOP) {
+			if ((*p)->next != NULL && ((*p)->next->node != NULL && (*p)->next->node->type == NODE_LOOP)) {
 				roll_prefix(changed, p, (*p)->next->node);
 				if (*changed) {
 					break;
@@ -209,7 +210,7 @@ rrd_pretty_roll(int *changed, struct node **n)
 		 * The suffix is the node immediately following a loop.
 		 */
 		for (p = &(*n)->u.seq; *p != NULL; p = &(**p).next) {
-			if ((*p)->node->type == NODE_LOOP && (*p)->next != NULL) {
+			if ((*p)->node != NULL && (*p)->node->type == NODE_LOOP && (*p)->next != NULL) {
 				roll_suffix(changed, &(*p)->next, (*p)->node);
 				if (*changed) {
 					break;

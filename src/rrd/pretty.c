@@ -21,10 +21,13 @@ static void
 node_walk(void (*f)(int *, struct node **),
 	int *changed, struct node **n)
 {
-	assert(n != NULL);
 	assert(f != NULL);
 
 	f(changed, n);
+
+	if (*n == NULL) {
+		return;
+	}
 
 	switch ((*n)->type) {
 		struct list **p;
@@ -46,7 +49,6 @@ node_walk(void (*f)(int *, struct node **),
 		node_walk(f, changed, &(*n)->u.loop.backward);
 		break;
 
-	case NODE_SKIP:
 	case NODE_RULE:
 	case NODE_LITERAL:
 		break;

@@ -164,7 +164,10 @@ void
 rrd_pretty_affixes(int *changed, struct node **n)
 {
 	assert(n != NULL);
-	assert(*n != NULL);
+
+	if (*n == NULL) {
+		return;
+	}
 
 	switch ((*n)->type) {
 		struct list **p;
@@ -184,8 +187,8 @@ rrd_pretty_affixes(int *changed, struct node **n)
 		 */
 
 		for (p = &(*n)->u.seq; *p != NULL; p = &(*p)->next) {
-			if ((*p)->node->type == NODE_LOOP) {
-				if ((*p)->node->u.loop.backward->type == NODE_SKIP) {
+			if ((*p)->node != NULL && (*p)->node->type == NODE_LOOP) {
+				if ((*p)->node->u.loop.backward == NULL) {
 					/* TODO: collapse_suffix() for forward only */
 				} else {
 					collapse_suffix(changed, &(*p)->next, (*p)->node);
@@ -197,8 +200,8 @@ rrd_pretty_affixes(int *changed, struct node **n)
 		}
 
 		for (p = &(*n)->u.seq; *p != NULL; p = &(*p)->next) {
-			if ((*p)->node->type == NODE_LOOP) {
-				if ((*p)->node->u.loop.backward->type == NODE_SKIP) {
+			if ((*p)->node != NULL && (*p)->node->type == NODE_LOOP) {
+				if ((*p)->node->u.loop.backward == NULL) {
 					/* TODO: collapse_prefix() for forward only */
 				} else {
 					collapse_prefix(changed, &(*n)->u.seq, (*p)->node);

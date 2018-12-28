@@ -104,14 +104,13 @@ loop_label(const struct node *loop, char *s)
 static unsigned
 node_walk_dim_w(const struct node *n)
 {
-	assert(n != NULL);
+	if (n == NULL) {
+		return 0;
+	}
 
 	switch (n->type) {
 		const struct list *p;
 		unsigned w;
-
-	case NODE_SKIP:
-		return 0;
 
 	case NODE_LITERAL:
 		return strlen(n->u.literal) + 4;
@@ -167,14 +166,13 @@ node_walk_dim_w(const struct node *n)
 static unsigned
 node_walk_dim_y(const struct node *n)
 {
-	assert(n != NULL);
+	if (n == NULL) {
+		return 0;
+	}
 
 	switch (n->type) {
 		const struct list *p;
 		unsigned y;
-
-	case NODE_SKIP:
-		return 0;
 
 	case NODE_LITERAL:
 		return 0;
@@ -187,7 +185,7 @@ node_walk_dim_y(const struct node *n)
 
 		for (p = n->u.alt; p != NULL; p = p->next) {
 			if (p == n->u.alt) {
-				if (p->node->type == NODE_SKIP && p->next && !p->next->next) {
+				if (p->node == NULL && p->next && !p->next->next) {
 					y = 2 + node_walk_dim_y(p->node) + node_walk_dim_y(p->next->node);
 				} else {
 					y = node_walk_dim_y(p->node);
@@ -223,14 +221,13 @@ node_walk_dim_y(const struct node *n)
 static unsigned
 node_walk_dim_h(const struct node *n)
 {
-	assert(n != NULL);
+	if (n == NULL) {
+		return 1;
+	}
 
 	switch (n->type) {
 		const struct list *p;
 		unsigned h;
-
-	case NODE_SKIP:
-		return 1;
 
 	case NODE_LITERAL:
 		return 1;
@@ -274,7 +271,7 @@ node_walk_dim_h(const struct node *n)
 		h = node_walk_dim_h(n->u.loop.forward) + node_walk_dim_h(n->u.loop.backward) + 1;
 
 		if (loop_label(n, NULL) > 0) {
-			if (n->u.loop.backward->type != NODE_SKIP) {
+			if (n->u.loop.backward != NULL) {
 				h += 2;
 			}
 		}
@@ -323,9 +320,11 @@ justify(struct render_context *ctx, const struct node *n, int space)
 static void
 node_walk_render(const struct node *n, struct render_context *ctx)
 {
-	assert(n != NULL);
-
 	assert(ctx != NULL);
+
+	if (n == NULL) {
+		return;
+	}
 
 	switch (n->type) {
 		const struct list *p;
@@ -462,7 +461,7 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 				int y = ctx->y;
 				char c;
 				ctx->x = x + 1 + (node_walk_dim_w(n) - cw - 2) / 2;
-				if (n->u.loop.backward->type != NODE_SKIP) {
+				if (n->u.loop.backward != NULL) {
 					ctx->y += 2;
 				}
 				/* still less horrible than malloc() */
@@ -481,9 +480,6 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 		}
 
 		break;
-
-	case NODE_SKIP:
-		break;
 	}
 }
 
@@ -495,8 +491,7 @@ rrtext_output(const struct ast_rule *grammar)
 	for (p = grammar; p; p = p->next) {
 		struct node *rrd;
 
-		rrd = ast_to_rrd(p);
-		if (rrd == NULL) {
+		if (!ast_to_rrd(p, &rrd)) {
 			perror("ast_to_rrd");
 			return;
 		}

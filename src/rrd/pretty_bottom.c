@@ -22,12 +22,11 @@ bottom_loop(struct node **np)
 
 	n = *np;
 
-	if (n->u.loop.forward->type != NODE_SKIP) {
+	if (n->u.loop.forward != NULL) {
 		return 0;
 	}
 
-	if (n->u.loop.backward->type == NODE_SKIP
-	 || n->u.loop.backward->type == NODE_LOOP) {
+	if (n->u.loop.backward == NULL || n->u.loop.backward->type == NODE_LOOP) {
 		return 0;
 	}
 
@@ -61,7 +60,7 @@ bottom_loop(struct node **np)
 		new  = NULL;
 
 		list_push(&new, n);
-		list_push(&new, node_create_skip());
+		list_push(&new, NULL);
 
 		*np = node_create_alt(new);
 	}
@@ -79,7 +78,10 @@ void
 rrd_pretty_bottom(int *changed, struct node **n)
 {
 	assert(n != NULL);
-	assert(*n != NULL);
+
+	if (*n == NULL) {
+		return;
+	}
 
 	switch ((*n)->type) {
 	case NODE_LOOP:
