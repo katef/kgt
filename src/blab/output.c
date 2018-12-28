@@ -85,6 +85,8 @@ output_repetition(unsigned int min, unsigned int max)
 		/* no operator */
 	} else if (min == max) {
 		printf("{%u}", min);
+	} else if (max == 0) {
+		printf("{%u,}", min);
 	} else {
 		printf("{%u,%u}", min, max);
 	}
