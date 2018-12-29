@@ -346,11 +346,15 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 			y = ctx->y;
 			line = y + node_walk_dim_y(n);
 
-			/* XXX: suspicious. is n->u.alt->node always present? */
-			a_in  = (node_walk_dim_y(n) - node_walk_dim_y(n->u.alt->node)) ? "v" : "^";
-			a_out = (node_walk_dim_y(n) - node_walk_dim_y(n->u.alt->node)) ? "^" : "v";
+			if (n->u.alt->node == NULL) { /* skip */
+				a_in  = node_walk_dim_y(n) ? "v" : "^";
+				a_out = node_walk_dim_y(n) ? "^" : "v";
+			} else {
+				a_in  = "^";
+				a_out = "v";
 
-			ctx->y += node_walk_dim_y(n->u.alt->node);
+				ctx->y += node_walk_dim_y(n);
+			}
 
 			for (p = n->u.alt; p != NULL; p = p->next) {
 				int i, flush = ctx->y == line;
