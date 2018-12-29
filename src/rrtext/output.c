@@ -183,14 +183,11 @@ node_walk_dim_y(const struct node *n)
 	case NODE_ALT:
 		y = 0;
 
-		for (p = n->u.alt; p != NULL; p = p->next) {
-			if (p == n->u.alt) {
-				if (p->node == NULL && p->next && !p->next->next) {
-					y = 2 + node_walk_dim_y(p->node) + node_walk_dim_y(p->next->node);
-				} else {
-					y = node_walk_dim_y(p->node);
-				}
-			}
+		p = n->u.alt;
+		if (p->node == NULL && p->next && !p->next->next) {
+			y = 2 + node_walk_dim_y(p->node) + node_walk_dim_y(p->next->node);
+		} else {
+			y = node_walk_dim_y(p->node);
 		}
 
 		return y;
