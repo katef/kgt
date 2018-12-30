@@ -150,8 +150,15 @@ node_walk(FILE *f, const struct node *n, int depth)
 		break;
 
 	case NODE_ALT:
+	case NODE_ALT_SKIPPABLE:
 		print_indent(f, depth);
 		fprintf(f, "Or(\n");
+
+		if (n->type == NODE_ALT_SKIPPABLE) {
+			print_indent(f, depth + 1);
+			fprintf(f, "Nothing(),\n");
+		}
+
 		for (p = n->u.alt; p != NULL; p = p->next) {
 			node_walk(f, p->node, depth + 1);
 			if (p->next != NULL) {

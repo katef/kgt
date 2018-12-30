@@ -84,6 +84,7 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 		const struct list *p;
 
 	case NODE_ALT:
+	case NODE_ALT_SKIPPABLE:
 		printf("\t{ rank = same;\n");
 		for (p = node->u.alt; p != NULL; p = p->next) {
 			printf("\t\t\"%s/%p\";\n", prefix, (void *) p->node);
@@ -127,6 +128,10 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 		printf("label = \"ALT\"");
 		break;
 
+	case NODE_ALT_SKIPPABLE:
+		printf("label = \"ALT|&epsilon;\"");
+		break;
+
 	case NODE_SEQ:
 		printf("label = \"SEQ\"");
 		break;
@@ -145,6 +150,7 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 		const struct list *p;
 
 	case NODE_ALT:
+	case NODE_ALT_SKIPPABLE:
 		for (p = node->u.alt; p != NULL; p = p->next) {
 			rrd_print_dot(prefix, node, "", p->node);
 		}

@@ -60,8 +60,9 @@ node_walk(FILE *f, const struct node *n, int depth)
 		break;
 
 	case NODE_ALT:
+	case NODE_ALT_SKIPPABLE:
 		print_indent(f, depth);
-		fprintf(f, "ALT: [\n");
+		fprintf(f, "%s: [\n", n->type == NODE_ALT ? "ALT" : "ALT|SKIP");
 		for (p = n->u.alt; p != NULL; p = p->next) {
 			node_walk(f, p->node, depth + 1);
 		}

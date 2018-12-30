@@ -28,6 +28,7 @@ node_free(struct node *n)
 		break;
 
 	case NODE_ALT:
+	case NODE_ALT_SKIPPABLE:
 		for (p = n->u.alt; p != NULL; p = p->next) {
 			node_free(p->node);
 		}
@@ -90,6 +91,20 @@ node_create_alt(struct list *alt)
 	new = xmalloc(sizeof *new);
 
 	new->type = NODE_ALT;
+
+	new->u.alt = alt;
+
+	return new;
+}
+
+struct node *
+node_create_alt_skippable(struct list *alt)
+{
+	struct node *new;
+
+	new = xmalloc(sizeof *new);
+
+	new->type = NODE_ALT_SKIPPABLE;
 
 	new->u.alt = alt;
 
@@ -169,6 +184,7 @@ node_compare(const struct node *a, const struct node *b)
 		return 0 == strcmp(a->u.name, b->u.name);
 
 	case NODE_ALT:
+	case NODE_ALT_SKIPPABLE:
 		return list_compare(a->u.alt, b->u.alt);
 
 	case NODE_SEQ:

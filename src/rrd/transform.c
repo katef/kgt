@@ -131,9 +131,8 @@ optional_term(const struct ast_term *term, struct node **r)
 	list = NULL;
 
 	list_push(&list, n);
-	list_push(&list, NULL);
 
-	*r = node_create_alt(list);
+	*r = node_create_alt_skippable(list);
 
 	return 1;
 }

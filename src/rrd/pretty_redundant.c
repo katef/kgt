@@ -14,9 +14,9 @@
 #include "list.h"
 
 static void
-redundant_alt(int *changed, struct node *n, struct node **np)
+redundant_alt(int *changed, struct node *n, struct node **np, int isskippable)
 {
-	int nc = 0, isopt = 0;
+	int nc = 0;
 	struct list **p;
 	struct node **loop;
 
@@ -25,16 +25,12 @@ redundant_alt(int *changed, struct node *n, struct node **np)
 	for (p = &n->u.alt; *p != NULL; p = &(**p).next) {
 		nc++;
 
-		if ((*p)->node == NULL) {
-			isopt = 1;
-		}
-
 		if ((*p)->node != NULL && (*p)->node->type == NODE_LOOP) {
 			loop = &(*p)->node;
 		}
 	}
 
-	if (nc == 2 && isopt && loop != NULL) {
+	if (nc == 2 && isskippable && loop != NULL) {
 		struct node *l;
 
 		l = *loop;
@@ -61,6 +57,7 @@ redundant_alt(int *changed, struct node *n, struct node **np)
 	} else {
 		struct list **next;
 
+		/* TODO: factor out to its own transformation */
 		/* fold nested alts into this one */
 		for (p = &n->u.alt; *p != NULL; p = next) {
 			struct list **head, **tail;
@@ -136,7 +133,8 @@ rrd_pretty_redundant(int *changed, struct node **n)
 
 	switch ((*n)->type) {
 	case NODE_ALT:
-		redundant_alt(changed, *n, n);
+	case NODE_ALT_SKIPPABLE:
+		redundant_alt(changed, *n, n, (*n)->type == NODE_ALT_SKIPPABLE);
 		break;
 
 	case NODE_LOOP:

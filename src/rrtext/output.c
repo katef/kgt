@@ -119,6 +119,7 @@ node_walk_dim_w(const struct node *n)
 		return strlen(n->u.name) + 2;
 
 	case NODE_ALT:
+	case NODE_ALT_SKIPPABLE:
 		w = 0;
 
 		for (p = n->u.alt; p != NULL; p = p->next) {
@@ -181,13 +182,21 @@ node_walk_dim_y(const struct node *n)
 		return 0;
 
 	case NODE_ALT:
-		y = 0;
+	case NODE_ALT_SKIPPABLE:
+		assert(n->u.alt != NULL);
 
 		p = n->u.alt;
-		if (p->node == NULL && p->next && !p->next->next) {
-			y = 2 + node_walk_dim_y(p->node) + node_walk_dim_y(p->next->node);
-		} else {
-			y = node_walk_dim_y(p->node);
+
+		/*
+		 * Alt lists hang below the line.
+		 * The height of this node is the height of just the first list item
+		 * because the first item is at the top of the list.
+ 		 */
+		y = node_walk_dim_y(p->node);
+
+		if (n->type == NODE_ALT_SKIPPABLE) {
+			/* for the skip node above the height of the first item */
+			y += 2;
 		}
 
 		return y;
@@ -233,13 +242,14 @@ node_walk_dim_h(const struct node *n)
 		return 1;
 
 	case NODE_ALT:
+	case NODE_ALT_SKIPPABLE:
 		h = 0;
 
 		for (p = n->u.alt; p != NULL; p = p->next) {
 			h += 1 + node_walk_dim_h(p->node);
 		}
 
-		return h - 1;
+		return h - 1 + 2 * (n->type == NODE_ALT_SKIPPABLE);
 
 	case NODE_SEQ:
 		{
@@ -337,6 +347,7 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 		break;
 
 	case NODE_ALT:
+	case NODE_ALT_SKIPPABLE:
 		{
 			int x, y;
 			int line;
@@ -346,7 +357,7 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 			y = ctx->y;
 			line = y + node_walk_dim_y(n);
 
-			if (n->u.alt->node == NULL) { /* skip */
+			if (n->type == NODE_ALT_SKIPPABLE) {
 				a_in  = node_walk_dim_y(n) ? "v" : "^";
 				a_out = node_walk_dim_y(n) ? "^" : "v";
 			} else {
@@ -356,14 +367,57 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 				ctx->y += node_walk_dim_y(n);
 			}
 
+			if (n->type == NODE_ALT_SKIPPABLE) {
+				int i;
+
+				/*
+				 * TODO: decide whether to put the skip above or hang it below.
+				 * It looks nicer below when the item being skipped is low in height,
+				 * and where adjacent SEQ nodes do not themselves go above the line.
+				 */
+
+				ctx->x = x;
+
+				if (!ctx->rtl) {
+					bprintf(ctx, ">");
+				} else {
+					bprintf(ctx, "<");
+				}
+				ctx->x++;
+
+				for (i = 0; i < node_walk_dim_w(n) - 2; i++) {
+					bprintf(ctx, "-");
+					ctx->x++;
+				}
+
+				bprintf(ctx, a_in);
+				ctx->y++;
+
+				ctx->x = x;
+				bprintf(ctx, "|");
+				ctx->x = x + node_walk_dim_w(n) - 1;
+				bprintf(ctx, "|");
+				ctx->y++;
+			}
+
 			for (p = n->u.alt; p != NULL; p = p->next) {
 				int i, flush = ctx->y == line;
 
+				/*
+				 * Skip nodes are rendered as three-way branches,
+				 * so we use ">" and "<" for the entry point,
+				 * depending on rtl.
+				 */
+
 				ctx->x = x;
 				if (!ctx->rtl) {
-					bprintf(ctx, flush ? a_out : ">");
+					if (n->type == NODE_ALT_SKIPPABLE && p->next != NULL) {
+						bprintf(ctx, "+");
+					} else {
+						bprintf(ctx, flush ? a_out : ">");
+					}
 				} else {
-					bprintf(ctx, flush ? "<" : a_in);
+					bprintf(ctx, flush ? "<" : (n->type == NODE_ALT_SKIPPABLE ? "^" : a_in));
 				}
 
 				ctx->x += 1;
@@ -371,9 +425,13 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 
 				ctx->x = x + node_walk_dim_w(n) - 1;
 				if (!ctx->rtl) {
-					bprintf(ctx, flush ? ">" : a_in);
+					bprintf(ctx, flush ? ">" : (n->type == NODE_ALT_SKIPPABLE ? "^" : a_in));
 				} else {
-					bprintf(ctx, flush ? a_out : "<");
+					if (n->type == NODE_ALT_SKIPPABLE && p->next != NULL) {
+						bprintf(ctx, "+");
+					} else {
+						bprintf(ctx, flush ? a_out : "<");
+					}
 				}
 				ctx->y++;
 

@@ -12,6 +12,7 @@ struct node {
 		NODE_LITERAL,
 		NODE_RULE,
 		NODE_ALT,
+		NODE_ALT_SKIPPABLE,
 		NODE_SEQ,
 		NODE_LOOP
 	} type;
@@ -43,6 +44,9 @@ node_create_name(const char *name);
 
 struct node *
 node_create_alt(struct list *alt);
+
+struct node *
+node_create_alt_skippable(struct list *alt);
 
 struct node *
 node_create_seq(struct list *seq);

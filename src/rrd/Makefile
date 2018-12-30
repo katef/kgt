@@ -9,6 +9,7 @@ SRC += src/rrd/pretty_collapse.c
 SRC += src/rrd/pretty_affix.c
 SRC += src/rrd/pretty_bottom.c
 SRC += src/rrd/pretty_redundant.c
+SRC += src/rrd/pretty_skippable.c
 SRC += src/rrd/pretty_roll.c
 SRC += src/rrd/pretty.c
 

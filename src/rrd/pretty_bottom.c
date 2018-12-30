@@ -34,14 +34,14 @@ bottom_loop(struct node **np)
 		return 0;
 	}
 
-	if (n->u.loop.backward->type == NODE_ALT) {
+	if (n->u.loop.backward->type == NODE_ALT || n->u.loop.backward->type == NODE_ALT_SKIPPABLE) {
 		struct list *p;
 		int c;
 
 		c = 0;
 
 		for (p = n->u.loop.backward->u.alt; p != NULL; p = p->next) {
-			if (p->node->type == NODE_ALT || p->node->type == NODE_SEQ || p->node->type == NODE_LOOP) {
+			if (p->node->type == NODE_ALT || p->node->type == NODE_ALT_SKIPPABLE || p->node->type == NODE_SEQ || p->node->type == NODE_LOOP) {
 				c = 1;
 			}
 		}

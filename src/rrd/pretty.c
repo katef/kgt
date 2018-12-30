@@ -33,6 +33,7 @@ node_walk(void (*f)(int *, struct node **),
 		struct list **p;
 
 	case NODE_ALT:
+	case NODE_ALT_SKIPPABLE:
 		for (p = &(*n)->u.alt; *p != NULL; p = &(**p).next) {
 			node_walk(f, changed, &(*p)->node);
 		}
@@ -63,7 +64,7 @@ rrd_pretty(struct node **rrd)
 	size_t i;
 
 	void (*f[])(int *, struct node **) = {
-		rrd_pretty_collapse, rrd_pretty_redundant,
+		rrd_pretty_collapse, rrd_pretty_skippable, rrd_pretty_redundant,
 		rrd_pretty_collapse, rrd_pretty_roll,
 		rrd_pretty_collapse, rrd_pretty_affixes,
 		rrd_pretty_collapse, rrd_pretty_bottom,

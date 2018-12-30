@@ -34,6 +34,9 @@ rrd_pretty_collapse(int *changed, struct node **n)
 		}
 		break;
 
+	case NODE_ALT_SKIPPABLE:
+		break;
+
 	case NODE_SEQ:
 		if (list_count((*n)->u.seq) == 1) {
 			struct node *dead;
