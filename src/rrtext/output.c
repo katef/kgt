@@ -189,35 +189,31 @@ node_walk_dim_y(const struct node *n)
 
 		/*
 		 * Alt lists hang below the line.
-		 * The height of this node is the height of just the first list item
-		 * because the first item is at the top of the list.
+		 * The y-height of this node is the y-height of just the first list item
+		 * because the first item is at the top of the list, plus the height of
+		 * the skip node above that.
  		 */
 		y = node_walk_dim_y(p->node);
 
 		if (n->type == NODE_ALT_SKIPPABLE) {
-			/* for the skip node above the height of the first item */
 			y += 2;
 		}
 
 		return y;
 
 	case NODE_SEQ:
-		{
-			unsigned top;
+		y = 0;
 
-			top = 0;
+		for (p = n->u.seq; p != NULL; p = p->next) {
+			unsigned z;
 
-			for (p = n->u.seq; p != NULL; p = p->next) {
-				unsigned z;
-
-				z = node_walk_dim_y(p->node);
-				if (z > top) {
-					top = z;
-				}
+			z = node_walk_dim_y(p->node);
+			if (z > y) {
+				y = z;
 			}
-
-			return top;
 		}
+
+		return y;
 
 	case NODE_LOOP:
 		return node_walk_dim_y(n->u.loop.forward);
@@ -249,7 +245,7 @@ node_walk_dim_h(const struct node *n)
 			h += 1 + node_walk_dim_h(p->node);
 		}
 
-		return h - 1 + 2 * (n->type == NODE_ALT_SKIPPABLE);
+		return h + node_walk_dim_y(n) - 1;
 
 	case NODE_SEQ:
 		{
