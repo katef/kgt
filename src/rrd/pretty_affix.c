@@ -80,7 +80,6 @@ collapse_suffix(int *changed, struct list **head, struct node *loop)
 	assert(loop->u.loop.forward != NULL);
 	assert(loop->u.loop.forward->type == NODE_SEQ);
 	assert(loop->u.loop.forward->u.seq != NULL);
-	assert(loop->u.loop.forward->u.seq->node != NULL);
 
 	/* if loop .backward isn't a NODE_SEQ, make it one */
 	node_make_seq(&loop->u.loop.backward);
@@ -88,7 +87,6 @@ collapse_suffix(int *changed, struct list **head, struct node *loop)
 	assert(loop->u.loop.backward != NULL);
 	assert(loop->u.loop.backward->type == NODE_SEQ);
 	assert(loop->u.loop.backward->u.seq != NULL);
-	assert(loop->u.loop.backward->u.seq->node != NULL);
 
 	/* find end of run; anchored at end of loop's seq */
 	{
@@ -122,7 +120,6 @@ collapse_prefix(int *changed, struct list **head, struct node *loop)
 	assert(loop->u.loop.forward != NULL);
 	assert(loop->u.loop.forward->type == NODE_SEQ);
 	assert(loop->u.loop.forward->u.seq != NULL);
-	assert(loop->u.loop.forward->u.seq->node != NULL);
 
 	/* if loop .backward isn't a NODE_SEQ, make it one */
 	node_make_seq(&loop->u.loop.backward);
@@ -130,7 +127,6 @@ collapse_prefix(int *changed, struct list **head, struct node *loop)
 	assert(loop->u.loop.backward != NULL);
 	assert(loop->u.loop.backward->type == NODE_SEQ);
 	assert(loop->u.loop.backward->u.seq != NULL);
-	assert(loop->u.loop.backward->u.seq->node != NULL);
 
 	/* find start of run; anchored at loop node */
 	{
