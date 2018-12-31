@@ -66,6 +66,7 @@ rrd_pretty(struct node **rrd)
 	void (*f[])(int *, struct node **) = {
 		rrd_pretty_collapse, rrd_pretty_skippable, rrd_pretty_redundant,
 		rrd_pretty_collapse, rrd_pretty_roll,
+		rrd_pretty_collapse, rrd_pretty_nested,
 		rrd_pretty_collapse, rrd_pretty_affixes,
 		rrd_pretty_collapse, rrd_pretty_bottom,
 		rrd_pretty_collapse

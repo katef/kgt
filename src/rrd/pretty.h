@@ -14,6 +14,7 @@ void rrd_pretty_bottom(int *changed, struct node **);
 void rrd_pretty_redundant(int *changed, struct node **);
 void rrd_pretty_skippable(int *changed, struct node **);
 void rrd_pretty_collapse(int *changed, struct node **);
+void rrd_pretty_nested(int *changed, struct node **);
 void rrd_pretty_roll(int *changed, struct node **);
 
 void rrd_pretty(struct node **rrd);

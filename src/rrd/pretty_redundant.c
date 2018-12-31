@@ -54,42 +54,6 @@ redundant_alt(int *changed, struct node *n, struct node **np, int isskippable)
 
 			*changed = 1;
 		}
-	} else {
-		struct list **next;
-
-		/* TODO: factor out to its own transformation */
-		/* fold nested alts into this one */
-		for (p = &n->u.alt; *p != NULL; p = next) {
-			struct list **head, **tail;
-			struct list *dead;
-
-			next = &(*p)->next;
-
-			if ((*p)->node == NULL || (*p)->node->type != NODE_ALT) {
-				continue;
-			}
-
-			dead = *p;
-
-			/* incoming inner list */
-			head = &(*p)->node->u.alt;
-
-			for (tail = head; *tail != NULL; tail = &(*tail)->next)
-				;
-
-			*tail = (*p)->next;
-			(*p)->next = NULL;
-
-			*p = *head;
-			*head = NULL;
-
-			next = p;
-
-			node_free(dead->node);
-			list_free(&dead);
-
-			*changed = 1;
-		}
 	}
 }
 
