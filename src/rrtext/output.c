@@ -241,15 +241,23 @@ node_walk_dim_h(const struct node *n)
 	case NODE_ALT_SKIPPABLE:
 		h = 0;
 
+		assert(n->u.alt != NULL);
+
 		for (p = n->u.alt; p != NULL; p = p->next) {
 			h += 1 + node_walk_dim_h(p->node);
 		}
 
-		return h + node_walk_dim_y(n) - 1;
+		if (n->type == NODE_ALT_SKIPPABLE) {
+ 			h += 2;
+		}
+
+		return h - 1;
 
 	case NODE_SEQ:
 		{
 			unsigned top = 0, bot = 1;
+
+			assert(n->u.seq != NULL);
 
 			for (p = n->u.seq; p != NULL; p = p->next) {
 				unsigned y, z;
@@ -389,11 +397,13 @@ node_walk_render(const struct node *n, struct render_context *ctx)
 				bprintf(ctx, a_in);
 				ctx->y++;
 
-				ctx->x = x;
-				bprintf(ctx, "|");
-				ctx->x = x + node_walk_dim_w(n) - 1;
-				bprintf(ctx, "|");
-				ctx->y++;
+				for (i = 0; i < node_walk_dim_y(n) - 1; i++) {
+					ctx->x = x;
+					bprintf(ctx, "|");
+					ctx->x = x + node_walk_dim_w(n) - 1;
+					bprintf(ctx, "|");
+					ctx->y++;
+				}
 			}
 
 			for (p = n->u.alt; p != NULL; p = p->next) {
