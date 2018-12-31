@@ -37,16 +37,15 @@ static void
 node_walk(FILE *f, const struct node *n, int depth)
 {
 	assert(f != NULL);
-	assert(n != NULL);
+
+	if (n == NULL) {
+		print_indent(f, depth);
+		fprintf(f, "SKIP\n");
+		return;
+	}
 
 	switch (n->type) {
 		const struct list *p;
-
-	case NODE_SKIP:
-		print_indent(f, depth);
-		fprintf(f, "SKIP\n");
-
-		break;
 
 	case NODE_LITERAL:
 		print_indent(f, depth);
@@ -61,8 +60,9 @@ node_walk(FILE *f, const struct node *n, int depth)
 		break;
 
 	case NODE_ALT:
+	case NODE_ALT_SKIPPABLE:
 		print_indent(f, depth);
-		fprintf(f, "ALT: [\n");
+		fprintf(f, "%s: [\n", n->type == NODE_ALT ? "ALT" : "ALT|SKIP");
 		for (p = n->u.alt; p != NULL; p = p->next) {
 			node_walk(f, p->node, depth + 1);
 		}
@@ -86,13 +86,13 @@ node_walk(FILE *f, const struct node *n, int depth)
 		print_indent(f, depth);
 		fprintf(f, "LOOP:\n");
 
-		if (n->u.loop.forward->type != NODE_SKIP) {
+		if (n->u.loop.forward != NULL) {
 			print_indent(f, depth + 1);
 			fprintf(f, ".forward:\n");
 			node_walk(f, n->u.loop.forward, depth + 2);
 		}
 
-		if (n->u.loop.backward->type != NODE_SKIP) {
+		if (n->u.loop.backward != NULL) {
 			print_indent(f, depth + 1);
 			fprintf(f, ".backward:\n");
 			node_walk(f, n->u.loop.backward, depth + 2);
@@ -110,8 +110,7 @@ rrdump_output(const struct ast_rule *grammar)
 	for (p = grammar; p != NULL; p = p->next) {
 		struct node *rrd;
 
-		rrd = ast_to_rrd(p);
-		if (rrd == NULL) {
+		if (!ast_to_rrd(p, &rrd)) {
 			perror("ast_to_rrd");
 			return;
 		}

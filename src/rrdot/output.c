@@ -76,10 +76,15 @@ static void
 rrd_print_dot(const char *prefix, const void *parent, const char *port,
 	const struct node *node)
 {
+	if (node == NULL) {
+		return;
+	}
+
 	switch (node->type) {
 		const struct list *p;
 
 	case NODE_ALT:
+	case NODE_ALT_SKIPPABLE:
 		printf("\t{ rank = same;\n");
 		for (p = node->u.alt; p != NULL; p = p->next) {
 			printf("\t\t\"%s/%p\";\n", prefix, (void *) p->node);
@@ -107,10 +112,6 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 		prefix, (void *) node);
 
 	switch (node->type) {
-	case NODE_SKIP:
-		printf("label = \"&epsilon;\"");
-		break;
-
 	case NODE_LITERAL:
 		printf("style = filled, shape = box, label = \"\\\"");
 		escputs(node->u.literal, stdout);
@@ -125,6 +126,10 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 
 	case NODE_ALT:
 		printf("label = \"ALT\"");
+		break;
+
+	case NODE_ALT_SKIPPABLE:
+		printf("label = \"ALT|&epsilon;\"");
 		break;
 
 	case NODE_SEQ:
@@ -145,6 +150,7 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 		const struct list *p;
 
 	case NODE_ALT:
+	case NODE_ALT_SKIPPABLE:
 		for (p = node->u.alt; p != NULL; p = p->next) {
 			rrd_print_dot(prefix, node, "", p->node);
 		}
@@ -178,8 +184,7 @@ rrdot_output(const struct ast_rule *grammar)
 	for (p = grammar; p != NULL; p = p->next) {
 		struct node *rrd;
 
-		rrd = ast_to_rrd(p);
-		if (rrd == NULL) {
+		if (!ast_to_rrd(p, &rrd)) {
 			perror("ast_to_rrd");
 			return;
 		}

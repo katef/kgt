@@ -10,6 +10,7 @@
 #include "../xalloc.h"
 
 #include "list.h"
+#include "node.h"
 
 void
 list_push(struct list **list, struct node *node)
@@ -17,7 +18,6 @@ list_push(struct list **list, struct node *node)
 	struct list *new;
 
 	assert(list != NULL);
-	assert(node != NULL);
 
 	new = xmalloc(sizeof *new);
 	new->node = node;

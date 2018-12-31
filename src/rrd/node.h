@@ -9,10 +9,10 @@
 
 struct node {
 	enum {
-		NODE_SKIP,
 		NODE_LITERAL,
 		NODE_RULE,
 		NODE_ALT,
+		NODE_ALT_SKIPPABLE,
 		NODE_SEQ,
 		NODE_LOOP
 	} type;
@@ -37,9 +37,6 @@ void
 node_free(struct node *);
 
 struct node *
-node_create_skip(void);
-
-struct node *
 node_create_literal(const char *literal);
 
 struct node *
@@ -47,6 +44,9 @@ node_create_name(const char *name);
 
 struct node *
 node_create_alt(struct list *alt);
+
+struct node *
+node_create_alt_skippable(struct list *alt);
 
 struct node *
 node_create_seq(struct list *seq);

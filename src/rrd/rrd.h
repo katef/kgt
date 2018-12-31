@@ -10,6 +10,6 @@
 struct ast_rule;
 struct node;
 
-struct node *ast_to_rrd(const struct ast_rule *);
+int ast_to_rrd(const struct ast_rule *, struct node **r);
 
 #endif
