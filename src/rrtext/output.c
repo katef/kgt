@@ -478,7 +478,7 @@ static void
 render_loop(const struct node *n, struct render_context *ctx)
 {
 	int x = ctx->x, y = ctx->y;
-	int i, cw;
+	int cw;
 
 	assert(n != NULL);
 	assert(ctx != NULL);
