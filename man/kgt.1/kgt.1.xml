@@ -1,0 +1,276 @@
+<?xml version="1.0"?>
+
+<!--
+	Copyright 2018 Katherine Flavel
+
+	See LICENCE for the full copyright terms.
+-->
+
+<!DOCTYPE refentry SYSTEM "minidocbook.dtd" [
+	<!ENTITY dialect.arg "<replaceable>dialect</replaceable>">
+
+	<!ENTITY stdin.lit  "<literal>stdin</literal>">
+	<!ENTITY stdout.lit "<literal>stdout</literal>">
+
+	<!ENTITY ascii "ASCII">
+
+	<!ENTITY vol.1 "<manvolnum>1</manvolnum>">
+	<!ENTITY kgt.1 "<citerefentry><refentrytitle>kgt</refentrytitle> &vol.1;</citerefentry>">
+	<!ENTITY sid.1 "<citerefentry><refentrytitle>sid</refentrytitle> &vol.1;</citerefentry>">
+	<!ENTITY dot.1 "<citerefentry><refentrytitle>dot</refentrytitle> &vol.1;</citerefentry>">
+	<!ENTITY blab.1 "<citerefentry><refentrytitle>blab</refentrytitle> &vol.1;</citerefentry>">
+
+	<!ENTITY bnf  "<acronym role='Backus-Naur Form'>BNF</acronym>">
+	<!ENTITY ebnf "<acronym role='Extended Backus-Naur Form'>EBNF</acronym>">
+	<!ENTITY abnf "<acronym role='Augmented Backus-Naur Form'>ABNF</acronym>">
+	<!ENTITY rbnf "<acronym role='Routing Backus-Naur Form'>RBNF</acronym>">
+	<!ENTITY wsn  "<acronym role='Wirth Syntax Notation'>RBNF</acronym>">
+
+	<!ENTITY n.opt "<option>-n</option>">
+	<!ENTITY u.opt "<option>-u</option>">
+	<!ENTITY l.opt "<option>-l</option>&nbsp;&dialect.arg;">
+	<!ENTITY e.opt "<option>-e</option>&nbsp;&dialect.arg;">
+
+	<!ENTITY h.opt "<option>-h</option>">
+	<!ENTITY v.opt "<option>-v</option>">
+]>
+
+<refentry>
+	<refentryinfo>
+		<productname>kgt</productname>
+	</refentryinfo>
+
+	<refmeta>
+		<refentrytitle>kgt</refentrytitle>
+		<manvolnum>1</manvolnum>
+	</refmeta>
+
+	<refnamediv>
+		<refname>kgt</refname>
+		<refpurpose>Kate's Grammar Tool</refpurpose>
+	</refnamediv>
+
+	<refsynopsisdiv>
+		<cmdsynopsis>
+			<command>kgt</command>
+
+			<arg choice="opt">&n.opt;</arg>
+			<arg choice="opt">&u.opt;</arg>
+
+			<arg choice="opt">&l.opt;</arg>
+			<arg choice="opt">&e.opt;</arg>
+		</cmdsynopsis>
+
+		<cmdsynopsis>
+			<command>kgt</command>
+
+			<group choice="req">
+				<arg choice="plain">&h.opt;</arg>
+<!--
+				<arg choice="plain">&v.opt;</arg>
+-->
+			</group>
+		</cmdsynopsis>
+	</refsynopsisdiv>
+
+	<refsection>
+		<title>Description</title>
+
+		<para>&kgt.1; is a command line tool to define and manipulate
+			<firstterm>context free grammars</firstterm>.
+			It can read and write grammars in various &bnf; dialects,
+			and render grammars as <firstterm>railroad diagrams</firstterm>.
+			Input is read from &stdin.lit; and output is written to
+			&stdout.lit;.</para>
+
+		<para>Available dialects are:</para>
+
+		<table>
+			<col align="left"/>
+			<col align="left"/>
+			<col align="left"/>
+
+			<thead>
+				<tr>
+					<th>Dialect</th>
+					<th>I/O</th>
+					<th>Specification</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				<tr>
+					<td><code>bnf</code></td>
+					<td>I/O</td>
+					<td>
+						<para>Backus–Naur form. This has no single specification.
+							&bnf; was first defined by John Backus
+							using symbols which aren't present in &ascii;;
+							<literal>:≡</literal> for rules, and alternatives
+							were given using the word “or” with an overbar.
+							This was refined by Peter Naur to introduce
+							<literal>::=</literal> for rules,
+							<literal>|</literal> for alternates,
+							and to have rule names surrounded by angle brackets.</para>
+
+						<para>J. W. Backus. The Syntax and Semantics of the Proposed International Algebraic Language of the Zurich ACM-GAMM Conference. Preprint.</para>
+
+						<para>Peter Naur (1961). “A course on ALGOL Programming”.</para>
+					</td>
+				</tr>
+				<tr>
+					<td><code>blab</code></td>
+					<td>O</td>
+					<td>Aki Helin's grammar-based data generator.
+						https://github.com/aoh/blab</td>
+				</tr>
+				<tr>
+					<td><code>wsn</code></td>
+					<td>I/O</td>
+					<td>
+						<para>Wirth Syntax Notation.
+							Wirth, Niklaus (November 1977).
+							“What Can We Do about the Unnecessary Diversity of Notations for Syntax Definitions?”.
+							Communications of the ACM. 20 (11): 822–823. doi:10.1145/359863.359883.
+						</para>
+					</td>
+				</tr>
+				<tr>
+					<td><code>abnf</code></td>
+					<td>I</td>
+					<td>Augmented BNF.
+						<ulink url="https://tools.ietf.org/html/rfc5234">RFC 5234</ulink>.</td>
+				</tr>
+				<tr>
+					<td><code>iso-ebnf</code></td>
+					<td>I/O</td>
+					<td>ISO Extended BNF.
+						<ulink url="https://www.iso.org/standard/26153.html">ISO/IEC 14977: 1996(E)</ulink></td>
+				</tr>
+				<tr>
+					<td><code>rbnf</code></td>
+					<td>I/O</td>
+					<td>Routing BNF.
+						<ulink url="https://tools.ietf.org/html/rfc5511">RFC 5511</ulink>.</td>
+				</tr>
+				<tr>
+					<td><code>sid</code></td>
+					<td>O</td>
+					<td>Syntax Improving Device.
+						SID is a parser generator.
+						Its syntax is specified in
+						<ulink url="http://www.tendra.org/sid-userguide">the SID users' guide</ulink>.</td>
+				</tr>
+				<tr>
+					<td><code>dot</code></td>
+					<td>O</td>
+					<td>Grammar AST output to Graphviz .dot format.</td>
+				</tr>
+				<tr>
+					<td><code>rrdot</code></td>
+					<td rowspan="2">O</td>
+					<td rowspan="2">Railroad diagram tree output to Graphviz &dot.1; format
+						and text, respectively.
+						This is an internal datastructure, likely to be relevant
+						for use when working on the railroad diagram output only.</td>
+				</tr>
+				<tr>
+					<td><code>rrdump</code></td>
+				</tr>
+				<tr>
+					<td><code>rrparcon</code></td>
+					<td>O</td>
+					<td>Alexander Boyd's <ulink url="http://www.opengroove.org/parcon/parcon-tutorial.html">parcon.railroad</ulink> Railroad diagram DSL.</td>
+				</tr>
+				<tr>
+					<td><code>rrta</code></td>
+					<td>O</td>
+					<td><ulink url="https://github.com/tabatkins/railroad-diagrams">Tab Atkins Jr. Railroad diagram</ulink> output.</td>
+				</tr>
+				<tr>
+					<td><code>rrtext</code></td>
+					<td>O</td>
+					<td>Railroad diagram &ascii;-art.</td>
+				</tr>
+			</tbody>
+		</table>
+	</refsection>
+
+	<refsection>
+		<title>Options</title>
+
+		<variablelist>
+			<varlistentry>
+				<term>&n.opt;</term>
+
+				<listitem>
+					<para>By default &kgt.1; will apply transformations to
+						simplify railroad diagram output. These are cosmetic only,
+						and do not change the meaning of a grammar.
+						The &n.opt; option disables these transformations.
+						This is intended to be relevant for development use only.</para>
+				</listitem>
+			</varlistentry>
+
+			<varlistentry>
+				<term>&u.opt;</term>
+
+				<listitem>
+					<para>Error about productions which are referenced but have
+						no definition given.
+						The default is to accept them.</para>
+				</listitem>
+			</varlistentry>
+
+			<varlistentry>
+				<term>&l.opt;</term>
+
+				<listitem>
+					<para>Read input in the given &bnf; dialect.</para>
+				</listitem>
+			</varlistentry>
+
+			<varlistentry>
+				<term>&e.opt;</term>
+
+				<listitem>
+					<para>Set the output language for printing a grammar.
+						The default is <literal>bnf</literal>.
+						Not all dialects support all grammatical constructs.</para>
+				</listitem>
+			</varlistentry>
+
+<!-- TODO:
+			<varlistentry>
+				<term>&v.opt;</term>
+
+				<listitem>
+					<para>Causes &fsm.1; to print its version number.</para>
+				</listitem>
+			</varlistentry>
+-->
+
+			<varlistentry>
+				<term>&h.opt;</term>
+
+				<listitem>
+					<para>Print command-line usage help.</para>
+				</listitem>
+			</varlistentry>
+		</variablelist>
+	</refsection>
+
+	<refsection>
+		<title>Exit Status</title>
+
+		<para>Exits <literal>0</literal> on success,
+			or non-zero if an error occurs.</para>
+	</refsection>
+
+	<refsection>
+		<title>See Also</title>
+
+		<para>&blab.1;, &sid.1;, &dot.1;</para>
+	</refsection>
+</refentry>
+
