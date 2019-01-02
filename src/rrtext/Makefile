@@ -1,6 +1,7 @@
 .include "../../share/mk/top.mk"
 
 SRC += src/rrtext/output.c
+SRC += src/rrtext/tnode.c
 
 PART += rrtext
 
