@@ -440,11 +440,11 @@ rrtext_output(const struct ast_rule *grammar)
 
 		tnode = rrd_to_tnode(rrd);
 
+		node_free(rrd);
+
 		printf("%s:\n", p->name);
 		render_rule(tnode);
 		printf("\n");
-
-		node_free(rrd); /* XXX: move earlier, when dim_*() are in struct tnode */
 
 		tnode_free(tnode);
 	}
