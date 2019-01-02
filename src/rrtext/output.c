@@ -155,6 +155,7 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 	size_t j;
 
 	assert(n != NULL);
+	assert(n->type == TNODE_ALT || n->type == TNODE_ALT_SKIPPABLE);
 	assert(ctx != NULL);
 
 	x = ctx->x;
@@ -262,6 +263,7 @@ render_seq(const struct tnode *n, struct render_context *ctx)
 	int x, y;
 
 	assert(n != NULL);
+	assert(n->type == TNODE_SEQ);
 	assert(ctx != NULL);
 
 	x = ctx->x;
@@ -293,6 +295,7 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 	int cw;
 
 	assert(n != NULL);
+	assert(n->type == TNODE_LOOP);
 	assert(ctx != NULL);
 
 	ctx->y += n->y;
@@ -325,7 +328,7 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 		int y = ctx->y;
 		char c;
 		ctx->x = x + 1 + (n->w - cw - 2) / 2;
-		if (n->u.loop.backward != NULL) {
+		if (n->u.loop.backward->type != TNODE_SKIP) {
 			ctx->y += 2;
 		}
 		/* still less horrible than malloc() */
@@ -348,11 +351,10 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 {
 	assert(ctx != NULL);
 
-	if (n == NULL) {
-		return;
-	}
-
 	switch (n->type) {
+	case TNODE_SKIP:
+		break;
+
 	case TNODE_LITERAL:
 		bprintf(ctx, " \"%s\" ", n->u.literal);
 		break;

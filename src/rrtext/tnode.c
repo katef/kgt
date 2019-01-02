@@ -59,6 +59,7 @@ tnode_free(struct tnode *n)
 	}
 
 	switch (n->type) {
+	case TNODE_SKIP:
 	case TNODE_LITERAL:
 	case TNODE_RULE:
 		break;
@@ -129,15 +130,16 @@ tnode_create_node(const struct node *node)
 {
 	struct tnode *new;
 
-	if (node == NULL) {
-		return NULL;
-	}
-
 	new = xmalloc(sizeof *new);
 
 	new->w = node_walk_dim_w(node);
 	new->y = node_walk_dim_y(node);
 	new->h = node_walk_dim_h(node);
+
+	if (node == NULL) {
+		new->type = TNODE_SKIP;
+		return new;
+	}
 
 	switch (node->type) {
 	case NODE_LITERAL:

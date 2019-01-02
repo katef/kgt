@@ -24,10 +24,11 @@ struct tlist {
 
 struct tnode {
 	enum {
+		TNODE_SKIP,
 		TNODE_LITERAL,
 		TNODE_RULE,
 		TNODE_ALT,
-		TNODE_ALT_SKIPPABLE,
+		TNODE_ALT_SKIPPABLE, /* TODO: maybe combine with TNODE_ALT, with different .h */
 		TNODE_SEQ,
 		TNODE_LOOP
 	} type;
