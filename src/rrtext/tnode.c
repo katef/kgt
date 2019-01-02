@@ -22,7 +22,6 @@
 #include "../rrd/node.h"
 #include "../rrd/rrd.h"
 #include "../rrd/list.h"
-#include "../rrd/stack.h"
 
 #include "io.h"
 #include "tnode.h"

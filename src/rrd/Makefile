@@ -3,7 +3,6 @@
 SRC += src/rrd/node.c
 SRC += src/rrd/transform.c
 SRC += src/rrd/list.c
-SRC += src/rrd/stack.c
 
 SRC += src/rrd/pretty_collapse.c
 SRC += src/rrd/pretty_affix.c
