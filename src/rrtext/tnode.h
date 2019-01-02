@@ -32,12 +32,9 @@ struct tnode {
 		TNODE_LOOP
 	} type;
 
-/* TODO:
 	unsigned w;
 	unsigned y;
 	unsigned h;
-*/
-	struct node *n;
 
 	union {
 		const char *literal; /* TODO: point to ast_literal instead */
@@ -65,11 +62,6 @@ rrd_to_tnode(const struct node *node);
 /* XXX */
 size_t
 loop_label(const struct tnode *loop, char *s);
-
-/* XXX: to move to struct tnode */
-unsigned node_walk_dim_w(const struct node *n);
-unsigned node_walk_dim_y(const struct node *n);
-unsigned node_walk_dim_h(const struct node *n);
 
 #endif
 

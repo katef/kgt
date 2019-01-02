@@ -113,10 +113,10 @@ static void
 segment(struct render_context *ctx, const struct tnode *n, int delim)
 {
 	int y = ctx->y;
-	ctx->y -= node_walk_dim_y(n->n);
+	ctx->y -= n->y;
 	node_walk_render(n, ctx);
 
-	ctx->x += node_walk_dim_w(n->n);
+	ctx->x += n->w;
 	ctx->y = y;
 	if (delim) {
 		bprintf(ctx, "--");
@@ -128,17 +128,17 @@ static void
 justify(struct render_context *ctx, const struct tnode *n, int space)
 {
 	int x = ctx->x;
-	int off = (space - node_walk_dim_w(n->n)) / 2;
+	int off = (space - n->w) / 2;
 
 	for (; ctx->x < x + off; ctx->x++) {
 		bprintf(ctx, "-");
 	}
 
-	ctx->y -= node_walk_dim_y(n->n);
+	ctx->y -= n->y;
 	node_walk_render(n, ctx);
 
-	ctx->y += node_walk_dim_y(n->n);
-	ctx->x += node_walk_dim_w(n->n);
+	ctx->y += n->y;
+	ctx->x += n->w;
 	for (; ctx->x < x + space; ctx->x++) {
 		bprintf(ctx, "-");
 	}
@@ -159,16 +159,16 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 
 	x = ctx->x;
 	y = ctx->y;
-	line = y + node_walk_dim_y(n->n);
+	line = y + n->y;
 
 	if (n->type == TNODE_ALT_SKIPPABLE) {
-		a_in  = node_walk_dim_y(n->n) ? "v" : "^";
-		a_out = node_walk_dim_y(n->n) ? "^" : "v";
+		a_in  = n->y ? "v" : "^";
+		a_out = n->y ? "^" : "v";
 	} else {
 		a_in  = "^";
 		a_out = "v";
 
-		ctx->y += node_walk_dim_y(n->n);
+		ctx->y += n->y;
 	}
 
 	if (n->type == TNODE_ALT_SKIPPABLE) {
@@ -189,7 +189,7 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		}
 		ctx->x++;
 
-		for (i = 0; i < node_walk_dim_w(n->n) - 2; i++) {
+		for (i = 0; i < n->w - 2; i++) {
 			bprintf(ctx, "-");
 			ctx->x++;
 		}
@@ -197,10 +197,10 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		bprintf(ctx, a_in);
 		ctx->y++;
 
-		for (i = 0; i < node_walk_dim_y(n->n) - 1; i++) {
+		for (i = 0; i < n->y - 1; i++) {
 			ctx->x = x;
 			bprintf(ctx, "|");
-			ctx->x = x + node_walk_dim_w(n->n) - 1;
+			ctx->x = x + n->w - 1;
 			bprintf(ctx, "|");
 			ctx->y++;
 		}
@@ -227,9 +227,9 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		}
 
 		ctx->x += 1;
-		justify(ctx, n->u.alt.a[j], node_walk_dim_w(n->n) - 2);
+		justify(ctx, n->u.alt.a[j], n->w - 2);
 
-		ctx->x = x + node_walk_dim_w(n->n) - 1;
+		ctx->x = x + n->w - 1;
 		if (!ctx->rtl) {
 			bprintf(ctx, flush ? ">" : (n->type == TNODE_ALT_SKIPPABLE ? "^" : a_in));
 		} else {
@@ -242,10 +242,10 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		ctx->y++;
 
 		if (j + 1 < n->u.alt.n) {
-			for (i = 0; i < node_walk_dim_h(n->u.alt.a[j]->n) - node_walk_dim_y(n->u.alt.a[j]->n) + node_walk_dim_y(n->u.alt.a[j + 1]->n); i++) {
+			for (i = 0; i < n->u.alt.a[j]->h - n->u.alt.a[j]->y + n->u.alt.a[j + 1]->y; i++) {
 				ctx->x = x;
 				bprintf(ctx, "|");
-				ctx->x = x + node_walk_dim_w(n->n) - 1;
+				ctx->x = x + n->w - 1;
 				bprintf(ctx, "|");
 				ctx->y++;
 			}
@@ -267,7 +267,7 @@ render_seq(const struct tnode *n, struct render_context *ctx)
 	x = ctx->x;
 	y = ctx->y;
 
-	ctx->y += node_walk_dim_y(n->n);
+	ctx->y += n->y;
 	if (!ctx->rtl) {
 		size_t i;
 
@@ -295,19 +295,19 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 	assert(n != NULL);
 	assert(ctx != NULL);
 
-	ctx->y += node_walk_dim_y(n->n);
+	ctx->y += n->y;
 	bprintf(ctx, !ctx->rtl ? ">" : "v");
 	ctx->x += 1;
 
-	justify(ctx, n->u.loop.forward, node_walk_dim_w(n->n) - 2);
-	ctx->x = x + node_walk_dim_w(n->n) - 1;
+	justify(ctx, n->u.loop.forward, n->w - 2);
+	ctx->x = x + n->w - 1;
 	bprintf(ctx, !ctx->rtl ? "v" : "<");
 	ctx->y++;
 
-	for (i = 0; i < node_walk_dim_h(n->u.loop.forward->n) - node_walk_dim_y(n->u.loop.forward->n) + node_walk_dim_y(n->u.loop.backward->n); i++) {
+	for (i = 0; i < n->u.loop.forward->h - n->u.loop.forward->y + n->u.loop.backward->y; i++) {
 		ctx->x = x;
 		bprintf(ctx, "|");
-		ctx->x = x + node_walk_dim_w(n->n) - 1;
+		ctx->x = x + n->w - 1;
 		bprintf(ctx, "|");
 		ctx->y++;
 	}
@@ -319,12 +319,12 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 
 	cw = loop_label(n, NULL);
 
-	justify(ctx, n->u.loop.backward, node_walk_dim_w(n->n) - 2);
+	justify(ctx, n->u.loop.backward, n->w - 2);
 
 	if (cw > 0) {
 		int y = ctx->y;
 		char c;
-		ctx->x = x + 1 + (node_walk_dim_w(n->n) - cw - 2) / 2;
+		ctx->x = x + 1 + (n->w - cw - 2) / 2;
 		if (n->u.loop.backward != NULL) {
 			ctx->y += 2;
 		}
@@ -336,7 +336,7 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 	}
 
 	ctx->rtl = !ctx->rtl;
-	ctx->x = x + node_walk_dim_w(n->n) - 1;
+	ctx->x = x + n->w - 1;
 	bprintf(ctx, !ctx->rtl ? "<" : "^");
 
 	ctx->x = x;
@@ -383,8 +383,8 @@ render_rule(const struct tnode *node)
 	unsigned w, h;
 	int i;
 
-	w = node_walk_dim_w(node->n) + 8;
-	h = node_walk_dim_h(node->n);
+	w = node->w + 8;
+	h = node->h;
 
 	ctx.lines = xmalloc(sizeof *ctx.lines * h + 1);
 	for (i = 0; i < h; i++) {
@@ -398,7 +398,7 @@ render_rule(const struct tnode *node)
 	ctx.y = 0;
 	ctx.scratch = xmalloc(w + 1);
 
-	ctx.y = node_walk_dim_y(node->n);
+	ctx.y = node->y;
 	bprintf(&ctx, "||--");
 
 	ctx.x = w - 4;

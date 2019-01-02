@@ -32,6 +32,11 @@
 static struct tnode *
 tnode_create_node(const struct node *node);
 
+/* XXX */
+static unsigned node_walk_dim_w(const struct node *n);
+static unsigned node_walk_dim_y(const struct node *n);
+static unsigned node_walk_dim_h(const struct node *n);
+
 static void
 tnode_free_tlist(struct tlist *list)
 {
@@ -130,7 +135,9 @@ tnode_create_node(const struct node *node)
 
 	new = xmalloc(sizeof *new);
 
-	new->n = node; /* XXX */
+	new->w = node_walk_dim_w(node);
+	new->y = node_walk_dim_y(node);
+	new->h = node_walk_dim_h(node);
 
 	switch (node->type) {
 	case NODE_LITERAL:
@@ -177,7 +184,7 @@ rrd_to_tnode(const struct node *node)
 	return tnode_create_node(node);
 }
 
-unsigned
+static unsigned
 node_walk_dim_w(const struct node *n)
 {
 	if (n == NULL) {
@@ -240,7 +247,7 @@ node_walk_dim_w(const struct node *n)
 	}
 }
 
-unsigned
+static unsigned
 node_walk_dim_y(const struct node *n)
 {
 	if (n == NULL) {
@@ -296,7 +303,7 @@ node_walk_dim_y(const struct node *n)
 	}
 }
 
-unsigned
+static unsigned
 node_walk_dim_h(const struct node *n)
 {
 	if (n == NULL) {
