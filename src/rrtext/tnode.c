@@ -100,22 +100,26 @@ tnode_create_list(const struct list *list)
 	return new;
 }
 
-static enum tnode_looptype
-tnode_looptype(const struct node *loop)
+static size_t
+loop_label(unsigned min, unsigned max, char *s)
 {
-	if (loop->u.loop.max == 1 && loop->u.loop.min == 1) {
-		return TNODE_LOOP_ONCE;
-	} else if (loop->u.loop.max == 0 && loop->u.loop.min > 0) {
-		return TNODE_LOOP_ATLEAST;
-	} else if (loop->u.loop.max > 0 && loop->u.loop.min == 0) {
-		return TNODE_LOOP_UPTO;
-	} else if (loop->u.loop.max > 0 && loop->u.loop.min == loop->u.loop.max) {
-		return TNODE_LOOP_EXACTLY;
-	} else if (loop->u.loop.max > 1 && loop->u.loop.min > 1) {
-		return TNODE_LOOP_BETWEEN;
+	assert(max >= min);
+	assert(s != NULL);
+
+	if (max == 1 && min == 1) {
+		return sprintf(s, "(exactly once)");
+	} else if (max == 0 && min > 0) {
+		return sprintf(s, "(at least %u times)", min);
+	} else if (max > 0 && min == 0) {
+		return sprintf(s, "(up to %d times)", max);
+	} else if (max > 0 && min == max) {
+		return sprintf(s, "(%u times)", max);
+	} else if (max > 1 && min > 1) {
+		return sprintf(s, "(%u-%u times)", min, max);
 	}
 
-	assert(!"unreached");
+	*s = '\0';
+
 	return 0;
 }
 
@@ -268,11 +272,10 @@ tnode_create_node(const struct node *node)
 
 	case NODE_LOOP:
 		new->type = TNODE_LOOP;
-		new->u.loop.looptype = tnode_looptype(node);
 		new->u.loop.forward  = tnode_create_node(node->u.loop.forward);
 		new->u.loop.backward = tnode_create_node(node->u.loop.backward);
-		new->u.loop.min = node->u.loop.min;
-		new->u.loop.max = node->u.loop.max;
+
+		loop_label(node->u.loop.min, node->u.loop.max, new->u.loop.label);
 
 		{
 			unsigned w;
@@ -283,7 +286,7 @@ tnode_create_node(const struct node *node)
 
 			w = (wf > wb ? wf : wb) + 6;
 
-			cw = loop_label(new, NULL);
+			cw = strlen(new->u.loop.label);
 
 			if (cw > 0) {
 				if (cw + 6 > w) {
@@ -303,7 +306,7 @@ tnode_create_node(const struct node *node)
 
 			h = new->u.loop.forward->h + new->u.loop.backward->h + 1;
 
-			if (loop_label(new, NULL) > 0) {
+			if (strlen(new->u.loop.label) > 0) {
 				if (new->u.loop.backward->type != TNODE_SKIP) {
 					h += 2;
 				}

@@ -9,14 +9,6 @@
 
 struct node;
 
-enum tnode_looptype {
-	TNODE_LOOP_ONCE,
-	TNODE_LOOP_ATLEAST,
-	TNODE_LOOP_UPTO,
-	TNODE_LOOP_EXACTLY,
-	TNODE_LOOP_BETWEEN
-};
-
 struct tlist {
 	struct tnode **a;
 	size_t n;
@@ -45,11 +37,9 @@ struct tnode {
 		struct tlist seq;
 
 		struct {
-			enum tnode_looptype looptype;
 			struct tnode *forward;
 			struct tnode *backward;
-			unsigned int min;
-			unsigned int max;
+			char label[128];
 		} loop;
 	} u;
 };
@@ -59,10 +49,6 @@ tnode_free(struct tnode *n);
 
 struct tnode *
 rrd_to_tnode(const struct node *node);
-
-/* XXX */
-size_t
-loop_label(const struct tnode *loop, char *s);
 
 #endif
 

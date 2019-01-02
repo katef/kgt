@@ -77,38 +77,6 @@ bprintf(struct render_context *ctx, const char *fmt, ...)
 	return n;
 }
 
-/* XXX: static */
-size_t
-loop_label(const struct tnode *loop, char *s)
-{
-	char buffer[128];
-
-	assert(loop->type == TNODE_LOOP);
-
-	if (s == NULL) {
-		s = buffer;
-	}
-
-	switch (loop->u.loop.looptype) {
-	case TNODE_LOOP_ONCE:
-		return sprintf(s, "(exactly once)");
-
-	case TNODE_LOOP_ATLEAST:
-		return sprintf(s, "(at least %d times)", loop->u.loop.min);
-
-	case TNODE_LOOP_UPTO:
-		return sprintf(s, "(up to %d times)", loop->u.loop.max);
-
-	case TNODE_LOOP_EXACTLY:
-		return sprintf(s, "(%d times)", loop->u.loop.max);
-
-	case TNODE_LOOP_BETWEEN:
-		return sprintf(s, "(%d-%d times)", loop->u.loop.min, loop->u.loop.max);
-	}
-
-	return 0;
-}
-
 static void
 segment(struct render_context *ctx, const struct tnode *n, int delim)
 {
@@ -320,21 +288,17 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 	ctx->x += 1;
 	ctx->rtl = !ctx->rtl;
 
-	cw = loop_label(n, NULL);
+	cw = strlen(n->u.loop.label);
 
 	justify(ctx, n->u.loop.backward, n->w - 2);
 
 	if (cw > 0) {
 		int y = ctx->y;
-		char c;
 		ctx->x = x + 1 + (n->w - cw - 2) / 2;
 		if (n->u.loop.backward->type != TNODE_SKIP) {
 			ctx->y += 2;
 		}
-		/* still less horrible than malloc() */
-		c = ctx->lines[ctx->y][ctx->x + cw];
-		loop_label(n, ctx->lines[ctx->y] + ctx->x);
-		ctx->lines[ctx->y][ctx->x + cw] = c;
+		memcpy(ctx->lines[ctx->y] + ctx->x, n->u.loop.label, strlen(n->u.loop.label));
 		ctx->y = y;
 	}
 
