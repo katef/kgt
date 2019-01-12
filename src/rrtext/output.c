@@ -59,7 +59,7 @@ rtrim(char *s)
 	return s;
 }
 
-static int
+static void
 bprintf(struct render_context *ctx, const char *fmt, ...)
 {
 	va_list ap;
@@ -74,44 +74,25 @@ bprintf(struct render_context *ctx, const char *fmt, ...)
 
 	memcpy(ctx->lines[ctx->y] + ctx->x, ctx->scratch, n);
 
-	return n;
-}
-
-static void
-segment(struct render_context *ctx, const struct tnode *n, int delim)
-{
-	int y = ctx->y;
-	ctx->y -= n->y;
-	node_walk_render(n, ctx);
-
-	ctx->x += n->w;
-	ctx->y = y;
-	if (delim) {
-		bprintf(ctx, "--");
-		ctx->x += 2;
-	}
+	ctx->x += n;
 }
 
 static void
 justify(struct render_context *ctx, const struct tnode *n, int space)
 {
-	int x = ctx->x;
-	int off = (space - n->w) / 2;
+	unsigned lhs = (space - n->w) / 2;
+	unsigned rhs = (space - n->w) - lhs;
+	unsigned i;
 
-	for (; ctx->x < x + off; ctx->x++) {
+	for (i = 0; i < lhs; i++) {
 		bprintf(ctx, "-");
 	}
 
-	ctx->y -= n->y;
 	node_walk_render(n, ctx);
 
-	ctx->y += n->y;
-	ctx->x += n->w;
-	for (; ctx->x < x + space; ctx->x++) {
+	for (i = 0; i < rhs; i++) {
 		bprintf(ctx, "-");
 	}
-
-	ctx->x = x;
 }
 
 static void
@@ -128,7 +109,7 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 
 	x = ctx->x;
 	y = ctx->y;
-	line = y + n->y;
+	line = y;
 
 	if (n->type == TNODE_ALT_SKIPPABLE) {
 		a_in  = n->y ? "v" : "^";
@@ -136,8 +117,6 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 	} else {
 		a_in  = "^";
 		a_out = "v";
-
-		ctx->y += n->y;
 	}
 
 	if (n->type == TNODE_ALT_SKIPPABLE) {
@@ -149,18 +128,16 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		 * and where adjacent SEQ nodes do not themselves go above the line.
 		 */
 
-		ctx->x = x;
+		ctx->y -= n->y;
 
 		if (!ctx->rtl) {
 			bprintf(ctx, ">");
 		} else {
 			bprintf(ctx, "<");
 		}
-		ctx->x++;
 
 		for (i = 0; i < n->w - 2; i++) {
 			bprintf(ctx, "-");
-			ctx->x++;
 		}
 
 		bprintf(ctx, a_in);
@@ -195,10 +172,8 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 			bprintf(ctx, flush ? "<" : (n->type == TNODE_ALT_SKIPPABLE ? "^" : a_in));
 		}
 
-		ctx->x += 1;
 		justify(ctx, n->u.alt.a[j], n->w - 2);
 
-		ctx->x = x + n->w - 1;
 		if (!ctx->rtl) {
 			bprintf(ctx, flush ? ">" : (n->type == TNODE_ALT_SKIPPABLE ? "^" : a_in));
 		} else {
@@ -221,39 +196,25 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		}
 	}
 
-	ctx->x = x;
 	ctx->y = y;
 }
 
 static void
 render_seq(const struct tnode *n, struct render_context *ctx)
 {
-	int x, y;
+	size_t i;
 
 	assert(n != NULL);
 	assert(n->type == TNODE_SEQ);
 	assert(ctx != NULL);
 
-	x = ctx->x;
-	y = ctx->y;
+	for (i = 0; i < n->u.seq.n; i++) {
+		node_walk_render(n->u.seq.a[!ctx->rtl ? i : n->u.seq.n - i], ctx);
 
-	ctx->y += n->y;
-	if (!ctx->rtl) {
-		size_t i;
-
-		for (i = 0; i < n->u.seq.n; i++) {
-			segment(ctx, n->u.seq.a[i], i + 1 < n->u.seq.n);
-		}
-	} else {
-		size_t i;
-
-		for (i = 0; i < n->u.seq.n; i++) {
-			segment(ctx, n->u.seq.a[n->u.seq.n - i], i + 1 < n->u.seq.n);
+		if (i + 1 < n->u.seq.n) {
+			bprintf(ctx, "--");
 		}
 	}
-
-	ctx->x = x;
-	ctx->y = y;
 }
 
 static void
@@ -265,27 +226,24 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 	assert(n != NULL);
 	assert(n->type == TNODE_LOOP);
 	assert(ctx != NULL);
+	assert(n->y == 0);
 
-	ctx->y += n->y;
 	bprintf(ctx, !ctx->rtl ? ">" : "v");
-	ctx->x += 1;
 
 	justify(ctx, n->u.loop.forward, n->w - 2);
-	ctx->x = x + n->w - 1;
 	bprintf(ctx, !ctx->rtl ? "v" : "<");
 	ctx->y++;
 
 	for (i = 0; i < n->u.loop.forward->h - n->u.loop.forward->y + n->u.loop.backward->y; i++) {
 		ctx->x = x;
 		bprintf(ctx, "|");
-		ctx->x = x + n->w - 1;
+		ctx->x += n->w - 2;
 		bprintf(ctx, "|");
 		ctx->y++;
 	}
 
 	ctx->x = x;
 	bprintf(ctx, !ctx->rtl ? "^" : ">");
-	ctx->x += 1;
 	ctx->rtl = !ctx->rtl;
 
 	cw = strlen(n->u.loop.label);
@@ -306,7 +264,6 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 	ctx->x = x + n->w - 1;
 	bprintf(ctx, !ctx->rtl ? "<" : "^");
 
-	ctx->x = x;
 	ctx->y = y;
 }
 
@@ -371,7 +328,7 @@ render_rule(const struct tnode *node)
 	bprintf(&ctx, "--||");
 
 	ctx.x = 4;
-	ctx.y = 0;
+	ctx.y = node->y;
 	node_walk_render(node, &ctx);
 
 	for (i = 0; i < h; i++) {
