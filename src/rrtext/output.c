@@ -99,62 +99,20 @@ static void
 render_alt(const struct tnode *n, struct render_context *ctx)
 {
 	int x, y;
-	int line;
-	char *a_in, *a_out;
 	size_t j;
 
 	assert(n != NULL);
-	assert(n->type == TNODE_ALT || n->type == TNODE_ALT_SKIPPABLE);
+	assert(n->type == TNODE_ALT);
 	assert(ctx != NULL);
 
 	x = ctx->x;
 	y = ctx->y;
-	line = y;
 
-	if (n->type == TNODE_ALT_SKIPPABLE) {
-		a_in  = n->y ? "v" : "^";
-		a_out = n->y ? "^" : "v";
-	} else {
-		a_in  = "^";
-		a_out = "v";
-	}
-
-	if (n->type == TNODE_ALT_SKIPPABLE) {
-		int i;
-
-		/*
-		 * TODO: decide whether to put the skip above or hang it below.
-		 * It looks nicer below when the item being skipped is low in height,
-		 * and where adjacent SEQ nodes do not themselves go above the line.
-		 */
-
+	if (n->u.alt.n > 0 && n->u.alt.a[0]->type == TNODE_SKIP) {
 		ctx->y -= n->y;
-
-		if (!ctx->rtl) {
-			bprintf(ctx, ">");
-		} else {
-			bprintf(ctx, "<");
-		}
-
-		for (i = 0; i < n->w - 2; i++) {
-			bprintf(ctx, "-");
-		}
-
-		bprintf(ctx, a_in);
-		ctx->y++;
-
-		for (i = 0; i < n->y - 1; i++) {
-			ctx->x = x;
-			bprintf(ctx, "|");
-			ctx->x = x + n->w - 1;
-			bprintf(ctx, "|");
-			ctx->y++;
-		}
 	}
 
 	for (j = 0; j < n->u.alt.n; j++) {
-		int i, flush = ctx->y == line;
-
 		/*
 		 * Skip nodes are rendered as three-way branches,
 		 * so we use ">" and "<" for the entry point,
@@ -162,30 +120,16 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		 */
 
 		ctx->x = x;
-		if (!ctx->rtl) {
-			if (n->type == TNODE_ALT_SKIPPABLE && j + 1 < n->u.alt.n) {
-				bprintf(ctx, "+");
-			} else {
-				bprintf(ctx, flush ? a_out : ">");
-			}
-		} else {
-			bprintf(ctx, flush ? "<" : (n->type == TNODE_ALT_SKIPPABLE ? "^" : a_in));
-		}
 
+		bprintf(ctx, "A");
 		justify(ctx, n->u.alt.a[j], n->w - 2);
+		bprintf(ctx, "B");
 
-		if (!ctx->rtl) {
-			bprintf(ctx, flush ? ">" : (n->type == TNODE_ALT_SKIPPABLE ? "^" : a_in));
-		} else {
-			if (n->type == TNODE_ALT_SKIPPABLE && j + 1 < n->u.alt.n) {
-				bprintf(ctx, "+");
-			} else {
-				bprintf(ctx, flush ? a_out : "<");
-			}
-		}
-		ctx->y++;
 
 		if (j + 1 < n->u.alt.n) {
+			int i;
+
+			ctx->y++;
 			for (i = 0; i < n->u.alt.a[j]->h - n->u.alt.a[j]->y + n->u.alt.a[j + 1]->y; i++) {
 				ctx->x = x;
 				bprintf(ctx, "|");
@@ -285,7 +229,6 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_ALT:
-	case TNODE_ALT_SKIPPABLE:
 		render_alt(n, ctx);
 		break;
 

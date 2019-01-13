@@ -59,7 +59,6 @@ tnode_free(struct tnode *n)
 		break;
 
 	case TNODE_ALT:
-	case TNODE_ALT_SKIPPABLE:
 		tnode_free_tlist(&n->u.alt);
 		break;
 
@@ -158,8 +157,24 @@ tnode_create_node(const struct node *node)
 
 	case NODE_ALT:
 	case NODE_ALT_SKIPPABLE:
-		new->type = node->type == NODE_ALT ? TNODE_ALT : TNODE_ALT_SKIPPABLE;
-		new->u.alt = tnode_create_list(node->u.alt);
+		new->type = TNODE_ALT;
+
+		/*
+		 * TODO: decide whether to put the skip above or hang it below.
+		 * It looks nicer below when the item being skipped is low in height,
+		 * and where adjacent SEQ nodes do not themselves go above the line.
+		 */
+
+		if (node->type == NODE_ALT_SKIPPABLE) {
+			struct list list;
+
+			list.node = NULL;
+			list.next = node->u.alt;
+
+			new->u.alt = tnode_create_list(&list);
+		} else {
+			new->u.alt = tnode_create_list(node->u.alt);
+		}
 
 		{
 			unsigned w;
@@ -178,8 +193,9 @@ tnode_create_node(const struct node *node)
 
 		{
 			unsigned y;
+			size_t i;
 
-			assert(new->u.alt.n > 0 && new->u.alt.a[0] != NULL);
+			i = 0;
 
 			/*
 			 * Alt lists hang below the line.
@@ -187,10 +203,23 @@ tnode_create_node(const struct node *node)
 			 * because the first item is at the top of the list, plus the height of
 			 * the skip node above that.
 			 */
-			y = new->u.alt.a[0]->y;
+
+			y = 0;
 
 			if (node->type == NODE_ALT_SKIPPABLE) {
-				y += 2;
+				assert(new->u.alt.n > i);
+				assert(new->u.alt.a[i] != NULL);
+				assert(new->u.alt.a[i]->type == TNODE_SKIP);
+				assert(new->u.alt.a[i]->h == 1);
+
+				y += new->u.alt.a[i]->h + 1;
+				i++;
+			}
+
+			if (new->u.alt.n > i) {
+				assert(new->u.alt.a[i] != NULL);
+
+				y += new->u.alt.a[i]->y;
 			}
 
 			new->y = y;
@@ -204,10 +233,6 @@ tnode_create_node(const struct node *node)
 
 			for (i = 0; i < new->u.alt.n; i++) {
 				h += 1 + new->u.alt.a[i]->h;
-			}
-
-			if (node->type == NODE_ALT_SKIPPABLE) {
-				h += 2;
 			}
 
 			new->h = h - 1;
