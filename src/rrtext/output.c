@@ -136,44 +136,27 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		int firstalt  = j == 0;
 		int lastalt   = j == n->u.alt.n - 1;
 
-		/*
-		 * Skip nodes are rendered as three-way branches,
-		 * so we use ">" and "<" for the entry point,
-		 * depending on rtl.
-		 */
+		const char *a;
 
 		ctx->x = x;
 
 		if (sameline && n->u.alt.n > 1 && lastalt) {
-				bprintf(ctx, ctx->rtl ? "<" : "^");
+			a = ctx->rtl ? "<^" : "^>";
 		} else if (firstalt && aboveline) {
-				bprintf(ctx, ".");
+			a = ",.";
 		} else if (j == 0 && sameline) {
-				bprintf(ctx, ctx->rtl ? "<" : "v");
+			a = ctx->rtl ? "<v" : "v>";
 		} else if (sameline) {
-				bprintf(ctx, ctx->rtl ? "<" : "+");
+			a = ctx->rtl ? "<+" : "+>";
 		} else if (belowline && j > 0 && lastalt) {
-				bprintf(ctx, "`");
+			a = "`'";
 		} else {
-				bprintf(ctx, ctx->rtl ? "^" : ">");
+			a = ctx->rtl ? "^<" : ">^";
 		}
 
-
+		bprintf(ctx, "%c", a[0]);
 		justify(ctx, n->u.alt.a[j], n->w - 2);
-
-		if (sameline && n->u.alt.n > 1 && lastalt) {
-				bprintf(ctx, ctx->rtl ? "^" : ">");
-		} else if (firstalt && aboveline) {
-				bprintf(ctx, ".");
-		} else if (j == 0 && sameline) {
-				bprintf(ctx, ctx->rtl ? "v" : ">");
-		} else if (sameline) {
-				bprintf(ctx, ctx->rtl ? "+" : ">");
-		} else if (belowline && j > 0 && lastalt) {
-				bprintf(ctx, "'");
-		} else {
-				bprintf(ctx, ctx->rtl ? "<" : "^");
-		}
+		bprintf(ctx, "%c", a[1]);
 
 		if (j + 1 < n->u.alt.n) {
 			ctx->y++;
@@ -224,7 +207,7 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 	bars(ctx, n->u.loop.forward->h - n->u.loop.forward->y + n->u.loop.backward->y, n->w);
 
 	ctx->x = x;
-	bprintf(ctx, !ctx->rtl ? "^" : ">");
+	bprintf(ctx, !ctx->rtl ? "`" : ">");
 	ctx->rtl = !ctx->rtl;
 
 	cw = strlen(n->u.loop.label);
@@ -243,7 +226,7 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 
 	ctx->rtl = !ctx->rtl;
 	ctx->x = x + n->w - 1;
-	bprintf(ctx, !ctx->rtl ? "<" : "^");
+	bprintf(ctx, !ctx->rtl ? "'" : "^");
 
 	ctx->y = y;
 }
