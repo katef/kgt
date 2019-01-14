@@ -18,8 +18,7 @@
 #include "../rrd/pretty.h"
 #include "../rrd/node.h"
 #include "../rrd/list.h"
-
-#include "../rrtext/tnode.h"
+#include "../rrd/tnode.h"
 
 #include "io.h"
 

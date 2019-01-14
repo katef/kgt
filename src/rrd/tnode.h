@@ -4,8 +4,8 @@
  * See LICENCE for the full copyright terms.
  */
 
-#ifndef KGT_RRTEXT_TNODE_H
-#define KGT_RRTEXT_TNODE_H
+#ifndef KGT_RRD_TNODE_H
+#define KGT_RRD_TNODE_H
 
 struct node;
 

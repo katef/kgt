@@ -24,7 +24,6 @@
 #include "../rrd/rrd.h"
 #include "../rrd/list.h"
 
-#include "io.h"
 #include "tnode.h"
 
 #include "../xalloc.h"
