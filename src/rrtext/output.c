@@ -130,6 +130,12 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 	}
 
 	for (j = 0; j < n->u.alt.n; j++) {
+		int sameline  = ctx->y == y;
+		int aboveline = ctx->y < y;
+		int belowline = ctx->y > y;
+		int firstalt  = j == 0;
+		int lastalt   = j == n->u.alt.n - 1;
+
 		/*
 		 * Skip nodes are rendered as three-way branches,
 		 * so we use ">" and "<" for the entry point,
@@ -138,9 +144,36 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 
 		ctx->x = x;
 
-		bprintf(ctx, "A");
+		if (sameline && n->u.alt.n > 1 && lastalt) {
+				bprintf(ctx, ctx->rtl ? "<" : "^");
+		} else if (firstalt && aboveline) {
+				bprintf(ctx, ".");
+		} else if (j == 0 && sameline) {
+				bprintf(ctx, ctx->rtl ? "<" : "v");
+		} else if (sameline) {
+				bprintf(ctx, ctx->rtl ? "<" : "+");
+		} else if (belowline && j > 0 && lastalt) {
+				bprintf(ctx, "`");
+		} else {
+				bprintf(ctx, ctx->rtl ? "^" : ">");
+		}
+
+
 		justify(ctx, n->u.alt.a[j], n->w - 2);
-		bprintf(ctx, "B");
+
+		if (sameline && n->u.alt.n > 1 && lastalt) {
+				bprintf(ctx, ctx->rtl ? "^" : ">");
+		} else if (firstalt && aboveline) {
+				bprintf(ctx, ".");
+		} else if (j == 0 && sameline) {
+				bprintf(ctx, ctx->rtl ? "v" : ">");
+		} else if (sameline) {
+				bprintf(ctx, ctx->rtl ? "+" : ">");
+		} else if (belowline && j > 0 && lastalt) {
+				bprintf(ctx, "'");
+		} else {
+				bprintf(ctx, ctx->rtl ? "<" : "^");
+		}
 
 		if (j + 1 < n->u.alt.n) {
 			ctx->y++;
