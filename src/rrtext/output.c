@@ -96,6 +96,23 @@ justify(struct render_context *ctx, const struct tnode *n, int space)
 }
 
 static void
+bars(struct render_context *ctx, unsigned n, unsigned w)
+{
+	unsigned i;
+	unsigned x;
+
+	x = ctx->x;
+
+	for (i = 0; i < n; i++) {
+		bprintf(ctx, "|");
+		ctx->x += w - 2;
+		bprintf(ctx, "|");
+		ctx->y++;
+		ctx->x = x;
+	}
+}
+
+static void
 render_alt(const struct tnode *n, struct render_context *ctx)
 {
 	int x, y;
@@ -125,18 +142,10 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		justify(ctx, n->u.alt.a[j], n->w - 2);
 		bprintf(ctx, "B");
 
-
 		if (j + 1 < n->u.alt.n) {
-			int i;
-
 			ctx->y++;
-			for (i = 0; i < n->u.alt.a[j]->h - n->u.alt.a[j]->y + n->u.alt.a[j + 1]->y; i++) {
-				ctx->x = x;
-				bprintf(ctx, "|");
-				ctx->x = x + n->w - 1;
-				bprintf(ctx, "|");
-				ctx->y++;
-			}
+			ctx->x = x;
+			bars(ctx, n->u.alt.a[j]->h - n->u.alt.a[j]->y + n->u.alt.a[j + 1]->y, n->w);
 		}
 	}
 
@@ -178,13 +187,8 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 	bprintf(ctx, !ctx->rtl ? "v" : "<");
 	ctx->y++;
 
-	for (i = 0; i < n->u.loop.forward->h - n->u.loop.forward->y + n->u.loop.backward->y; i++) {
-		ctx->x = x;
-		bprintf(ctx, "|");
-		ctx->x += n->w - 2;
-		bprintf(ctx, "|");
-		ctx->y++;
-	}
+	ctx->x = x;
+	bars(ctx, n->u.loop.forward->h - n->u.loop.forward->y + n->u.loop.backward->y, n->w);
 
 	ctx->x = x;
 	bprintf(ctx, !ctx->rtl ? "^" : ">");
