@@ -24,6 +24,7 @@
 #include "rrdot/io.h"
 #include "rrdump/io.h"
 #include "rrparcon/io.h"
+#include "rrll/io.h"
 #include "rrta/io.h"
 #include "rrtext/io.h"
 
@@ -49,6 +50,7 @@ struct io {
 	{ "rrdot",    NULL,           rrdot_output    },
 	{ "rrdump",   NULL,           rrdump_output   },
 	{ "rrparcon", NULL,           rrparcon_output },
+	{ "rrll",     NULL,           rrll_output     },
 	{ "rrta",     NULL,           rrta_output     },
 	{ "rrtext",   NULL,           rrtext_output   }
 };
