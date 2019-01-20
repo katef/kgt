@@ -196,7 +196,31 @@ find_node(const struct list *list, char d)
 }
 
 static struct tlist
-tnode_create_list(const struct list *list)
+tnode_create_seq_list(const struct list *list)
+{
+	const struct list *p;
+	struct tlist new;
+	size_t i;
+
+	new.n = list_count(list);
+	if (new.n == 0) {
+		new.a = NULL;
+		return new;
+	}
+
+	new.a = xmalloc(sizeof *new.a * new.n);
+
+	for (i = 0, p = list; p != NULL; p = p->next) {
+		new.a[i++] = tnode_create_node(p->node);
+	}
+
+	assert(i == new.n);
+
+	return new;
+}
+
+static struct tlist
+tnode_create_alt_list(const struct list *list)
 {
 	const struct list *p;
 	struct tlist new;
@@ -395,9 +419,9 @@ tnode_create_node(const struct node *node)
 			list.node = NULL;
 			list.next = node->u.alt;
 
-			new->u.alt = tnode_create_list(&list);
+			new->u.alt = tnode_create_alt_list(&list);
 		} else {
-			new->u.alt = tnode_create_list(node->u.alt);
+			new->u.alt = tnode_create_alt_list(node->u.alt);
 		}
 
 		{
@@ -466,7 +490,7 @@ tnode_create_node(const struct node *node)
 
 	case NODE_SEQ:
 		new->type = TNODE_SEQ;
-		new->u.seq = tnode_create_list(node->u.seq);
+		new->u.seq = tnode_create_seq_list(node->u.seq);
 
 		{
 			unsigned w;
