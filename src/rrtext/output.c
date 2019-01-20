@@ -215,6 +215,10 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 
 	justify(ctx, n->u.loop.backward, n->w - 2);
 
+	if (n->u.loop.backward->type == TNODE_SKIP && strlen(n->u.loop.label) == 0) {
+		ctx->lines[ctx->y][ctx->x - n->w / 2] = ctx->rtl ? '<' : '>';
+	}
+
 	if (cw > 0) {
 		int y = ctx->y;
 		ctx->x = x + 1 + (n->w - cw - 2) / 2;
