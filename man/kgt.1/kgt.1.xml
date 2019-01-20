@@ -183,6 +183,11 @@
 					<td>Alexander Boyd's <ulink url="http://www.opengroove.org/parcon/parcon-tutorial.html">parcon.railroad</ulink> Railroad diagram DSL.</td>
 				</tr>
 				<tr>
+					<td><code>rrll</code></td>
+					<td>O</td>
+					<td><ulink url="https://github.com/lukaslueg/railroad_dsl">Lukas Lueg's Railroad DSL</ulink> output.</td>
+				</tr>
+				<tr>
 					<td><code>rrta</code></td>
 					<td>O</td>
 					<td><ulink url="https://github.com/tabatkins/railroad-diagrams">Tab Atkins Jr. Railroad diagram</ulink> output.</td>

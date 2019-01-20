@@ -20,7 +20,7 @@ ${BUILD}/bin/kgt: ${BUILD}/src/xalloc.o
 .for part in ${PART:Mbnf} ${PART:Mblab} ${PART:Mabnf} ${PART:Miso-ebnf} ${PART:Mrbnf} \
 	${PART:Msid} ${PART:Mdot} ${PART:Mwsn} \
 	${PART:Mrrd} ${PART:Mrrdot} ${PART:Mrrdump} \
-	${PART:Mrrparcon} ${PART:Mrrta} ${PART:Mrrtext}
+	${PART:Mrrparcon} ${PART:Mrrll} ${PART:Mrrta} ${PART:Mrrtext}
 ${BUILD}/bin/kgt: ${BUILD}/lib/${part}.o
 .endfor
 
