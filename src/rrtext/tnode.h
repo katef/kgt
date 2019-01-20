@@ -17,6 +17,7 @@ struct tlist {
 struct tnode {
 	enum {
 		TNODE_SKIP,
+		TNODE_ELLIPSIS,
 		TNODE_LITERAL,
 		TNODE_RULE,
 		TNODE_ALT,

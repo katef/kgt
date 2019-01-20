@@ -15,6 +15,7 @@
 #include <ctype.h>
 
 #include "../ast.h"
+#include "../bitmap.h"
 #include "../xalloc.h"
 
 #include "../rrd/rrd.h"
@@ -30,6 +31,9 @@
 
 static struct tnode *
 tnode_create_node(const struct node *node);
+
+static struct tnode *
+tnode_create_ellipsis(void);
 
 static void
 tnode_free_tlist(struct tlist *list)
@@ -75,26 +79,178 @@ tnode_free(struct tnode *n)
 	free(n);
 }
 
+static int
+char_terminal(const struct node *node, unsigned char *c)
+{
+	assert(c != NULL);
+
+	if (node == NULL) {
+		return 0;
+	}
+
+	if (node->type != NODE_LITERAL) {
+		return 0;
+	}
+
+	if (strlen(node->u.literal) != 1) {
+		return 0;
+	}
+
+	*c = (unsigned) node->u.literal[0];
+
+	return 1;
+}
+
+static void
+collate_ranges(struct bm *bm, const struct list *list)
+{
+	const struct list *p;
+
+	assert(bm != NULL);
+	assert(list != NULL);
+
+	bm_clear(bm);
+
+	for (p = list; p != NULL; p = p->next) {
+		unsigned char c;
+
+		if (!char_terminal(p->node, &c)) {
+			continue;
+		}
+
+		bm_set(bm, c);
+	}
+}
+
+static const struct node *
+find_node(const struct list *list, char d)
+{
+	const struct list *p;
+
+	for (p = list; p != NULL; p = p->next) {
+		unsigned char c;
+
+		if (!char_terminal(p->node, &c)) {
+			continue;
+		}
+
+		if (c == (unsigned char) d) {
+			return p->node;
+		}
+	}
+
+	assert(!"unreached");
+}
+
 static struct tlist
 tnode_create_list(const struct list *list)
 {
 	const struct list *p;
 	struct tlist new;
 	size_t i;
+	struct bm bm;
+	int hi, lo;
 
-	new.n = list_count(list);
+	new.n = list_count(list); /* worst case */
 	if (new.n == 0) {
 		new.a = NULL;
 		return new;
 	}
 
+	collate_ranges(&bm, list);
+
 	new.a = xmalloc(sizeof *new.a * new.n);
 
-	for (i = 0, p = list; i < new.n; i++, p = p->next) {
-		assert(p != NULL);
+	hi = -1;
 
-		new.a[i] = tnode_create_node(p->node);
+	for (i = 0, p = list; p != NULL; p = p->next) {
+		unsigned char c;
+
+		if (!char_terminal(p->node, &c)) {
+			new.a[i++] = tnode_create_node(p->node);
+			continue;
+		}
+
+		if (!bm_get(&bm, c)) {
+			/* already output */
+			continue;
+		}
+
+		/* start of range */
+		lo = bm_next(&bm, hi, 1);
+		if (lo > UCHAR_MAX) {
+			/* end of list */
+		}
+
+		/* end of range */
+		hi = bm_next(&bm, lo, 0);
+		if (hi > UCHAR_MAX && lo < UCHAR_MAX) {
+			hi = UCHAR_MAX;
+		}
+
+		if (!isalnum((unsigned char) lo) && isalnum((unsigned char) hi)) {
+			new.a[i++] = tnode_create_node(find_node(list, lo));
+			bm_unset(&bm, lo);
+
+			hi = lo;
+			continue;
+		}
+
+		/* bring down endpoint, if it's past the end of the class */
+		if (isalnum((unsigned char) lo)) {
+			size_t i;
+
+			const struct {
+				int (*is)(int);
+				int end;
+			} b[] = {
+				{ isdigit, '9' },
+				{ isupper, 'Z' },
+				{ islower, 'z' }
+			};
+
+			/* XXX: assumes ASCII */
+			for (i = 0; i < sizeof b / sizeof *b; i++) {
+				if (b[i].is((unsigned char) lo)) {
+					if (!b[i].is((unsigned char) hi)) {
+						hi = b[i].end + 1;
+					}
+					break;
+				}
+			}
+
+			assert(i < sizeof b / sizeof *b);
+		}
+
+		assert(hi > lo);
+
+		switch (hi - lo) {
+			int j;
+
+		case 1:
+		case 2:
+		case 3:
+			new.a[i++] = tnode_create_node(find_node(list, lo));
+			bm_unset(&bm, lo);
+
+			hi = lo;
+			break;
+
+		default:
+			new.a[i++] = tnode_create_node(find_node(list, lo));
+			new.a[i++] = tnode_create_ellipsis();
+			new.a[i++] = tnode_create_node(find_node(list, hi - 1));
+
+			for (j = lo; j <= hi - 1; j++) {
+				bm_unset(&bm, j);
+			}
+
+			break;
+		}
 	}
+
+	assert(i <= new.n);
+	new.n = i;
 
 	return new;
 }
@@ -120,6 +276,21 @@ loop_label(unsigned min, unsigned max, char *s)
 	*s = '\0';
 
 	return 0;
+}
+
+static struct tnode *
+tnode_create_ellipsis(void)
+{
+	struct tnode *new;
+
+	new = xmalloc(sizeof *new);
+
+	new->type = TNODE_ELLIPSIS;
+	new->w = 1;
+	new->y = 0;
+	new->h = 1;
+
+	return new;
 }
 
 static struct tnode *

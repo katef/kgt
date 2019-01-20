@@ -85,13 +85,13 @@ justify(struct render_context *ctx, const struct tnode *n, int space)
 	unsigned i;
 
 	for (i = 0; i < lhs; i++) {
-		bprintf(ctx, "-");
+		bprintf(ctx, n->type == TNODE_ELLIPSIS ? " " : "-");
 	}
 
 	node_walk_render(n, ctx);
 
 	for (i = 0; i < rhs; i++) {
-		bprintf(ctx, "-");
+		bprintf(ctx, n->type == TNODE_ELLIPSIS ? " " : "-");
 	}
 }
 
@@ -150,6 +150,8 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 			a = ctx->rtl ? "<+" : "+>";
 		} else if (belowline && j > 0 && lastalt) {
 			a = "`'";
+		} else if (n->u.alt.a[j]->type == TNODE_ELLIPSIS) {
+			a = "||";
 		} else {
 			a = ctx->rtl ? "^<" : ">^";
 		}
@@ -238,6 +240,10 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 
 	switch (n->type) {
 	case TNODE_SKIP:
+		break;
+
+	case TNODE_ELLIPSIS:
+		bprintf(ctx, ":");
 		break;
 
 	case TNODE_LITERAL:
