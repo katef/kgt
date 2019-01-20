@@ -197,7 +197,6 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 	assert(n != NULL);
 	assert(n->type == TNODE_LOOP);
 	assert(ctx != NULL);
-	assert(n->y == 0);
 
 	bprintf(ctx, !ctx->rtl ? ">" : "v");
 
