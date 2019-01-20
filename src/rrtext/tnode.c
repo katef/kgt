@@ -35,6 +35,55 @@ tnode_create_node(const struct node *node);
 static struct tnode *
 tnode_create_ellipsis(void);
 
+/* made-up to suit text output */
+static size_t
+escputc(char *s, char c)
+{
+	assert(s != NULL);
+
+	switch (c) {
+	case '\\': return sprintf(s, "\\\\");
+	case '\"': return sprintf(s, "\\\"");
+
+	case '\a': return sprintf(s, "\\a");
+	case '\b': return sprintf(s, "\\b");
+	case '\f': return sprintf(s, "\\f");
+	case '\n': return sprintf(s, "\\n");
+	case '\r': return sprintf(s, "\\r");
+	case '\t': return sprintf(s, "\\t");
+	case '\v': return sprintf(s, "\\v");
+
+	default:
+		break;
+	}
+
+	if (!isprint((unsigned char) c)) {
+		return sprintf(s, "\\x%02x", (unsigned char) c);
+	}
+
+	return sprintf(s, "%c", c);
+}
+
+static char *
+esc_literal(const char *s)
+{
+	const char *p;
+	char *a, *q;
+	size_t n;
+
+	n = strlen(s) * 4 + 1; /* worst case for \xXX */
+
+	a = xmalloc(n);
+
+	for (p = s, q = a; *p != '\0'; p++) {
+		q += escputc(q, *p);
+	}
+
+	*q = '\0';
+
+	return a;
+}
+
 static void
 tnode_free_tlist(struct tlist *list)
 {
@@ -58,8 +107,12 @@ tnode_free(struct tnode *n)
 
 	switch (n->type) {
 	case TNODE_SKIP:
-	case TNODE_LITERAL:
+	case TNODE_ELLIPSIS:
 	case TNODE_RULE:
+		break;
+
+	case TNODE_LITERAL:
+		free((void *) n->u.literal);
 		break;
 
 	case TNODE_ALT:
@@ -312,7 +365,7 @@ tnode_create_node(const struct node *node)
 	switch (node->type) {
 	case NODE_LITERAL:
 		new->type = TNODE_LITERAL;
-		new->u.literal = node->u.literal;
+		new->u.literal = esc_literal(node->u.literal);
 		new->w = strlen(new->u.literal) + 4;
 		new->y = 0;
 		new->h = 1;
