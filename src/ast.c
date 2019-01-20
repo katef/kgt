@@ -20,6 +20,9 @@ ast_make_empty_term(void)
 	new->type = TYPE_EMPTY;
 	new->next = NULL;
 
+	new->min = 1;
+	new->max = 1;
+
 	return new;
 }
 
@@ -34,6 +37,9 @@ ast_make_rule_term(struct ast_rule *rule)
 	new->type   = TYPE_RULE;
 	new->next   = NULL;
 	new->u.rule = rule;
+
+	new->min = 1;
+	new->max = 1;
 
 	return new;
 }
@@ -53,6 +59,9 @@ ast_make_char_term(char c)
 	new->next      = NULL;
 	new->u.literal = s;
 
+	new->min = 1;
+	new->max = 1;
+
 	return new;
 }
 
@@ -67,6 +76,9 @@ ast_make_literal_term(const char *literal)
 	new->type      = TYPE_LITERAL;
 	new->next      = NULL;
 	new->u.literal = literal;
+
+	new->min = 1;
+	new->max = 1;
 
 	return new;
 }
@@ -83,6 +95,9 @@ ast_make_token_term(const char *token)
 	new->next    = NULL;
 	new->u.token = token;
 
+	new->min = 1;
+	new->max = 1;
+
 	return new;
 }
 
@@ -95,6 +110,9 @@ ast_make_group_term(struct ast_alt *group)
 	new->type    = TYPE_GROUP;
 	new->next    = NULL;
 	new->u.group = group;
+
+	new->min = 1;
+	new->max = 1;
 
 	return new;
 }
