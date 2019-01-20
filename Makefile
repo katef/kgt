@@ -24,6 +24,7 @@ SUBDIR += src/sid
 SUBDIR += src/wsn
 SUBDIR += src/rrd
 SUBDIR += src/rrdump
+SUBDIR += src/rrtdump
 SUBDIR += src/rrparcon
 SUBDIR += src/rrll
 SUBDIR += src/rrta

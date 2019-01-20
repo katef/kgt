@@ -23,6 +23,7 @@
 #include "dot/io.h"
 #include "rrdot/io.h"
 #include "rrdump/io.h"
+#include "rrtdump/io.h"
 #include "rrparcon/io.h"
 #include "rrll/io.h"
 #include "rrta/io.h"
@@ -49,6 +50,7 @@ struct io {
 	{ "dot",      NULL,           dot_output      },
 	{ "rrdot",    NULL,           rrdot_output    },
 	{ "rrdump",   NULL,           rrdump_output   },
+	{ "rrtdump",  NULL,           rrtdump_output  },
 	{ "rrparcon", NULL,           rrparcon_output },
 	{ "rrll",     NULL,           rrll_output     },
 	{ "rrta",     NULL,           rrta_output     },

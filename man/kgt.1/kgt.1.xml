@@ -178,6 +178,13 @@
 					<td><code>rrdump</code></td>
 				</tr>
 				<tr>
+					<td><code>rrtdump</code></td>
+					<td>O</td>
+					<td>Railroad diagram tnode tree output to text.
+						This is an internal datastructure, likely to be relevant
+						for use when working on the railroad diagram output only.</td>
+				</tr>
+				<tr>
 					<td><code>rrparcon</code></td>
 					<td>O</td>
 					<td>Alexander Boyd's <ulink url="http://www.opengroove.org/parcon/parcon-tutorial.html">parcon.railroad</ulink> Railroad diagram DSL.</td>
