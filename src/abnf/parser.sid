@@ -59,7 +59,6 @@
 	<pattern-char>:   (:char) -> ();
 	<pattern-buffer>: ()      -> (:string);
 
-	<rep-one>:          () -> (:count, :count);
 	!<rep-one-or-more>: () -> (:count, :count);
 	<rep-zero-or-more>: () -> (:count, :count);
 	<rep-zero-or-one>:  () -> (:count, :count);
@@ -159,9 +158,6 @@
 
 	] = {
 		t = element;
-
-		(min, max) = <rep-one>;
-		<set-repeat>(t, min, max);
 	||
 		{
 			min = COUNT;
