@@ -6,6 +6,8 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "../xalloc.h"
 
@@ -16,29 +18,46 @@
 static void
 skippable_alt(int *changed, struct node *n)
 {
-	struct list **p, **next;
-	struct list *dead;
+	struct list *p;
 
-	for (p = &n->u.alt; *p != NULL; p = next) {
-		next = &(**p).next;
-
-		if ((*p)->node == NULL) {
+	for (p = n->u.alt; p != NULL; p = p->next) {
+		if (p->node == NULL) {
 			n->type = NODE_ALT_SKIPPABLE;
-
-			dead = *p;
-
-			*p = *next;
-
-			dead->next = NULL;
-			node_free(dead->node);
-			list_free(&dead);
-
 			*changed = 1;
 		}
 	}
 
 	/* TODO: if you're skippable and you contain nothing, have some other transformation remove it */
-	/* TODO: ditto NULL in SEQs, and empty seqs, and empty loops */
+}
+
+static void
+redundant_skip(int *changed, struct list **list)
+{
+	struct list **p;
+	struct list **next;
+
+	/*
+	 * If there are skip nodes (NULL) in a seq or skippable alt,
+	 * just remove them - they have no semantic effect.
+	 */
+
+	for (p = list; *p != NULL; p = next) {
+		next = &(*p)->next;
+
+		if ((*p)->node == NULL) {
+			struct list *dead;
+
+			dead = *p;
+			*p = (*p)->next;
+
+			dead->next = NULL;
+			list_free(&dead);
+
+			*changed = 1;
+
+			next = p;
+		}
+	}
 }
 
 void
@@ -53,6 +72,14 @@ rrd_pretty_skippable(int *changed, struct node **n)
 	switch ((*n)->type) {
 	case NODE_ALT:
 		skippable_alt(changed, *n);
+		break;
+
+	case NODE_ALT_SKIPPABLE:
+		redundant_skip(changed, &(*n)->u.alt);
+		break;
+
+	case NODE_SEQ:
+		redundant_skip(changed, &(*n)->u.seq);
 		break;
 	}
 }
