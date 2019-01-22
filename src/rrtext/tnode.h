@@ -29,6 +29,8 @@ struct tnode {
 	unsigned y;
 	unsigned h;
 
+	int rtl;
+
 	union {
 		const char *literal; /* TODO: point to ast_literal instead */
 		const char *name;    /* TODO: point to ast_rule instead */

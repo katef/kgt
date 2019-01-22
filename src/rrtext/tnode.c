@@ -594,9 +594,50 @@ tnode_create_node(const struct node *node)
 	return new;
 }
 
+static void
+tnode_set_rtl(struct tnode *n, int rtl)
+{
+	assert(n != NULL);
+
+	n->rtl = rtl;
+
+	switch (n->type) {
+		size_t i;
+
+	case TNODE_SKIP:
+	case TNODE_ELLIPSIS:
+	case TNODE_LITERAL:
+	case TNODE_RULE:
+		break;
+
+	case TNODE_ALT:
+		for (i = 0; i < n->u.alt.n; i++) {
+			tnode_set_rtl(n->u.alt.a[i], rtl);
+		}
+		break;
+
+	case TNODE_SEQ:
+		for (i = 0; i < n->u.seq.n; i++) {
+			tnode_set_rtl(n->u.seq.a[i], rtl);
+		}
+		break;
+
+	case TNODE_LOOP:
+		tnode_set_rtl(n->u.loop.forward,   rtl);
+		tnode_set_rtl(n->u.loop.backward, !rtl);
+		break;
+	}
+}
+
 struct tnode *
 rrd_to_tnode(const struct node *node)
 {
-	return tnode_create_node(node);
+	struct tnode *n;
+
+	n = tnode_create_node(node);
+
+	tnode_set_rtl(n, 0);
+
+	return n;
 }
 

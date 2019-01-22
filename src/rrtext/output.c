@@ -35,7 +35,6 @@
 struct render_context {
 	char **lines;
 	char *scratch;
-	int rtl;
 	int x, y;
 };
 
@@ -141,19 +140,19 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		ctx->x = x;
 
 		if (sameline && n->u.alt.n > 1 && lastalt) {
-			a = ctx->rtl ? "<^" : "^>";
+			a = n->rtl ? "<^" : "^>";
 		} else if (firstalt && aboveline) {
 			a = ",.";
 		} else if (j == 0 && sameline) {
-			a = ctx->rtl ? "<v" : "v>";
+			a = n->rtl ? "<v" : "v>";
 		} else if (sameline) {
-			a = ctx->rtl ? "<+" : "+>";
+			a = n->rtl ? "<+" : "+>";
 		} else if (belowline && j > 0 && lastalt) {
 			a = "`'";
 		} else if (n->u.alt.a[j]->type == TNODE_ELLIPSIS) {
 			a = "||";
 		} else {
-			a = ctx->rtl ? "^<" : ">^";
+			a = n->rtl ? "^<" : ">^";
 		}
 
 		bprintf(ctx, "%c", a[0]);
@@ -180,7 +179,7 @@ render_seq(const struct tnode *n, struct render_context *ctx)
 	assert(ctx != NULL);
 
 	for (i = 0; i < n->u.seq.n; i++) {
-		node_walk_render(n->u.seq.a[!ctx->rtl ? i : n->u.seq.n - i], ctx);
+		node_walk_render(n->u.seq.a[!n->rtl ? i : n->u.seq.n - i], ctx);
 
 		if (i + 1 < n->u.seq.n) {
 			bprintf(ctx, "--");
@@ -198,25 +197,24 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 	assert(n->type == TNODE_LOOP);
 	assert(ctx != NULL);
 
-	bprintf(ctx, !ctx->rtl ? ">" : "v");
+	bprintf(ctx, !n->rtl ? ">" : "v");
 
 	justify(ctx, n->u.loop.forward, n->w - 2);
-	bprintf(ctx, !ctx->rtl ? "v" : "<");
+	bprintf(ctx, !n->rtl ? "v" : "<");
 	ctx->y++;
 
 	ctx->x = x;
 	bars(ctx, n->u.loop.forward->h - n->u.loop.forward->y + n->u.loop.backward->y, n->w);
 
 	ctx->x = x;
-	bprintf(ctx, !ctx->rtl ? "`" : ">");
-	ctx->rtl = !ctx->rtl;
+	bprintf(ctx, !n->u.loop.forward->rtl ? "`" : ">");
 
 	cw = strlen(n->u.loop.label);
 
 	justify(ctx, n->u.loop.backward, n->w - 2);
 
 	if (n->u.loop.backward->type == TNODE_SKIP && strlen(n->u.loop.label) == 0) {
-		ctx->lines[ctx->y][ctx->x - n->w / 2] = ctx->rtl ? '<' : '>';
+		ctx->lines[ctx->y][ctx->x - n->w / 2] = n->u.loop.backward->rtl ? '<' : '>';
 	}
 
 	if (cw > 0) {
@@ -229,9 +227,8 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 		ctx->y = y;
 	}
 
-	ctx->rtl = !ctx->rtl;
 	ctx->x = x + n->w - 1;
-	bprintf(ctx, !ctx->rtl ? "'" : "^");
+	bprintf(ctx, !n->rtl ? "'" : "^");
 
 	ctx->y = y;
 }
@@ -288,7 +285,6 @@ render_rule(const struct tnode *node)
 		ctx.lines[i][w] = '\0';
 	}
 
-	ctx.rtl = 0;
 	ctx.x = 0;
 	ctx.y = 0;
 	ctx.scratch = xmalloc(w + 1);
