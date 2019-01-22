@@ -9,7 +9,12 @@
 
 struct node;
 
-struct tlist {
+struct tlist_alt {
+	struct tnode **a;
+	size_t n;
+};
+
+struct tlist_seq {
 	struct tnode **a;
 	size_t n;
 };
@@ -35,8 +40,8 @@ struct tnode {
 		const char *literal; /* TODO: point to ast_literal instead */
 		const char *name;    /* TODO: point to ast_rule instead */
 
-		struct tlist alt;
-		struct tlist seq;
+		struct tlist_alt alt;
+		struct tlist_seq seq;
 
 		struct {
 			struct tnode *forward;

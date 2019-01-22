@@ -85,7 +85,21 @@ esc_literal(const char *s)
 }
 
 static void
-tnode_free_tlist(struct tlist *list)
+tnode_free_alt_list(struct tlist_alt *list)
+{
+	size_t i;
+
+	assert(list != NULL);
+
+	for (i = 0; i < list->n; i++) {
+		tnode_free(list->a[i]);
+	}
+
+	free(list->a);
+}
+
+static void
+tnode_free_seq_list(struct tlist_seq *list)
 {
 	size_t i;
 
@@ -116,11 +130,11 @@ tnode_free(struct tnode *n)
 		break;
 
 	case TNODE_ALT:
-		tnode_free_tlist(&n->u.alt);
+		tnode_free_alt_list(&n->u.alt);
 		break;
 
 	case TNODE_SEQ:
-		tnode_free_tlist(&n->u.seq);
+		tnode_free_seq_list(&n->u.seq);
 		break;
 
 	case TNODE_LOOP:
@@ -195,35 +209,11 @@ find_node(const struct list *list, char d)
 	assert(!"unreached");
 }
 
-static struct tlist
-tnode_create_seq_list(const struct list *list)
-{
-	const struct list *p;
-	struct tlist new;
-	size_t i;
-
-	new.n = list_count(list);
-	if (new.n == 0) {
-		new.a = NULL;
-		return new;
-	}
-
-	new.a = xmalloc(sizeof *new.a * new.n);
-
-	for (i = 0, p = list; p != NULL; p = p->next) {
-		new.a[i++] = tnode_create_node(p->node);
-	}
-
-	assert(i == new.n);
-
-	return new;
-}
-
-static struct tlist
+static struct tlist_alt
 tnode_create_alt_list(const struct list *list)
 {
 	const struct list *p;
-	struct tlist new;
+	struct tlist_alt new;
 	size_t i;
 	struct bm bm;
 	int hi, lo;
@@ -328,6 +318,30 @@ tnode_create_alt_list(const struct list *list)
 
 	assert(i <= new.n);
 	new.n = i;
+
+	return new;
+}
+
+static struct tlist_seq
+tnode_create_seq_list(const struct list *list)
+{
+	const struct list *p;
+	struct tlist_seq new;
+	size_t i;
+
+	new.n = list_count(list);
+	if (new.n == 0) {
+		new.a = NULL;
+		return new;
+	}
+
+	new.a = xmalloc(sizeof *new.a * new.n);
+
+	for (i = 0, p = list; p != NULL; p = p->next) {
+		new.a[i++] = tnode_create_node(p->node);
+	}
+
+	assert(i == new.n);
 
 	return new;
 }
