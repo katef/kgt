@@ -309,6 +309,19 @@ render_rule(const struct tnode *node)
 	free(ctx.scratch);
 }
 
+static void
+dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
+{
+	assert(s != NULL);
+	assert(w != NULL);
+	assert(a != NULL);
+	assert(d != NULL);
+
+	*w = strlen(s); /* monospace */
+	*a = 0;
+	*d = 1;
+}
+
 void
 rrtext_output(const struct ast_rule *grammar)
 {
@@ -327,7 +340,7 @@ rrtext_output(const struct ast_rule *grammar)
 			rrd_pretty(&rrd);
 		}
 
-		tnode = rrd_to_tnode(rrd);
+		tnode = rrd_to_tnode(rrd, dim_string);
 
 		node_free(rrd);
 

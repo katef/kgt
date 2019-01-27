@@ -55,7 +55,8 @@ void
 tnode_free(struct tnode *n);
 
 struct tnode *
-rrd_to_tnode(const struct node *node);
+rrd_to_tnode(const struct node *node,
+	void (*dim_string)(const char *s, unsigned *w, unsigned *a, unsigned *d));
 
 #endif
 

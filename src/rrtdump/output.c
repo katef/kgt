@@ -130,6 +130,19 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 	}
 }
 
+static void
+dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
+{
+	assert(s != NULL);
+	assert(w != NULL);
+	assert(a != NULL);
+	assert(d != NULL);
+
+	*w = strlen(s); /* monospace */
+	*a = 0;
+	*d = 1;
+}
+
 void
 rrtdump_output(const struct ast_rule *grammar)
 {
@@ -144,7 +157,7 @@ rrtdump_output(const struct ast_rule *grammar)
 			return;
 		}
 
-		tnode = rrd_to_tnode(rrd);
+		tnode = rrd_to_tnode(rrd, dim_string);
 
 		if (!prettify) {
 			printf("%s:\n", p->name);
@@ -159,7 +172,7 @@ rrtdump_output(const struct ast_rule *grammar)
 
 			rrd_pretty(&rrd);
 
-			tnode = rrd_to_tnode(rrd);
+			tnode = rrd_to_tnode(rrd, dim_string);
 
 			printf("%s: (after prettify)\n", p->name);
 			tnode_walk(stdout, tnode, 1);
