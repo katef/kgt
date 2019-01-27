@@ -378,8 +378,8 @@ tnode_create_ellipsis(void)
 
 	new->type = TNODE_ELLIPSIS;
 	new->w = 1;
-	new->y = 0;
-	new->h = 1;
+	new->a = 0;
+	new->d = 1;
 
 	return new;
 }
@@ -394,8 +394,8 @@ tnode_create_node(const struct node *node)
 	if (node == NULL) {
 		new->type = TNODE_SKIP;
 		new->w = 0;
-		new->y = 0;
-		new->h = 1;
+		new->a = 0;
+		new->d = 1;
 
 		return new;
 	}
@@ -405,16 +405,16 @@ tnode_create_node(const struct node *node)
 		new->type = TNODE_LITERAL;
 		new->u.literal = esc_literal(node->u.literal);
 		new->w = strlen(new->u.literal) + 4;
-		new->y = 0;
-		new->h = 1;
+		new->a = 0;
+		new->d = 1;
 		break;
 
 	case NODE_RULE:
 		new->type = TNODE_RULE;
 		new->u.name = node->u.name;
 		new->w = strlen(new->u.name) + 2;
-		new->y = 0;
-		new->h = 1;
+		new->a = 0;
+		new->d = 1;
 		break;
 
 	case NODE_ALT:
@@ -454,50 +454,50 @@ tnode_create_node(const struct node *node)
 		}
 
 		{
-			unsigned y;
+			unsigned a;
 			size_t i;
 
 			i = 0;
 
 			/*
 			 * Alt lists hang below the line.
-			 * The y-height of this node is the y-height of just the first list item
+			 * The ascender of this node is the ascender of just the first list item
 			 * because the first item is at the top of the list, plus the height of
 			 * the skip node above that.
 			 */
 
-			y = 0;
+			a = 0;
 
 			if (node->type == NODE_ALT_SKIPPABLE) {
 				assert(new->u.alt.n > i);
 				assert(new->u.alt.a[i] != NULL);
 				assert(new->u.alt.a[i]->type == TNODE_SKIP);
-				assert(new->u.alt.a[i]->h == 1);
+				assert(new->u.alt.a[i]->a + new->u.alt.a[i]->d == 1);
 
-				y += new->u.alt.a[i]->h + 1;
+				a += new->u.alt.a[i]->a + new->u.alt.a[i]->d + 1;
 				i++;
 			}
 
 			if (new->u.alt.n > i) {
 				assert(new->u.alt.a[i] != NULL);
 
-				y += new->u.alt.a[i]->y;
+				a += new->u.alt.a[i]->a;
 			}
 
-			new->y = y;
+			new->a = a;
 		}
 
 		{
-			unsigned h;
+			unsigned d;
 			size_t i;
 
-			h = 0;
+			d = 0;
 
 			for (i = 0; i < new->u.alt.n; i++) {
-				h += 1 + new->u.alt.a[i]->h;
+				d += 1 + new->u.alt.a[i]->a + new->u.alt.a[i]->d;
 			}
 
-			new->h = h - 1;
+			new->d = d - new->a - 1;
 		}
 
 		break;
@@ -520,39 +520,33 @@ tnode_create_node(const struct node *node)
 		}
 
 		{
-			unsigned y;
+			unsigned a;
 			size_t i;
 
-			y = 0;
+			a = 0;
 
 			for (i = 0; i < new->u.seq.n; i++) {
-				if (new->u.seq.a[i]->y > y) {
-					y = new->u.seq.a[i]->y;
+				if (new->u.seq.a[i]->a > a) {
+					a = new->u.seq.a[i]->a;
 				}
 			}
 
-			new->y = y;
+			new->a = a;
 		}
 
 		{
-			unsigned top = 0, bot = 1;
+			unsigned d;
 			size_t i;
 
+			d = 0;
+
 			for (i = 0; i < new->u.seq.n; i++) {
-				unsigned y, z;
-
-				y = new->u.seq.a[i]->y;
-				if (y > top) {
-					top = y;
-				}
-
-				z = new->u.seq.a[i]->h;
-				if (z - y > bot) {
-					bot = z - y;
+				if (new->u.seq.a[i]->d > d) {
+					d = new->u.seq.a[i]->d;
 				}
 			}
 
-			new->h = bot + top;
+			new->d = d;
 		}
 
 		break;
@@ -585,21 +579,21 @@ tnode_create_node(const struct node *node)
 		}
 
 		{
-			new->y = new->u.loop.forward->y;
+			new->a = new->u.loop.forward->a;
 		}
 
 		{
-			unsigned h;
+			unsigned d;
 
-			h = new->u.loop.forward->h + new->u.loop.backward->h + 1;
+			d = new->u.loop.forward->d + new->u.loop.backward->d + 1;
 
 			if (strlen(new->u.loop.label) > 0) {
 				if (new->u.loop.backward->type != TNODE_SKIP) {
-					h += 2;
+					d += 2;
 				}
 			}
 
-			new->h = h;
+			new->d = d;
 		}
 
 		break;

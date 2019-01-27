@@ -125,7 +125,7 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 	y = ctx->y;
 
 	if (n->u.alt.n > 0 && n->u.alt.a[0]->type == TNODE_SKIP) {
-		ctx->y -= n->y;
+		ctx->y -= n->a;
 	}
 
 	for (j = 0; j < n->u.alt.n; j++) {
@@ -162,7 +162,7 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		if (j + 1 < n->u.alt.n) {
 			ctx->y++;
 			ctx->x = x;
-			bars(ctx, n->u.alt.a[j]->h - n->u.alt.a[j]->y + n->u.alt.a[j + 1]->y, n->w);
+			bars(ctx, n->u.alt.a[j]->d + n->u.alt.a[j + 1]->a, n->w);
 		}
 	}
 
@@ -204,7 +204,7 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 	ctx->y++;
 
 	ctx->x = x;
-	bars(ctx, n->u.loop.forward->h - n->u.loop.forward->y + n->u.loop.backward->y, n->w);
+	bars(ctx, n->u.loop.forward->d + n->u.loop.backward->a, n->w);
 
 	ctx->x = x;
 	bprintf(ctx, !n->u.loop.forward->rtl ? "`" : ">");
@@ -276,7 +276,7 @@ render_rule(const struct tnode *node)
 	int i;
 
 	w = node->w + 8;
-	h = node->h;
+	h = node->a + node->d;
 
 	ctx.lines = xmalloc(sizeof *ctx.lines * h + 1);
 	for (i = 0; i < h; i++) {
@@ -289,14 +289,14 @@ render_rule(const struct tnode *node)
 	ctx.y = 0;
 	ctx.scratch = xmalloc(w + 1);
 
-	ctx.y = node->y;
+	ctx.y = node->a;
 	bprintf(&ctx, "||--");
 
 	ctx.x = w - 4;
 	bprintf(&ctx, "--||");
 
 	ctx.x = 4;
-	ctx.y = node->y;
+	ctx.y = node->a;
 	node_walk_render(node, &ctx);
 
 	for (i = 0; i < h; i++) {

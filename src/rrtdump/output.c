@@ -38,7 +38,7 @@ print_indent(FILE *f, int n)
 static void
 print_coords(FILE *f, const struct tnode *n)
 {
-	fprintf(f, " w=%u y=%u h=%u", n->w, n->y, n->h);
+	fprintf(f, " w=%u a=%u d=%u", n->w, n->a, n->d);
 }
 
 static void

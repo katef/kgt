@@ -31,8 +31,8 @@ struct tnode {
 	} type;
 
 	unsigned w;
-	unsigned y;
-	unsigned h;
+	unsigned a; /* ascender  - height including and above the line  */
+	unsigned d; /* descender - depth below the line */
 
 	int rtl;
 
