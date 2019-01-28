@@ -498,9 +498,8 @@ tnode_create_node(const struct node *node,
 		{
 			new->o = 0;
 
-			/* TODO: think in terms of indexes here, and find .o from that */
 			if (node->type == NODE_ALT_SKIPPABLE) {
-				new->o += new->a;
+				new->o += 1; /* one alt */
 			}
 		}
 

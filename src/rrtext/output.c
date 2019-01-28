@@ -124,7 +124,15 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 	x = ctx->x;
 	y = ctx->y;
 
-	ctx->y -= n->o;
+	/*
+	 * n->o is in terms of indicies; here we would iterate and add the y-distance
+	 * for each of those nodes. That'd be .a for the topmost node, plus the height
+	 * of each subsequent node and the depth of each node above it.
+	 */
+	assert(n->o <= 1); /* currently only implemented for one node above the line */
+	if (n->o == 1) {
+		ctx->y -= n->a;
+	}
 
 	for (j = 0; j < n->u.alt.n; j++) {
 		int sameline  = ctx->y == y;

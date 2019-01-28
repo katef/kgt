@@ -36,7 +36,7 @@ struct tnode {
 
 	int rtl;
 
-	unsigned o; /* offset; XXX: applies for alts only. should be inside union */
+	unsigned o; /* offset, in indicies; XXX: applies for alts only. should be inside union */
 
 	union {
 		const char *literal; /* TODO: point to ast_literal instead */
