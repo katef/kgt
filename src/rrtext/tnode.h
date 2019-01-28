@@ -35,6 +35,7 @@ struct tnode {
 		TNODE_SKIP,
 		TNODE_ELLIPSIS,
 		TNODE_LITERAL,
+		TNODE_LABEL,
 		TNODE_RULE,
 		TNODE_ALT,
 		TNODE_SEQ,
@@ -52,6 +53,7 @@ struct tnode {
 	union {
 		const char *literal; /* TODO: point to ast_literal instead */
 		const char *name;    /* TODO: point to ast_rule instead */
+		const char *label;
 
 		struct tlist_alt alt;
 		struct tlist_seq seq;

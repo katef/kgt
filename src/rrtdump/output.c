@@ -74,6 +74,14 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 
 		break;
 
+	case TNODE_LABEL:
+		print_indent(f, depth);
+		fprintf(f, "LABEL");
+		print_coords(f, n);
+		fprintf(f, ": %s\n", n->u.label);
+
+		break;
+
 	case TNODE_RULE:
 		print_indent(f, depth);
 		fprintf(f, "NAME");

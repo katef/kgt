@@ -131,6 +131,10 @@ tnode_free(struct tnode *n)
 		free((void *) n->u.literal);
 		break;
 
+	case TNODE_LABEL:
+		free((void *) n->u.label);
+		break;
+
 	case TNODE_ALT:
 		tnode_free_alt_list(&n->u.alt);
 		break;
@@ -639,6 +643,7 @@ tnode_set_rtl(struct tnode *n, int rtl)
 	case TNODE_SKIP:
 	case TNODE_ELLIPSIS:
 	case TNODE_LITERAL:
+	case TNODE_LABEL:
 	case TNODE_RULE:
 		break;
 
@@ -672,6 +677,7 @@ tnode_set_tline(struct tnode *n)
 	case TNODE_SKIP:
 	case TNODE_ELLIPSIS:
 	case TNODE_LITERAL:
+	case TNODE_LABEL:
 	case TNODE_RULE:
 		break;
 
