@@ -89,6 +89,7 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 		fprintf(f, " o=%u", n->o); /* XXX: belongs in alt union */
 		fprintf(f, ": [\n");
 		for (i = 0; i < n->u.alt.n; i++) {
+			/* TODO: show tline for each alt */
 			tnode_walk(f, n->u.alt.a[i], depth + 1);
 		}
 		print_indent(f, depth);

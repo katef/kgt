@@ -97,6 +97,7 @@ tnode_free_alt_list(struct tlist_alt *list)
 	}
 
 	free(list->a);
+	free(list->b);
 }
 
 static void
@@ -322,6 +323,8 @@ tnode_create_alt_list(const struct list *list,
 
 	assert(i <= new.n);
 	new.n = i;
+
+	new.b = xmalloc(sizeof *new.b * new.n);
 
 	return new;
 }
@@ -658,6 +661,69 @@ tnode_set_rtl(struct tnode *n, int rtl)
 	}
 }
 
+static void
+tnode_set_tline(struct tnode *n)
+{
+	assert(n != NULL);
+
+	switch (n->type) {
+		size_t i;
+
+	case TNODE_SKIP:
+	case TNODE_ELLIPSIS:
+	case TNODE_LITERAL:
+	case TNODE_RULE:
+		break;
+
+	case TNODE_ALT:
+		{
+			for (i = 0; i < n->u.alt.n; i++) {
+				enum tline z;
+
+				int sameline  = i == n->o;
+				int aboveline = i <  n->o;
+				int belowline = i >  n->o;
+				int firstalt  = i == 0;
+				int lastalt   = i == n->u.alt.n - 1;
+
+				if (sameline && n->u.alt.n > 1 && lastalt) {
+					z = TLINE_A;
+				} else if (firstalt && aboveline) {
+					z = TLINE_B;
+				} else if (i == 0 && sameline) {
+					z = TLINE_C;
+				} else if (sameline) {
+					z = TLINE_D;
+				} else if (belowline && i > 0 && lastalt) {
+					z = TLINE_E;
+				} else if (n->u.alt.a[i]->type == TNODE_ELLIPSIS) {
+					z = TLINE_F;
+				} else {
+					z = TLINE_G;
+				}
+
+				n->u.alt.b[i] = z;
+			}
+		}
+
+		for (i = 0; i < n->u.alt.n; i++) {
+			tnode_set_tline(n->u.alt.a[i]);
+		}
+		break;
+
+	case TNODE_SEQ:
+		for (i = 0; i < n->u.seq.n; i++) {
+			tnode_set_tline(n->u.seq.a[i]);
+		}
+		break;
+
+	case TNODE_LOOP:
+		tnode_set_tline(n->u.loop.forward);
+		tnode_set_tline(n->u.loop.backward);
+		break;
+	}
+}
+
 struct tnode *
 rrd_to_tnode(const struct node *node,
 	void (*dim_string)(const char *s, unsigned *w, unsigned *a, unsigned *d))
@@ -669,6 +735,7 @@ rrd_to_tnode(const struct node *node,
 	n = tnode_create_node(node, dim_string);
 
 	tnode_set_rtl(n, 0);
+	tnode_set_tline(n);
 
 	return n;
 }

@@ -135,30 +135,22 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 	}
 
 	for (j = 0; j < n->u.alt.n; j++) {
-		int sameline  = ctx->y == y;
-		int aboveline = ctx->y < y;
-		int belowline = ctx->y > y;
-		int firstalt  = j == 0;
-		int lastalt   = j == n->u.alt.n - 1;
-
 		const char *a;
 
 		ctx->x = x;
 
-		if (sameline && n->u.alt.n > 1 && lastalt) {
-			a = n->rtl ? "<^" : "^>";
-		} else if (firstalt && aboveline) {
-			a = ",.";
-		} else if (j == 0 && sameline) {
-			a = n->rtl ? "<v" : "v>";
-		} else if (sameline) {
-			a = n->rtl ? "<+" : "+>";
-		} else if (belowline && j > 0 && lastalt) {
-			a = "`'";
-		} else if (n->u.alt.a[j]->type == TNODE_ELLIPSIS) {
-			a = "||";
-		} else {
-			a = n->rtl ? "^<" : ">^";
+		switch (n->u.alt.b[j]) {
+		case TLINE_A: a = n->rtl ? "<^" : "^>"; break;
+		case TLINE_B: a = ",.";                 break;
+		case TLINE_C: a = n->rtl ? "<v" : "v>"; break;
+		case TLINE_D: a = n->rtl ? "<+" : "+>"; break;
+		case TLINE_E: a = "`'";                 break;
+		case TLINE_F: a = "||";                 break;
+		case TLINE_G: a = n->rtl ? "^<" : ">^"; break;
+
+		default:
+			a = "??";
+			break;
 		}
 
 		bprintf(ctx, "%c", a[0]);

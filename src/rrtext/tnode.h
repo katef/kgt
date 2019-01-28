@@ -9,8 +9,19 @@
 
 struct node;
 
+enum tline {
+	TLINE_A,
+	TLINE_B,
+	TLINE_C,
+	TLINE_D,
+	TLINE_E,
+	TLINE_F,
+	TLINE_G
+};
+
 struct tlist_alt {
 	struct tnode **a;
+	enum tline *b;
 	size_t n;
 };
 
