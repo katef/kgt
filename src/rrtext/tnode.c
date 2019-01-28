@@ -575,6 +575,11 @@ tnode_create_node(const struct node *node,
 
 		loop_label(node->u.loop.min, node->u.loop.max, new->u.loop.label);
 
+		/* arrows are helpful when going backwards */
+		if (new->u.loop.backward->type == TNODE_SKIP && strlen(new->u.loop.label) == 0) {
+			new->u.loop.backward->w = 1;
+		}
+
 		{
 			unsigned w;
 			unsigned wf, wb, cw;
