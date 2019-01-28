@@ -124,9 +124,7 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 	x = ctx->x;
 	y = ctx->y;
 
-	if (n->u.alt.n > 0 && n->u.alt.a[0]->type == TNODE_SKIP) {
-		ctx->y -= n->a;
-	}
+	ctx->y -= n->o;
 
 	for (j = 0; j < n->u.alt.n; j++) {
 		int sameline  = ctx->y == y;
