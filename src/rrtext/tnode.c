@@ -539,7 +539,7 @@ tnode_create_node(const struct node *node,
 					z = TLINE_A;
 				} else if (firstalt && aboveline) {
 					z = TLINE_B;
-				} else if (i == 0 && sameline) {
+				} else if (firstalt && sameline) {
 					z = TLINE_C;
 				} else if (sameline) {
 					z = TLINE_D;
