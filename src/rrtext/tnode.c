@@ -581,9 +581,18 @@ tnode_create_node(const struct node *node,
 
 		loop_label(node->u.loop.min, node->u.loop.max, new->u.loop.label);
 
-		/* arrows are helpful when going backwards */
-		if (new->u.loop.backward->type == TNODE_SKIP && strlen(new->u.loop.label) == 0) {
-			new->u.loop.backward->w = 1;
+		if (new->u.loop.backward->type == TNODE_SKIP) {
+			/* if there's nothing to show for the backwards node, put the label there */
+			if (strlen(new->u.loop.label) > 0) {
+				new->u.loop.backward->type = TNODE_LABEL;
+				new->u.loop.backward->u.literal = esc_literal(new->u.loop.label);
+				dim_string(new->u.loop.backward->u.label, &new->u.loop.backward->w, &new->u.loop.backward->a, &new->u.loop.backward->d);
+			}
+
+			/* arrows are helpful when going backwards */
+			if (strlen(new->u.loop.label) == 0) {
+				new->u.loop.backward->w = 1;
+			}
 		}
 
 		{
@@ -616,7 +625,7 @@ tnode_create_node(const struct node *node,
 			d = new->u.loop.forward->d + new->u.loop.backward->d + 1;
 
 			if (strlen(new->u.loop.label) > 0) {
-				if (new->u.loop.backward->type != TNODE_SKIP) {
+				if (new->u.loop.backward->type != TNODE_LABEL) {
 					d += 2;
 				}
 			}

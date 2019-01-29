@@ -217,8 +217,8 @@ render_loop(const struct tnode *n, struct render_context *ctx)
 		if (n->u.loop.backward->type != TNODE_SKIP) {
 			/* TODO: maybe set the label position in tnode? */
 			ctx->y += 2;
+			memcpy(ctx->lines[ctx->y] + ctx->x, n->u.loop.label, strlen(n->u.loop.label));
 		}
-		memcpy(ctx->lines[ctx->y] + ctx->x, n->u.loop.label, strlen(n->u.loop.label));
 		ctx->y = y;
 	}
 
