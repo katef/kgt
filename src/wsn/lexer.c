@@ -36,6 +36,7 @@ lx_getc(struct lx_wsn_lx *lx)
 
 	if (c == '\n') {
 		lx->end.line++;
+		lx->end.saved_col = lx->end.col - 1;
 		lx->end.col = 1;
 	}
 
@@ -59,7 +60,7 @@ lx_wsn_ungetc(struct lx_wsn_lx *lx, int c)
 
 	if (c == '\n') {
 		lx->end.line--;
-		lx->end.col = 0; /* XXX: lost information */
+		lx->end.col = lx->end.saved_col;
 	}
 }
 
@@ -176,14 +177,14 @@ z0(struct lx_wsn_lx *lx)
 		case S1: /* e.g. "a" */
 			lx_wsn_ungetc(lx, c); return TOK_CHAR;
 
-		case S2: /* e.g. """ */
+		case S2: /* e.g. "\"" */
 			switch ((unsigned char) c) {
 			case '"': state = S3; break;
 			default:  lx_wsn_ungetc(lx, c); return lx->z = z1, TOK_LITERAL;
 			}
 			break;
 
-		case S3: /* e.g. """" */
+		case S3: /* e.g. "\"\"" */
 			lx_wsn_ungetc(lx, c); return TOK_ESC;
 
 		default:
@@ -240,13 +241,12 @@ z1(struct lx_wsn_lx *lx)
 			case '\n':
 			case '\v':
 			case '\f':
-			case '\r': state = S1; break;
+			case '\r':
 			case ' ': state = S1; break;
 			case '"': state = S2; break;
 			case '(': state = S3; break;
 			case ')': state = S4; break;
-			case '-': state = S5; break;
-			case '.': state = S6; break;
+			case '-':
 			case '0':
 			case '1':
 			case '2':
@@ -256,8 +256,7 @@ z1(struct lx_wsn_lx *lx)
 			case '6':
 			case '7':
 			case '8':
-			case '9': state = S5; break;
-			case '=': state = S7; break;
+			case '9':
 			case 'A':
 			case 'B':
 			case 'C':
@@ -283,10 +282,8 @@ z1(struct lx_wsn_lx *lx)
 			case 'W':
 			case 'X':
 			case 'Y':
-			case 'Z': state = S5; break;
-			case '[': state = S8; break;
-			case ']': state = S9; break;
-			case '_': state = S5; break;
+			case 'Z':
+			case '_':
 			case 'a':
 			case 'b':
 			case 'c':
@@ -313,6 +310,10 @@ z1(struct lx_wsn_lx *lx)
 			case 'x':
 			case 'y':
 			case 'z': state = S5; break;
+			case '.': state = S6; break;
+			case '=': state = S7; break;
+			case '[': state = S8; break;
+			case ']': state = S9; break;
 			case '{': state = S10; break;
 			case '|': state = S11; break;
 			case '}': state = S12; break;
@@ -326,13 +327,13 @@ z1(struct lx_wsn_lx *lx)
 			case '\n':
 			case '\v':
 			case '\f':
-			case '\r': break;
+			case '\r':
 			case ' ': break;
 			default:  lx_wsn_ungetc(lx, c); return lx->z(lx);
 			}
 			break;
 
-		case S2: /* e.g. """ */
+		case S2: /* e.g. "\"" */
 			switch ((unsigned char) c) {
 			case '"': state = S13; break;
 			default:  lx_wsn_ungetc(lx, c); return lx->z = z0, lx->z(lx);
@@ -347,7 +348,7 @@ z1(struct lx_wsn_lx *lx)
 
 		case S5: /* e.g. "a" */
 			switch ((unsigned char) c) {
-			case '-': break;
+			case '-':
 			case '0':
 			case '1':
 			case '2':
@@ -357,7 +358,7 @@ z1(struct lx_wsn_lx *lx)
 			case '6':
 			case '7':
 			case '8':
-			case '9': break;
+			case '9':
 			case 'A':
 			case 'B':
 			case 'C':
@@ -383,8 +384,8 @@ z1(struct lx_wsn_lx *lx)
 			case 'W':
 			case 'X':
 			case 'Y':
-			case 'Z': break;
-			case '_': break;
+			case 'Z':
+			case '_':
 			case 'a':
 			case 'b':
 			case 'c':
@@ -436,7 +437,7 @@ z1(struct lx_wsn_lx *lx)
 		case S12: /* e.g. "}" */
 			lx_wsn_ungetc(lx, c); return TOK_ENDSTAR;
 
-		case S13: /* e.g. """" */
+		case S13: /* e.g. "\"\"" */
 			lx_wsn_ungetc(lx, c); return TOK_EMPTY;
 
 		default:

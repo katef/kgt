@@ -39,6 +39,7 @@ lx_getc(struct lx_iso_ebnf_lx *lx)
 
 	if (c == '\n') {
 		lx->end.line++;
+		lx->end.saved_col = lx->end.col - 1;
 		lx->end.col = 1;
 	}
 
@@ -62,7 +63,7 @@ lx_iso_ebnf_ungetc(struct lx_iso_ebnf_lx *lx, int c)
 
 	if (c == '\n') {
 		lx->end.line--;
-		lx->end.col = 0; /* XXX: lost information */
+		lx->end.col = lx->end.saved_col;
 	}
 }
 
@@ -248,7 +249,7 @@ z1(struct lx_iso_ebnf_lx *lx)
 		case S1: /* e.g. "a" */
 			lx_iso_ebnf_ungetc(lx, c); return TOK_CHAR;
 
-		case S2: /* e.g. """ */
+		case S2: /* e.g. "\"" */
 			lx_iso_ebnf_ungetc(lx, c); return lx->z = z4, TOK_LITERAL;
 
 		default:
@@ -307,7 +308,7 @@ z2(struct lx_iso_ebnf_lx *lx)
 		case S1: /* e.g. "a" */
 			lx_iso_ebnf_ungetc(lx, c); return TOK_CHAR;
 
-		case S2: /* e.g. "\'" */
+		case S2: /* e.g. "'" */
 			lx_iso_ebnf_ungetc(lx, c); return lx->z = z4, TOK_LITERAL;
 
 		default:
@@ -438,22 +439,17 @@ z4(struct lx_iso_ebnf_lx *lx)
 		switch (state) {
 		case S0: /* start */
 			switch ((unsigned char) c) {
+			case '-': state = S9; break;
+			case '[': state = S17; break;
 			case '\t':
 			case '\n':
 			case '\v':
 			case '\f':
-			case '\r': state = S1; break;
+			case '\r':
 			case ' ': state = S1; break;
-			case '!': state = S2; break;
-			case '"': state = S3; break;
-			case '\'': state = S4; break;
-			case '(': state = S5; break;
-			case ')': state = S6; break;
-			case '*': state = S7; break;
-			case ',': state = S8; break;
-			case '-': state = S9; break;
-			case '.': state = S10; break;
-			case '\x2f': state = S11; break;
+			case '.':
+			case ';': state = S10; break;
+			case '/': state = S11; break;
 			case '0':
 			case '1':
 			case '2':
@@ -464,10 +460,9 @@ z4(struct lx_iso_ebnf_lx *lx)
 			case '7':
 			case '8':
 			case '9': state = S12; break;
-			case ':': state = S13; break;
-			case ';': state = S10; break;
-			case '=': state = S14; break;
 			case '?': state = S15; break;
+			case ':': state = S13; break;
+			case '=': state = S14; break;
 			case 'A':
 			case 'B':
 			case 'C':
@@ -493,9 +488,7 @@ z4(struct lx_iso_ebnf_lx *lx)
 			case 'W':
 			case 'X':
 			case 'Y':
-			case 'Z': state = S16; break;
-			case '[': state = S17; break;
-			case ']': state = S18; break;
+			case 'Z':
 			case 'a':
 			case 'b':
 			case 'c':
@@ -522,9 +515,17 @@ z4(struct lx_iso_ebnf_lx *lx)
 			case 'x':
 			case 'y':
 			case 'z': state = S16; break;
+			case ']': state = S18; break;
 			case '{': state = S19; break;
-			case '|': state = S2; break;
 			case '}': state = S20; break;
+			case '!':
+			case '|': state = S2; break;
+			case '"': state = S3; break;
+			case '\'': state = S4; break;
+			case '(': state = S5; break;
+			case ')': state = S6; break;
+			case '*': state = S7; break;
+			case ',': state = S8; break;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
 			}
 			break;
@@ -535,7 +536,7 @@ z4(struct lx_iso_ebnf_lx *lx)
 			case '\n':
 			case '\v':
 			case '\f':
-			case '\r': break;
+			case '\r':
 			case ' ': break;
 			default:  lx_iso_ebnf_ungetc(lx, c); return lx->z(lx);
 			}
@@ -544,17 +545,17 @@ z4(struct lx_iso_ebnf_lx *lx)
 		case S2: /* e.g. "!" */
 			lx_iso_ebnf_ungetc(lx, c); return TOK_ALT;
 
-		case S3: /* e.g. """ */
+		case S3: /* e.g. "\"" */
 			lx_iso_ebnf_ungetc(lx, c); return lx->z = z1, lx->z(lx);
 
-		case S4: /* e.g. "\'" */
+		case S4: /* e.g. "'" */
 			lx_iso_ebnf_ungetc(lx, c); return lx->z = z2, lx->z(lx);
 
 		case S5: /* e.g. "(" */
 			switch ((unsigned char) c) {
-			case '*': state = S23; break;
-			case '\x2f': state = S17; break;
+			case '/': state = S17; break;
 			case ':': state = S19; break;
+			case '*': state = S23; break;
 			default:  lx_iso_ebnf_ungetc(lx, c); return TOK_STARTGROUP;
 			}
 			break;
@@ -574,7 +575,7 @@ z4(struct lx_iso_ebnf_lx *lx)
 		case S10: /* e.g. "." */
 			lx_iso_ebnf_ungetc(lx, c); return TOK_SEP;
 
-		case S11: /* e.g. "\x2f" */
+		case S11: /* e.g. "\057" */
 			switch ((unsigned char) c) {
 			case ')': state = S18; break;
 			default:  lx_iso_ebnf_ungetc(lx, c); return TOK_ALT;
@@ -612,13 +613,6 @@ z4(struct lx_iso_ebnf_lx *lx)
 
 		case S16: /* e.g. "a" */
 			switch ((unsigned char) c) {
-			case '\t':
-			case '\n':
-			case '\v':
-			case '\f':
-			case '\r': state = S21; break;
-			case ' ': state = S21; break;
-			case '-': state = S22; break;
 			case '0':
 			case '1':
 			case '2':
@@ -628,7 +622,7 @@ z4(struct lx_iso_ebnf_lx *lx)
 			case '6':
 			case '7':
 			case '8':
-			case '9': break;
+			case '9':
 			case 'A':
 			case 'B':
 			case 'C':
@@ -654,8 +648,8 @@ z4(struct lx_iso_ebnf_lx *lx)
 			case 'W':
 			case 'X':
 			case 'Y':
-			case 'Z': break;
-			case '_': break;
+			case 'Z':
+			case '_':
 			case 'a':
 			case 'b':
 			case 'c':
@@ -682,6 +676,13 @@ z4(struct lx_iso_ebnf_lx *lx)
 			case 'x':
 			case 'y':
 			case 'z': break;
+			case '\t':
+			case '\n':
+			case '\v':
+			case '\f':
+			case '\r':
+			case ' ': state = S21; break;
+			case '-': state = S22; break;
 			default:  lx_iso_ebnf_ungetc(lx, c); return TOK_IDENT;
 			}
 			break;
@@ -700,12 +701,6 @@ z4(struct lx_iso_ebnf_lx *lx)
 
 		case S21: /* e.g. "a\t" */
 			switch ((unsigned char) c) {
-			case '\t':
-			case '\n':
-			case '\v':
-			case '\f':
-			case '\r': break;
-			case ' ': break;
 			case 'A':
 			case 'B':
 			case 'C':
@@ -731,7 +726,7 @@ z4(struct lx_iso_ebnf_lx *lx)
 			case 'W':
 			case 'X':
 			case 'Y':
-			case 'Z': state = S16; break;
+			case 'Z':
 			case 'a':
 			case 'b':
 			case 'c':
@@ -758,6 +753,12 @@ z4(struct lx_iso_ebnf_lx *lx)
 			case 'x':
 			case 'y':
 			case 'z': state = S16; break;
+			case '\t':
+			case '\n':
+			case '\v':
+			case '\f':
+			case '\r':
+			case ' ': break;
 			default:  lx_iso_ebnf_ungetc(lx, c); return TOK_IDENT;
 			}
 			break;
@@ -773,7 +774,7 @@ z4(struct lx_iso_ebnf_lx *lx)
 			case '6':
 			case '7':
 			case '8':
-			case '9': state = S16; break;
+			case '9':
 			case 'A':
 			case 'B':
 			case 'C':
@@ -799,8 +800,8 @@ z4(struct lx_iso_ebnf_lx *lx)
 			case 'W':
 			case 'X':
 			case 'Y':
-			case 'Z': state = S16; break;
-			case '_': state = S16; break;
+			case 'Z':
+			case '_':
 			case 'a':
 			case 'b':
 			case 'c':
@@ -933,7 +934,7 @@ lx_iso_ebnf_example(enum lx_iso_ebnf_token (*z)(struct lx_iso_ebnf_lx *), enum l
 	if (z == z2) {
 		switch (t) {
 		case TOK_CHAR: return "a";
-		case TOK_LITERAL: return "\'";
+		case TOK_LITERAL: return "'";
 		default: goto error;
 		}
 	} else

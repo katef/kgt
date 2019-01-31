@@ -38,6 +38,7 @@ lx_getc(struct lx_bnf_lx *lx)
 
 	if (c == '\n') {
 		lx->end.line++;
+		lx->end.saved_col = lx->end.col - 1;
 		lx->end.col = 1;
 	}
 
@@ -61,7 +62,7 @@ lx_bnf_ungetc(struct lx_bnf_lx *lx, int c)
 
 	if (c == '\n') {
 		lx->end.line--;
-		lx->end.col = 0; /* XXX: lost information */
+		lx->end.col = lx->end.saved_col;
 	}
 }
 
@@ -178,7 +179,7 @@ z0(struct lx_bnf_lx *lx)
 		case S1: /* e.g. "a" */
 			lx_bnf_ungetc(lx, c); return TOK_CHAR;
 
-		case S2: /* e.g. """ */
+		case S2: /* e.g. "\"" */
 			lx_bnf_ungetc(lx, c); return lx->z = z3, TOK_LITERAL;
 
 		default:
@@ -237,7 +238,7 @@ z1(struct lx_bnf_lx *lx)
 		case S1: /* e.g. "a" */
 			lx_bnf_ungetc(lx, c); return TOK_CHAR;
 
-		case S2: /* e.g. "\'" */
+		case S2: /* e.g. "'" */
 			lx_bnf_ungetc(lx, c); return lx->z = z3, TOK_LITERAL;
 
 		default:
@@ -288,7 +289,7 @@ z2(struct lx_bnf_lx *lx)
 		switch (state) {
 		case S0: /* start */
 			switch ((unsigned char) c) {
-			case '-': state = S1; break;
+			case '-':
 			case '0':
 			case '1':
 			case '2':
@@ -298,8 +299,7 @@ z2(struct lx_bnf_lx *lx)
 			case '6':
 			case '7':
 			case '8':
-			case '9': state = S1; break;
-			case '>': state = S2; break;
+			case '9':
 			case 'A':
 			case 'B':
 			case 'C':
@@ -325,8 +325,8 @@ z2(struct lx_bnf_lx *lx)
 			case 'W':
 			case 'X':
 			case 'Y':
-			case 'Z': state = S1; break;
-			case '_': state = S1; break;
+			case 'Z':
+			case '_':
 			case 'a':
 			case 'b':
 			case 'c':
@@ -353,6 +353,7 @@ z2(struct lx_bnf_lx *lx)
 			case 'x':
 			case 'y':
 			case 'z': state = S1; break;
+			case '>': state = S2; break;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
 			}
 			break;
@@ -412,15 +413,15 @@ z3(struct lx_bnf_lx *lx)
 		switch (state) {
 		case S0: /* start */
 			switch ((unsigned char) c) {
-			case '\t': state = S1; break;
 			case '\n': state = S2; break;
+			case '\t':
 			case '\v':
 			case '\f':
-			case '\r': state = S1; break;
+			case '\r':
 			case ' ': state = S1; break;
 			case '"': state = S3; break;
-			case '\'': state = S4; break;
 			case ':': state = S5; break;
+			case '\'': state = S4; break;
 			case '<': state = S6; break;
 			case '|': state = S7; break;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
@@ -429,10 +430,10 @@ z3(struct lx_bnf_lx *lx)
 
 		case S1: /* e.g. "\t" */
 			switch ((unsigned char) c) {
-			case '\t': break;
+			case '\t':
 			case '\v':
 			case '\f':
-			case '\r': break;
+			case '\r':
 			case ' ': break;
 			default:  lx_bnf_ungetc(lx, c); return lx->z(lx);
 			}
@@ -445,14 +446,14 @@ z3(struct lx_bnf_lx *lx)
 			}
 			break;
 
-		case S3: /* e.g. """ */
+		case S3: /* e.g. "\"" */
 			switch ((unsigned char) c) {
 			case '"': state = S10; break;
 			default:  lx_bnf_ungetc(lx, c); return lx->z = z0, lx->z(lx);
 			}
 			break;
 
-		case S4: /* e.g. "\'" */
+		case S4: /* e.g. "'" */
 			switch ((unsigned char) c) {
 			case '\'': state = S10; break;
 			default:  lx_bnf_ungetc(lx, c); return lx->z = z1, lx->z(lx);
@@ -482,7 +483,7 @@ z3(struct lx_bnf_lx *lx)
 		case S9: /* e.g. "::=" */
 			lx_bnf_ungetc(lx, c); return TOK_EQUALS;
 
-		case S10: /* e.g. "\'\'" */
+		case S10: /* e.g. "''" */
 			lx_bnf_ungetc(lx, c); return TOK_EMPTY;
 
 		case S11: /* e.g. "\n\n" */
@@ -557,7 +558,7 @@ lx_bnf_example(enum lx_bnf_token (*z)(struct lx_bnf_lx *), enum lx_bnf_token t)
 	} else
 	if (z == z1) {
 		switch (t) {
-		case TOK_LITERAL: return "\'";
+		case TOK_LITERAL: return "'";
 		case TOK_CHAR: return "a";
 		default: goto error;
 		}
@@ -571,7 +572,7 @@ lx_bnf_example(enum lx_bnf_token (*z)(struct lx_bnf_lx *), enum lx_bnf_token t)
 	} else
 	if (z == z3) {
 		switch (t) {
-		case TOK_EMPTY: return "\'\'";
+		case TOK_EMPTY: return "''";
 		case TOK_SEP: return "\n\n";
 		case TOK_ALT: return "|";
 		case TOK_EQUALS: return "::=";

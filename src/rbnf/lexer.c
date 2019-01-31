@@ -36,6 +36,7 @@ lx_getc(struct lx_rbnf_lx *lx)
 
 	if (c == '\n') {
 		lx->end.line++;
+		lx->end.saved_col = lx->end.col - 1;
 		lx->end.col = 1;
 	}
 
@@ -59,7 +60,7 @@ lx_rbnf_ungetc(struct lx_rbnf_lx *lx, int c)
 
 	if (c == '\n') {
 		lx->end.line--;
-		lx->end.col = 0; /* XXX: lost information */
+		lx->end.col = lx->end.saved_col;
 	}
 }
 
@@ -169,6 +170,11 @@ z0(struct lx_rbnf_lx *lx)
 		case S0: /* start */
 			switch ((unsigned char) c) {
 			case '>': state = S2; break;
+			case '\t':
+			case '\n':
+			case '\v':
+			case '\f':
+			case '\r': lx->lgetc = NULL; return TOK_UNKNOWN;
 			default: state = S1; break;
 			}
 			break;
@@ -228,14 +234,14 @@ z1(struct lx_rbnf_lx *lx)
 		switch (state) {
 		case S0: /* start */
 			switch ((unsigned char) c) {
-			case '\t': state = S1; break;
-			case '\n': state = S2; break;
+			case '\t':
 			case '\v':
 			case '\f':
-			case '\r': state = S1; break;
+			case '\r':
 			case ' ': state = S1; break;
-			case '(': state = S3; break;
+			case '\n': state = S2; break;
 			case ')': state = S4; break;
+			case '(': state = S3; break;
 			case '.': state = S5; break;
 			case ':': state = S6; break;
 			case '<': state = S7; break;
@@ -248,10 +254,10 @@ z1(struct lx_rbnf_lx *lx)
 
 		case S1: /* e.g. "\t" */
 			switch ((unsigned char) c) {
-			case '\t': break;
+			case '\t':
 			case '\v':
 			case '\f':
-			case '\r': break;
+			case '\r':
 			case ' ': break;
 			default:  lx_rbnf_ungetc(lx, c); return lx->z(lx);
 			}
@@ -272,14 +278,14 @@ z1(struct lx_rbnf_lx *lx)
 
 		case S5: /* e.g. "." */
 			switch ((unsigned char) c) {
-			case '.': state = S11; break;
+			case '.': state = S13; break;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
 			}
 			break;
 
 		case S6: /* e.g. ":" */
 			switch ((unsigned char) c) {
-			case ':': state = S12; break;
+			case ':': state = S11; break;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
 			}
 			break;
@@ -296,22 +302,22 @@ z1(struct lx_rbnf_lx *lx)
 		case S10: /* e.g. "|" */
 			lx_rbnf_ungetc(lx, c); return TOK_ALT;
 
-		case S11: /* e.g. ".." */
+		case S11: /* e.g. "::" */
+			switch ((unsigned char) c) {
+			case '=': state = S12; break;
+			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
+			}
+			break;
+
+		case S12: /* e.g. "::=" */
+			lx_rbnf_ungetc(lx, c); return TOK_EQUALS;
+
+		case S13: /* e.g. ".." */
 			switch ((unsigned char) c) {
 			case '.': state = S14; break;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
 			}
 			break;
-
-		case S12: /* e.g. "::" */
-			switch ((unsigned char) c) {
-			case '=': state = S13; break;
-			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
-			}
-			break;
-
-		case S13: /* e.g. "::=" */
-			lx_rbnf_ungetc(lx, c); return TOK_EQUALS;
 
 		case S14: /* e.g. "..." */
 			lx_rbnf_ungetc(lx, c); return TOK_REP;
@@ -351,7 +357,7 @@ z1(struct lx_rbnf_lx *lx)
 	case S8: return TOK_STARTOPT;
 	case S9: return TOK_ENDOPT;
 	case S10: return TOK_ALT;
-	case S13: return TOK_EQUALS;
+	case S12: return TOK_EQUALS;
 	case S14: return TOK_REP;
 	case S15: return TOK_SEP;
 	default: errno = EINVAL; return TOK_ERROR;

@@ -38,6 +38,7 @@ lx_getc(struct lx_abnf_lx *lx)
 
 	if (c == '\n') {
 		lx->end.line++;
+		lx->end.saved_col = lx->end.col - 1;
 		lx->end.col = 1;
 	}
 
@@ -61,7 +62,7 @@ lx_abnf_ungetc(struct lx_abnf_lx *lx, int c)
 
 	if (c == '\n') {
 		lx->end.line--;
-		lx->end.col = 0; /* XXX: lost information */
+		lx->end.col = lx->end.saved_col;
 	}
 }
 
@@ -178,7 +179,7 @@ z0(struct lx_abnf_lx *lx)
 		case S1: /* e.g. "a" */
 			lx_abnf_ungetc(lx, c); return TOK_CHAR;
 
-		case S2: /* e.g. """ */
+		case S2: /* e.g. "\"" */
 			lx_abnf_ungetc(lx, c); return lx->z = z3, TOK_LITERAL;
 
 		default:
@@ -229,7 +230,8 @@ z1(struct lx_abnf_lx *lx)
 		switch (state) {
 		case S0: /* start */
 			switch ((unsigned char) c) {
-			case '-': state = S1; break;
+			case '>': state = S2; break;
+			case '-':
 			case '0':
 			case '1':
 			case '2':
@@ -239,8 +241,7 @@ z1(struct lx_abnf_lx *lx)
 			case '6':
 			case '7':
 			case '8':
-			case '9': state = S1; break;
-			case '>': state = S2; break;
+			case '9':
 			case 'A':
 			case 'B':
 			case 'C':
@@ -266,8 +267,8 @@ z1(struct lx_abnf_lx *lx)
 			case 'W':
 			case 'X':
 			case 'Y':
-			case 'Z': state = S1; break;
-			case '_': state = S1; break;
+			case 'Z':
+			case '_':
 			case 'a':
 			case 'b':
 			case 'c':
@@ -424,18 +425,15 @@ z3(struct lx_abnf_lx *lx)
 		switch (state) {
 		case S0: /* start */
 			switch ((unsigned char) c) {
-			case '\t': state = S1; break;
-			case '\n': state = S2; break;
+			case '\t':
 			case '\v':
 			case '\f':
-			case '\r': state = S1; break;
+			case '\r':
 			case ' ': state = S1; break;
-			case '"': state = S3; break;
-			case '%': state = S4; break;
 			case '(': state = S5; break;
 			case ')': state = S6; break;
 			case '*': state = S7; break;
-			case '\x2f': state = S8; break;
+			case '/': state = S8; break;
 			case '0':
 			case '1':
 			case '2':
@@ -446,6 +444,11 @@ z3(struct lx_abnf_lx *lx)
 			case '7':
 			case '8':
 			case '9': state = S9; break;
+			case '\n': state = S2; break;
+			case '[': state = S14; break;
+			case ']': state = S15; break;
+			case '%': state = S4; break;
+			case '"': state = S3; break;
 			case ';': state = S10; break;
 			case '<': state = S11; break;
 			case '=': state = S12; break;
@@ -474,9 +477,7 @@ z3(struct lx_abnf_lx *lx)
 			case 'W':
 			case 'X':
 			case 'Y':
-			case 'Z': state = S13; break;
-			case '[': state = S14; break;
-			case ']': state = S15; break;
+			case 'Z':
 			case 'a':
 			case 'b':
 			case 'c':
@@ -509,10 +510,10 @@ z3(struct lx_abnf_lx *lx)
 
 		case S1: /* e.g. "\t" */
 			switch ((unsigned char) c) {
-			case '\t': break;
+			case '\t':
 			case '\v':
 			case '\f':
-			case '\r': break;
+			case '\r':
 			case ' ': break;
 			default:  lx_abnf_ungetc(lx, c); return lx->z(lx);
 			}
@@ -520,18 +521,18 @@ z3(struct lx_abnf_lx *lx)
 
 		case S2: /* e.g. "\n" */
 			switch ((unsigned char) c) {
-			case '\n': state = S16; break;
+			case '\n': state = S17; break;
 			default:  lx_abnf_ungetc(lx, c); return lx->z(lx);
 			}
 			break;
 
-		case S3: /* e.g. """ */
+		case S3: /* e.g. "\"" */
 			lx_abnf_ungetc(lx, c); return lx->z = z0, lx->z(lx);
 
 		case S4: /* e.g. "%" */
 			switch ((unsigned char) c) {
-			case 'b': state = S18; break;
 			case 'd': state = S19; break;
+			case 'b': state = S18; break;
 			case 'x': state = S20; break;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
 			}
@@ -546,7 +547,7 @@ z3(struct lx_abnf_lx *lx)
 		case S7: /* e.g. "*" */
 			lx_abnf_ungetc(lx, c); return TOK_REP;
 
-		case S8: /* e.g. "\x2f" */
+		case S8: /* e.g. "\057" */
 			lx_abnf_ungetc(lx, c); return TOK_ALT;
 
 		case S9: /* e.g. "0" */
@@ -573,14 +574,14 @@ z3(struct lx_abnf_lx *lx)
 
 		case S12: /* e.g. "=" */
 			switch ((unsigned char) c) {
-			case '\x2f': state = S17; break;
+			case '/': state = S16; break;
 			default:  lx_abnf_ungetc(lx, c); return TOK_EQUALS;
 			}
 			break;
 
 		case S13: /* e.g. "a" */
 			switch ((unsigned char) c) {
-			case '-': break;
+			case '-':
 			case '0':
 			case '1':
 			case '2':
@@ -590,7 +591,7 @@ z3(struct lx_abnf_lx *lx)
 			case '6':
 			case '7':
 			case '8':
-			case '9': break;
+			case '9':
 			case 'A':
 			case 'B':
 			case 'C':
@@ -616,7 +617,7 @@ z3(struct lx_abnf_lx *lx)
 			case 'W':
 			case 'X':
 			case 'Y':
-			case 'Z': break;
+			case 'Z':
 			case 'a':
 			case 'b':
 			case 'c':
@@ -653,16 +654,16 @@ z3(struct lx_abnf_lx *lx)
 		case S15: /* e.g. "]" */
 			lx_abnf_ungetc(lx, c); return TOK_ENDOPT;
 
-		case S16: /* e.g. "\n\n" */
-			lx_abnf_ungetc(lx, c); return TOK_SEP;
-
-		case S17: /* e.g. "=\x2f" */
+		case S16: /* e.g. "=\057" */
 			lx_abnf_ungetc(lx, c); return TOK_ALTINC;
+
+		case S17: /* e.g. "\n\n" */
+			lx_abnf_ungetc(lx, c); return TOK_SEP;
 
 		case S18: /* e.g. "%b" */
 			switch ((unsigned char) c) {
 			case '0':
-			case '1': state = S31; break;
+			case '1': state = S21; break;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
 			}
 			break;
@@ -678,7 +679,7 @@ z3(struct lx_abnf_lx *lx)
 			case '6':
 			case '7':
 			case '8':
-			case '9': state = S22; break;
+			case '9': state = S23; break;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
 			}
 			break;
@@ -694,27 +695,35 @@ z3(struct lx_abnf_lx *lx)
 			case '6':
 			case '7':
 			case '8':
-			case '9': state = S21; break;
+			case '9':
 			case 'A':
 			case 'B':
 			case 'C':
 			case 'D':
 			case 'E':
-			case 'F': state = S21; break;
+			case 'F':
 			case 'a':
 			case 'b':
 			case 'c':
 			case 'd':
 			case 'e':
-			case 'f': state = S21; break;
+			case 'f': state = S22; break;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
 			}
 			break;
 
-		case S21: /* e.g. "%xa" */
+		case S21: /* e.g. "%b0" */
 			switch ((unsigned char) c) {
-			case '-': state = S23; break;
-			case '.': state = S24; break;
+			case '0':
+			case '1': break;
+			case '-': state = S32; break;
+			case '.': state = S33; break;
+			default:  lx_abnf_ungetc(lx, c); return TOK_BINSTR;
+			}
+			break;
+
+		case S22: /* e.g. "%xa" */
+			switch ((unsigned char) c) {
 			case '0':
 			case '1':
 			case '2':
@@ -724,27 +733,27 @@ z3(struct lx_abnf_lx *lx)
 			case '6':
 			case '7':
 			case '8':
-			case '9': break;
+			case '9':
 			case 'A':
 			case 'B':
 			case 'C':
 			case 'D':
 			case 'E':
-			case 'F': break;
+			case 'F':
 			case 'a':
 			case 'b':
 			case 'c':
 			case 'd':
 			case 'e':
 			case 'f': break;
+			case '-': state = S24; break;
+			case '.': state = S25; break;
 			default:  lx_abnf_ungetc(lx, c); return TOK_HEXSTR;
 			}
 			break;
 
-		case S22: /* e.g. "%d0" */
+		case S23: /* e.g. "%d0" */
 			switch ((unsigned char) c) {
-			case '-': state = S27; break;
-			case '.': state = S28; break;
 			case '0':
 			case '1':
 			case '2':
@@ -755,11 +764,13 @@ z3(struct lx_abnf_lx *lx)
 			case '7':
 			case '8':
 			case '9': break;
+			case '.': state = S29; break;
+			case '-': state = S28; break;
 			default:  lx_abnf_ungetc(lx, c); return TOK_DECSTR;
 			}
 			break;
 
-		case S23: /* e.g. "%xa-" */
+		case S24: /* e.g. "%xa-" */
 			switch ((unsigned char) c) {
 			case '0':
 			case '1':
@@ -770,13 +781,13 @@ z3(struct lx_abnf_lx *lx)
 			case '6':
 			case '7':
 			case '8':
-			case '9': state = S26; break;
+			case '9':
 			case 'A':
 			case 'B':
 			case 'C':
 			case 'D':
 			case 'E':
-			case 'F': state = S26; break;
+			case 'F':
 			case 'a':
 			case 'b':
 			case 'c':
@@ -787,7 +798,7 @@ z3(struct lx_abnf_lx *lx)
 			}
 			break;
 
-		case S24: /* e.g. "%xa." */
+		case S25: /* e.g. "%xa." */
 			switch ((unsigned char) c) {
 			case '0':
 			case '1':
@@ -798,49 +809,20 @@ z3(struct lx_abnf_lx *lx)
 			case '6':
 			case '7':
 			case '8':
-			case '9': state = S25; break;
+			case '9':
 			case 'A':
 			case 'B':
 			case 'C':
 			case 'D':
 			case 'E':
-			case 'F': state = S25; break;
+			case 'F':
 			case 'a':
 			case 'b':
 			case 'c':
 			case 'd':
 			case 'e':
-			case 'f': state = S25; break;
+			case 'f': state = S27; break;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
-			}
-			break;
-
-		case S25: /* e.g. "%xa.a" */
-			switch ((unsigned char) c) {
-			case '.': state = S24; break;
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9': break;
-			case 'A':
-			case 'B':
-			case 'C':
-			case 'D':
-			case 'E':
-			case 'F': break;
-			case 'a':
-			case 'b':
-			case 'c':
-			case 'd':
-			case 'e':
-			case 'f': break;
-			default:  lx_abnf_ungetc(lx, c); return TOK_HEXSTR;
 			}
 			break;
 
@@ -855,13 +837,13 @@ z3(struct lx_abnf_lx *lx)
 			case '6':
 			case '7':
 			case '8':
-			case '9': break;
+			case '9':
 			case 'A':
 			case 'B':
 			case 'C':
 			case 'D':
 			case 'E':
-			case 'F': break;
+			case 'F':
 			case 'a':
 			case 'b':
 			case 'c':
@@ -872,7 +854,36 @@ z3(struct lx_abnf_lx *lx)
 			}
 			break;
 
-		case S27: /* e.g. "%d0-" */
+		case S27: /* e.g. "%xa.a" */
+			switch ((unsigned char) c) {
+			case '.': state = S25; break;
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+			case 'A':
+			case 'B':
+			case 'C':
+			case 'D':
+			case 'E':
+			case 'F':
+			case 'a':
+			case 'b':
+			case 'c':
+			case 'd':
+			case 'e':
+			case 'f': break;
+			default:  lx_abnf_ungetc(lx, c); return TOK_HEXSTR;
+			}
+			break;
+
+		case S28: /* e.g. "%d0-" */
 			switch ((unsigned char) c) {
 			case '0':
 			case '1':
@@ -888,7 +899,7 @@ z3(struct lx_abnf_lx *lx)
 			}
 			break;
 
-		case S28: /* e.g. "%d0." */
+		case S29: /* e.g. "%d0." */
 			switch ((unsigned char) c) {
 			case '0':
 			case '1':
@@ -899,25 +910,8 @@ z3(struct lx_abnf_lx *lx)
 			case '6':
 			case '7':
 			case '8':
-			case '9': state = S29; break;
+			case '9': state = S31; break;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
-			}
-			break;
-
-		case S29: /* e.g. "%d0.0" */
-			switch ((unsigned char) c) {
-			case '.': state = S28; break;
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9': break;
-			default:  lx_abnf_ungetc(lx, c); return TOK_DECSTR;
 			}
 			break;
 
@@ -937,25 +931,24 @@ z3(struct lx_abnf_lx *lx)
 			}
 			break;
 
-		case S31: /* e.g. "%b0" */
+		case S31: /* e.g. "%d0.0" */
 			switch ((unsigned char) c) {
-			case '-': state = S32; break;
-			case '.': state = S33; break;
+			case '.': state = S29; break;
 			case '0':
-			case '1': break;
-			default:  lx_abnf_ungetc(lx, c); return TOK_BINSTR;
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9': break;
+			default:  lx_abnf_ungetc(lx, c); return TOK_DECSTR;
 			}
 			break;
 
 		case S32: /* e.g. "%b0-" */
-			switch ((unsigned char) c) {
-			case '0':
-			case '1': state = S35; break;
-			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
-			}
-			break;
-
-		case S33: /* e.g. "%b0." */
 			switch ((unsigned char) c) {
 			case '0':
 			case '1': state = S34; break;
@@ -963,20 +956,28 @@ z3(struct lx_abnf_lx *lx)
 			}
 			break;
 
-		case S34: /* e.g. "%b0.0" */
+		case S33: /* e.g. "%b0." */
+			switch ((unsigned char) c) {
+			case '0':
+			case '1': state = S35; break;
+			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
+			}
+			break;
+
+		case S34: /* e.g. "%b0-0" */
+			switch ((unsigned char) c) {
+			case '0':
+			case '1': break;
+			default:  lx_abnf_ungetc(lx, c); return TOK_BINRANGE;
+			}
+			break;
+
+		case S35: /* e.g. "%b0.0" */
 			switch ((unsigned char) c) {
 			case '.': state = S33; break;
 			case '0':
 			case '1': break;
 			default:  lx_abnf_ungetc(lx, c); return TOK_BINSTR;
-			}
-			break;
-
-		case S35: /* e.g. "%b0-0" */
-			switch ((unsigned char) c) {
-			case '0':
-			case '1': break;
-			default:  lx_abnf_ungetc(lx, c); return TOK_BINRANGE;
 			}
 			break;
 
@@ -1020,17 +1021,17 @@ z3(struct lx_abnf_lx *lx)
 	case S13: return TOK_IDENT;
 	case S14: return TOK_STARTOPT;
 	case S15: return TOK_ENDOPT;
-	case S16: return TOK_SEP;
-	case S17: return TOK_ALTINC;
-	case S21: return TOK_HEXSTR;
-	case S22: return TOK_DECSTR;
-	case S25: return TOK_HEXSTR;
+	case S16: return TOK_ALTINC;
+	case S17: return TOK_SEP;
+	case S21: return TOK_BINSTR;
+	case S22: return TOK_HEXSTR;
+	case S23: return TOK_DECSTR;
 	case S26: return TOK_HEXRANGE;
-	case S29: return TOK_DECSTR;
+	case S27: return TOK_HEXSTR;
 	case S30: return TOK_DECRANGE;
-	case S31: return TOK_BINSTR;
-	case S34: return TOK_BINSTR;
-	case S35: return TOK_BINRANGE;
+	case S31: return TOK_DECSTR;
+	case S34: return TOK_BINRANGE;
+	case S35: return TOK_BINSTR;
 	default: errno = EINVAL; return TOK_ERROR;
 	}
 }
@@ -1098,8 +1099,8 @@ lx_abnf_example(enum lx_abnf_token (*z)(struct lx_abnf_lx *), enum lx_abnf_token
 		case TOK_REP: return "*";
 		case TOK_ENDGROUP: return ")";
 		case TOK_STARTGROUP: return "(";
-		case TOK_ALTINC: return "=\x2f";
-		case TOK_ALT: return "\x2f";
+		case TOK_ALTINC: return "=\057";
+		case TOK_ALT: return "\057";
 		case TOK_HEXRANGE: return "%xa-a";
 		case TOK_DECRANGE: return "%d0-0";
 		case TOK_BINRANGE: return "%b0-0";
