@@ -22,7 +22,7 @@
 '(' -> $startgroup; ')' -> $endgroup;
 
 # not formally specified
-/[-a-z0-9_]+/i -> $ident;
+/[\-a-z0-9_]+/i -> $ident;
 
 '""' -> $empty;
 
