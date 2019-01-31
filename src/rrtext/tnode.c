@@ -609,62 +609,79 @@ tnode_create_node(const struct node *node, int rtl,
 		break;
 
 	case NODE_LOOP:
-		new->type = TNODE_LOOP;
-		new->u.loop.forward  = tnode_create_node(node->u.loop.forward,  rtl,  dim_string);
-		new->u.loop.backward = tnode_create_node(node->u.loop.backward, !rtl, dim_string);
+		new->type = TNODE_ALT;
 
-		loop_label(node->u.loop.min, node->u.loop.max, new->u.loop.label);
+		new->o = 0;
 
-		if (new->u.loop.backward->type == TNODE_SKIP) {
-			/* if there's nothing to show for the backwards node, put the label there */
-			if (strlen(new->u.loop.label) > 0) {
-				new->u.loop.backward->type = TNODE_LABEL;
-				new->u.loop.backward->u.literal = esc_literal(new->u.loop.label);
-				dim_string(new->u.loop.backward->u.label, &new->u.loop.backward->w, &new->u.loop.backward->a, &new->u.loop.backward->d);
-			}
+		new->u.alt.n = 2;
+		new->u.alt.a = xmalloc(sizeof *new->u.alt.a * new->u.alt.n);
+		new->u.alt.b = xmalloc(sizeof *new->u.alt.b * new->u.alt.n);
 
+		new->u.alt.a[0] = tnode_create_node(node->u.loop.forward,   rtl, dim_string);
+		new->u.alt.a[1] = tnode_create_node(node->u.loop.backward, !rtl, dim_string);
+
+		new->u.alt.b[0] = TLINE_H;
+		new->u.alt.b[1] = TLINE_E;
+
+		if (new->u.alt.a[1]->type == TNODE_SKIP) {
 			/* arrows are helpful when going backwards */
-			if (strlen(new->u.loop.label) == 0) {
-				new->u.loop.backward->w = 1;
+			new->u.alt.a[1]->w = 1;
+		}
+
+		{
+			char s[128]; /* XXX */
+			const char *label;
+
+			loop_label(node->u.loop.min, node->u.loop.max, s);
+			label = esc_literal(s);
+
+			if (strlen(label) != 0) {
+				if (new->u.alt.a[1]->type == TNODE_SKIP) {
+					struct tnode *label_tnode;
+
+					/* if there's nothing to show for the backwards node, put the label there */
+					label_tnode = new->u.alt.a[1];
+					label_tnode->type = TNODE_LABEL;
+					label_tnode->u.label = label;
+					dim_string(label, &label_tnode->w, &label_tnode->a, &label_tnode->d);
+				} else {
+					/* TODO: store label somewhere for rendering to display somehow */
+					assert(!"unimplemented");
+				}
 			}
 		}
 
 		{
 			unsigned w;
-			unsigned wf, wb, cw;
+			unsigned wf, wb;
 
-			wf = new->u.loop.forward->w;
-			wb = new->u.loop.backward->w;
+			wf = new->u.alt.a[0]->w;
+			wb = new->u.alt.a[1]->w;
 
 			w = (wf > wb ? wf : wb) + 6;
-
-			cw = strlen(new->u.loop.label);
-
-			if (cw > 0) {
-				if (cw + 6 > w) {
-					w = cw + 6;
-				}
-			}
 
 			new->w = w;
 		}
 
 		{
-			new->a = new->u.loop.forward->a;
+			new->a = new->u.alt.a[0]->a;
+		}
+
+		{
+			new->o = 0;
 		}
 
 		{
 			unsigned d;
+			size_t i;
 
-			d = new->u.loop.forward->d + new->u.loop.backward->d + 1;
+			d = 0;
 
-			if (strlen(new->u.loop.label) > 0) {
-				if (new->u.loop.backward->type != TNODE_LABEL) {
-					d += 2;
-				}
+			for (i = 0; i < new->u.alt.n; i++) {
+				d += 1 + new->u.alt.a[i]->a + new->u.alt.a[i]->d;
 			}
 
-			new->d = d;
+			new->d = d - new->a - 1;
 		}
 
 		break;
