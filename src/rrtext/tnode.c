@@ -36,6 +36,19 @@ tnode_create_node(const struct node *node, int rtl,
 static struct tnode *
 tnode_create_ellipsis(void);
 
+static void
+swap(struct tnode **a, struct tnode **b)
+{
+	struct tnode *tmp;
+
+	assert(a != NULL);
+	assert(b != NULL);
+
+	tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+
 /* made-up to suit text output */
 static size_t
 escputc(char *s, char c)
@@ -606,8 +619,6 @@ tnode_create_node(const struct node *node, int rtl,
 	case NODE_LOOP:
 		new->type = TNODE_ALT;
 
-		new->o = 0;
-
 		new->u.alt.n = 2;
 		new->u.alt.a = xmalloc(sizeof *new->u.alt.a * new->u.alt.n);
 		new->u.alt.b = xmalloc(sizeof *new->u.alt.b * new->u.alt.n);
@@ -677,6 +688,28 @@ tnode_create_node(const struct node *node, int rtl,
 			}
 
 			new->d = d - new->a - 1;
+		}
+
+		/*
+		 * An aesthetic optimisation: When the depth of the forward node is large
+		 * a loop going beneath it looks bad, because the backward bars are so high.
+		 * A height of 2 seems simple enough to potentially render above the line.
+		 * We do that only if there isn't already something big above the line.
+		 */
+		if (new->u.alt.a[0]->d >= 4) {
+			if (new->u.alt.a[1]->a + new->u.alt.a[1]->d <= 2) {
+				if (new->u.alt.a[0]->a <= 2 && new->u.alt.a[0]->d > new->u.alt.a[0]->a) {
+					swap(&new->u.alt.a[0], &new->u.alt.a[1]);
+
+					new->u.alt.b[0] = TLINE_B;
+					new->u.alt.b[1] = TLINE_G;
+
+					new->o = 1;
+
+					new->a += new->u.alt.a[0]->a + new->u.alt.a[0]->d + 1;
+					new->d -= new->u.alt.a[0]->a + new->u.alt.a[0]->d + 1;
+				}
+			}
 		}
 
 		break;
