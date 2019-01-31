@@ -118,26 +118,6 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 		fprintf(f, "]\n");
 
 		break;
-
-	case TNODE_LOOP:
-		print_indent(f, depth);
-		fprintf(f, "LOOP");
-		print_coords(f, n);
-		fprintf(f, ":\n");
-
-		if (n->u.loop.forward != NULL) {
-			print_indent(f, depth + 1);
-			fprintf(f, ".forward:\n");
-			tnode_walk(f, n->u.loop.forward, depth + 2);
-		}
-
-		if (n->u.loop.backward != NULL) {
-			print_indent(f, depth + 1);
-			fprintf(f, ".backward:\n");
-			tnode_walk(f, n->u.loop.backward, depth + 2);
-		}
-
-		break;
 	}
 }
 

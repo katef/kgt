@@ -39,8 +39,7 @@ struct tnode {
 		TNODE_LABEL,
 		TNODE_RULE,
 		TNODE_ALT,
-		TNODE_SEQ,
-		TNODE_LOOP
+		TNODE_SEQ
 	} type;
 
 	unsigned w;
@@ -58,12 +57,6 @@ struct tnode {
 
 		struct tlist_alt alt;
 		struct tlist_seq seq;
-
-		struct {
-			struct tnode *forward;
-			struct tnode *backward;
-			char label[128];
-		} loop;
 	} u;
 };
 

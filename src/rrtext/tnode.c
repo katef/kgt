@@ -142,11 +142,6 @@ tnode_free(struct tnode *n)
 	case TNODE_SEQ:
 		tnode_free_seq_list(&n->u.seq);
 		break;
-
-	case TNODE_LOOP:
-		tnode_free(n->u.loop.forward);
-		tnode_free(n->u.loop.backward);
-		break;
 	}
 
 	free(n);

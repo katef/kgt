@@ -187,49 +187,6 @@ render_seq(const struct tnode *n, struct render_context *ctx)
 }
 
 static void
-render_loop(const struct tnode *n, struct render_context *ctx)
-{
-	int x = ctx->x, y = ctx->y;
-	int cw;
-
-	assert(n != NULL);
-	assert(n->type == TNODE_LOOP);
-	assert(ctx != NULL);
-
-	bprintf(ctx, !n->rtl ? ">" : "v");
-
-	justify(ctx, n->u.loop.forward, n->w - 2);
-	bprintf(ctx, !n->rtl ? "v" : "<");
-	ctx->y++;
-
-	ctx->x = x;
-	bars(ctx, n->u.loop.forward->d + n->u.loop.backward->a, n->w);
-
-	ctx->x = x;
-	bprintf(ctx, !n->u.loop.forward->rtl ? "`" : ">");
-
-	cw = strlen(n->u.loop.label);
-
-	justify(ctx, n->u.loop.backward, n->w - 2);
-
-	if (cw > 0) {
-		int y = ctx->y;
-		ctx->x = x + 1 + (n->w - cw - 2) / 2;
-		if (n->u.loop.backward->type != TNODE_SKIP) {
-			/* TODO: maybe set the label position in tnode? */
-			ctx->y += 2;
-			memcpy(ctx->lines[ctx->y] + ctx->x, n->u.loop.label, strlen(n->u.loop.label));
-		}
-		ctx->y = y;
-	}
-
-	ctx->x = x + n->w - 1;
-	bprintf(ctx, !n->rtl ? "'" : "^");
-
-	ctx->y = y;
-}
-
-static void
 node_walk_render(const struct tnode *n, struct render_context *ctx)
 {
 	assert(ctx != NULL);
@@ -261,10 +218,6 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 
 	case TNODE_SEQ:
 		render_seq(n, ctx);
-		break;
-
-	case TNODE_LOOP:
-		render_loop(n, ctx);
 		break;
 	}
 }
