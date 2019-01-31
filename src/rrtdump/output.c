@@ -67,7 +67,15 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 
 		break;
 
-	case TNODE_LITERAL:
+	case TNODE_CI_LITERAL:
+		print_indent(f, depth);
+		fprintf(f, "LITERAL");
+		print_coords(f, n);
+		fprintf(f, ": \"%s\"/i\n", n->u.literal);
+
+		break;
+
+	case TNODE_CS_LITERAL:
 		print_indent(f, depth);
 		fprintf(f, "LITERAL");
 		print_coords(f, n);

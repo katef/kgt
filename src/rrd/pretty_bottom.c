@@ -30,7 +30,7 @@ bottom_loop(struct node **np)
 		return 0;
 	}
 
-	if (n->u.loop.backward->type == NODE_LITERAL || n->u.loop.backward->type == NODE_RULE) {
+	if (n->u.loop.backward->type == NODE_CI_LITERAL || n->u.loop.backward->type == NODE_CS_LITERAL || n->u.loop.backward->type == NODE_RULE) {
 		return 0;
 	}
 

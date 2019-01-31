@@ -104,7 +104,8 @@ atomic(const struct ast_term *term)
 	switch (term->type) {
 	case TYPE_EMPTY:
 	case TYPE_RULE:
-	case TYPE_LITERAL:
+	case TYPE_CI_LITERAL:
+	case TYPE_CS_LITERAL:
 	case TYPE_TOKEN:
 		return 1;
 
@@ -135,7 +136,37 @@ output_term(const struct ast_term *term)
 		printf(" %s", term->u.rule->name);
 		break;
 
-	case TYPE_LITERAL: {
+	case TYPE_CI_LITERAL: {
+			const char *p;
+
+			putc(' ', stdout);
+
+			/* XXX: the tokenization here is wrong; this should be a single token */
+
+			for (p = term->u.literal; *p != '\0'; p++) {
+				char uc, lc;
+
+				uc = toupper((unsigned char) *p);
+				lc = tolower((unsigned char) *p);
+
+				if (uc == lc) {
+					putc('[', stdout);
+					(void) blab_escputc(stdout, *p);
+					putc(']', stdout);
+					continue;
+				}
+
+				if (uc != lc) {
+					putc('[', stdout);
+					(void) blab_escputc(stdout, lc);
+					(void) blab_escputc(stdout, uc);
+					putc(']', stdout);
+				}
+			}
+		}
+		break;
+
+	case TYPE_CS_LITERAL: {
 			const char *p;
 
 			fputs(" \"", stdout);

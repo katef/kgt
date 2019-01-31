@@ -113,10 +113,14 @@ output_term(const struct ast_rule *grammar,
 		escputs(term->u.rule->name, stdout);
 		break;
 
-	case TYPE_LITERAL:
+	case TYPE_CI_LITERAL:
+	case TYPE_CS_LITERAL:
 		fputs("&quot;", stdout);
 		escputs(term->u.literal, stdout);
 		fputs("&quot;", stdout);
+		if (term->type == TYPE_CI_LITERAL) {
+			fputs("/i", stdout);
+		}
 		break;
 
 	case TYPE_TOKEN:
@@ -141,7 +145,8 @@ output_term(const struct ast_rule *grammar,
 */
 		break;
 
-	case TYPE_LITERAL:
+	case TYPE_CI_LITERAL:
+	case TYPE_CS_LITERAL:
 	case TYPE_TOKEN:
 		printf("\t\"t%p\" [ style = filled ];\n",
 			(void *) term);

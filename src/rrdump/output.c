@@ -47,7 +47,13 @@ node_walk(FILE *f, const struct node *n, int depth)
 	switch (n->type) {
 		const struct list *p;
 
-	case NODE_LITERAL:
+	case NODE_CI_LITERAL:
+		print_indent(f, depth);
+		fprintf(f, "LITERAL: \"%s\"/i\n", n->u.literal);
+
+		break;
+
+	case NODE_CS_LITERAL:
 		print_indent(f, depth);
 		fprintf(f, "LITERAL: \"%s\"\n", n->u.literal);
 

@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <assert.h>
 
 #include "../ast.h"
@@ -51,7 +52,11 @@ output_basic(const struct ast_term *term)
 		printf("%s; ", term->u.rule->name);
 		break;
 
-	case TYPE_LITERAL:
+	case TYPE_CI_LITERAL:
+		fprintf(stderr, "unimplemented\n");
+		exit(EXIT_FAILURE);
+
+	case TYPE_CS_LITERAL:
 		output_literal(term->u.literal);
 		break;
 
@@ -123,9 +128,10 @@ is_equal(const struct ast_term *a, const struct ast_term *b)
 	}
 
 	switch (a->type) {
-	case TYPE_RULE:    return 0 == strcmp(a->u.rule->name, b->u.rule->name);
-	case TYPE_LITERAL: return 0 == strcmp(a->u.literal,    b->u.literal);
-	case TYPE_TOKEN:   return 0 == strcmp(a->u.token,      b->u.token);
+	case TYPE_RULE:       return 0 == strcmp(a->u.rule->name,  b->u.rule->name);
+	case TYPE_CI_LITERAL: return 0 == strcasecmp(a->u.literal, b->u.literal);
+	case TYPE_CS_LITERAL: return 0 == strcmp(a->u.literal,     b->u.literal);
+	case TYPE_TOKEN:      return 0 == strcmp(a->u.token,       b->u.token);
 	}
 }
 
@@ -153,7 +159,8 @@ output_terminals(const struct ast_rule *grammar)
 				case TYPE_TOKEN:
 					continue;
 
-				case TYPE_LITERAL:
+				case TYPE_CI_LITERAL:
+				case TYPE_CS_LITERAL:
 					break;
 				}
 

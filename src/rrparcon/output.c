@@ -14,6 +14,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
@@ -133,7 +134,11 @@ node_walk(FILE *f, const struct node *n, int depth)
 	switch (n->type) {
 		const struct list *p;
 
-	case NODE_LITERAL:
+	case NODE_CI_LITERAL:
+		fprintf(stderr, "unimplemented\n");
+		exit(EXIT_FAILURE);
+
+	case NODE_CS_LITERAL:
 		print_indent(f, depth);
 		fprintf(f, "text(\"");
 		escputs(n->u.literal, f);

@@ -6,6 +6,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 
 #include "list.h"
@@ -23,7 +24,8 @@ node_free(struct node *n)
 	}
 
 	switch (n->type) {
-	case NODE_LITERAL:
+	case NODE_CI_LITERAL:
+	case NODE_CS_LITERAL:
 	case NODE_RULE:
 		break;
 
@@ -52,7 +54,7 @@ node_free(struct node *n)
 }
 
 struct node *
-node_create_literal(const char *literal)
+node_create_ci_literal(const char *literal)
 {
 	struct node *new;
 
@@ -60,7 +62,23 @@ node_create_literal(const char *literal)
 
 	new = xmalloc(sizeof *new);
 
-	new->type = NODE_LITERAL;
+	new->type = NODE_CI_LITERAL;
+
+	new->u.literal = literal;
+
+	return new;
+}
+
+struct node *
+node_create_cs_literal(const char *literal)
+{
+	struct node *new;
+
+	assert(literal != NULL);
+
+	new = xmalloc(sizeof *new);
+
+	new->type = NODE_CS_LITERAL;
 
 	new->u.literal = literal;
 
@@ -177,7 +195,10 @@ node_compare(const struct node *a, const struct node *b)
 	}
 
 	switch (a->type) {
-	case NODE_LITERAL:
+	case NODE_CI_LITERAL:
+		return 0 == strcasecmp(a->u.literal, b->u.literal);
+
+	case NODE_CS_LITERAL:
 		return 0 == strcmp(a->u.literal, b->u.literal);
 
 	case NODE_RULE:

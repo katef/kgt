@@ -37,7 +37,8 @@
 
 	!EMPTY;
 	NAME;
-	LITERAL;
+	CI_LITERAL;
+	CS_LITERAL;
 
 	!ESC:  () -> (:char);
 	CHAR:  () -> (:char);
@@ -66,12 +67,13 @@
 	<set-repeat>:  (:ast_term, :count, :count) -> ();
 	!<mul-repeat>: (:ast_term, :count)         -> ();
 
-	!<make-empty-term>:  ()             -> (:ast_term);
-	<make-rule-term>:    (:string)      -> (:ast_term);
-	<make-literal-term>: (:string)      -> (:ast_term);
-	!<make-token-term>:  (:string)      -> (:ast_term);
-	<make-group-term>:   (:ast_alt)     -> (:ast_term);
-	<make-range-term>:   (:char, :char) -> (:ast_term);
+	!<make-empty-term>:     ()             -> (:ast_term);
+	<make-rule-term>:       (:string)      -> (:ast_term);
+	<make-ci-literal-term>: (:string)      -> (:ast_term);
+	<make-cs-literal-term>: (:string)      -> (:ast_term);
+	!<make-token-term>:     (:string)      -> (:ast_term);
+	<make-group-term>:      (:ast_alt)     -> (:ast_term);
+	<make-range-term>:      (:char, :char) -> (:ast_term);
 
 	<make-alt>:        (:ast_term)         -> (:ast_alt);
 	<make-rule>:       (:string, :ast_alt) -> (:ast_rule);
@@ -122,10 +124,14 @@
 
 	term: () -> (t :ast_term) = {
 		body;
-		LITERAL;
-/* TODO: case insensitive; possibly expand out to alts? */
+		CI_LITERAL;
 		s = <pattern-buffer>;
-		t = <make-literal-term>(s);
+		t = <make-ci-literal-term>(s);
+	||
+		body;
+		CS_LITERAL;
+		s = <pattern-buffer>;
+		t = <make-cs-literal-term>(s);
 	||
 		body;
 		NAME;
@@ -138,7 +144,7 @@
 		t = <make-rule-term>(s);
 	||
 		s = escstr;
-		t = <make-literal-term>(s);
+		t = <make-cs-literal-term>(s);
 	||
 		(m, n) = escrange;
 		t = <make-range-term>(m, n);

@@ -123,7 +123,11 @@ node_walk(FILE *f, const struct node *n)
 	switch (n->type) {
 		const struct list *p;
 
-	case NODE_LITERAL:
+	case NODE_CI_LITERAL:
+		fprintf(stderr, "unimplemented\n");
+		exit(EXIT_FAILURE);
+
+	case NODE_CS_LITERAL:
 		fprintf(f, "\"");
 		escputs(n->u.literal, f);
 		fprintf(f, "\"");

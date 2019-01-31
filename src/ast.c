@@ -55,7 +55,7 @@ ast_make_char_term(char c)
 	s[1] = '\0';
 
 	new = xmalloc(sizeof *new);
-	new->type      = TYPE_LITERAL;
+	new->type      = TYPE_CS_LITERAL;
 	new->next      = NULL;
 	new->u.literal = s;
 
@@ -66,14 +66,14 @@ ast_make_char_term(char c)
 }
 
 struct ast_term *
-ast_make_literal_term(const char *literal)
+ast_make_literal_term(const char *literal, int ci)
 {
 	struct ast_term *new;
 
 	assert(literal != NULL);
 
 	new = xmalloc(sizeof *new);
-	new->type      = TYPE_LITERAL;
+	new->type      = ci ? TYPE_CI_LITERAL : TYPE_CS_LITERAL;
 	new->next      = NULL;
 	new->u.literal = literal;
 

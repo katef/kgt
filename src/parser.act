@@ -61,8 +61,10 @@
 	/* XXX: get rid of this; use same %entry% for all grammars */
 	#define FORM_ENTRY CAT(prod_, FORM)
 
-	/* XXX: workaround for SID's identifier escaping */
+	/* XXX: workarounds for SID's identifier escaping */
 	#define prod_iso_Hebnf FORM_ENTRY
+	#define TOK_CI__LITERAL TOK_CI_LITERAL
+	#define TOK_CS__LITERAL TOK_CS_LITERAL
 
 	#include "parser.h"
 	#include "lexer.h"
@@ -529,8 +531,19 @@
 		@t = ast_make_rule_term(r);
 	@};
 
-	<make-literal-term>: (l :string) -> (t :ast_term) = @{
-		@t = ast_make_literal_term(@l);
+	<make-ci-literal-term>: (l :string) -> (t :ast_term) = @{
+		char *p;
+
+		/* normalise case-insensitive strings for aesthetic reasons only */
+		for (p = @l; *p != '\0'; p++) {
+			*p = tolower((unsigned char) *p);
+		}
+
+		@t = ast_make_literal_term(@l, 1);
+	@};
+
+	<make-cs-literal-term>: (l :string) -> (t :ast_term) = @{
+		@t = ast_make_literal_term(@l, 0);
 	@};
 
 	<make-token-term>: (n :string) -> (t :ast_term) = @{
