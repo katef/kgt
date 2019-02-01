@@ -9,8 +9,6 @@
 
 struct ast_rule;
 
-#define rrtext_rrd_unsupported 0
-
 extern int prettify;
 
 void

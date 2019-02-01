@@ -23,6 +23,7 @@
 
 #include "../rrd/rrd.h"
 #include "../rrd/pretty.h"
+#include "../rrd/rewrite.h"
 #include "../rrd/node.h"
 #include "../rrd/list.h"
 
@@ -264,6 +265,9 @@ rrparcon_output(const struct ast_rule *grammar)
 		if (prettify) {
 			rrd_pretty(&rrd);
 		}
+
+		/* TODO: pass in unsupported bitmap */
+		rewrite_rrd_ci_literals(rrd);
 
 		printf("  (\n");
 		printf("    \"");

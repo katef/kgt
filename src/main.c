@@ -58,7 +58,7 @@ struct io {
 	{ "rrparcon", NULL,           rrparcon_output, 0, rrparcon_rrd_unsupported },
 	{ "rrll",     NULL,           rrll_output,     0, rrll_rrd_unsupported     },
 	{ "rrta",     NULL,           rrta_output,     0, rrta_rrd_unsupported     },
-	{ "rrtext",   NULL,           rrtext_output,   0, rrtext_rrd_unsupported   }
+	{ "rrtext",   NULL,           rrtext_output,   0, 0 }
 };
 
 enum io_dir {
