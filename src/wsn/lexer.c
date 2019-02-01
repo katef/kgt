@@ -180,7 +180,7 @@ z0(struct lx_wsn_lx *lx)
 		case S2: /* e.g. "\"" */
 			switch ((unsigned char) c) {
 			case '"': state = S3; break;
-			default:  lx_wsn_ungetc(lx, c); return lx->z = z1, TOK_LITERAL;
+			default:  lx_wsn_ungetc(lx, c); return lx->z = z1, TOK_CS_LITERAL;
 			}
 			break;
 
@@ -203,7 +203,7 @@ z0(struct lx_wsn_lx *lx)
 	switch (state) {
 	case NONE: return TOK_EOF;
 	case S1: return TOK_CHAR;
-	case S2: return TOK_LITERAL;
+	case S2: return TOK_CS_LITERAL;
 	case S3: return TOK_ESC;
 	default: errno = EINVAL; return TOK_ERROR;
 	}
@@ -494,7 +494,7 @@ lx_wsn_name(enum lx_wsn_token t)
 	case TOK_STARTSTAR: return "STARTSTAR";
 	case TOK_CHAR: return "CHAR";
 	case TOK_ESC: return "ESC";
-	case TOK_LITERAL: return "LITERAL";
+	case TOK_CS_LITERAL: return "CS_LITERAL";
 	case TOK_SEP: return "SEP";
 	case TOK_ALT: return "ALT";
 	case TOK_EQUALS: return "EQUALS";
@@ -514,7 +514,7 @@ lx_wsn_example(enum lx_wsn_token (*z)(struct lx_wsn_lx *), enum lx_wsn_token t)
 		switch (t) {
 		case TOK_CHAR: return "a";
 		case TOK_ESC: return "\"\"";
-		case TOK_LITERAL: return "\"";
+		case TOK_CS_LITERAL: return "\"";
 		default: goto error;
 		}
 	} else

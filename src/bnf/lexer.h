@@ -5,7 +5,7 @@
 
 enum lx_bnf_token {
 	TOK_EMPTY,
-	TOK_LITERAL,
+	TOK_CS_LITERAL,
 	TOK_CHAR,
 	TOK_NAME,
 	TOK_SEP,
