@@ -14,6 +14,7 @@
 #include <stdio.h>
 
 #include "ast.h"
+#include "rewrite.h"
 #include "xalloc.h"
 #include "rrd/node.h"
 
@@ -174,9 +175,10 @@ main(int argc, char *argv[])
 		for (v = out->ast_unsupported; v != 0; v &= v - 1) {
 			int r;
 
-			/* TODO: expose these transformations as CLI options too */
+			/* TODO: expose these rewritings as CLI options too; set as bits in v */
+			/* TODO: option to query if output is possible without rewriting */
 			switch (v & -v) {
-			case FEATURE_AST_CI_LITERAL: r = 1; /* TODO: ast_transform_ci_literals(g); */ break;
+			case FEATURE_AST_CI_LITERAL: r = 1; rewrite_ci_literals(g); break;
 			}
 
 			if (!r) {
