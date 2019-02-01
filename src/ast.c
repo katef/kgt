@@ -7,9 +7,26 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "ast.h"
 #include "xalloc.h"
+
+static int
+isalphastr(const char *s)
+{
+	const char *p;
+
+	assert(s != NULL);
+
+	for (p = s; *p != '\0'; p++) {
+		if (isalpha((unsigned char) *p)) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
 
 struct ast_term *
 ast_make_empty_term(void)
@@ -76,6 +93,11 @@ ast_make_literal_term(const char *literal, int ci)
 	new->type      = ci ? TYPE_CI_LITERAL : TYPE_CS_LITERAL;
 	new->next      = NULL;
 	new->u.literal = literal;
+
+	/* no need for case-insensitive strings if there are no letters */
+	if (!isalphastr(new->u.literal)) {
+		new->type = TYPE_CS_LITERAL;
+	}
 
 	new->min = 1;
 	new->max = 1;

@@ -23,6 +23,7 @@ add_alt(struct ast_alt **alt, const char *s)
 	struct ast_alt *new;
 
 	assert(alt != NULL);
+	assert(s != NULL);
 
 	s = xstrdup(s);
 
