@@ -9,6 +9,8 @@
 
 struct ast_rule;
 
+#define rrparcon_rrd_unsupported 0
+
 extern int prettify;
 
 void

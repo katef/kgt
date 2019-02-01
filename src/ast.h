@@ -9,6 +9,10 @@
 
 struct ast_alt;
 
+enum ast_features {
+    FEATURE_AST_CI_LITERAL = 1 << 0
+};
+
 /*
  * A term is a sequential list of items within an alt. Each item may be
  * a terminal literal, a production rule name, or a group of terms.

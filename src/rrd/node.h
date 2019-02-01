@@ -7,6 +7,10 @@
 #ifndef KGT_RRD_NODE_H
 #define KGT_RRD_NODE_H
 
+enum rrd_features {
+	FEATURE_RRD_DUMMY = 1 << 0 /* placeholder */
+};
+
 struct node {
 	enum {
 		NODE_CI_LITERAL,

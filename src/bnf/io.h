@@ -9,6 +9,8 @@
 
 struct ast_rule;
 
+#define bnf_ast_unsupported FEATURE_AST_CI_LITERAL
+
 struct ast_rule *
 bnf_input(int (*f)(void *opaque), void *opaque);
 
