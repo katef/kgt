@@ -148,6 +148,7 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		case TLINE_F: a = "||";                 break;
 		case TLINE_G: a = n->rtl ? "^<" : ">^"; break;
 		case TLINE_H: a = n->rtl ? "v<" : ">v"; break;
+		case TLINE_I: a = n->rtl ? "^<" : ">^"; break;
 
 		default:
 			a = "??";

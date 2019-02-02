@@ -710,7 +710,7 @@ tnode_create_node(const struct node *node, int rtl,
 					swap(&new->u.alt.a[0], &new->u.alt.a[1]);
 
 					new->u.alt.b[0] = TLINE_B;
-					new->u.alt.b[1] = TLINE_G;
+					new->u.alt.b[1] = TLINE_I;
 
 					new->o = 1;
 

@@ -17,7 +17,8 @@ enum tline {
 	TLINE_E,
 	TLINE_F,
 	TLINE_G,
-	TLINE_H
+	TLINE_H,
+	TLINE_I
 };
 
 struct tlist_alt {
