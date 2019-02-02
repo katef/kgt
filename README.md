@@ -1,6 +1,9 @@
 
 ## KGT: Kate's Grammar Tool
 
+Do you want to convert various kinds of BNF to other kinds of BNF? No?  
+Well imagine if you did! This would be the tool for you.
+
  Input:  Various BNF-like syntaxes  
  Output: Various BNF-like syntaxes, AST dumps, and Railroad Syntax Diagrams
 
