@@ -140,7 +140,8 @@ tnode_free(struct tnode *n)
 	case TNODE_RULE:
 		break;
 
-	case TNODE_LITERAL:
+	case TNODE_CI_LITERAL:
+	case TNODE_CS_LITERAL:
 		free((void *) n->u.literal);
 		break;
 
@@ -169,7 +170,8 @@ char_terminal(const struct node *node, unsigned char *c)
 		return 0;
 	}
 
-	if (node->type != NODE_LITERAL) {
+	/* we collate ranges for case-sensitive strings only */
+	if (node->type != NODE_CS_LITERAL) {
 		return 0;
 	}
 
@@ -428,8 +430,15 @@ tnode_create_node(const struct node *node, int rtl,
 	}
 
 	switch (node->type) {
-	case NODE_LITERAL:
-		new->type = TNODE_LITERAL;
+	case NODE_CI_LITERAL:
+		new->type = TNODE_CI_LITERAL;
+		new->u.literal = esc_literal(node->u.literal);
+		dim_string(new->u.literal, &new->w, &new->a, &new->d);
+		new->w += 4 + 2;
+		break;
+
+	case NODE_CS_LITERAL:
+		new->type = TNODE_CS_LITERAL;
 		new->u.literal = esc_literal(node->u.literal);
 		dim_string(new->u.literal, &new->w, &new->a, &new->d);
 		new->w += 4;

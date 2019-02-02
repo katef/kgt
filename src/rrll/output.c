@@ -20,6 +20,7 @@
 
 #include "../rrd/rrd.h"
 #include "../rrd/pretty.h"
+#include "../rrd/rewrite.h"
 #include "../rrd/node.h"
 #include "../rrd/list.h"
 
@@ -123,7 +124,11 @@ node_walk(FILE *f, const struct node *n)
 	switch (n->type) {
 		const struct list *p;
 
-	case NODE_LITERAL:
+	case NODE_CI_LITERAL:
+		fprintf(stderr, "unimplemented\n");
+		exit(EXIT_FAILURE);
+
+	case NODE_CS_LITERAL:
 		fprintf(f, "\"");
 		escputs(n->u.literal, f);
 		fprintf(f, "\"");
@@ -205,6 +210,9 @@ rrll_output(const struct ast_rule *grammar)
 		if (prettify) {
 			rrd_pretty(&rrd);
 		}
+
+		/* TODO: pass in unsupported bitmap */
+		rewrite_rrd_ci_literals(rrd);
 
 		printf("[`");
 		escputs(p->name, stdout);

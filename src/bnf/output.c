@@ -11,6 +11,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
@@ -37,7 +38,11 @@ output_term(const struct ast_term *term)
 		printf(" <%s>", term->u.rule->name);
 		break;
 
-	case TYPE_LITERAL: {
+	case TYPE_CI_LITERAL:
+		fprintf(stderr, "unimplemented\n");
+		exit(EXIT_FAILURE);
+
+	case TYPE_CS_LITERAL: {
 			char c;
 
 			c = strchr(term->u.literal, '\"') ? '\'' : '\"';

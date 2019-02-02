@@ -112,7 +112,13 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 		prefix, (void *) node);
 
 	switch (node->type) {
-	case NODE_LITERAL:
+	case NODE_CI_LITERAL:
+		printf("style = filled, shape = box, label = \"\\\"");
+		escputs(node->u.literal, stdout);
+		printf("\\\"\"/i");
+		break;
+
+	case NODE_CS_LITERAL:
 		printf("style = filled, shape = box, label = \"\\\"");
 		escputs(node->u.literal, stdout);
 		printf("\\\"\"");

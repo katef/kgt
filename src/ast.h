@@ -9,6 +9,10 @@
 
 struct ast_alt;
 
+enum ast_features {
+    FEATURE_AST_CI_LITERAL = 1 << 0
+};
+
 /*
  * A term is a sequential list of items within an alt. Each item may be
  * a terminal literal, a production rule name, or a group of terms.
@@ -21,7 +25,8 @@ struct ast_term {
 	enum {
 		TYPE_EMPTY,
 		TYPE_RULE,
-		TYPE_LITERAL,
+		TYPE_CS_LITERAL,
+		TYPE_CI_LITERAL,
 		TYPE_TOKEN,
 		TYPE_GROUP
 	} type;
@@ -75,7 +80,7 @@ struct ast_term *
 ast_make_char_term(char c);
 
 struct ast_term *
-ast_make_literal_term(const char *literal);
+ast_make_literal_term(const char *literal, int ci);
 
 struct ast_term *
 ast_make_token_term(const char *token);

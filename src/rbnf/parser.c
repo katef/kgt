@@ -9,7 +9,7 @@
 
 /* BEGINNING OF HEADER */
 
-#line 97 "src/parser.act"
+#line 99 "src/parser.act"
 
 
 	#include <assert.h>
@@ -43,8 +43,10 @@
 	/* XXX: get rid of this; use same %entry% for all grammars */
 	#define FORM_ENTRY CAT(prod_, FORM)
 
-	/* XXX: workaround for SID's identifier escaping */
+	/* XXX: workarounds for SID's identifier escaping */
 	#define prod_iso_Hebnf FORM_ENTRY
+	#define TOK_CI__LITERAL TOK_CI_LITERAL
+	#define TOK_CS__LITERAL TOK_CS_LITERAL
 
 	#include "parser.h"
 	#include "lexer.h"
@@ -240,7 +242,7 @@
 		exit(EXIT_FAILURE);
 	}
 
-#line 244 "src/rbnf/parser.c"
+#line 246 "src/rbnf/parser.c"
 
 
 #ifndef ERROR_TERMINAL
@@ -257,9 +259,9 @@ extern void prod_rbnf(lex_state, act_state, map_rule *);
 static void prod_body(lex_state, act_state);
 static void prod_term(lex_state, act_state, map_term *);
 static void prod_rule(lex_state, act_state, map_rule *);
-static void prod_86(lex_state, act_state, map_rule *);
-static void prod_87(lex_state, act_state, map_term *, map_alt *);
-static void prod_88(lex_state, act_state, map_term *);
+static void prod_88(lex_state, act_state, map_rule *);
+static void prod_89(lex_state, act_state, map_term *, map_alt *);
+static void prod_90(lex_state, act_state, map_term *);
 
 /* BEGINNING OF STATIC VARIABLES */
 
@@ -290,11 +292,11 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-group-term */
 			{
-#line 541 "src/parser.act"
+#line 554 "src/parser.act"
 
 		(ZIt) = ast_make_group_term((ZIa));
 	
-#line 298 "src/rbnf/parser.c"
+#line 300 "src/rbnf/parser.c"
 			}
 			/* END OF ACTION: make-group-term */
 		}
@@ -307,7 +309,7 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 
 			ADVANCE_LEXER;
 			prod_list_Hof_Halts (lex_state, act_state, &ZIa);
-			/* BEGINNING OF INLINE: 73 */
+			/* BEGINNING OF INLINE: 75 */
 			{
 				switch (CURRENT_TERMINAL) {
 				case (TOK_REP):
@@ -315,12 +317,12 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 						ADVANCE_LEXER;
 						/* BEGINNING OF ACTION: rep-zero-or-more */
 						{
-#line 474 "src/parser.act"
+#line 476 "src/parser.act"
 
 		(ZImin) = 0;
 		(ZImax) = 0;
 	
-#line 324 "src/rbnf/parser.c"
+#line 326 "src/rbnf/parser.c"
 						}
 						/* END OF ACTION: rep-zero-or-more */
 					}
@@ -329,12 +331,12 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 					{
 						/* BEGINNING OF ACTION: rep-zero-or-one */
 						{
-#line 479 "src/parser.act"
+#line 481 "src/parser.act"
 
 		(ZImin) = 0;
 		(ZImax) = 1;
 	
-#line 338 "src/rbnf/parser.c"
+#line 340 "src/rbnf/parser.c"
 						}
 						/* END OF ACTION: rep-zero-or-one */
 					}
@@ -344,7 +346,7 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 					goto ZL1;
 				}
 			}
-			/* END OF INLINE: 73 */
+			/* END OF INLINE: 75 */
 			switch (CURRENT_TERMINAL) {
 			case (TOK_ENDOPT):
 				break;
@@ -354,23 +356,23 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-group-term */
 			{
-#line 541 "src/parser.act"
+#line 554 "src/parser.act"
 
 		(ZIt) = ast_make_group_term((ZIa));
 	
-#line 362 "src/rbnf/parser.c"
+#line 364 "src/rbnf/parser.c"
 			}
 			/* END OF ACTION: make-group-term */
 			/* BEGINNING OF ACTION: set-repeat */
 			{
-#line 484 "src/parser.act"
+#line 486 "src/parser.act"
 
 		assert((ZImax) >= (ZImin) || !(ZImax));
 
 		(ZIt)->min = (ZImin);
 		(ZIt)->max = (ZImax);
 	
-#line 374 "src/rbnf/parser.c"
+#line 376 "src/rbnf/parser.c"
 			}
 			/* END OF ACTION: set-repeat */
 		}
@@ -407,7 +409,7 @@ prod_list_Hof_Hterms(lex_state lex_state, act_state act_state, map_term *ZOl)
 	}
 	{
 		prod_factor (lex_state, act_state, &ZIl);
-		prod_88 (lex_state, act_state, &ZIl);
+		prod_90 (lex_state, act_state, &ZIl);
 		if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 			RESTORE_LEXER;
 			goto ZL1;
@@ -431,7 +433,7 @@ prod_list_Hof_Hrules(lex_state lex_state, act_state act_state, map_rule *ZOl)
 	}
 	{
 		prod_rule (lex_state, act_state, &ZIl);
-		prod_86 (lex_state, act_state, &ZIl);
+		prod_88 (lex_state, act_state, &ZIl);
 		if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 			RESTORE_LEXER;
 			goto ZL1;
@@ -457,7 +459,7 @@ prod_list_Hof_Halts(lex_state lex_state, act_state act_state, map_alt *ZOl)
 		map_term ZIt;
 
 		prod_list_Hof_Hterms (lex_state, act_state, &ZIt);
-		prod_87 (lex_state, act_state, &ZIt, &ZIl);
+		prod_89 (lex_state, act_state, &ZIt, &ZIl);
 		if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 			RESTORE_LEXER;
 			goto ZL1;
@@ -491,21 +493,21 @@ ZL1:;
 	{
 		/* BEGINNING OF ACTION: make-empty-rule */
 		{
-#line 574 "src/parser.act"
+#line 587 "src/parser.act"
 
 		(ZIl) = NULL;
 	
-#line 499 "src/rbnf/parser.c"
+#line 501 "src/rbnf/parser.c"
 		}
 		/* END OF ACTION: make-empty-rule */
 		/* BEGINNING OF ACTION: err-syntax */
 		{
-#line 621 "src/parser.act"
+#line 634 "src/parser.act"
 
 		err(lex_state, "Syntax error");
 		exit(EXIT_FAILURE);
 	
-#line 509 "src/rbnf/parser.c"
+#line 511 "src/rbnf/parser.c"
 		}
 		/* END OF ACTION: err-syntax */
 	}
@@ -522,20 +524,20 @@ ZL2_body:;
 		{
 			map_char ZIc;
 
-			/* BEGINNING OF INLINE: 66 */
+			/* BEGINNING OF INLINE: 68 */
 			{
 				{
 					switch (CURRENT_TERMINAL) {
 					case (TOK_CHAR):
 						/* BEGINNING OF EXTRACT: CHAR */
 						{
-#line 287 "src/parser.act"
+#line 289 "src/parser.act"
 
 		assert(strlen(lex_state->buf.a) == 1);
 
 		ZIc = lex_state->buf.a[0];
 	
-#line 539 "src/rbnf/parser.c"
+#line 541 "src/rbnf/parser.c"
 						}
 						/* END OF EXTRACT: CHAR */
 						break;
@@ -545,15 +547,15 @@ ZL2_body:;
 					ADVANCE_LEXER;
 				}
 			}
-			/* END OF INLINE: 66 */
+			/* END OF INLINE: 68 */
 			/* BEGINNING OF ACTION: pattern-char */
 			{
-#line 446 "src/parser.act"
+#line 448 "src/parser.act"
 
 		/* TODO */
 		*lex_state->p++ = (ZIc);
 	
-#line 557 "src/rbnf/parser.c"
+#line 559 "src/rbnf/parser.c"
 			}
 			/* END OF ACTION: pattern-char */
 			/* BEGINNING OF INLINE: body */
@@ -596,7 +598,7 @@ prod_term(lex_state lex_state, act_state act_state, map_term *ZOt)
 		ADVANCE_LEXER;
 		/* BEGINNING OF ACTION: pattern-buffer */
 		{
-#line 458 "src/parser.act"
+#line 460 "src/parser.act"
 
 		/* TODO */
 		*lex_state->p++ = '\0';
@@ -614,12 +616,12 @@ prod_term(lex_state lex_state, act_state act_state, map_term *ZOt)
 
 		lex_state->p = lex_state->a;
 	
-#line 618 "src/rbnf/parser.c"
+#line 620 "src/rbnf/parser.c"
 		}
 		/* END OF ACTION: pattern-buffer */
 		/* BEGINNING OF ACTION: make-rule-term */
 		{
-#line 523 "src/parser.act"
+#line 525 "src/parser.act"
 
 		struct ast_rule *r;
 
@@ -637,7 +639,7 @@ prod_term(lex_state lex_state, act_state act_state, map_term *ZOt)
 
 		(ZIt) = ast_make_rule_term(r);
 	
-#line 641 "src/rbnf/parser.c"
+#line 643 "src/rbnf/parser.c"
 		}
 		/* END OF ACTION: make-rule-term */
 	}
@@ -674,7 +676,7 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 		ADVANCE_LEXER;
 		/* BEGINNING OF ACTION: pattern-buffer */
 		{
-#line 458 "src/parser.act"
+#line 460 "src/parser.act"
 
 		/* TODO */
 		*lex_state->p++ = '\0';
@@ -692,10 +694,10 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 
 		lex_state->p = lex_state->a;
 	
-#line 696 "src/rbnf/parser.c"
+#line 698 "src/rbnf/parser.c"
 		}
 		/* END OF ACTION: pattern-buffer */
-		/* BEGINNING OF INLINE: 80 */
+		/* BEGINNING OF INLINE: 82 */
 		{
 			{
 				switch (CURRENT_TERMINAL) {
@@ -711,17 +713,17 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			{
 				/* BEGINNING OF ACTION: err-expected-equals */
 				{
-#line 633 "src/parser.act"
+#line 646 "src/parser.act"
 
 		err_expected(lex_state, "production rule assignment");
 	
-#line 719 "src/rbnf/parser.c"
+#line 721 "src/rbnf/parser.c"
 				}
 				/* END OF ACTION: err-expected-equals */
 			}
 		ZL2:;
 		}
-		/* END OF INLINE: 80 */
+		/* END OF INLINE: 82 */
 		prod_list_Hof_Halts (lex_state, act_state, &ZIa);
 		if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 			RESTORE_LEXER;
@@ -729,14 +731,14 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 		}
 		/* BEGINNING OF ACTION: make-rule */
 		{
-#line 570 "src/parser.act"
+#line 583 "src/parser.act"
 
 		(ZIr) = ast_make_rule((ZIs), (ZIa));
 	
-#line 737 "src/rbnf/parser.c"
+#line 739 "src/rbnf/parser.c"
 		}
 		/* END OF ACTION: make-rule */
-		/* BEGINNING OF INLINE: 81 */
+		/* BEGINNING OF INLINE: 83 */
 		{
 			switch (CURRENT_TERMINAL) {
 			case (TOK_EOF):
@@ -757,17 +759,17 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			{
 				/* BEGINNING OF ACTION: err-expected-sep */
 				{
-#line 629 "src/parser.act"
+#line 642 "src/parser.act"
 
 		err_expected(lex_state, "production rule separator");
 	
-#line 765 "src/rbnf/parser.c"
+#line 767 "src/rbnf/parser.c"
 				}
 				/* END OF ACTION: err-expected-sep */
 			}
 		ZL4:;
 		}
-		/* END OF INLINE: 81 */
+		/* END OF INLINE: 83 */
 	}
 	goto ZL0;
 ZL1:;
@@ -778,7 +780,7 @@ ZL0:;
 }
 
 static void
-prod_86(lex_state lex_state, act_state act_state, map_rule *ZIl)
+prod_88(lex_state lex_state, act_state act_state, map_rule *ZIl)
 {
 	switch (CURRENT_TERMINAL) {
 	case (TOK_NAME): case (TOK_CHAR):
@@ -792,7 +794,7 @@ prod_86(lex_state lex_state, act_state act_state, map_rule *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-rule-to-list */
 			{
-#line 589 "src/parser.act"
+#line 602 "src/parser.act"
 
 		if (ast_find_rule((ZIr), (*ZIl)->name)) {
 			fprintf(stderr, "production rule <%s> already exists\n", (*ZIl)->name);
@@ -804,7 +806,7 @@ prod_86(lex_state lex_state, act_state act_state, map_rule *ZIl)
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIr);
 	
-#line 808 "src/rbnf/parser.c"
+#line 810 "src/rbnf/parser.c"
 			}
 			/* END OF ACTION: add-rule-to-list */
 		}
@@ -821,7 +823,7 @@ ZL1:;
 }
 
 static void
-prod_87(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
+prod_89(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 {
 	map_alt ZIl;
 
@@ -830,7 +832,7 @@ prod_87(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 		{
 			map_alt ZIa;
 
-			/* BEGINNING OF INLINE: 77 */
+			/* BEGINNING OF INLINE: 79 */
 			{
 				{
 					switch (CURRENT_TERMINAL) {
@@ -846,17 +848,17 @@ prod_87(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 				{
 					/* BEGINNING OF ACTION: err-expected-alt */
 					{
-#line 625 "src/parser.act"
+#line 638 "src/parser.act"
 
 		err_expected(lex_state, "alternative separator");
 	
-#line 854 "src/rbnf/parser.c"
+#line 856 "src/rbnf/parser.c"
 					}
 					/* END OF ACTION: err-expected-alt */
 				}
 			ZL2:;
 			}
-			/* END OF INLINE: 77 */
+			/* END OF INLINE: 79 */
 			prod_list_Hof_Halts (lex_state, act_state, &ZIa);
 			if ((CURRENT_TERMINAL) == (ERROR_TERMINAL)) {
 				RESTORE_LEXER;
@@ -864,21 +866,21 @@ prod_87(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 			}
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 566 "src/parser.act"
+#line 579 "src/parser.act"
 
 		(ZIl) = ast_make_alt((*ZIt));
 	
-#line 872 "src/rbnf/parser.c"
+#line 874 "src/rbnf/parser.c"
 			}
 			/* END OF ACTION: make-alt */
 			/* BEGINNING OF ACTION: add-alt-to-list */
 			{
-#line 584 "src/parser.act"
+#line 597 "src/parser.act"
 
 		assert((ZIl)->next == NULL);
 		(ZIl)->next = (ZIa);
 	
-#line 882 "src/rbnf/parser.c"
+#line 884 "src/rbnf/parser.c"
 			}
 			/* END OF ACTION: add-alt-to-list */
 		}
@@ -887,11 +889,11 @@ prod_87(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 		{
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 566 "src/parser.act"
+#line 579 "src/parser.act"
 
 		(ZIl) = ast_make_alt((*ZIt));
 	
-#line 895 "src/rbnf/parser.c"
+#line 897 "src/rbnf/parser.c"
 			}
 			/* END OF ACTION: make-alt */
 		}
@@ -908,7 +910,7 @@ ZL0:;
 }
 
 static void
-prod_88(lex_state lex_state, act_state act_state, map_term *ZIl)
+prod_90(lex_state lex_state, act_state act_state, map_term *ZIl)
 {
 	switch (CURRENT_TERMINAL) {
 	case (TOK_STARTGROUP): case (TOK_STARTOPT): case (TOK_NAME): case (TOK_CHAR):
@@ -922,12 +924,12 @@ prod_88(lex_state lex_state, act_state act_state, map_term *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-term-to-list */
 			{
-#line 579 "src/parser.act"
+#line 592 "src/parser.act"
 
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIt);
 	
-#line 931 "src/rbnf/parser.c"
+#line 933 "src/rbnf/parser.c"
 			}
 			/* END OF ACTION: add-term-to-list */
 		}
@@ -945,7 +947,7 @@ ZL1:;
 
 /* BEGINNING OF TRAILER */
 
-#line 765 "src/parser.act"
+#line 778 "src/parser.act"
 
 
 	static int
@@ -1072,6 +1074,6 @@ ZL1:;
 		return g;
 	}
 
-#line 1076 "src/rbnf/parser.c"
+#line 1078 "src/rbnf/parser.c"
 
 /* END OF FILE */

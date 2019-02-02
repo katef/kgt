@@ -9,6 +9,8 @@
 
 struct ast_rule;
 
+#define rrll_rrd_unsupported FEATURE_RRD_CI_LITERAL
+
 extern int prettify;
 
 void

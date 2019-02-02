@@ -14,6 +14,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
@@ -22,6 +23,7 @@
 
 #include "../rrd/rrd.h"
 #include "../rrd/pretty.h"
+#include "../rrd/rewrite.h"
 #include "../rrd/node.h"
 #include "../rrd/list.h"
 
@@ -133,7 +135,11 @@ node_walk(FILE *f, const struct node *n, int depth)
 	switch (n->type) {
 		const struct list *p;
 
-	case NODE_LITERAL:
+	case NODE_CI_LITERAL:
+		fprintf(stderr, "unimplemented\n");
+		exit(EXIT_FAILURE);
+
+	case NODE_CS_LITERAL:
 		print_indent(f, depth);
 		fprintf(f, "text(\"");
 		escputs(n->u.literal, f);
@@ -259,6 +265,9 @@ rrparcon_output(const struct ast_rule *grammar)
 		if (prettify) {
 			rrd_pretty(&rrd);
 		}
+
+		/* TODO: pass in unsupported bitmap */
+		rewrite_rrd_ci_literals(rrd);
 
 		printf("  (\n");
 		printf("    \"");

@@ -13,6 +13,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "ast.h"
+#include "rewrite.h"
+#include "xalloc.h"
+#include "rrd/node.h"
+
 #include "bnf/io.h"
 #include "blab/io.h"
 #include "wsn/io.h"
@@ -29,9 +34,6 @@
 #include "rrta/io.h"
 #include "rrtext/io.h"
 
-#include "ast.h"
-#include "xalloc.h"
-
 int prettify = 1;
 int allow_undefined = 1;
 
@@ -39,22 +41,24 @@ struct io {
 	const char *name;
 	struct ast_rule *(*in)(int (*f)(void *), void *);
 	void (*out)(const struct ast_rule *);
+	enum ast_features ast_unsupported;
+	enum rrd_features rrd_unsupported;
 } io[] = {
-	{ "bnf",      bnf_input,      bnf_output      },
-	{ "blab",     NULL,           blab_output     },
-	{ "wsn",      wsn_input,      wsn_output      },
-	{ "abnf",     abnf_input,     NULL            },
-	{ "iso-ebnf", iso_ebnf_input, iso_ebnf_output },
-	{ "rbnf",     rbnf_input,     rbnf_output     },
-	{ "sid",      NULL,           sid_output      },
-	{ "dot",      NULL,           dot_output      },
-	{ "rrdot",    NULL,           rrdot_output    },
-	{ "rrdump",   NULL,           rrdump_output   },
-	{ "rrtdump",  NULL,           rrtdump_output  },
-	{ "rrparcon", NULL,           rrparcon_output },
-	{ "rrll",     NULL,           rrll_output     },
-	{ "rrta",     NULL,           rrta_output     },
-	{ "rrtext",   NULL,           rrtext_output   }
+	{ "bnf",      bnf_input,      bnf_output,      bnf_ast_unsupported, 0 },
+	{ "blab",     NULL,           blab_output,     0, 0 },
+	{ "wsn",      wsn_input,      wsn_output,      wsn_ast_unsupported, 0 },
+	{ "abnf",     abnf_input,     NULL,            0, 0 },
+	{ "iso-ebnf", iso_ebnf_input, iso_ebnf_output, iso_ebnf_ast_unsupported, 0 },
+	{ "rbnf",     rbnf_input,     rbnf_output,     rbnf_ast_unsupported, 0 },
+	{ "sid",      NULL,           sid_output,      sid_ast_unsupported, 0 },
+	{ "dot",      NULL,           dot_output,      0, 0 },
+	{ "rrdot",    NULL,           rrdot_output,    0, 0 },
+	{ "rrdump",   NULL,           rrdump_output,   0, 0 },
+	{ "rrtdump",  NULL,           rrtdump_output,  0, 0 },
+	{ "rrparcon", NULL,           rrparcon_output, 0, rrparcon_rrd_unsupported },
+	{ "rrll",     NULL,           rrll_output,     0, rrll_rrd_unsupported     },
+	{ "rrta",     NULL,           rrta_output,     0, rrta_rrd_unsupported     },
+	{ "rrtext",   NULL,           rrtext_output,   0, 0 }
 };
 
 enum io_dir {
@@ -164,6 +168,25 @@ main(int argc, char *argv[])
 	assert(io->out != NULL);
 
 	g = in->in(kgt_fgetc, stdin);
+
+	{
+		unsigned v;
+
+		for (v = out->ast_unsupported; v != 0; v &= v - 1) {
+			int r;
+
+			/* TODO: expose these rewritings as CLI options too; set as bits in v */
+			/* TODO: option to query if output is possible without rewriting */
+			switch (v & -v) {
+			case FEATURE_AST_CI_LITERAL: r = 1; rewrite_ci_literals(g); break;
+			}
+
+			if (!r) {
+				perror("ast_transform_*");
+				exit(EXIT_FAILURE);
+			}
+		}
+	}
 
 	out->out(g);
 

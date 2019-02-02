@@ -7,9 +7,14 @@
 #ifndef KGT_RRD_NODE_H
 #define KGT_RRD_NODE_H
 
+enum rrd_features {
+	FEATURE_RRD_CI_LITERAL = 1 << 0
+};
+
 struct node {
 	enum {
-		NODE_LITERAL,
+		NODE_CI_LITERAL,
+		NODE_CS_LITERAL,
 		NODE_RULE,
 		NODE_ALT,
 		NODE_ALT_SKIPPABLE,
@@ -37,7 +42,10 @@ void
 node_free(struct node *);
 
 struct node *
-node_create_literal(const char *literal);
+node_create_ci_literal(const char *literal);
+
+struct node *
+node_create_cs_literal(const char *literal);
 
 struct node *
 node_create_name(const char *name);

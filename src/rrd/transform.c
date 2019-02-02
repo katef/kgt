@@ -103,8 +103,13 @@ single_term(const struct ast_term *term, struct node **r)
 		*r = node_create_name(term->u.rule->name);
 		return 1;
 
-	case TYPE_LITERAL:
-		*r = node_create_literal(term->u.literal);
+	case TYPE_CI_LITERAL:
+		/* can't create a sequence of alts; the tokenisation would be wrong */
+		*r = node_create_ci_literal(term->u.literal);
+		return 1;
+
+	case TYPE_CS_LITERAL:
+		*r = node_create_cs_literal(term->u.literal);
 		return 1;
 
 	case TYPE_TOKEN:

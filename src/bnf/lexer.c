@@ -180,7 +180,7 @@ z0(struct lx_bnf_lx *lx)
 			lx_bnf_ungetc(lx, c); return TOK_CHAR;
 
 		case S2: /* e.g. "\"" */
-			lx_bnf_ungetc(lx, c); return lx->z = z3, TOK_LITERAL;
+			lx_bnf_ungetc(lx, c); return lx->z = z3, TOK_CS_LITERAL;
 
 		default:
 			; /* unreached */
@@ -198,7 +198,7 @@ z0(struct lx_bnf_lx *lx)
 	switch (state) {
 	case NONE: return TOK_EOF;
 	case S1: return TOK_CHAR;
-	case S2: return TOK_LITERAL;
+	case S2: return TOK_CS_LITERAL;
 	default: errno = EINVAL; return TOK_ERROR;
 	}
 }
@@ -239,7 +239,7 @@ z1(struct lx_bnf_lx *lx)
 			lx_bnf_ungetc(lx, c); return TOK_CHAR;
 
 		case S2: /* e.g. "'" */
-			lx_bnf_ungetc(lx, c); return lx->z = z3, TOK_LITERAL;
+			lx_bnf_ungetc(lx, c); return lx->z = z3, TOK_CS_LITERAL;
 
 		default:
 			; /* unreached */
@@ -257,7 +257,7 @@ z1(struct lx_bnf_lx *lx)
 	switch (state) {
 	case NONE: return TOK_EOF;
 	case S1: return TOK_CHAR;
-	case S2: return TOK_LITERAL;
+	case S2: return TOK_CS_LITERAL;
 	default: errno = EINVAL; return TOK_ERROR;
 	}
 }
@@ -289,6 +289,7 @@ z2(struct lx_bnf_lx *lx)
 		switch (state) {
 		case S0: /* start */
 			switch ((unsigned char) c) {
+			case '>': state = S2; break;
 			case '-':
 			case '0':
 			case '1':
@@ -353,7 +354,6 @@ z2(struct lx_bnf_lx *lx)
 			case 'x':
 			case 'y':
 			case 'z': state = S1; break;
-			case '>': state = S2; break;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
 			}
 			break;
@@ -413,15 +413,15 @@ z3(struct lx_bnf_lx *lx)
 		switch (state) {
 		case S0: /* start */
 			switch ((unsigned char) c) {
-			case '\n': state = S2; break;
 			case '\t':
 			case '\v':
 			case '\f':
 			case '\r':
 			case ' ': state = S1; break;
+			case '\n': state = S2; break;
+			case '\'': state = S4; break;
 			case '"': state = S3; break;
 			case ':': state = S5; break;
-			case '\'': state = S4; break;
 			case '<': state = S6; break;
 			case '|': state = S7; break;
 			default:  lx->lgetc = NULL; return TOK_UNKNOWN;
@@ -531,7 +531,7 @@ lx_bnf_name(enum lx_bnf_token t)
 {
 	switch (t) {
 	case TOK_EMPTY: return "EMPTY";
-	case TOK_LITERAL: return "LITERAL";
+	case TOK_CS_LITERAL: return "CS_LITERAL";
 	case TOK_CHAR: return "CHAR";
 	case TOK_NAME: return "NAME";
 	case TOK_SEP: return "SEP";
@@ -551,14 +551,14 @@ lx_bnf_example(enum lx_bnf_token (*z)(struct lx_bnf_lx *), enum lx_bnf_token t)
 
 	if (z == z0) {
 		switch (t) {
-		case TOK_LITERAL: return "\"";
+		case TOK_CS_LITERAL: return "\"";
 		case TOK_CHAR: return "a";
 		default: goto error;
 		}
 	} else
 	if (z == z1) {
 		switch (t) {
-		case TOK_LITERAL: return "'";
+		case TOK_CS_LITERAL: return "'";
 		case TOK_CHAR: return "a";
 		default: goto error;
 		}

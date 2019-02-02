@@ -19,7 +19,7 @@ enum lx_iso_ebnf_token {
 	TOK_SEP,
 	TOK_ALT,
 	TOK_CHAR,
-	TOK_LITERAL,
+	TOK_CS_LITERAL,
 	TOK_EOF,
 	TOK_ERROR,
 	TOK_UNKNOWN

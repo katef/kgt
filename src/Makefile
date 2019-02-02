@@ -3,6 +3,7 @@
 SRC += src/ast.c
 SRC += src/bitmap.c
 SRC += src/main.c
+SRC += src/rewrite_ci.c
 SRC += src/xalloc.c
 
 PROG += kgt
@@ -15,6 +16,7 @@ PROG += kgt
 ${BUILD}/bin/kgt: ${BUILD}/src/ast.o
 ${BUILD}/bin/kgt: ${BUILD}/src/bitmap.o
 ${BUILD}/bin/kgt: ${BUILD}/src/main.o
+${BUILD}/bin/kgt: ${BUILD}/src/rewrite_ci.o
 ${BUILD}/bin/kgt: ${BUILD}/src/xalloc.o
 
 .for part in ${PART:Mbnf} ${PART:Mblab} ${PART:Mabnf} ${PART:Miso-ebnf} ${PART:Mrbnf} \
