@@ -42,6 +42,7 @@ hex = /[0-9a-f]+/i; # XXX: case insensitive?
 '%x' hex '-' hex -> $hexrange;
 
 # 2.3. Terminal Values
+# case sensitivity per RFC 7405
 '%i'? '"' .. '"' -> $ci_literal { # case insenstive
 	# TODO: explicitly "printable" characters only
 	/[^"]/ -> $char;
