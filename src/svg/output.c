@@ -149,25 +149,24 @@ bars(struct render_context *ctx, unsigned n, unsigned w)
 	svg_line(ctx, 0, n);
 }
 
-enum corner {
-	/* entry from the lhs, exit on the rhs */
-	CORNER_A, /* `- bottom left */
-	CORNER_B, /* .- top left */
-	CORNER_C, /* -' bottom right */
-	CORNER_D  /* -. top right */
+enum tile {
+	TILE_BL = 1 << 0, /* `- bottom left */
+	TILE_TL = 1 << 1, /* .- top left */
+	TILE_BR = 1 << 2, /* -' bottom right */
+	TILE_TR = 1 << 3  /* -. top right */
 };
 
 static void
-render_corner(struct render_context *ctx, enum corner corner)
+render_tile(struct render_context *ctx, enum tile tile)
 {
 	int y;
 	int rx, ry;
 
-	switch (corner) {
-	case CORNER_A: y =  1; rx = 0; ry = y; break;
-	case CORNER_B: y = -1; rx = 0; ry = y; break;
-	case CORNER_C: y = -1; rx = 1; ry = 0; break;
-	case CORNER_D: y =  1; rx = 1; ry = 0; break;
+	switch (tile) {
+	case TILE_BL: y =  1; rx = 0; ry = y; break;
+	case TILE_TL: y = -1; rx = 0; ry = y; break;
+	case TILE_BR: y = -1; rx = 1; ry = 0; break;
+	case TILE_TR: y =  1; rx = 1; ry = 0; break;
 
 	default:
 		assert(!"unreached");
@@ -208,29 +207,29 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 	/* XXX: cheesy */
 	switch (a[rhs]) {
 	case ',': /* / top left */
-		render_corner(ctx, CORNER_B);
+		render_tile(ctx, TILE_TL);
 		break;
 
 	case '.': /* \ top right */
-		render_corner(ctx, CORNER_D);
+		render_tile(ctx, TILE_TR);
 		break;
 
 	case '`': /* \ bottom left */
-		render_corner(ctx, CORNER_A);
+		render_tile(ctx, TILE_BL);
 		break;
 
 	case '\'': /* / bottom right */
 		ctx->y -= 2;
-		render_corner(ctx, CORNER_C);
+		render_tile(ctx, TILE_BR);
 		break;
 
 	case 'h': /* entry from left and top */
-		render_corner(ctx, CORNER_A); /* exit right */
+		render_tile(ctx, TILE_BL); /* exit right */
 		break;
 
 	case 'g': /* entry from left */
 		ctx->y -= 2;
-		render_corner(ctx, CORNER_C); /* exit up */
+		render_tile(ctx, TILE_BR); /* exit up */
 		ctx->y += 2;
 		break;
 
@@ -257,11 +256,11 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 	case 'j': /* entry from left and bottom */
 		svg_line(ctx, 1, 0); /* entry from left, exit right */
 		ctx->x -= 1;
-		render_corner(ctx, CORNER_B); /* entry from bottom, exit right */
+		render_tile(ctx, TILE_TL); /* entry from bottom, exit right */
 		break;
 
 	case 'i': /* entry from left */
-		render_corner(ctx, CORNER_D); /* exit down */
+		render_tile(ctx, TILE_TR); /* exit down */
 		ctx->y -= 1;
 		ctx->x -= 1;
 		svg_line(ctx, 1, 0); /* exit right */
@@ -271,7 +270,7 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 	case 'l': /* entry from left and top */
 		svg_line(ctx, 1, 0); /* entry from left, exit right */
 		ctx->x -= 1;
-		render_corner(ctx, CORNER_A); /* entry from top, exit right */
+		render_tile(ctx, TILE_BL); /* entry from top, exit right */
 		break;
 
 	case 'k': /* entry from left */
@@ -279,7 +278,7 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 		svg_line(ctx, 1, 0); /* exit right */
 		ctx->x -= 1;
 		ctx->y -= 1;
-		render_corner(ctx, CORNER_C); /* exit up */
+		render_tile(ctx, TILE_BR); /* exit up */
 		ctx->y += 2;
 		break;
 
@@ -330,7 +329,7 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 		ctx->x -= 1;
 		svg_line(ctx, 1, 0); /* entry from left, exit right */
 		ctx->x -= 1;
-		render_corner(ctx, CORNER_A); /* entry from top, exit right */
+		render_tile(ctx, TILE_BL); /* entry from top, exit right */
 		ctx->y += 1;
 		break;
 
@@ -338,7 +337,7 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 		svg_line(ctx, 1, 0); /* exit right */
 		ctx->x -= 1;
 		ctx->y += 1;
-		render_corner(ctx, CORNER_D); /* exit down */
+		render_tile(ctx, TILE_TR); /* exit down */
 		ctx->y -= 1;
 		break;
 
@@ -347,13 +346,13 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 		ctx->x -= 1;
 		svg_line(ctx, 1, 0); /* entry from left, exit right */
 		ctx->x -= 1;
-		render_corner(ctx, CORNER_B); /* entry from bottom, exit right */
+		render_tile(ctx, TILE_TL); /* entry from bottom, exit right */
 		ctx->y += 1;
 		break;
 
 	case 'b': /* entry from left */
 		ctx->y -= 1;
-		render_corner(ctx, CORNER_C); /* exit up */
+		render_tile(ctx, TILE_BR); /* exit up */
 		ctx->x -= 1;
 		ctx->y += 1;
 		svg_line(ctx, 1, 0); /* exit right */
@@ -361,10 +360,10 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 
 	case 'f': /* entry from left */
 		ctx->y -= 1;
-		render_corner(ctx, CORNER_C); /* exit up */
+		render_tile(ctx, TILE_BR); /* exit up */
 		ctx->x -= 1;
 		ctx->y += 2;
-		render_corner(ctx, CORNER_D); /* exit down */
+		render_tile(ctx, TILE_TR); /* exit down */
 		ctx->y -= 1;
 		ctx->x -= 1;
 		svg_line(ctx, 1, 0); /* exit right */
@@ -375,9 +374,9 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 		ctx->x -= 1;
 		svg_line(ctx, 1, 0); /* exit right */
 		ctx->x -= 1;
-		render_corner(ctx, CORNER_A); /* entry from top, exit right */
+		render_tile(ctx, TILE_BL); /* entry from top, exit right */
 		ctx->x -= 1;
-		render_corner(ctx, CORNER_B); /* entry from bottom, exit right */
+		render_tile(ctx, TILE_TL); /* entry from bottom, exit right */
 		ctx->y += 1;
 		break;
 
