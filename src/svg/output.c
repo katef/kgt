@@ -81,7 +81,21 @@ svg_textbox(struct render_context *ctx, const char *s, unsigned w, unsigned r)
 }
 
 static void
-svg_arrow(struct render_context *ctx, int w, unsigned h,
+svg_ellipsis(struct render_context *ctx, int w, int h)
+{
+	ctx->x += 1;
+	ctx->y -= 1;
+
+	printf("    <line x1='%u0' y1='%u5' x2='%d0' y2='%u5' class='ellipsis'/>",
+		ctx->x, ctx->y,
+		(int) ctx->x + w, ctx->y + h);
+
+	ctx->x += w;
+	ctx->y += 1;
+}
+
+static void
+svg_arrow(struct render_context *ctx, int w, int h,
 	const char *marker_start, const char *marker_mid, const char *marker_end)
 {
 	printf("    <line x1='%u0' y1='%u0' x2='%d0' y2='%u0'",
@@ -98,7 +112,7 @@ svg_arrow(struct render_context *ctx, int w, unsigned h,
 }
 
 static void
-svg_line(struct render_context *ctx, unsigned w, unsigned h)
+svg_line(struct render_context *ctx, int w, int h)
 {
 	svg_arrow(ctx, w, h, NULL, NULL, NULL);
 	/* TODO: add to list, then combine adjoining lines */
@@ -110,11 +124,20 @@ justify(struct render_context *ctx, const struct tnode *n, int space)
 	unsigned lhs = (space - n->w) / 2;
 	unsigned rhs = (space - n->w) - lhs;
 
-	/* TODO: deal wth ellipsis */
+	if (n->type != TNODE_ELLIPSIS) {
+		svg_line(ctx, lhs, 0);
+	} else {
+		ctx->x += lhs;
+	}
 
-	svg_line(ctx, lhs, 0);
 	node_walk_render(n, ctx);
-	svg_line(ctx, rhs, 0);
+
+	if (n->type != TNODE_ELLIPSIS) {
+		svg_line(ctx, rhs, 0);
+	} else {
+		ctx->x += rhs;
+	}
+
 	ctx->y++;
 }
 
@@ -124,6 +147,163 @@ bars(struct render_context *ctx, unsigned n, unsigned w)
 	svg_line(ctx, 0, n);
 	ctx->x += w;
 	svg_line(ctx, 0, n);
+}
+
+enum corner {
+	/* entry from the lhs, exit on the rhs */
+	CORNER_A, /* `- bottom left */
+	CORNER_B, /* .- top left */
+	CORNER_C, /* -' bottom right */
+	CORNER_D  /* -. top right */
+};
+
+static void
+render_corner(struct render_context *ctx, enum corner corner)
+{
+	int y;
+
+	switch (corner) {
+	case CORNER_A: y =  1; break;
+	case CORNER_B: y = -1; break;
+	case CORNER_C: y = -1; break;
+	case CORNER_D: y =  1; break;
+
+	default:
+		assert(!"unreached");
+	}
+
+	/* TODO: radius convex or concave, render arc */
+	ctx->y += -y;
+	svg_line(ctx, 1, y);
+	ctx->y -= -y;
+}
+
+static void
+render_tline(struct render_context *ctx, enum tline tline, int rhs, int rtl)
+{
+	const char *a;
+
+	assert(ctx != NULL);
+
+	switch (tline) {
+	case TLINE_A: a = rtl ? "AB" : "ba"; break;
+	case TLINE_B: a = ",.";              break;
+	case TLINE_C: a = rtl ? "CD" : "dc"; break;
+	case TLINE_D: a = rtl ? "EF" : "fe"; break;
+	case TLINE_E: a = "`'";              break;
+	case TLINE_F: a = "||";              break;
+	case TLINE_G: a = rtl ? "GH" : "hg"; break;
+	case TLINE_H: a = rtl ? "IJ" : "ji"; break;
+	case TLINE_I: a = rtl ? "KL" : "lk"; break;
+
+	default:
+		a = "??";
+		break;
+	}
+
+	/* XXX: cheesy */
+	switch (a[rhs]) {
+	case ',': /* / top left */
+		render_corner(ctx, CORNER_B);
+		break;
+
+	case '.': /* \ top right */
+		render_corner(ctx, CORNER_D);
+		break;
+
+	case '`': /* \ bottom left */
+		render_corner(ctx, CORNER_A);
+		break;
+
+	case '\'': /* / bottom right */
+		ctx->y -= 2;
+		render_corner(ctx, CORNER_C);
+		break;
+
+	case 'h': /* entry from left and top */
+		render_corner(ctx, CORNER_A); /* exit right */
+		break;
+
+	case 'g': /* entry from left */
+		ctx->y -= 2;
+		render_corner(ctx, CORNER_C); /* exit up */
+		ctx->y += 2;
+		break;
+
+	case 'a': /* entry from left and top */
+		ctx->y -= 1;
+		svg_line(ctx, 2, 0); /* entry from left, exit right */
+		ctx->x -= 1;
+		render_corner(ctx, CORNER_A); /* entry from top, exit right */
+		ctx->y += 1;
+		break;
+
+	case 'd': /* entry from left */
+		ctx->x -= 1;
+		svg_line(ctx, 2, 0); /* exit right */
+		ctx->x -= 2;
+		ctx->y += 1;
+		render_corner(ctx, CORNER_D); /* exit down */
+		ctx->y -= 1;
+		ctx->x += 1;
+		break;
+
+	case 'c': /* entry from left and bottom */
+		ctx->y -= 1;
+		svg_line(ctx, 2, 0); /* entry from left, exit right */
+		ctx->x -= 1;
+		render_corner(ctx, CORNER_B); /* entry from bottom, exit right */
+		ctx->y += 1;
+		break;
+
+	case 'b': /* entry from left */
+		ctx->x -= 1;
+		ctx->y -= 1;
+		render_corner(ctx, CORNER_C); /* exit up */
+		ctx->y += 1;
+		ctx->x -= 1;
+		svg_line(ctx, 2, 0); /* exit right */
+		break;
+
+	case 'j': /* entry from left and bottom */
+		ctx->x -= 1;
+		svg_line(ctx, 2, 0); /* entry from left, exit right */
+		ctx->x -= 1;
+		render_corner(ctx, CORNER_B); /* entry from bottom, exit right */
+		break;
+
+	case 'i': /* entry from left */
+		ctx->y -= 1;
+		svg_line(ctx, 2, 0); /* exit right */
+		ctx->y += 1;
+		ctx->x -= 2;
+		render_corner(ctx, CORNER_D); /* exit down */
+		break;
+
+	case 'l': /* entry from left and top */
+		ctx->x -= 1;
+		svg_line(ctx, 2, 0); /* entry from left, exit right */
+		ctx->x -= 1;
+		render_corner(ctx, CORNER_A); /* entry from top, exit right */
+		break;
+
+	case 'k': /* entry from left */
+		ctx->y -= 1;
+		svg_line(ctx, 2, 0); /* exit right */
+		ctx->x -= 2;
+		ctx->y -= 1;
+		render_corner(ctx, CORNER_C); /* exit up */
+		break;
+
+	case '|': /* nothing to draw */
+		ctx->x += 1;
+		break;
+
+	default:
+		svg_text(ctx, "%c", a[rhs]);
+		ctx->x += 1;
+		break;
+	}
 }
 
 static void
@@ -150,7 +330,11 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 	for (j = 0; j < n->u.alt.n; j++) {
 		ctx->x = x;
 
-		justify(ctx, n->u.alt.a[j], n->w);
+		ctx->x += 1;
+		render_tline(ctx, n->u.alt.b[j], 0, n->rtl);
+		justify(ctx, n->u.alt.a[j], n->w - 4);
+		render_tline(ctx, n->u.alt.b[j], 1, n->rtl);
+		ctx->x += 1;
 
 		if (j + 1 < n->u.alt.n) {
 			ctx->y += n->u.alt.a[j]->d + n->u.alt.a[j + 1]->a;
@@ -167,7 +351,13 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 
 	ctx->x = x;
 	ctx->y = y;
-	bars(ctx, h, n->w);
+
+	h -= 2; /* for the tline corner pieces */
+	ctx->y += 1;
+/* XXX: need to render bars() in two separate parts, above and below the line */
+ctx->x += 1;
+	bars(ctx, h, n->w - 2);
+ctx->x -= 1;
 
 	ctx->x = x + n->w;
 	ctx->y = o;
@@ -198,6 +388,7 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 
 	switch (n->type) {
 	case TNODE_SKIP:
+		/* TODO: skips under loop alts are too close to the line */
 		/* TODO: midpoint arrow */
 		if (n->w > 0) {
 			svg_text(ctx, "%s", n->rtl ? "&lt;" : "&gt;");
@@ -206,9 +397,8 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_ELLIPSIS:
-		/* TODO: dotted line */
-		svg_text(ctx, ":");
-		ctx->x += n->w;
+		/* TODO: 2 looks too long */
+		svg_ellipsis(ctx, 0, 2);
 		break;
 
 	case TNODE_CI_LITERAL:
@@ -323,12 +513,13 @@ svg_output(const struct ast_rule *grammar)
 	printf("  xmlns:xlink='http://www.w3.org/1999/xlink'\n");
 	printf("\n");
 	printf("  class='figure'\n");
-	printf("  viewBox='-20 -50 900 1600'\n"); /* TODO */
-	printf("  width='900' height='1600'>\n");
+	printf("  viewBox='-20 -50 900 2600'\n"); /* TODO */
+	printf("  width='900' height='2600'>\n");
 	printf("\n");
 
 	printf("  <style>\n");
 	printf("    rect, line { stroke-width: 1.5px; stroke: black; }\n");
+	printf("    line.ellipsis { stroke-dasharray: 4; }\n");
 	printf("  </style>\n");
 	printf("\n");
 
