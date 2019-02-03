@@ -161,20 +161,24 @@ static void
 render_corner(struct render_context *ctx, enum corner corner)
 {
 	int y;
+	int rx, ry;
 
 	switch (corner) {
-	case CORNER_A: y =  1; break;
-	case CORNER_B: y = -1; break;
-	case CORNER_C: y = -1; break;
-	case CORNER_D: y =  1; break;
+	case CORNER_A: y =  1; rx = 0; ry = y; break;
+	case CORNER_B: y = -1; rx = 0; ry = y; break;
+	case CORNER_C: y = -1; rx = 1; ry = 0; break;
+	case CORNER_D: y =  1; rx = 1; ry = 0; break;
 
 	default:
 		assert(!"unreached");
 	}
 
-	/* TODO: radius convex or concave, render arc */
 	ctx->y += -y;
-	svg_line(ctx, 1, y);
+
+	printf("    <path d='M%u0 %u0 q %d0 %d0 %d0 %d0'/>\n",
+		ctx->x, ctx->y, rx, ry, 1, y);
+
+	ctx->x += 1;
 	ctx->y -= -y;
 }
 
@@ -518,7 +522,8 @@ svg_output(const struct ast_rule *grammar)
 	printf("\n");
 
 	printf("  <style>\n");
-	printf("    rect, line { stroke-width: 1.5px; stroke: black; }\n");
+	printf("    rect, line, path { stroke-width: 1.5px; stroke: black; }\n");
+	printf("    path { fill: transparent; }\n");
 	printf("    line.ellipsis { stroke-dasharray: 4; }\n");
 	printf("  </style>\n");
 	printf("\n");
