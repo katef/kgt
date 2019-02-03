@@ -296,6 +296,27 @@ render_tline(struct render_context *ctx, enum tline tline, int rhs, int rtl)
 		ctx->y += 2;
 		break;
 
+	case 'f': /* entry from left */
+		ctx->x -= 1;
+		ctx->y -= 1;
+		render_corner(ctx, CORNER_C); /* exit up */
+		ctx->x -= 1;
+		ctx->y += 2;
+		render_corner(ctx, CORNER_D); /* exit down */
+		ctx->y -= 1;
+		svg_line(ctx, 1, 0); /* exit right */
+		break;
+
+	case 'e': /* entry from left, top, bottom */
+		ctx->y -= 1;
+		svg_line(ctx, 1, 0); /* exit right */
+		render_corner(ctx, CORNER_A); /* entry from top, exit right */
+		ctx->x -= 1;
+		render_corner(ctx, CORNER_B); /* entry from bottom, exit right */
+		ctx->x -= 1;
+		ctx->y += 1;
+		break;
+
 	case '|': /* nothing to draw */
 		ctx->x += 1;
 		break;
@@ -311,7 +332,6 @@ static void
 render_alt(const struct tnode *n, struct render_context *ctx)
 {
 	int x, o, y;
-	unsigned h;
 	size_t j;
 
 	assert(n != NULL);
@@ -336,7 +356,7 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		if (j == n->o) {
 			svg_line(ctx, 1, 0);
 		} else {
-			ctx->x += 1;
+			render_tline(ctx, TLINE_F, 0, n->rtl);
 		}
 
 		render_tline(ctx, n->u.alt.b[j], 0, n->rtl);
@@ -348,7 +368,7 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 			svg_line(ctx, 1, 0);
 			ctx->y += 1;
 		} else {
-			ctx->x += 1;
+			render_tline(ctx, TLINE_F, 1, n->rtl);
 		}
 
 		if (j + 1 < n->u.alt.n) {
@@ -356,23 +376,49 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		}
 	}
 
-	h = 0;
+	/* bars above the line */
+	if (n->o > 0) {
+		unsigned h;
 
-	for (j = 0; j < n->u.alt.n; j++) {
-		if (j + 1 < n->u.alt.n) {
-			h += n->u.alt.a[j]->d + n->u.alt.a[j + 1]->a + 1;
+		h = 0;
+
+		for (j = 0; j < n->o; j++) {
+			if (j + 1 < n->u.alt.n) {
+				h += n->u.alt.a[j]->d + n->u.alt.a[j + 1]->a + 1;
+			}
 		}
+
+		ctx->x = x;
+		ctx->y = y;
+
+		h -= 2; /* for the tline corner pieces */
+		ctx->y += 1;
+ctx->x += 1;
+		bars(ctx, h, n->w - 2);
+ctx->x -= 1;
 	}
 
-	ctx->x = x;
-	ctx->y = y;
+	/* bars below the line */
+	if (n->u.alt.n > n->o + 1) {
+		unsigned h;
 
-	h -= 2; /* for the tline corner pieces */
-	ctx->y += 1;
-/* XXX: need to render bars() in two separate parts, above and below the line */
+		h = 0;
+
+		for (j = n->o; j < n->u.alt.n; j++) {
+			if (j + 1 < n->u.alt.n) {
+				h += n->u.alt.a[j]->d + n->u.alt.a[j + 1]->a + 1;
+			}
+		}
+
+		ctx->x = x;
+		ctx->y = o;
+
+		h -= 2; /* for the tline corner pieces */
+		ctx->y += 1;
 ctx->x += 1;
-	bars(ctx, h, n->w - 2);
+		bars(ctx, h, n->w - 2);
 ctx->x -= 1;
+	}
 
 	ctx->x = x + n->w;
 	ctx->y = o;
