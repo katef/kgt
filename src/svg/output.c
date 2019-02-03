@@ -236,15 +236,14 @@ render_tline(struct render_context *ctx, enum tline tline, int rhs, int rtl)
 
 	case 'a': /* entry from left and top */
 		ctx->y -= 1;
-		svg_line(ctx, 2, 0); /* entry from left, exit right */
-		ctx->x -= 1;
+		svg_line(ctx, 1, 0); /* entry from left, exit right */
 		render_corner(ctx, CORNER_A); /* entry from top, exit right */
+		ctx->x -= 1;
 		ctx->y += 1;
 		break;
 
 	case 'd': /* entry from left */
-		ctx->x -= 1;
-		svg_line(ctx, 2, 0); /* exit right */
+		svg_line(ctx, 1, 0); /* exit right */
 		ctx->x -= 2;
 		ctx->y += 1;
 		render_corner(ctx, CORNER_D); /* exit down */
@@ -254,9 +253,9 @@ render_tline(struct render_context *ctx, enum tline tline, int rhs, int rtl)
 
 	case 'c': /* entry from left and bottom */
 		ctx->y -= 1;
-		svg_line(ctx, 2, 0); /* entry from left, exit right */
-		ctx->x -= 1;
+		svg_line(ctx, 1, 0); /* entry from left, exit right */
 		render_corner(ctx, CORNER_B); /* entry from bottom, exit right */
+		ctx->x -= 1;
 		ctx->y += 1;
 		break;
 
@@ -265,38 +264,36 @@ render_tline(struct render_context *ctx, enum tline tline, int rhs, int rtl)
 		ctx->y -= 1;
 		render_corner(ctx, CORNER_C); /* exit up */
 		ctx->y += 1;
-		ctx->x -= 1;
-		svg_line(ctx, 2, 0); /* exit right */
+		svg_line(ctx, 1, 0); /* exit right */
 		break;
 
 	case 'j': /* entry from left and bottom */
-		ctx->x -= 1;
-		svg_line(ctx, 2, 0); /* entry from left, exit right */
+		svg_line(ctx, 1, 0); /* entry from left, exit right */
 		ctx->x -= 1;
 		render_corner(ctx, CORNER_B); /* entry from bottom, exit right */
 		break;
 
 	case 'i': /* entry from left */
-		ctx->y -= 1;
-		svg_line(ctx, 2, 0); /* exit right */
-		ctx->y += 1;
-		ctx->x -= 2;
 		render_corner(ctx, CORNER_D); /* exit down */
+		ctx->y -= 1;
+		ctx->x -= 1;
+		svg_line(ctx, 1, 0); /* exit right */
+		ctx->y += 1;
 		break;
 
 	case 'l': /* entry from left and top */
-		ctx->x -= 1;
-		svg_line(ctx, 2, 0); /* entry from left, exit right */
+		svg_line(ctx, 1, 0); /* entry from left, exit right */
 		ctx->x -= 1;
 		render_corner(ctx, CORNER_A); /* entry from top, exit right */
 		break;
 
 	case 'k': /* entry from left */
 		ctx->y -= 1;
-		svg_line(ctx, 2, 0); /* exit right */
-		ctx->x -= 2;
+		svg_line(ctx, 1, 0); /* exit right */
+		ctx->x -= 1;
 		ctx->y -= 1;
 		render_corner(ctx, CORNER_C); /* exit up */
+		ctx->y += 2;
 		break;
 
 	case '|': /* nothing to draw */
@@ -334,11 +331,25 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 	for (j = 0; j < n->u.alt.n; j++) {
 		ctx->x = x;
 
-		ctx->x += 1;
+		/* TODO: render entry/exit as a separate corner|line combination */
+		/* TODO: decide this based on tline, not on n->o */
+		if (j == n->o) {
+			svg_line(ctx, 1, 0);
+		} else {
+			ctx->x += 1;
+		}
+
 		render_tline(ctx, n->u.alt.b[j], 0, n->rtl);
 		justify(ctx, n->u.alt.a[j], n->w - 4);
 		render_tline(ctx, n->u.alt.b[j], 1, n->rtl);
-		ctx->x += 1;
+
+		if (j == n->o) {
+			ctx->y -= 1;
+			svg_line(ctx, 1, 0);
+			ctx->y += 1;
+		} else {
+			ctx->x += 1;
+		}
 
 		if (j + 1 < n->u.alt.n) {
 			ctx->y += n->u.alt.a[j]->d + n->u.alt.a[j + 1]->a;
