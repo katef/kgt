@@ -183,22 +183,22 @@ render_corner(struct render_context *ctx, enum corner corner)
 }
 
 static void
-render_tline_inner(struct render_context *ctx, enum tline tline, int rhs, int rtl)
+render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 {
 	const char *a;
 
 	assert(ctx != NULL);
 
 	switch (tline) {
-	case TLINE_A: a = rtl ? "AB" : "ba"; break;
-	case TLINE_B: a = ",.";              break;
-	case TLINE_C: a = rtl ? "CD" : "dc"; break;
-	case TLINE_D: a = rtl ? "EF" : "fe"; break;
-	case TLINE_E: a = "`'";              break;
-	case TLINE_F: a = "||";              break;
-	case TLINE_G: a = rtl ? "GH" : "hg"; break;
-	case TLINE_H: a = rtl ? "IJ" : "ji"; break;
-	case TLINE_I: a = rtl ? "KL" : "lk"; break;
+	case TLINE_A: a = "ba"; break;
+	case TLINE_B: a = ",."; break;
+	case TLINE_C: a = "dc"; break;
+	case TLINE_D: a = "fe"; break;
+	case TLINE_E: a = "`'"; break;
+	case TLINE_F: a = "||"; break;
+	case TLINE_G: a = "hg"; break;
+	case TLINE_H: a = "ji"; break;
+	case TLINE_I: a = "lk"; break;
 
 	default:
 		a = "??";
@@ -305,18 +305,18 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs, int rt
 }
 
 static void
-render_tline_outer(struct render_context *ctx, enum tline tline, int rhs, int rtl)
+render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 {
 	const char *a;
 
 	assert(ctx != NULL);
 
 	switch (tline) {
-	case TLINE_A: a = rtl ? "AB" : "ba"; break;
-	case TLINE_C: a = rtl ? "CD" : "dc"; break;
-	case TLINE_D: a = rtl ? "EF" : "fe"; break;
-	case TLINE_H: a = rtl ? "IJ" : "ji"; break;
-	case TLINE_I: a = rtl ? "KL" : "lk"; break;
+	case TLINE_A: a = "ba"; break;
+	case TLINE_C: a = "dc"; break;
+	case TLINE_D: a = "fe"; break;
+	case TLINE_H: a = "ji"; break;
+	case TLINE_I: a = "lk"; break;
 
 	default:
 		a = "??";
@@ -427,23 +427,23 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		/* TODO: render entry/exit as a separate corner|line combination */
 		/* TODO: decide this based on tline, not on n->o */
 		if (j == n->o) {
-			render_tline_outer(ctx, n->u.alt.b[j], 0, n->rtl);
+			render_tline_outer(ctx, n->u.alt.b[j], 0);
 		} else {
-			render_tline_outer(ctx, TLINE_F, 0, n->rtl);
+			render_tline_outer(ctx, TLINE_F, 0);
 		}
 
-		render_tline_inner(ctx, n->u.alt.b[j], 0, n->rtl);
+		render_tline_inner(ctx, n->u.alt.b[j], 0);
 		justify(ctx, n->u.alt.a[j], n->w - 4);
-		render_tline_inner(ctx, n->u.alt.b[j], 1, n->rtl);
+		render_tline_inner(ctx, n->u.alt.b[j], 1);
 
 		if (j == n->o) {
 			ctx->y -= 1;
 			svg_line(ctx, 1, 0);
 			ctx->y += 1;
 
-			render_tline_outer(ctx, n->u.alt.b[j], 1, n->rtl);
+			render_tline_outer(ctx, n->u.alt.b[j], 1);
 		} else {
-			render_tline_outer(ctx, TLINE_F, 1, n->rtl);
+			render_tline_outer(ctx, TLINE_F, 1);
 		}
 
 		if (j + 1 < n->u.alt.n) {
