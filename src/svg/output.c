@@ -242,94 +242,46 @@ render_tile_bm(struct render_context *ctx, unsigned u)
 static void
 render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 {
-	const char *a;
-	unsigned u;
+	unsigned u[2];
 
 	assert(ctx != NULL);
 
 	switch (tline) {
-	case TLINE_A: a = "ba"; break;
-	case TLINE_B: a = ",."; break;
-	case TLINE_C: a = "dc"; break;
-	case TLINE_D: a = "fe"; break;
-	case TLINE_E: a = "`'"; break;
-	case TLINE_F: a = "||"; break;
-	case TLINE_G: a = "hg"; break;
-	case TLINE_H: a = "ji"; break;
-	case TLINE_I: a = "lk"; break;
+	case TLINE_A: u[0] = TILE_LINE;  u[1] = TILE_LINE_N1; break;
+	case TLINE_B: u[0] = TILE_TL_P1; u[1] = TILE_TR_N1;   break;
+	case TLINE_C: u[0] = TILE_LINE;  u[1] = TILE_LINE_N1; break;
+	case TLINE_D: u[0] = TILE_LINE;  u[1] = TILE_LINE_N1; break;
+	case TLINE_E: u[0] = TILE_BL_N1; u[1] = TILE_BR_N1;   break;
+	case TLINE_F: u[0] = 0;          u[1] = 0;            break;
+	case TLINE_G: u[0] = TILE_BL_N1; u[1] = TILE_BR_N1;   break;
 
-	default:
-		a = "??";
-		break;
+	case TLINE_H: u[0] = TILE_LINE | TILE_TL_P1; u[1] = TILE_LINE_N1 | TILE_TR_N1; break;
+	case TLINE_I: u[0] = TILE_LINE | TILE_BL_N1; u[1] = TILE_LINE_N1 | TILE_BR_N1; break;
+
+	default: u[0] = 0; u[1] = 0; break;
 	}
 
-	/* XXX: cheesy */
-	switch (a[rhs]) {
-	case ',': u = TILE_TL_P1; break;
-	case '.': u = TILE_TR_N1; break;
-	case '`': u = TILE_BL_N1; break;
-	case '\'': u = TILE_BR_N1; break;
-	case 'h': u = TILE_BL_N1; break;
-	case 'g': u = TILE_BR_N1; break;
-	case 'a': u = TILE_LINE_N1; break;
-	case 'd': u = TILE_LINE; break;
-	case 'c': u = TILE_LINE_N1; break;
-	case 'b': u = TILE_LINE; break;
-	case 'j': u = TILE_LINE | TILE_TL_P1; break;
-	case 'i': u = TILE_LINE_N1 | TILE_TR_N1; break;
-	case 'l': u = TILE_LINE | TILE_BL_N1; break;
-	case 'k': u = TILE_LINE_N1 | TILE_BR_N1; break;
-	case 'f': u = TILE_LINE; break;
-	case 'e': u = TILE_LINE_N1; break;
-	case '|': u = 0; break;
-
-	default:
-		u = 0;
-		break;
-	}
-
-	render_tile_bm(ctx, u);
+	render_tile_bm(ctx, u[rhs]);
 }
 
 static void
 render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 {
-	const char *a;
-	unsigned u;
+	unsigned u[2];
 
 	assert(ctx != NULL);
 
 	switch (tline) {
-	case TLINE_A: a = "ba"; break;
-	case TLINE_C: a = "dc"; break;
-	case TLINE_D: a = "fe"; break;
-	case TLINE_H: a = "ji"; break;
-	case TLINE_I: a = "lk"; break;
+	case TLINE_A: u[0] = TILE_LINE | TILE_BR; u[1] = TILE_LINE_N1 | TILE_BL_N2; break;
+	case TLINE_C: u[0] = TILE_LINE | TILE_TR; u[1] = TILE_LINE_N1 | TILE_TL; break;
+	case TLINE_D: u[0] = TILE_LINE | TILE_BR | TILE_TR; u[1] = TILE_LINE_N1 | TILE_BL_N2 | TILE_TL; break;
+	case TLINE_H: u[0] = TILE_LINE;           u[1] = TILE_LINE_N1; break;
+	case TLINE_I: u[0] = TILE_LINE;           u[1] = TILE_LINE_N1; break;
 
-	default:
-		a = "??";
-		break;
+	default: u[0] = 0; u[1] = 0; break;
 	}
 
-	/* XXX: cheesy */
-	switch (a[rhs]) {
-	case 'a': u = TILE_LINE_N1 | TILE_BL_N2; break;
-	case 'd': u = TILE_LINE | TILE_TR; break;
-	case 'c': u = TILE_LINE_N1 | TILE_TL; break;
-	case 'b': u = TILE_LINE | TILE_BR; break;
-	case 'f': u = TILE_LINE | TILE_BR | TILE_TR; break;
-	case 'e': u = TILE_LINE_N1 | TILE_BL_N2 | TILE_TL; break;
-	case 'j': u = TILE_LINE; break;
-	case 'l': u = TILE_LINE; break;
-	case 'k': u = TILE_LINE_N1; break;
-	case 'i': u = TILE_LINE_N1; break;
-
-	default:
-		u = 0;
-		break;
-	}
-
-	render_tile_bm(ctx, u);
+	render_tile_bm(ctx, u[rhs]);
 }
 
 static void
