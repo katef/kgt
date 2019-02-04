@@ -164,8 +164,6 @@ render_tile(struct render_context *ctx, enum tile tile, int dy)
 	int y;
 	int rx, ry;
 
-	ctx->y += dy;
-
 	switch (tile) {
 	case TILE_BL: y =  1; rx = 0; ry = y; break;
 	case TILE_TL: y = -1; rx = 0; ry = y; break;
@@ -173,12 +171,16 @@ render_tile(struct render_context *ctx, enum tile tile, int dy)
 	case TILE_TR: y =  1; rx = 1; ry = 0; break;
 
 	case TILE_LINE:
+		ctx->y += dy;
 		svg_line(ctx, 1, 0);
+		ctx->y -= dy;
 		return;
 
 	default:
 		assert(!"unreached");
 	}
+
+	ctx->y += dy;
 
 	printf("    <path d='M%u0 %u0 q %d0 %d0 %d0 %d0'/>\n",
 		ctx->x, ctx->y, rx, ry, 1, y);
@@ -221,19 +223,19 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 		break;
 
 	case '`': /* \ bottom left */
-		render_tile(ctx, TILE_BL, 0);
+		render_tile(ctx, TILE_BL, -1);
 		break;
 
 	case '\'': /* / bottom right */
-		render_tile(ctx, TILE_BR, 0);
+		render_tile(ctx, TILE_BR, -1);
 		break;
 
 	case 'h': /* entry from left and top */
-		render_tile(ctx, TILE_BL, 0); /* exit right */
+		render_tile(ctx, TILE_BL, -1); /* exit right */
 		break;
 
 	case 'g': /* entry from left */
-		render_tile(ctx, TILE_BR, 0); /* exit up */
+		render_tile(ctx, TILE_BR, -1); /* exit up */
 		break;
 
 	case 'a': /* entry from left and top */
@@ -261,7 +263,7 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 	case 'i': /* entry from left */
 		render_tile(ctx, TILE_LINE, -1);
 		ctx->x -= 1;
-		render_tile(ctx, TILE_TR, 0); /* exit down */
+		render_tile(ctx, TILE_TR, -1); /* exit down */
 		break;
 
 	case 'l': /* entry from left and top */
@@ -273,7 +275,7 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 	case 'k': /* entry from left */
 		render_tile(ctx, TILE_LINE, -1);
 		ctx->x -= 1;
-		render_tile(ctx, TILE_BR, 0); /* exit up */
+		render_tile(ctx, TILE_BR, -1); /* exit up */
 		break;
 
 	case 'f': /* entry from left */
@@ -316,9 +318,9 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 	/* XXX: cheesy */
 	switch (a[rhs]) {
 	case 'a': /* entry from left and top */
-		render_tile(ctx, TILE_LINE, 0);
+		render_tile(ctx, TILE_LINE, -1);
 		ctx->x -= 1;
-		render_tile(ctx, TILE_BL, -1); /* entry from top, exit right */
+		render_tile(ctx, TILE_BL, -2); /* entry from top, exit right */
 		break;
 
 	case 'd': /* entry from left */
@@ -328,9 +330,9 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 		break;
 
 	case 'c': /* entry from left and bottom */
-		render_tile(ctx, TILE_LINE, 0);
+		render_tile(ctx, TILE_LINE, -1);
 		ctx->x -= 1;
-		render_tile(ctx, TILE_TL, 1); /* entry from bottom, exit right */
+		render_tile(ctx, TILE_TL, 0); /* entry from bottom, exit right */
 		break;
 
 	case 'b': /* entry from left */
@@ -348,11 +350,11 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 		break;
 
 	case 'e': /* entry from left, top, bottom */
-		render_tile(ctx, TILE_LINE, 0);
+		render_tile(ctx, TILE_LINE, -1);
 		ctx->x -= 1;
-		render_tile(ctx, TILE_TL, 1); /* entry from bottom, exit right */
+		render_tile(ctx, TILE_BL, -2); /* entry from top, exit right */
 		ctx->x -= 1;
-		render_tile(ctx, TILE_BL, -1); /* entry from top, exit right */
+		render_tile(ctx, TILE_TL, 0); /* entry from bottom, exit right */
 		break;
 
 	case 'j': /* entry from left and bottom */
@@ -364,11 +366,11 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 		break;
 
 	case 'k': /* entry from left */
-		render_tile(ctx, TILE_LINE, 0);
+		render_tile(ctx, TILE_LINE, -1);
 		break;
 
 	case 'i': /* entry from left */
-		render_tile(ctx, TILE_LINE, 0);
+		render_tile(ctx, TILE_LINE, -1);
 		break;
 
 	default: /* nothing to draw */
@@ -402,15 +404,9 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 
 		render_tline_outer(ctx, n->u.alt.b[j], 0);
 		render_tline_inner(ctx, n->u.alt.b[j], 0);
-		if (n->u.alt.b[j] == TLINE_E || n->u.alt.b[j] == TLINE_G) {
-			ctx->y++; /* XXX */
-		}
 
 		justify(ctx, n->u.alt.a[j], n->w - 4);
 
-		if (n->u.alt.b[j] == TLINE_E || n->u.alt.b[j] == TLINE_G) {
-			ctx->y--; /* XXX */
-		}
 		render_tline_inner(ctx, n->u.alt.b[j], 1);
 		render_tline_outer(ctx, n->u.alt.b[j], 1);
 
