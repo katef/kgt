@@ -1,6 +1,7 @@
 .include "../../share/mk/top.mk"
 
 SRC += src/svg/output.c
+SRC += src/svg/path.c
 
 PART += svg
 

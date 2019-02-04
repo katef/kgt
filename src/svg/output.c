@@ -32,9 +32,12 @@
 #include "../rrd/tnode.h"
 
 #include "io.h"
+#include "path.h"
 
 struct render_context {
 	int x, y;
+
+	struct path *paths;
 };
 
 static void node_walk_render(const struct tnode *n, struct render_context *ctx);
@@ -98,6 +101,7 @@ static void
 svg_arrow(struct render_context *ctx, int w, int h,
 	const char *marker_start, const char *marker_mid, const char *marker_end)
 {
+	/* TODO: <path> is neater anyway, never use <line> */
 	printf("    <line x1='%u0' y1='%u0' x2='%d0' y2='%u0'",
 		ctx->x, ctx->y,
 		(int) ctx->x + w, ctx->y + h);
@@ -112,31 +116,22 @@ svg_arrow(struct render_context *ctx, int w, int h,
 }
 
 static void
-svg_line(struct render_context *ctx, int w, int h)
-{
-	svg_arrow(ctx, w, h, NULL, NULL, NULL);
-	/* TODO: add to list, then combine adjoining lines */
-}
-
-static void
 justify(struct render_context *ctx, const struct tnode *n, int space)
 {
 	unsigned lhs = (space - n->w) / 2;
 	unsigned rhs = (space - n->w) - lhs;
 
 	if (n->type != TNODE_ELLIPSIS) {
-		svg_line(ctx, lhs, 0);
-	} else {
-		ctx->x += lhs;
+		svg_path_h(&ctx->paths, ctx->x, ctx->y, lhs);
 	}
+	ctx->x += lhs;
 
 	node_walk_render(n, ctx);
 
 	if (n->type != TNODE_ELLIPSIS) {
-		svg_line(ctx, rhs, 0);
-	} else {
-		ctx->x += rhs;
+		svg_path_h(&ctx->paths, ctx->x, ctx->y, rhs);
 	}
+	ctx->x += rhs;
 
 	ctx->y++;
 }
@@ -144,9 +139,9 @@ justify(struct render_context *ctx, const struct tnode *n, int space)
 static void
 bars(struct render_context *ctx, unsigned n, unsigned w)
 {
-	svg_line(ctx, 0, n);
+	svg_path_v(&ctx->paths, ctx->x, ctx->y, n);
 	ctx->x += w;
-	svg_line(ctx, 0, n);
+	svg_path_v(&ctx->paths, ctx->x, ctx->y, n);
 }
 
 enum tile {
@@ -197,7 +192,8 @@ render_tile(struct render_context *ctx, enum tile tile)
 
 	case TILE_LINE:
 		ctx->y += dy;
-		svg_line(ctx, 1, 0);
+		svg_path_h(&ctx->paths, ctx->x, ctx->y, 1);
+		ctx->x += 1;
 		ctx->y -= dy;
 		return;
 
@@ -373,7 +369,8 @@ render_seq(const struct tnode *n, struct render_context *ctx)
 		node_walk_render(n->u.seq.a[!n->rtl ? i : n->u.seq.n - i], ctx);
 
 		if (i + 1 < n->u.seq.n) {
-			svg_line(ctx, 2, 0);
+			svg_path_h(&ctx->paths, ctx->x, ctx->y, 2);
+			ctx->x += 2;
 		}
 	}
 }
@@ -433,12 +430,15 @@ static void
 render_rule(const struct tnode *node)
 {
 	struct render_context ctx;
+	const struct path *p;
 	unsigned w;
 
 	w = node->w + 8;
 
 	ctx.x = 0;
 	ctx.y = 0;
+
+	ctx.paths = NULL;
 
 	ctx.y = node->a;
 	svg_arrow(&ctx,  2, 0, "#rrd:start", NULL, NULL);
@@ -450,6 +450,23 @@ render_rule(const struct tnode *node)
 	ctx.x = 2;
 	ctx.y = node->a;
 	node_walk_render(node, &ctx);
+
+	for (p = ctx.paths; p != NULL; p = p->next) {
+		/* TODO: consolidate path segments */
+		switch (p->type) {
+		case PATH_H:
+			printf("    <path d='M%u0 %u0 h%d0'/>\n",
+				p->x, p->y, p->u.n);
+			break;
+
+		case PATH_V:
+			printf("    <path d='M%u0 %u0 v%d0'/>\n",
+				p->x, p->y, p->u.n);
+			break;
+		}
+	}
+
+	svg_path_free(ctx.paths);
 }
 
 static void
