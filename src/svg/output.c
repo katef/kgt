@@ -222,21 +222,17 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 
 	case '`': /* \ bottom left */
 		render_tile(ctx, TILE_BL, 0);
-		ctx->y++;
 		break;
 
 	case '\'': /* / bottom right */
-		ctx->y--;
 		render_tile(ctx, TILE_BR, 0);
 		break;
 
 	case 'h': /* entry from left and top */
 		render_tile(ctx, TILE_BL, 0); /* exit right */
-		ctx->y++;
 		break;
 
 	case 'g': /* entry from left */
-		ctx->y--;
 		render_tile(ctx, TILE_BR, 0); /* exit up */
 		break;
 
@@ -406,9 +402,15 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 
 		render_tline_outer(ctx, n->u.alt.b[j], 0);
 		render_tline_inner(ctx, n->u.alt.b[j], 0);
+		if (n->u.alt.b[j] == TLINE_E || n->u.alt.b[j] == TLINE_G) {
+			ctx->y++; /* XXX */
+		}
 
 		justify(ctx, n->u.alt.a[j], n->w - 4);
 
+		if (n->u.alt.b[j] == TLINE_E || n->u.alt.b[j] == TLINE_G) {
+			ctx->y--; /* XXX */
+		}
 		render_tline_inner(ctx, n->u.alt.b[j], 1);
 		render_tline_outer(ctx, n->u.alt.b[j], 1);
 
