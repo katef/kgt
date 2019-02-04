@@ -253,21 +253,21 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 		break;
 
 	case 'j': /* entry from left and bottom */
-		render_tile(ctx, TILE_TL, 1); /* entry from bottom, exit right */
-		ctx->x -= 1;
 		render_tile(ctx, TILE_LINE, 0);
+		ctx->x -= 1;
+		render_tile(ctx, TILE_TL, 1); /* entry from bottom, exit right */
 		break;
 
 	case 'i': /* entry from left */
-		render_tile(ctx, TILE_TR, -1); /* exit down */
-		ctx->x -= 1;
 		render_tile(ctx, TILE_LINE, -1);
+		ctx->x -= 1;
+		render_tile(ctx, TILE_TR, 0); /* exit down */
 		break;
 
 	case 'l': /* entry from left and top */
-		render_tile(ctx, TILE_BL, -1); /* entry from top, exit right */
-		ctx->x -= 1;
 		render_tile(ctx, TILE_LINE, 0);
+		ctx->x -= 1;
+		render_tile(ctx, TILE_BL, -1); /* entry from top, exit right */
 		break;
 
 	case 'k': /* entry from left */
@@ -334,17 +334,17 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 		break;
 
 	case 'b': /* entry from left */
-		render_tile(ctx, TILE_BR, 0); /* exit up */
-		ctx->x -= 1;
 		render_tile(ctx, TILE_LINE, 0);
+		ctx->x -= 1;
+		render_tile(ctx, TILE_BR, 0); /* exit up */
 		break;
 
 	case 'f': /* entry from left */
+		render_tile(ctx, TILE_LINE, 0);
+		ctx->x -= 1;
 		render_tile(ctx, TILE_BR, 0); /* exit up */
 		ctx->x -= 1;
 		render_tile(ctx, TILE_TR, 0); /* exit down */
-		ctx->x -= 1;
-		render_tile(ctx, TILE_LINE, 0);
 		break;
 
 	case 'e': /* entry from left, top, bottom */
