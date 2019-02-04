@@ -155,15 +155,16 @@ enum tile {
 	TILE_BR = 1 << 2, /* -' bottom right */
 	TILE_TR = 1 << 3, /* -. top right */
 
-	TILE_TOP = 1 << 4, /* horizontal line */
-	TILE_BOT = 1 << 5  /* horizontal line */
+	TILE_LINE = 1 << 4 /* horizontal line */
 };
 
 static void
-render_tile(struct render_context *ctx, enum tile tile)
+render_tile(struct render_context *ctx, enum tile tile, int dy)
 {
 	int y;
 	int rx, ry;
+
+	ctx->y += dy;
 
 	switch (tile) {
 	case TILE_BL: y =  1; rx = 0; ry = y; break;
@@ -171,14 +172,7 @@ render_tile(struct render_context *ctx, enum tile tile)
 	case TILE_BR: y = -1; rx = 1; ry = 0; break;
 	case TILE_TR: y =  1; rx = 1; ry = 0; break;
 
-	/* TODO: pass in h offset instead */
-	case TILE_TOP:
-		ctx->y -= 1;
-		svg_line(ctx, 1, 0);
-		ctx->y += 1;
-		return;
-
-	case TILE_BOT:
+	case TILE_LINE:
 		svg_line(ctx, 1, 0);
 		return;
 
@@ -190,6 +184,8 @@ render_tile(struct render_context *ctx, enum tile tile)
 
 	printf("    <path d='M%u0 %u0 q %d0 %d0 %d0 %d0'/>\n",
 		ctx->x, ctx->y, rx, ry, 1, y);
+
+	ctx->y -= dy;
 
 	ctx->x += 1;
 	ctx->y -= -y;
@@ -221,81 +217,79 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 	/* XXX: cheesy */
 	switch (a[rhs]) {
 	case ',': /* / top left */
-		render_tile(ctx, TILE_TL);
+		render_tile(ctx, TILE_TL, 0);
 		break;
 
 	case '.': /* \ top right */
-		render_tile(ctx, TILE_TR);
+		render_tile(ctx, TILE_TR, 0);
 		break;
 
 	case '`': /* \ bottom left */
-		render_tile(ctx, TILE_BL);
+		render_tile(ctx, TILE_BL, 1);
+		ctx->y++;
 		break;
 
 	case '\'': /* / bottom right */
-		ctx->y -= 2;
-		render_tile(ctx, TILE_BR);
+		ctx->y--;
+		render_tile(ctx, TILE_BR, -1);
 		break;
 
 	case 'h': /* entry from left and top */
-		render_tile(ctx, TILE_BL); /* exit right */
+		render_tile(ctx, TILE_BL, 1); /* exit right */
+		ctx->y++;
 		break;
 
 	case 'g': /* entry from left */
-		ctx->y -= 2;
-		render_tile(ctx, TILE_BR); /* exit up */
-		ctx->y += 2;
+		ctx->y--;
+		render_tile(ctx, TILE_BR, -1); /* exit up */
 		break;
 
 	case 'a': /* entry from left and top */
-		render_tile(ctx, TILE_TOP);
+		render_tile(ctx, TILE_LINE, -1);
 		break;
 
 	case 'd': /* entry from left */
-		render_tile(ctx, TILE_BOT);
+		render_tile(ctx, TILE_LINE, 0);
 		break;
 
 	case 'c': /* entry from left and bottom */
-		render_tile(ctx, TILE_TOP);
+		render_tile(ctx, TILE_LINE, -1);
 		break;
 
 	case 'b': /* entry from left */
-		render_tile(ctx, TILE_BOT);
+		render_tile(ctx, TILE_LINE, 0);
 		break;
 
 	case 'j': /* entry from left and bottom */
-		render_tile(ctx, TILE_BOT);
+		render_tile(ctx, TILE_LINE, 0);
 		ctx->x -= 1;
-		render_tile(ctx, TILE_TL); /* entry from bottom, exit right */
+		render_tile(ctx, TILE_TL, 0); /* entry from bottom, exit right */
 		break;
 
 	case 'i': /* entry from left */
-		render_tile(ctx, TILE_TR); /* exit down */
+		render_tile(ctx, TILE_TR, 0); /* exit down */
 		ctx->x -= 1;
-		render_tile(ctx, TILE_TOP);
+		render_tile(ctx, TILE_LINE, -1);
 		break;
 
 	case 'l': /* entry from left and top */
-		render_tile(ctx, TILE_BOT);
+		render_tile(ctx, TILE_LINE, 0);
 		ctx->x -= 1;
-		render_tile(ctx, TILE_BL); /* entry from top, exit right */
+		render_tile(ctx, TILE_BL, 0); /* entry from top, exit right */
 		break;
 
 	case 'k': /* entry from left */
-		render_tile(ctx, TILE_TOP);
+		render_tile(ctx, TILE_LINE, -1);
 		ctx->x -= 1;
-		ctx->y -= 2;
-		render_tile(ctx, TILE_BR); /* exit up */
-		ctx->y += 2;
+		render_tile(ctx, TILE_BR, -1); /* exit up */
 		break;
 
 	case 'f': /* entry from left */
-		render_tile(ctx, TILE_TOP);
-		ctx->y -= 1;
+		render_tile(ctx, TILE_LINE, 0);
 		break;
 
 	case 'e': /* entry from left, top, bottom */
-		render_tile(ctx, TILE_TOP);
+		render_tile(ctx, TILE_LINE, -1);
 		break;
 
 	case '|': /* nothing to draw */
@@ -331,71 +325,59 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 	/* XXX: cheesy */
 	switch (a[rhs]) {
 	case 'a': /* entry from left and top */
-		render_tile(ctx, TILE_TOP);
+		render_tile(ctx, TILE_LINE, 0);
 		ctx->x -= 1;
-		ctx->y -= 1;
-		render_tile(ctx, TILE_BL); /* entry from top, exit right */
-		ctx->y += 1;
+		render_tile(ctx, TILE_BL, 0); /* entry from top, exit right */
 		break;
 
 	case 'd': /* entry from left */
-		render_tile(ctx, TILE_BOT);
+		render_tile(ctx, TILE_LINE, 0);
 		ctx->x -= 1;
-		ctx->y += 1;
-		render_tile(ctx, TILE_TR); /* exit down */
-		ctx->y -= 1;
+		render_tile(ctx, TILE_TR, 1); /* exit down */
 		break;
 
 	case 'c': /* entry from left and bottom */
-		render_tile(ctx, TILE_TOP);
+		render_tile(ctx, TILE_LINE, 0);
 		ctx->x -= 1;
-		ctx->y -= 1;
-		render_tile(ctx, TILE_TL); /* entry from bottom, exit right */
-		ctx->y += 1;
+		render_tile(ctx, TILE_TL, 0); /* entry from bottom, exit right */
 		break;
 
 	case 'b': /* entry from left */
-		ctx->y -= 1;
-		render_tile(ctx, TILE_BR); /* exit up */
+		render_tile(ctx, TILE_BR, -1); /* exit up */
 		ctx->x -= 1;
-		ctx->y += 1;
-		render_tile(ctx, TILE_BOT);
+		render_tile(ctx, TILE_LINE, 0);
 		break;
 
 	case 'f': /* entry from left */
-		ctx->y -= 1;
-		render_tile(ctx, TILE_BR); /* exit up */
+		render_tile(ctx, TILE_BR, -1); /* exit up */
 		ctx->x -= 1;
-		ctx->y += 2;
-		render_tile(ctx, TILE_TR); /* exit down */
+		render_tile(ctx, TILE_TR, 1); /* exit down */
 		ctx->x -= 1;
-		render_tile(ctx, TILE_TOP);
+		render_tile(ctx, TILE_LINE, 0);
 		break;
 
 	case 'e': /* entry from left, top, bottom */
-		render_tile(ctx, TILE_TOP);
-		ctx->y -= 1;
+		render_tile(ctx, TILE_LINE, 0);
 		ctx->x -= 1;
-		render_tile(ctx, TILE_BL); /* entry from top, exit right */
+		render_tile(ctx, TILE_BL, 0); /* entry from top, exit right */
 		ctx->x -= 1;
-		render_tile(ctx, TILE_TL); /* entry from bottom, exit right */
-		ctx->y += 1;
+		render_tile(ctx, TILE_TL, 0); /* entry from bottom, exit right */
 		break;
 
 	case 'j': /* entry from left and bottom */
-		render_tile(ctx, TILE_BOT);
+		render_tile(ctx, TILE_LINE, 0);
 		break;
 
 	case 'l': /* entry from left and top */
-		render_tile(ctx, TILE_BOT);
+		render_tile(ctx, TILE_LINE, 0);
 		break;
 
 	case 'k': /* entry from left */
-		render_tile(ctx, TILE_TOP);
+		render_tile(ctx, TILE_LINE, 0);
 		break;
 
 	case 'i': /* entry from left */
-		render_tile(ctx, TILE_TOP);
+		render_tile(ctx, TILE_LINE, 0);
 		break;
 
 	default: /* nothing to draw */
