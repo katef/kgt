@@ -180,15 +180,11 @@ render_tile(struct render_context *ctx, enum tile tile, int dy)
 		assert(!"unreached");
 	}
 
-	ctx->y += -y;
-
 	printf("    <path d='M%u0 %u0 q %d0 %d0 %d0 %d0'/>\n",
 		ctx->x, ctx->y, rx, ry, 1, y);
 
 	ctx->y -= dy;
-
 	ctx->x += 1;
-	ctx->y -= -y;
 }
 
 static void
@@ -217,31 +213,31 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 	/* XXX: cheesy */
 	switch (a[rhs]) {
 	case ',': /* / top left */
-		render_tile(ctx, TILE_TL, 0);
+		render_tile(ctx, TILE_TL, 1);
 		break;
 
 	case '.': /* \ top right */
-		render_tile(ctx, TILE_TR, 0);
+		render_tile(ctx, TILE_TR, -1);
 		break;
 
 	case '`': /* \ bottom left */
-		render_tile(ctx, TILE_BL, 1);
+		render_tile(ctx, TILE_BL, 0);
 		ctx->y++;
 		break;
 
 	case '\'': /* / bottom right */
 		ctx->y--;
-		render_tile(ctx, TILE_BR, -1);
+		render_tile(ctx, TILE_BR, 0);
 		break;
 
 	case 'h': /* entry from left and top */
-		render_tile(ctx, TILE_BL, 1); /* exit right */
+		render_tile(ctx, TILE_BL, 0); /* exit right */
 		ctx->y++;
 		break;
 
 	case 'g': /* entry from left */
 		ctx->y--;
-		render_tile(ctx, TILE_BR, -1); /* exit up */
+		render_tile(ctx, TILE_BR, 0); /* exit up */
 		break;
 
 	case 'a': /* entry from left and top */
@@ -261,27 +257,27 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 		break;
 
 	case 'j': /* entry from left and bottom */
-		render_tile(ctx, TILE_LINE, 0);
+		render_tile(ctx, TILE_TL, 1); /* entry from bottom, exit right */
 		ctx->x -= 1;
-		render_tile(ctx, TILE_TL, 0); /* entry from bottom, exit right */
+		render_tile(ctx, TILE_LINE, 0);
 		break;
 
 	case 'i': /* entry from left */
-		render_tile(ctx, TILE_TR, 0); /* exit down */
+		render_tile(ctx, TILE_TR, -1); /* exit down */
 		ctx->x -= 1;
 		render_tile(ctx, TILE_LINE, -1);
 		break;
 
 	case 'l': /* entry from left and top */
-		render_tile(ctx, TILE_LINE, 0);
+		render_tile(ctx, TILE_BL, -1); /* entry from top, exit right */
 		ctx->x -= 1;
-		render_tile(ctx, TILE_BL, 0); /* entry from top, exit right */
+		render_tile(ctx, TILE_LINE, 0);
 		break;
 
 	case 'k': /* entry from left */
 		render_tile(ctx, TILE_LINE, -1);
 		ctx->x -= 1;
-		render_tile(ctx, TILE_BR, -1); /* exit up */
+		render_tile(ctx, TILE_BR, 0); /* exit up */
 		break;
 
 	case 'f': /* entry from left */
@@ -297,7 +293,6 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 		break;
 
 	default:
-		svg_text(ctx, "%c", a[rhs]);
 		ctx->x += 1;
 		break;
 	}
@@ -327,31 +322,31 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 	case 'a': /* entry from left and top */
 		render_tile(ctx, TILE_LINE, 0);
 		ctx->x -= 1;
-		render_tile(ctx, TILE_BL, 0); /* entry from top, exit right */
+		render_tile(ctx, TILE_BL, -1); /* entry from top, exit right */
 		break;
 
 	case 'd': /* entry from left */
 		render_tile(ctx, TILE_LINE, 0);
 		ctx->x -= 1;
-		render_tile(ctx, TILE_TR, 1); /* exit down */
+		render_tile(ctx, TILE_TR, 0); /* exit down */
 		break;
 
 	case 'c': /* entry from left and bottom */
 		render_tile(ctx, TILE_LINE, 0);
 		ctx->x -= 1;
-		render_tile(ctx, TILE_TL, 0); /* entry from bottom, exit right */
+		render_tile(ctx, TILE_TL, 1); /* entry from bottom, exit right */
 		break;
 
 	case 'b': /* entry from left */
-		render_tile(ctx, TILE_BR, -1); /* exit up */
+		render_tile(ctx, TILE_BR, 0); /* exit up */
 		ctx->x -= 1;
 		render_tile(ctx, TILE_LINE, 0);
 		break;
 
 	case 'f': /* entry from left */
-		render_tile(ctx, TILE_BR, -1); /* exit up */
+		render_tile(ctx, TILE_BR, 0); /* exit up */
 		ctx->x -= 1;
-		render_tile(ctx, TILE_TR, 1); /* exit down */
+		render_tile(ctx, TILE_TR, 0); /* exit down */
 		ctx->x -= 1;
 		render_tile(ctx, TILE_LINE, 0);
 		break;
@@ -359,9 +354,9 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 	case 'e': /* entry from left, top, bottom */
 		render_tile(ctx, TILE_LINE, 0);
 		ctx->x -= 1;
-		render_tile(ctx, TILE_BL, 0); /* entry from top, exit right */
+		render_tile(ctx, TILE_TL, 1); /* entry from bottom, exit right */
 		ctx->x -= 1;
-		render_tile(ctx, TILE_TL, 0); /* entry from bottom, exit right */
+		render_tile(ctx, TILE_BL, -1); /* entry from top, exit right */
 		break;
 
 	case 'j': /* entry from left and bottom */
