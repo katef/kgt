@@ -220,9 +220,30 @@ render_tile(struct render_context *ctx, enum tile tile)
 }
 
 static void
+render_tile_bm(struct render_context *ctx, unsigned u)
+{
+	unsigned v;
+
+	if (u == 0) {
+		/* nothing to draw */
+		ctx->x += 1;
+		return;
+	}
+
+	for (v = u; v != 0; v &= v - 1) {
+		render_tile(ctx, v & -v);
+
+		if ((v & v - 1) != 0) {
+			ctx->x -= 1;
+		}
+	}
+}
+
+static void
 render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 {
 	const char *a;
+	unsigned u;
 
 	assert(ctx != NULL);
 
@@ -244,92 +265,37 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 
 	/* XXX: cheesy */
 	switch (a[rhs]) {
-	case ',': /* / top left */
-		render_tile(ctx, TILE_TL_P1);
-		break;
-
-	case '.': /* \ top right */
-		render_tile(ctx, TILE_TR_N1);
-		break;
-
-	case '`': /* \ bottom left */
-		render_tile(ctx, TILE_BL_N1);
-		break;
-
-	case '\'': /* / bottom right */
-		render_tile(ctx, TILE_BR_N1);
-		break;
-
-	case 'h': /* entry from left and top */
-		render_tile(ctx, TILE_BL_N1); /* exit right */
-		break;
-
-	case 'g': /* entry from left */
-		render_tile(ctx, TILE_BR_N1); /* exit up */
-		break;
-
-	case 'a': /* entry from left and top */
-		render_tile(ctx, TILE_LINE_N1);
-		break;
-
-	case 'd': /* entry from left */
-		render_tile(ctx, TILE_LINE);
-		break;
-
-	case 'c': /* entry from left and bottom */
-		render_tile(ctx, TILE_LINE_N1);
-		break;
-
-	case 'b': /* entry from left */
-		render_tile(ctx, TILE_LINE);
-		break;
-
-	case 'j': /* entry from left and bottom */
-		render_tile(ctx, TILE_LINE);
-		ctx->x -= 1;
-		render_tile(ctx, TILE_TL_P1); /* entry from bottom, exit right */
-		break;
-
-	case 'i': /* entry from left */
-		render_tile(ctx, TILE_LINE_N1);
-		ctx->x -= 1;
-		render_tile(ctx, TILE_TR_N1); /* exit down */
-		break;
-
-	case 'l': /* entry from left and top */
-		render_tile(ctx, TILE_LINE);
-		ctx->x -= 1;
-		render_tile(ctx, TILE_BL_N1); /* entry from top, exit right */
-		break;
-
-	case 'k': /* entry from left */
-		render_tile(ctx, TILE_LINE_N1);
-		ctx->x -= 1;
-		render_tile(ctx, TILE_BR_N1); /* exit up */
-		break;
-
-	case 'f': /* entry from left */
-		render_tile(ctx, TILE_LINE);
-		break;
-
-	case 'e': /* entry from left, top, bottom */
-		render_tile(ctx, TILE_LINE_N1);
-		break;
-
-	case '|': /* nothing to draw */
-		ctx->x += 1;
-		break;
+	case ',': u = TILE_TL_P1; break;
+	case '.': u = TILE_TR_N1; break;
+	case '`': u = TILE_BL_N1; break;
+	case '\'': u = TILE_BR_N1; break;
+	case 'h': u = TILE_BL_N1; break;
+	case 'g': u = TILE_BR_N1; break;
+	case 'a': u = TILE_LINE_N1; break;
+	case 'd': u = TILE_LINE; break;
+	case 'c': u = TILE_LINE_N1; break;
+	case 'b': u = TILE_LINE; break;
+	case 'j': u = TILE_LINE | TILE_TL_P1; break;
+	case 'i': u = TILE_LINE_N1 | TILE_TR_N1; break;
+	case 'l': u = TILE_LINE | TILE_BL_N1; break;
+	case 'k': u = TILE_LINE_N1 | TILE_BR_N1; break;
+	case 'f': u = TILE_LINE; break;
+	case 'e': u = TILE_LINE_N1; break;
+	case '|': u = 0; break;
 
 	default:
-		ctx->x += 1;
+		u = 0;
 		break;
 	}
+
+	render_tile_bm(ctx, u);
 }
 
 static void
 render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 {
 	const char *a;
+	unsigned u;
 
 	assert(ctx != NULL);
 
@@ -347,66 +313,23 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 
 	/* XXX: cheesy */
 	switch (a[rhs]) {
-	case 'a': /* entry from left and top */
-		render_tile(ctx, TILE_LINE_N1);
-		ctx->x -= 1;
-		render_tile(ctx, TILE_BL_N2); /* entry from top, exit right */
-		break;
+	case 'a': u = TILE_LINE_N1 | TILE_BL_N2; break;
+	case 'd': u = TILE_LINE | TILE_TR; break;
+	case 'c': u = TILE_LINE_N1 | TILE_TL; break;
+	case 'b': u = TILE_LINE | TILE_BR; break;
+	case 'f': u = TILE_LINE | TILE_BR | TILE_TR; break;
+	case 'e': u = TILE_LINE_N1 | TILE_BL_N2 | TILE_TL; break;
+	case 'j': u = TILE_LINE; break;
+	case 'l': u = TILE_LINE; break;
+	case 'k': u = TILE_LINE_N1; break;
+	case 'i': u = TILE_LINE_N1; break;
 
-	case 'd': /* entry from left */
-		render_tile(ctx, TILE_LINE);
-		ctx->x -= 1;
-		render_tile(ctx, TILE_TR); /* exit down */
-		break;
-
-	case 'c': /* entry from left and bottom */
-		render_tile(ctx, TILE_LINE_N1);
-		ctx->x -= 1;
-		render_tile(ctx, TILE_TL); /* entry from bottom, exit right */
-		break;
-
-	case 'b': /* entry from left */
-		render_tile(ctx, TILE_LINE);
-		ctx->x -= 1;
-		render_tile(ctx, TILE_BR); /* exit up */
-		break;
-
-	case 'f': /* entry from left */
-		render_tile(ctx, TILE_LINE);
-		ctx->x -= 1;
-		render_tile(ctx, TILE_BR); /* exit up */
-		ctx->x -= 1;
-		render_tile(ctx, TILE_TR); /* exit down */
-		break;
-
-	case 'e': /* entry from left, top, bottom */
-		render_tile(ctx, TILE_LINE_N1);
-		ctx->x -= 1;
-		render_tile(ctx, TILE_BL_N2); /* entry from top, exit right */
-		ctx->x -= 1;
-		render_tile(ctx, TILE_TL); /* entry from bottom, exit right */
-		break;
-
-	case 'j': /* entry from left and bottom */
-		render_tile(ctx, TILE_LINE);
-		break;
-
-	case 'l': /* entry from left and top */
-		render_tile(ctx, TILE_LINE);
-		break;
-
-	case 'k': /* entry from left */
-		render_tile(ctx, TILE_LINE_N1);
-		break;
-
-	case 'i': /* entry from left */
-		render_tile(ctx, TILE_LINE_N1);
-		break;
-
-	default: /* nothing to draw */
-		ctx->x += 1;
+	default:
+		u = 0;
 		break;
 	}
+
+	render_tile_bm(ctx, u);
 }
 
 static void
