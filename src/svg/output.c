@@ -158,12 +158,9 @@ enum tile {
 	TILE_LINE = 1 << 4, /* horizontal line */
 
 	TILE_BL_N1 = 1 << 5,
-	TILE_BL_N2 = 1 << 6,
-	TILE_BR_N1 = 1 << 7,
-	TILE_TL_P1 = 1 << 8,
-	TILE_TR_N1 = 1 << 9,
-
-	TILE_LINE_N1 = 1 << 10
+	TILE_BR_N1 = 1 << 6,
+	TILE_TL_P1 = 1 << 7,
+	TILE_TR_N1 = 1 << 8
 };
 
 static void
@@ -174,13 +171,11 @@ render_tile(struct render_context *ctx, enum tile tile)
 
 	switch (tile) {
 	case TILE_BL_N1: tile = TILE_BL; dy = -1; break;
-	case TILE_BL_N2: tile = TILE_BL; dy = -2; break;
 	case TILE_BR_N1: tile = TILE_BR; dy = -1; break;
 	case TILE_TL_P1: tile = TILE_TL; dy =  1; break;
 	case TILE_TR_N1: tile = TILE_TR; dy = -1; break;
 
-	case TILE_LINE_N1: tile = TILE_LINE; dy = -1; break;
-
+	/* TODO: make TILE_TL -1 by default */
 	case TILE_TL:
 	case TILE_BR:
 	case TILE_TR:
@@ -247,16 +242,16 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 	assert(ctx != NULL);
 
 	switch (tline) {
-	case TLINE_A: u[0] = TILE_LINE;  u[1] = TILE_LINE_N1; break;
-	case TLINE_B: u[0] = TILE_TL_P1; u[1] = TILE_TR_N1;   break;
-	case TLINE_C: u[0] = TILE_LINE;  u[1] = TILE_LINE_N1; break;
-	case TLINE_D: u[0] = TILE_LINE;  u[1] = TILE_LINE_N1; break;
-	case TLINE_E: u[0] = TILE_BL_N1; u[1] = TILE_BR_N1;   break;
-	case TLINE_F: u[0] = 0;          u[1] = 0;            break;
-	case TLINE_G: u[0] = TILE_BL_N1; u[1] = TILE_BR_N1;   break;
+	case TLINE_A: u[0] = TILE_LINE;  u[1] = TILE_LINE; break;
+	case TLINE_B: u[0] = TILE_TL_P1; u[1] = TILE_TR;   break;
+	case TLINE_C: u[0] = TILE_LINE;  u[1] = TILE_LINE; break;
+	case TLINE_D: u[0] = TILE_LINE;  u[1] = TILE_LINE; break;
+	case TLINE_E: u[0] = TILE_BL_N1; u[1] = TILE_BR;   break;
+	case TLINE_F: u[0] = 0;          u[1] = 0;         break;
+	case TLINE_G: u[0] = TILE_BL_N1; u[1] = TILE_BR;   break;
 
-	case TLINE_H: u[0] = TILE_LINE | TILE_TL_P1; u[1] = TILE_LINE_N1 | TILE_TR_N1; break;
-	case TLINE_I: u[0] = TILE_LINE | TILE_BL_N1; u[1] = TILE_LINE_N1 | TILE_BR_N1; break;
+	case TLINE_H: u[0] = TILE_LINE | TILE_TL_P1; u[1] = TILE_LINE | TILE_TR; break;
+	case TLINE_I: u[0] = TILE_LINE | TILE_BL_N1; u[1] = TILE_LINE | TILE_BR; break;
 
 	default: u[0] = 0; u[1] = 0; break;
 	}
@@ -272,11 +267,11 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 	assert(ctx != NULL);
 
 	switch (tline) {
-	case TLINE_A: u[0] = TILE_LINE | TILE_BR; u[1] = TILE_LINE_N1 | TILE_BL_N2; break;
-	case TLINE_C: u[0] = TILE_LINE | TILE_TR; u[1] = TILE_LINE_N1 | TILE_TL; break;
-	case TLINE_D: u[0] = TILE_LINE | TILE_BR | TILE_TR; u[1] = TILE_LINE_N1 | TILE_BL_N2 | TILE_TL; break;
-	case TLINE_H: u[0] = TILE_LINE;           u[1] = TILE_LINE_N1; break;
-	case TLINE_I: u[0] = TILE_LINE;           u[1] = TILE_LINE_N1; break;
+	case TLINE_A: u[0] = TILE_LINE | TILE_BR; u[1] = TILE_LINE | TILE_BL_N1; break;
+	case TLINE_C: u[0] = TILE_LINE | TILE_TR; u[1] = TILE_LINE | TILE_TL_P1; break;
+	case TLINE_D: u[0] = TILE_LINE | TILE_BR | TILE_TR; u[1] = TILE_LINE | TILE_BL_N1 | TILE_TL_P1; break;
+	case TLINE_H: u[0] = TILE_LINE;           u[1] = TILE_LINE; break;
+	case TLINE_I: u[0] = TILE_LINE;           u[1] = TILE_LINE; break;
 
 	default: u[0] = 0; u[1] = 0; break;
 	}
@@ -312,8 +307,10 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 
 		justify(ctx, n->u.alt.a[j], n->w - 4);
 
+		ctx->y -= 1;
 		render_tline_inner(ctx, n->u.alt.b[j], 1);
 		render_tline_outer(ctx, n->u.alt.b[j], 1);
+		ctx->y += 1;
 
 		if (j + 1 < n->u.alt.n) {
 			ctx->y += n->u.alt.a[j]->d + n->u.alt.a[j + 1]->a;
