@@ -430,7 +430,6 @@ static void
 render_rule(const struct tnode *node)
 {
 	struct render_context ctx;
-	const struct path *p;
 	unsigned w;
 
 	w = node->w + 8;
@@ -451,22 +450,36 @@ render_rule(const struct tnode *node)
 	ctx.y = node->a;
 	node_walk_render(node, &ctx);
 
-	for (p = ctx.paths; p != NULL; p = p->next) {
-		/* TODO: consolidate path segments */
-		switch (p->type) {
-		case PATH_H:
-			printf("    <path d='M%u0 %u0 h%d0'/>\n",
-				p->x, p->y, p->u.n);
-			break;
+	/*
+	 * We consolidate on-the-fly to render a single path segment for a
+	 * individual path items which connect in a sequence. This is just
+	 * an effort to produce tidy markup.
+	 */
 
-		case PATH_V:
-			printf("    <path d='M%u0 %u0 v%d0'/>\n",
-				p->x, p->y, p->u.n);
-			break;
-		}
+	while (ctx.paths != NULL) {
+		struct path *p;
+
+		p = svg_path_find_start(ctx.paths);
+
+		printf("    <path d='M%u0 %u0", p->x, p->y);
+
+		do {
+			unsigned nx, ny;
+
+			switch (p->type) {
+			case PATH_H: printf(" h%d0", p->u.n); break;
+			case PATH_V: printf(" v%d0", p->u.n); break;
+			}
+
+			svg_path_move(p, &nx, &ny);
+
+			svg_path_remove(&ctx.paths, p);
+
+			p = svg_path_find_following(ctx.paths, nx, ny);
+		} while (p != NULL);
+
+		printf("'/>\n");
 	}
-
-	svg_path_free(ctx.paths);
 }
 
 static void
