@@ -118,8 +118,14 @@ svg_arrow(struct render_context *ctx, int w, int h,
 static void
 justify(struct render_context *ctx, const struct tnode *n, int space)
 {
-	unsigned lhs = (space - n->w) / 2;
-	unsigned rhs = (space - n->w) - lhs;
+	unsigned lhs, rhs;
+
+	if (n->type == TNODE_ARROW) {
+		((struct tnode *) n)->w = space; /* XXX: hacky */
+	}
+
+	lhs = (space - n->w) / 2;
+	rhs = (space - n->w) - lhs;
 
 	if (n->type != TNODE_ELLIPSIS) {
 		svg_path_h(&ctx->paths, ctx->x, ctx->y, lhs);
@@ -380,7 +386,9 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_ARROW:
-		svg_text(ctx, "%s", n->rtl ? "&lt;" : "&gt;");
+		printf("    <path d='M%u0 %u0 h%.1f H%u0' class='arrow %s'/>\n",
+			ctx->x, ctx->y, (float) n->w / 0.2, ctx->x + n->w,
+			n->rtl ? "rtl" : "ltr");
 		ctx->x += n->w;
 		break;
 
@@ -549,6 +557,8 @@ svg_output(const struct ast_rule *grammar)
 	printf("    rect, line, path { stroke-width: 1.5px; stroke: black; }\n");
 	printf("    path { fill: transparent; }\n");
 	printf("    line.ellipsis { stroke-dasharray: 4; }\n");
+	printf("    path.arrow.rtl { marker-mid: url(#rrd:arrow-rtl); }\n");
+	printf("    path.arrow.ltr { marker-mid: url(#rrd:arrow-ltr); }\n");
 	printf("  </style>\n");
 	printf("\n");
 
@@ -557,17 +567,23 @@ svg_output(const struct ast_rule *grammar)
 	printf("        markerWidth='10' markerHeight='12'\n");
 	printf("        markerUnits='userSpaceOnUse'\n");
 	printf("        refX='7' refY='6'\n");
-	printf("        orient='auto'>\n");
+	printf("        orient='auto'>\n"); /* TODO: auto-start-reverse in SVG2 */
 	printf("      <line x1='7' y1='0' x2='7' y2='12' class='arrow'/>\n");
 	printf("      <line x1='2' y1='0' x2='2' y2='12' class='arrow'/>\n");
 	printf("    </marker>\n");
 	printf("\n");
-	printf("    <marker id='rrd:arrow'\n");
-	printf("        markerWidth='8' markerHeight='8'\n");
-	printf("        markerUnits='userSpaceOnUse'\n");
-	printf("        refX='8' refY='4'\n");
+
+	printf("    <marker id='rrd:arrow-ltr'\n");
+	printf("        markerWidth='5' markerHeight='5'\n");
+	printf("        refX='3' refY='2.5'\n");
 	printf("        orient='auto'>\n");
-	printf("      <polyline points='0,0 8,4 0,8' class='arrow'/>\n");
+	printf("      <polyline points='0,0 5,2.5 0,5' class='arrow'/>\n");
+	printf("    </marker>\n");
+	printf("    <marker id='rrd:arrow-rtl'\n");
+	printf("        markerWidth='5' markerHeight='5'\n");
+	printf("        refX='3' refY='2.5'\n");
+	printf("        orient='auto'>\n");
+	printf("      <polyline points='5,0 0,2.5 5,5' class='arrow'/>\n");
 	printf("    </marker>\n");
 	printf("  </defs>\n");
 	printf("\n");
