@@ -399,23 +399,23 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 
 	case TNODE_CI_LITERAL:
 		/* TODO: render differently somehow, show /i suffix, maybe as a triangle in bottom-right corner */
-		svg_textbox(ctx, n->u.literal, n->w, 0);
+		svg_textbox(ctx, n->u.literal, n->w, 8);
 		svg_text(ctx, "/i");
 		break;
 
 	case TNODE_CS_LITERAL:
 		/* TODO: square box, fill grey */
-		svg_textbox(ctx, n->u.literal, n->w, 0);
+		svg_textbox(ctx, n->u.literal, n->w, 8);
 		break;
 
 	case TNODE_LABEL:
 		/* TODO: no border, just text */
-		svg_textbox(ctx, n->u.label, n->w, 8);
+		svg_textbox(ctx, n->u.label, n->w, 0);
 		break;
 
 	case TNODE_RULE:
 		/* TODO: rounded box */
-		svg_textbox(ctx, n->u.name, n->w, 8);
+		svg_textbox(ctx, n->u.name, n->w, 0);
 		break;
 
 	case TNODE_ALT:
