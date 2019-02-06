@@ -376,10 +376,11 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 	switch (n->type) {
 	case TNODE_SKIP:
 		/* TODO: skips under loop alts are too close to the line */
-		/* TODO: midpoint arrow */
-		if (n->w > 0) {
-			svg_text(ctx, "%s", n->rtl ? "&lt;" : "&gt;");
-		}
+		ctx->x += n->w;
+		break;
+
+	case TNODE_ARROW:
+		svg_text(ctx, "%s", n->rtl ? "&lt;" : "&gt;");
 		ctx->x += n->w;
 		break;
 

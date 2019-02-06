@@ -202,6 +202,9 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 
 	switch (n->type) {
 	case TNODE_SKIP:
+		break;
+
+	case TNODE_ARROW:
 		bprintf(ctx, "%.*s", (int) n->w, n->rtl ? "<" : ">");
 		break;
 

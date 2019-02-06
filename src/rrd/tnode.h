@@ -35,6 +35,7 @@ struct tlist_seq {
 struct tnode {
 	enum {
 		TNODE_SKIP,
+		TNODE_ARROW,
 		TNODE_ELLIPSIS,
 		TNODE_CI_LITERAL,
 		TNODE_CS_LITERAL,
