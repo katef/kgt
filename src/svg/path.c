@@ -162,3 +162,55 @@ svg_path_remove(struct path **paths, struct path *n)
 	}
 }
 
+static void
+svg_path_merge(struct path **paths, struct path *p, struct path *q)
+{
+	assert(paths != NULL);
+	assert(p != NULL);
+	assert(q != NULL);
+	assert(p->type == q->type);
+
+	switch (p->type) {
+	case PATH_H: p->u.n += q->u.n; break;
+	case PATH_V: p->u.n += q->u.n; break;
+	}
+
+	svg_path_remove(paths, q);
+}
+
+void
+svg_path_consolidate(struct path **paths)
+{
+	struct path *p, *q;
+
+	assert(paths != NULL);
+
+	for (p = *paths; p != NULL; p = p->next) {
+		unsigned nx, ny;
+
+		svg_path_move(p, &nx, &ny);
+
+		q = *paths;
+
+		while (q = svg_path_find_following(q, nx, ny), q != NULL) {
+			assert(q != p); /* self-loop */
+
+			if (q->type != p->type) {
+				/*
+				 * Search onwards from q->next, so as to not re-visit
+				 * differently-typed nodes (which remain in the list)
+				 */
+				q = q->next;
+				continue;
+			}
+
+			svg_path_merge(paths, p, q);
+
+			svg_path_move(p, &nx, &ny);
+
+			/* back to the start, because nx, ny differ now */
+			q = *paths;
+		}
+	}
+}
+

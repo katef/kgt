@@ -46,4 +46,7 @@ svg_path_find_start(struct path *paths);
 void
 svg_path_remove(struct path **paths, struct path *n);
 
+void
+svg_path_consolidate(struct path **paths);
+
 #endif

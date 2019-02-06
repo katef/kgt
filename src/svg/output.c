@@ -451,9 +451,14 @@ render_rule(const struct tnode *node)
 	node_walk_render(node, &ctx);
 
 	/*
-	 * We consolidate on-the-fly to render a single path segment for a
-	 * individual path items which connect in a sequence. This is just
-	 * an effort to produce tidy markup.
+	 * Consolidate adjacent nodes of the same type.
+	 */
+	svg_path_consolidate(&ctx.paths);
+
+	/*
+	 * Next we consolidate on-the-fly to render a single path segment
+	 * for a individual path with differently-typed items which connect
+	 * in a sequence. This is just an effort to produce tidy markup.
 	 */
 
 	while (ctx.paths != NULL) {
