@@ -191,22 +191,15 @@ render_tile(struct render_context *ctx, enum tile tile)
 	case TILE_TR: y =  1; rx = 1; ry = 0; break;
 
 	case TILE_LINE:
-		ctx->y += dy;
-		svg_path_h(&ctx->paths, ctx->x, ctx->y, 1);
+		svg_path_h(&ctx->paths, ctx->x, ctx->y + dy, 1);
 		ctx->x += 1;
-		ctx->y -= dy;
 		return;
 
 	default:
 		assert(!"unreached");
 	}
 
-	ctx->y += dy;
-
-	printf("    <path d='M%u0 %u0 q %d0 %d0 %d0 %d0'/>\n",
-		ctx->x, ctx->y, rx, ry, 1, y);
-
-	ctx->y -= dy;
+	svg_path_q(&ctx->paths, ctx->x, ctx->y + dy, rx, ry, 1, y);
 	ctx->x += 1;
 }
 
@@ -474,6 +467,7 @@ render_rule(const struct tnode *node)
 			switch (p->type) {
 			case PATH_H: printf(" h%d0", p->u.n); break;
 			case PATH_V: printf(" v%d0", p->u.n); break;
+			case PATH_Q: printf(" q%d0 %d0 %d0 %d0", p->u.q[0], p->u.q[1], p->u.q[2], p->u.q[3]); break;
 			}
 
 			svg_path_move(p, &nx, &ny);

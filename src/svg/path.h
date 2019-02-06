@@ -9,7 +9,8 @@
 
 enum path_type {
 	PATH_H, /* horizontal */
-	PATH_V  /* vertical */
+	PATH_V, /* vertical */
+	PATH_Q  /* quadratic */
 };
 
 struct path {
@@ -20,6 +21,7 @@ struct path {
 
 	union {
 		int n;
+		int q[4];
 	} u;
 
 	struct path *next;
@@ -30,6 +32,9 @@ svg_path_h(struct path **paths, unsigned x, unsigned y, int n);
 
 void
 svg_path_v(struct path **paths, unsigned x, unsigned y, int n);
+
+void
+svg_path_q(struct path **paths, unsigned x, unsigned y, int rx, int ry, int mx, int my);
 
 void
 svg_path_move(struct path *n, unsigned *x, unsigned *y);

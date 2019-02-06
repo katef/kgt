@@ -50,6 +50,28 @@ svg_path_v(struct path **paths, unsigned x, unsigned y, int n)
 }
 
 void
+svg_path_q(struct path **paths, unsigned x, unsigned y, int rx, int ry, int mx, int my)
+{
+	struct path *new;
+
+	assert(paths != NULL);
+/* TODO: assert n != 0 */
+
+	new = xmalloc(sizeof *new);
+
+	new->type = PATH_Q;
+	new->x = x;
+	new->y = y;
+	new->u.q[0] = rx;
+	new->u.q[1] = ry;
+	new->u.q[2] = mx;
+	new->u.q[3] = my;
+
+	new->next = *paths;
+	*paths = new;
+}
+
+void
 svg_path_move(struct path *n, unsigned *x, unsigned *y)
 {
 	assert(n != NULL);
@@ -66,6 +88,11 @@ svg_path_move(struct path *n, unsigned *x, unsigned *y)
 
 	case PATH_V:
 		*y += n->u.n;
+		break;
+
+	case PATH_Q:
+		*x += n->u.q[2];
+		*y += n->u.q[3];
 		break;
 	}
 }
@@ -169,10 +196,14 @@ svg_path_merge(struct path **paths, struct path *p, struct path *q)
 	assert(p != NULL);
 	assert(q != NULL);
 	assert(p->type == q->type);
+	assert(p->type != PATH_Q); /* overkill to merge these */
 
 	switch (p->type) {
 	case PATH_H: p->u.n += q->u.n; break;
 	case PATH_V: p->u.n += q->u.n; break;
+
+	default:
+		assert(!"unreached");
 	}
 
 	svg_path_remove(paths, q);
@@ -188,12 +219,21 @@ svg_path_consolidate(struct path **paths)
 	for (p = *paths; p != NULL; p = p->next) {
 		unsigned nx, ny;
 
+		if (p->type == PATH_Q) {
+			/* not implemented */
+			continue;
+		}
+
 		svg_path_move(p, &nx, &ny);
 
 		q = *paths;
 
 		while (q = svg_path_find_following(q, nx, ny), q != NULL) {
-			assert(q != p); /* self-loop */
+			/* XXX: can happen when n=0 */
+			if (p == q) {
+				q = q->next;
+				continue;
+			}
 
 			if (q->type != p->type) {
 				/*
