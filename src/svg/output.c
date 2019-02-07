@@ -83,10 +83,16 @@ svg_text(struct render_context *ctx, const char *s)
 static void
 svg_rect(struct render_context *ctx, unsigned w, unsigned r)
 {
-	printf("    <rect x='%d0' y='%d0' height='%u0' width='%u0' rx='%u' ry='%u' stroke='black' fill='transparent'/>\n", /* XXX: css */
+	printf("    <rect x='%d0' y='%d0' height='%u0' width='%u0' rx='%u' ry='%u'",
 		(int) ctx->x, (int) ctx->y - 1,
 		2, w,
 		r, r);
+
+	if (r > 0) {
+		printf(" class='rounded'");
+	}
+
+	printf("/>\n");
 }
 
 static void
@@ -418,14 +424,12 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_CI_LITERAL:
-		/* TODO: render differently somehow, show /i suffix, maybe as a triangle in bottom-right corner */
 		svg_textbox(ctx, n->u.literal, n->w, 8);
 		printf("    <text x='%u5' y='%u5' text-anchor='left' class='ci'>%s</text>\n",
 			ctx->x - 2, ctx->y, "&#x29f8;i");
 		break;
 
 	case TNODE_CS_LITERAL:
-		/* TODO: square box, fill grey */
 		svg_textbox(ctx, n->u.literal, n->w, 8);
 		break;
 
@@ -435,7 +439,6 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_RULE:
-		/* TODO: rounded box */
 		svg_textbox(ctx, n->u.name, n->w, 0);
 		break;
 
@@ -575,7 +578,7 @@ svg_output(const struct ast_rule *grammar)
 	printf("\n");
 
 	printf("  <style>\n");
-	printf("    rect, line, path { stroke-width: 1.5px; stroke: black; }\n");
+	printf("    rect, line, path { stroke-width: 1.5px; stroke: black; fill: transparent; }\n");
 	printf("    path { fill: transparent; }\n");
 	printf("    line.ellipsis { stroke-dasharray: 4; }\n");
 	printf("    path.arrow.rtl { marker-mid: url(#rrd:arrow-rtl); }\n");
