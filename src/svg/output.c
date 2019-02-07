@@ -140,24 +140,6 @@ svg_ellipsis(struct render_context *ctx, int w, int h)
 }
 
 static void
-svg_arrow(struct render_context *ctx, int w, int h,
-	const char *marker_start, const char *marker_mid, const char *marker_end)
-{
-	/* TODO: <path> is neater anyway, never use <line> */
-	printf("    <line x1='%u0' y1='%u0' x2='%d0' y2='%u0'",
-		ctx->x, ctx->y,
-		(int) ctx->x + w, ctx->y + h);
-
-	if (marker_start != NULL) { printf(" marker-start='url(%s)'", marker_start); }
-	if (marker_mid   != NULL) { printf(" marker-mid='url(%s)'",   marker_mid);   }
-	if (marker_end   != NULL) { printf(" marker-end='url(%s)'",   marker_end);   }
-
-	printf("/>\n");
-
-	ctx->x += w;
-}
-
-static void
 justify(struct render_context *ctx, const struct tnode *n, int space)
 {
 	unsigned lhs, rhs;
@@ -475,17 +457,17 @@ render_rule(const struct tnode *node)
 
 	w = node->w + 8;
 
-	ctx.x = 0;
-	ctx.y = 0;
-
 	ctx.paths = NULL;
 
+	ctx.x = 0;
 	ctx.y = node->a;
-	svg_arrow(&ctx,  2, 0, "#rrd:start", NULL, NULL);
+	printf("    <path d='M%u0 %u0 h%d0' marker-start='url(%s)'/>\n",
+		ctx.x, ctx.y, 2, "#rrd:start");
 
 	/* TODO: do want this pointing the other way around, to join with the adjacent path */
 	ctx.x = w - 4;
-	svg_arrow(&ctx, -2, 0, "#rrd:start", NULL, NULL);
+	printf("    <path d='M%u0 %u0 h%d0' marker-start='url(%s)'/>\n",
+		ctx.x, ctx.y, -2, "#rrd:start");
 
 	ctx.x = 2;
 	ctx.y = node->a;
