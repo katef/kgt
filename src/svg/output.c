@@ -527,23 +527,50 @@ dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 	/* estimate at proportional width */
 
 	for (p = s; *p != '\0'; p++) {
-		switch (*p) {
-		case 'i': case 'I':
+		switch (tolower((unsigned char) *p)) {
+		case '|':
+			n += 0.3;
+			break;
+
+		case 't':
+			n += 0.45;
+			break;
+
+		case 'f':
+		case 'i':
 		case 'j':
 		case 'l':
-		case '1':
-		case '|':
+			n += 0.5;
+			break;
+
+		case '(': case ')':
+		case 'I':
+			n += 0.55;
+			break;
+
+		case ' ':
 			n += 0.6;
 			break;
 
-		case 'm': case 'M':
-		case 'w': case 'W':
-			n += 1.3;
+		case 'm':
+			n += 1.25;
+			break;
+
+		case 'w':
+			n += 1.2;
+			break;
+
+		case '1':
+			n += 0.75;
 			break;
 
 		default:
-			n += 1.0;
+			n += 0.8;
 			break;
+		}
+
+		if (isupper((unsigned char) *p)) {
+			n += 0.25;
 		}
 	}
 
