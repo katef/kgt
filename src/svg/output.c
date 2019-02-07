@@ -110,6 +110,22 @@ svg_textbox(struct render_context *ctx, const char *s, unsigned w, unsigned r)
 }
 
 static void
+svg_label(struct render_context *ctx, const char *s, unsigned w)
+{
+	unsigned x;
+
+	assert(ctx != NULL);
+	assert(s != NULL);
+
+	x = ctx->x;
+
+	ctx->x += w / 2; /* XXX: either i want floats, or to scale things */
+	svg_text(ctx, s);
+
+	ctx->x = x + w;
+}
+
+static void
 svg_ellipsis(struct render_context *ctx, int w, int h)
 {
 	ctx->x += 1;
@@ -434,8 +450,7 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_LABEL:
-		/* TODO: no border, just text */
-		svg_textbox(ctx, n->u.label, n->w, 0);
+		svg_label(ctx, n->u.label, n->w);
 		break;
 
 	case TNODE_RULE:
