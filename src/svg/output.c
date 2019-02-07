@@ -15,7 +15,6 @@
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
-#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -42,20 +41,41 @@ struct render_context {
 
 static void node_walk_render(const struct tnode *n, struct render_context *ctx);
 
-static void
-svg_text(struct render_context *ctx, const char *fmt, ...)
+int
+xml_escputc(FILE *f, char c)
 {
-	va_list ap;
+	assert(f != NULL);
+
+	switch (c) {
+	case '&': return fputs("&amp;", f);
+	case '<': return fputs("&lt;", f);
+	case '>': return fputs("&gt;", f);
+
+	default:
+		break;
+	}
+
+	if (!isprint((unsigned char) c)) {
+		return fprintf(f, "&#x%02x;", (unsigned char) c);
+	}
+
+	return fprintf(f, "%c", c);
+}
+
+static void
+svg_text(struct render_context *ctx, const char *s)
+{
+	const char *p;
 
 	assert(ctx != NULL);
+	assert(s != NULL);
 
 	printf("    <text x='%u0' y='%u5' text-anchor='middle'>",
 		ctx->x, ctx->y);
 
-	/* TODO: escape characters */
-	va_start(ap, fmt);
-	vprintf(fmt, ap);
-	va_end(ap);
+	for (p = s; *p != '\0'; p++) {
+		xml_escputc(stdout, *p);
+	}
 
 	printf("</text>\n");
 }
@@ -78,7 +98,7 @@ svg_textbox(struct render_context *ctx, const char *s, unsigned w, unsigned r)
 
 	svg_rect(ctx, w, r);
 	ctx->x += w / 2; /* XXX: either i want floats, or to scale things */
-	svg_text(ctx, "%s", s);
+	svg_text(ctx, s);
 
 	ctx->x = x + w;
 }
