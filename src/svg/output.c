@@ -420,7 +420,8 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 	case TNODE_CI_LITERAL:
 		/* TODO: render differently somehow, show /i suffix, maybe as a triangle in bottom-right corner */
 		svg_textbox(ctx, n->u.literal, n->w, 8);
-		svg_text(ctx, "/i");
+		printf("    <text x='%u5' y='%u5' text-anchor='left' class='ci'>%s</text>\n",
+			ctx->x - 2, ctx->y, "&#x29f8;i");
 		break;
 
 	case TNODE_CS_LITERAL:
