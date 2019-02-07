@@ -590,19 +590,63 @@ void
 svg_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
+	struct tnode **a;
 	unsigned z;
+	unsigned w, h;
+	unsigned i, n;
+
+	n = 0;
+	for (p = grammar; p; p = p->next) {
+		n++;
+	}
+
+	/*
+	 * We store all tnodes for sake of calculating the viewport only;
+	 * it's a shame this needs to be provided ahead of rendering each
+	 * tnode, else we could do that on the fly.
+	 */
+
+	a = xmalloc(sizeof *a * n);
+
+	w = 0;
+	h = 0;
+
+	for (i = 0, p = grammar; p; p = p->next, i++) {
+		struct node *rrd;
+
+		if (!ast_to_rrd(p, &rrd)) {
+			perror("ast_to_rrd");
+			return;
+		}
+
+		if (prettify) {
+			rrd_pretty(&rrd);
+		}
+
+		a[i] = rrd_to_tnode(rrd, dim_string);
+
+		if (a[i]->w > w) {
+			w = a[i]->w;
+		}
+		h += a[i]->a + a[i]->d + 5;
+
+		node_free(rrd);
+	}
+
+	w += 12;
+	h += 5;
 
 	printf("<svg\n");
 	printf("  xmlns='http://www.w3.org/2000/svg'\n");
 	printf("  xmlns:xlink='http://www.w3.org/1999/xlink'\n");
 	printf("\n");
-	printf("  class='figure'\n");
-	printf("  viewBox='-20 -50 900 2600'\n"); /* TODO */
-	printf("  width='900' height='2600'>\n");
+	printf("  viewBox='-20 -50 %u0 %u0'\n", w, h); /* TODO */
+	printf("  width='%u0' height='%u0'>\n", w, h);
 	printf("\n");
 
 	printf("  <style>\n");
 	printf("    rect, line, path { stroke-width: 1.5px; stroke: black; fill: transparent; }\n");
+	printf("    rect, line, path { stroke-linecap: square; stroke-linejoin: rounded; }\n");
 	printf("    path { fill: transparent; }\n");
 	printf("    line.ellipsis { stroke-dasharray: 4; }\n");
 	printf("    path.arrow.rtl { marker-mid: url(#rrd:arrow-rtl); }\n");
@@ -638,37 +682,25 @@ svg_output(const struct ast_rule *grammar)
 
 	z = 0;
 
-	for (p = grammar; p; p = p->next) {
-		struct node *rrd;
-		struct tnode *tnode;
-
-		if (!ast_to_rrd(p, &rrd)) {
-			perror("ast_to_rrd");
-			return;
-		}
-
-		if (prettify) {
-			rrd_pretty(&rrd);
-		}
-
-		tnode = rrd_to_tnode(rrd, dim_string);
-
-		node_free(rrd);
-
+	for (i = 0, p = grammar; p; p = p->next, i++) {
 		printf("  <g transform='translate(%u0 %u0)'>\n",
 			4, z);
 		printf("    <text x='-%u0' y='-%u0'>%s:</text>\n",
 			4, 2, p->name);
 
-		render_rule(tnode);
+		render_rule(a[i]);
 
 		printf("  </g>\n");
 		printf("\n");
 
-z += tnode->a + tnode->d + 4; /* XXX */
-
-		tnode_free(tnode);
+		z += a[i]->a + a[i]->d + 5;
 	}
+
+	for (i = 0, p = grammar; p; p = p->next, i++) {
+		tnode_free(a[i]);
+	}
+
+	free(a);
 
 	printf("</svg>\n");
 }
