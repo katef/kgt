@@ -24,7 +24,8 @@ ${BUILD}/bin/kgt: ${BUILD}/src/xalloc.o
 .for part in ${PART:Mbnf} ${PART:Mblab} ${PART:Mabnf} ${PART:Miso-ebnf} ${PART:Mrbnf} \
 	${PART:Msid} ${PART:Mdot} ${PART:Mwsn} \
 	${PART:Mrrd} ${PART:Mrrdot} ${PART:Mrrdump} ${PART:Mrrtdump} \
-	${PART:Mrrparcon} ${PART:Mrrll} ${PART:Mrrta} ${PART:Mrrtext} ${PART:Msvg}
+	${PART:Mrrparcon} ${PART:Mrrll} ${PART:Mrrta} ${PART:Mrrtext} \
+	${PART:Msvg} ${PART:Mhtml}
 ${BUILD}/bin/kgt: ${BUILD}/lib/${part}.o
 .endfor
 

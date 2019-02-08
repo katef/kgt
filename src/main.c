@@ -34,6 +34,7 @@
 #include "rrta/io.h"
 #include "rrtext/io.h"
 #include "svg/io.h"
+#include "html/io.h"
 
 int prettify = 1;
 int allow_undefined = 1;
@@ -60,7 +61,8 @@ struct io {
 	{ "rrll",     NULL,           rrll_output,     0, rrll_rrd_unsupported     },
 	{ "rrta",     NULL,           rrta_output,     0, rrta_rrd_unsupported     },
 	{ "rrtext",   NULL,           rrtext_output,   0, 0 },
-	{ "svg",      NULL,           svg_output,      0, 0 }
+	{ "svg",      NULL,           svg_output,      0, 0 },
+	{ "html",     NULL,           html_output,     0, 0 }
 };
 
 enum io_dir {

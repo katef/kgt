@@ -39,7 +39,8 @@ struct render_context {
 	struct path *paths;
 };
 
-static void node_walk_render(const struct tnode *n, struct render_context *ctx);
+static void node_walk_render(const struct tnode *n,
+	struct render_context *ctx, const char *base);
 
 int
 xml_escputc(FILE *f, char c)
@@ -63,15 +64,21 @@ xml_escputc(FILE *f, char c)
 }
 
 static void
-svg_text(struct render_context *ctx, const char *s)
+svg_text(struct render_context *ctx, const char *s, const char *class)
 {
 	const char *p;
 
 	assert(ctx != NULL);
 	assert(s != NULL);
 
-	printf("    <text x='%u0' y='%u5' text-anchor='middle'>",
+	printf("    <text x='%u0' y='%u5' text-anchor='middle'",
 		ctx->x, ctx->y);
+
+	if (class != NULL) {
+		printf(" class='%s'", class);
+	}
+
+	printf(">");
 
 	for (p = s; *p != '\0'; p++) {
 		xml_escputc(stdout, *p);
@@ -81,30 +88,32 @@ svg_text(struct render_context *ctx, const char *s)
 }
 
 static void
-svg_rect(struct render_context *ctx, unsigned w, unsigned r)
+svg_rect(struct render_context *ctx, unsigned w, unsigned r,
+	const char *class)
 {
 	printf("    <rect x='%d0' y='%d0' height='%u0' width='%u0' rx='%u' ry='%u'",
 		(int) ctx->x, (int) ctx->y - 1,
 		2, w,
 		r, r);
 
-	if (r > 0) {
-		printf(" class='rounded'");
+	if (class != NULL) {
+		printf(" class='%s'", class);
 	}
 
 	printf("/>\n");
 }
 
 static void
-svg_textbox(struct render_context *ctx, const char *s, unsigned w, unsigned r)
+svg_textbox(struct render_context *ctx, const char *s, unsigned w, unsigned r,
+	const char *class)
 {
 	unsigned x;
 
 	x = ctx->x;
 
-	svg_rect(ctx, w, r);
+	svg_rect(ctx, w, r, class);
 	ctx->x += w / 2; /* XXX: either i want floats, or to scale things */
-	svg_text(ctx, s);
+	svg_text(ctx, s, class);
 
 	ctx->x = x + w;
 }
@@ -120,7 +129,7 @@ svg_label(struct render_context *ctx, const char *s, unsigned w)
 	x = ctx->x;
 
 	ctx->x += w / 2; /* XXX: either i want floats, or to scale things */
-	svg_text(ctx, s);
+	svg_text(ctx, s, "label");
 
 	ctx->x = x + w;
 }
@@ -140,7 +149,8 @@ svg_ellipsis(struct render_context *ctx, int w, int h)
 }
 
 static void
-justify(struct render_context *ctx, const struct tnode *n, int space)
+justify(struct render_context *ctx, const struct tnode *n, int space,
+	const char *base)
 {
 	unsigned lhs, rhs;
 
@@ -156,7 +166,7 @@ justify(struct render_context *ctx, const struct tnode *n, int space)
 	}
 	ctx->x += lhs;
 
-	node_walk_render(n, ctx);
+	node_walk_render(n, ctx, base);
 
 	if (n->type != TNODE_ELLIPSIS) {
 		svg_path_h(&ctx->paths, ctx->x, ctx->y, rhs);
@@ -299,7 +309,8 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 }
 
 static void
-render_alt(const struct tnode *n, struct render_context *ctx)
+render_alt(const struct tnode *n,
+	struct render_context *ctx, const char *base)
 {
 	int x, o, y;
 	size_t j;
@@ -324,7 +335,7 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 		render_tline_outer(ctx, n->u.alt.b[j], 0);
 		render_tline_inner(ctx, n->u.alt.b[j], 0);
 
-		justify(ctx, n->u.alt.a[j], n->w - 4);
+		justify(ctx, n->u.alt.a[j], n->w - 4, base);
 
 		ctx->y -= 1;
 		render_tline_inner(ctx, n->u.alt.b[j], 1);
@@ -380,7 +391,8 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 }
 
 static void
-render_seq(const struct tnode *n, struct render_context *ctx)
+render_seq(const struct tnode *n,
+	struct render_context *ctx, const char *base)
 {
 	size_t i;
 
@@ -389,7 +401,7 @@ render_seq(const struct tnode *n, struct render_context *ctx)
 	assert(ctx != NULL);
 
 	for (i = 0; i < n->u.seq.n; i++) {
-		node_walk_render(n->u.seq.a[!n->rtl ? i : n->u.seq.n - i], ctx);
+		node_walk_render(n->u.seq.a[!n->rtl ? i : n->u.seq.n - i], ctx, base);
 
 		if (i + 1 < n->u.seq.n) {
 			svg_path_h(&ctx->paths, ctx->x, ctx->y, 2);
@@ -399,7 +411,8 @@ render_seq(const struct tnode *n, struct render_context *ctx)
 }
 
 static void
-node_walk_render(const struct tnode *n, struct render_context *ctx)
+node_walk_render(const struct tnode *n,
+	struct render_context *ctx, const char *base)
 {
 	assert(ctx != NULL);
 
@@ -422,13 +435,13 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_CI_LITERAL:
-		svg_textbox(ctx, n->u.literal, n->w, 8);
+		svg_textbox(ctx, n->u.literal, n->w, 8, "literal");
 		printf("    <text x='%u5' y='%u5' text-anchor='left' class='ci'>%s</text>\n",
 			ctx->x - 2, ctx->y, "&#x29f8;i");
 		break;
 
 	case TNODE_CS_LITERAL:
-		svg_textbox(ctx, n->u.literal, n->w, 8);
+		svg_textbox(ctx, n->u.literal, n->w, 8, "literal");
 		break;
 
 	case TNODE_LABEL:
@@ -436,21 +449,27 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_RULE:
-		svg_textbox(ctx, n->u.name, n->w, 0);
+		if (base != NULL) {
+			printf("<a href='%s#%s'>\n", base, n->u.name); /* XXX: escape */
+		}
+		svg_textbox(ctx, n->u.name, n->w, 0, "rule");
+		if (base != NULL) {
+			printf("</a>\n");
+		}
 		break;
 
 	case TNODE_ALT:
-		render_alt(n, ctx);
+		render_alt(n, ctx, base);
 		break;
 
 	case TNODE_SEQ:
-		render_seq(n, ctx);
+		render_seq(n, ctx, base);
 		break;
 	}
 }
 
-static void
-render_rule(const struct tnode *node)
+void
+svg_render_rule(const struct tnode *node, const char *base)
 {
 	struct render_context ctx;
 	unsigned w;
@@ -471,7 +490,7 @@ render_rule(const struct tnode *node)
 
 	ctx.x = 2;
 	ctx.y = node->a;
-	node_walk_render(node, &ctx);
+	node_walk_render(node, &ctx, base);
 
 	/*
 	 * Consolidate adjacent nodes of the same type.
@@ -511,8 +530,8 @@ render_rule(const struct tnode *node)
 	}
 }
 
-static void
-dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
+void
+svg_dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 {
 	const char *p;
 	double n;
@@ -623,7 +642,7 @@ svg_output(const struct ast_rule *grammar)
 			rrd_pretty(&rrd);
 		}
 
-		a[i] = rrd_to_tnode(rrd, dim_string);
+		a[i] = rrd_to_tnode(rrd, svg_dim_string);
 
 		if (a[i]->w > w) {
 			w = a[i]->w;
@@ -688,7 +707,7 @@ svg_output(const struct ast_rule *grammar)
 		printf("    <text x='-%u0' y='-%u0'>%s:</text>\n",
 			4, 2, p->name);
 
-		render_rule(a[i]);
+		svg_render_rule(a[i], NULL);
 
 		printf("  </g>\n");
 		printf("\n");
