@@ -667,6 +667,7 @@ svg_output(const struct ast_rule *grammar)
 	printf("    rect, line, path { stroke-width: 1.5px; stroke: black; fill: transparent; }\n");
 	printf("    rect, line, path { stroke-linecap: square; stroke-linejoin: rounded; }\n");
 	printf("    path { fill: transparent; }\n");
+	printf("    text.literal { font-family: monospace; }\n");
 	printf("    line.ellipsis { stroke-dasharray: 4; }\n");
 	printf("    path.arrow.rtl { marker-mid: url(#rrd:arrow-rtl); }\n");
 	printf("    path.arrow.ltr { marker-mid: url(#rrd:arrow-ltr); }\n");

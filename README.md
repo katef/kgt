@@ -37,6 +37,12 @@ in format `-e ...`:
     const:
         ||-- integer --||
 
+and the same grammar output as SVG instead:
+
+    ; kgt -l bnf -e svg < examples/expr.bnf > /tmp/expr.svg
+
+![expr.svg](examples/expr.svg)
+
 Clone with submodules (contains required .mk files):
 
     ; git clone --recursive https://github.com/katef/kgt.git
