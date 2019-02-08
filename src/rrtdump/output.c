@@ -18,8 +18,7 @@
 #include "../rrd/pretty.h"
 #include "../rrd/node.h"
 #include "../rrd/list.h"
-
-#include "../rrtext/tnode.h"
+#include "../rrd/tnode.h"
 
 #include "io.h"
 
@@ -54,6 +53,14 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 	case TNODE_SKIP:
 		print_indent(f, depth);
 		fprintf(f, "SKIP");
+		print_coords(f, n);
+		fprintf(f, "\n");
+
+		break;
+
+	case TNODE_ARROW:
+		print_indent(f, depth);
+		fprintf(f, "ARROW");
 		print_coords(f, n);
 		fprintf(f, "\n");
 

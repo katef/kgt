@@ -30,6 +30,7 @@ SUBDIR += src/rrll
 SUBDIR += src/rrta
 SUBDIR += src/rrtext
 SUBDIR += src/rrdot
+SUBDIR += src/svg
 SUBDIR += src
 
 .include <subdir.mk>

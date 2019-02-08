@@ -13,6 +13,8 @@ PROG += kgt
 #${BUILD}/bin/kgt: ${BUILD}/${src:R}.o
 #.endfor
 
+LFLAGS.kgt += -lm
+
 ${BUILD}/bin/kgt: ${BUILD}/src/ast.o
 ${BUILD}/bin/kgt: ${BUILD}/src/bitmap.o
 ${BUILD}/bin/kgt: ${BUILD}/src/main.o
@@ -22,7 +24,7 @@ ${BUILD}/bin/kgt: ${BUILD}/src/xalloc.o
 .for part in ${PART:Mbnf} ${PART:Mblab} ${PART:Mabnf} ${PART:Miso-ebnf} ${PART:Mrbnf} \
 	${PART:Msid} ${PART:Mdot} ${PART:Mwsn} \
 	${PART:Mrrd} ${PART:Mrrdot} ${PART:Mrrdump} ${PART:Mrrtdump} \
-	${PART:Mrrparcon} ${PART:Mrrll} ${PART:Mrrta} ${PART:Mrrtext}
+	${PART:Mrrparcon} ${PART:Mrrll} ${PART:Mrrta} ${PART:Mrrtext} ${PART:Msvg}
 ${BUILD}/bin/kgt: ${BUILD}/lib/${part}.o
 .endfor
 

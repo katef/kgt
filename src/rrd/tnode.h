@@ -4,8 +4,8 @@
  * See LICENCE for the full copyright terms.
  */
 
-#ifndef KGT_RRTEXT_TNODE_H
-#define KGT_RRTEXT_TNODE_H
+#ifndef KGT_RRD_TNODE_H
+#define KGT_RRD_TNODE_H
 
 struct node;
 
@@ -17,7 +17,8 @@ enum tline {
 	TLINE_E,
 	TLINE_F,
 	TLINE_G,
-	TLINE_H
+	TLINE_H,
+	TLINE_I
 };
 
 struct tlist_alt {
@@ -34,6 +35,7 @@ struct tlist_seq {
 struct tnode {
 	enum {
 		TNODE_SKIP,
+		TNODE_ARROW,
 		TNODE_ELLIPSIS,
 		TNODE_CI_LITERAL,
 		TNODE_CS_LITERAL,

@@ -3,6 +3,7 @@
 SRC += src/rrd/node.c
 SRC += src/rrd/transform.c
 SRC += src/rrd/list.c
+SRC += src/rrd/tnode.c
 
 SRC += src/rrd/rewrite_ci.c
 

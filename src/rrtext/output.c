@@ -28,9 +28,9 @@
 #include "../rrd/node.h"
 #include "../rrd/rrd.h"
 #include "../rrd/list.h"
+#include "../rrd/tnode.h"
 
 #include "io.h"
-#include "tnode.h"
 
 struct render_context {
 	char **lines;
@@ -112,6 +112,32 @@ bars(struct render_context *ctx, unsigned n, unsigned w)
 }
 
 static void
+render_tline(struct render_context *ctx, enum tline tline, int rhs, int rtl)
+{
+	const char *a;
+
+	assert(ctx != NULL);
+
+	switch (tline) {
+	case TLINE_A: a = rtl ? "<^" : "^>"; break;
+	case TLINE_B: a = ",.";              break;
+	case TLINE_C: a = rtl ? "<v" : "v>"; break;
+	case TLINE_D: a = rtl ? "<+" : "+>"; break;
+	case TLINE_E: a = "`'";              break;
+	case TLINE_F: a = "||";              break;
+	case TLINE_G: a = rtl ? "^<" : ">^"; break;
+	case TLINE_H: a = rtl ? "v<" : ">v"; break;
+	case TLINE_I: a = rtl ? "^<" : ">^"; break;
+
+	default:
+		a = "??";
+		break;
+	}
+
+	bprintf(ctx, "%c", a[rhs]);
+}
+
+static void
 render_alt(const struct tnode *n, struct render_context *ctx)
 {
 	int x, y;
@@ -135,28 +161,11 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 	}
 
 	for (j = 0; j < n->u.alt.n; j++) {
-		const char *a;
-
 		ctx->x = x;
 
-		switch (n->u.alt.b[j]) {
-		case TLINE_A: a = n->rtl ? "<^" : "^>"; break;
-		case TLINE_B: a = ",.";                 break;
-		case TLINE_C: a = n->rtl ? "<v" : "v>"; break;
-		case TLINE_D: a = n->rtl ? "<+" : "+>"; break;
-		case TLINE_E: a = "`'";                 break;
-		case TLINE_F: a = "||";                 break;
-		case TLINE_G: a = n->rtl ? "^<" : ">^"; break;
-		case TLINE_H: a = n->rtl ? "v<" : ">v"; break;
-
-		default:
-			a = "??";
-			break;
-		}
-
-		bprintf(ctx, "%c", a[0]);
+		render_tline(ctx, n->u.alt.b[j], 0, n->rtl);
 		justify(ctx, n->u.alt.a[j], n->w - 2);
-		bprintf(ctx, "%c", a[1]);
+		render_tline(ctx, n->u.alt.b[j], 1, n->rtl);
 
 		if (j + 1 < n->u.alt.n) {
 			ctx->y++;
@@ -193,6 +202,9 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 
 	switch (n->type) {
 	case TNODE_SKIP:
+		break;
+
+	case TNODE_ARROW:
 		bprintf(ctx, "%.*s", (int) n->w, n->rtl ? "<" : ">");
 		break;
 

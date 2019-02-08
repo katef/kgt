@@ -24,7 +24,6 @@
 #include "../rrd/rrd.h"
 #include "../rrd/list.h"
 
-#include "io.h"
 #include "tnode.h"
 
 #include "../xalloc.h"
@@ -136,6 +135,7 @@ tnode_free(struct tnode *n)
 
 	switch (n->type) {
 	case TNODE_SKIP:
+	case TNODE_ARROW:
 	case TNODE_ELLIPSIS:
 	case TNODE_RULE:
 		break;
@@ -640,6 +640,7 @@ tnode_create_node(const struct node *node, int rtl,
 
 		if (new->u.alt.a[1]->type == TNODE_SKIP) {
 			/* arrows are helpful when going backwards */
+			new->u.alt.a[1]->type = TNODE_ARROW;
 			new->u.alt.a[1]->w = 1;
 		}
 
@@ -651,7 +652,7 @@ tnode_create_node(const struct node *node, int rtl,
 			label = esc_literal(s);
 
 			if (strlen(label) != 0) {
-				if (new->u.alt.a[1]->type == TNODE_SKIP) {
+				if (new->u.alt.a[1]->type == TNODE_SKIP || new->u.alt.a[1]->type == TNODE_ARROW) {
 					struct tnode *label_tnode;
 
 					/* if there's nothing to show for the backwards node, put the label there */
@@ -711,7 +712,7 @@ tnode_create_node(const struct node *node, int rtl,
 					swap(&new->u.alt.a[0], &new->u.alt.a[1]);
 
 					new->u.alt.b[0] = TLINE_B;
-					new->u.alt.b[1] = TLINE_G;
+					new->u.alt.b[1] = TLINE_I;
 
 					new->o = 1;
 
