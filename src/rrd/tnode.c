@@ -508,6 +508,10 @@ tnode_create_node(const struct node *node, int rtl,
 				assert(new->u.alt.a[i]->type == TNODE_SKIP);
 				assert(new->u.alt.a[i]->a + new->u.alt.a[i]->d == 1);
 
+				/* arrows are more helpful here */
+				new->u.alt.a[i]->type = TNODE_ARROW;
+				new->u.alt.a[i]->w = 1;
+
 				a += new->u.alt.a[i]->a + new->u.alt.a[i]->d + 1;
 				i++;
 			}
