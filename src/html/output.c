@@ -35,6 +35,7 @@
 /* xxx */
 void svg_render_rule(const struct tnode *node, const char *base);
 void svg_dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d);
+void svg_defs(void);
 
 void
 html_output(const struct ast_rule *grammar)
@@ -61,30 +62,7 @@ html_output(const struct ast_rule *grammar)
 	printf("\n");
 
 	printf(" <svg height='0' width='0' style='float: left'>\n"); /* XXX: why does this take space? */
-	printf("  <defs>\n");
-	printf("    <marker id='rrd:start'\n");
-	printf("        markerWidth='10' markerHeight='12'\n");
-	printf("        markerUnits='userSpaceOnUse'\n");
-	printf("        refX='7' refY='6'\n");
-	printf("        orient='auto'>\n"); /* TODO: auto-start-reverse in SVG2 */
-	printf("      <line x1='7' y1='0' x2='7' y2='12' class='arrow'/>\n");
-	printf("      <line x1='2' y1='0' x2='2' y2='12' class='arrow'/>\n");
-	printf("    </marker>\n");
-	printf("\n");
-
-	printf("    <marker id='rrd:arrow-ltr'\n");
-	printf("        markerWidth='5' markerHeight='5'\n");
-	printf("        refX='3' refY='2.5'\n");
-	printf("        orient='auto'>\n");
-	printf("      <polyline points='0,0 5,2.5 0,5' class='arrow'/>\n");
-	printf("    </marker>\n");
-	printf("    <marker id='rrd:arrow-rtl'\n");
-	printf("        markerWidth='5' markerHeight='5'\n");
-	printf("        refX='3' refY='2.5'\n");
-	printf("        orient='auto'>\n");
-	printf("      <polyline points='5,0 0,2.5 5,5' class='arrow'/>\n");
-	printf("    </marker>\n");
-	printf("  </defs>\n");
+	svg_defs();
 	printf(" </svg>\n");
 	printf("\n");
 

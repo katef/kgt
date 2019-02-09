@@ -7,7 +7,8 @@
 /*
  * Railroad Diagram SVG Output
  *
- * Output a SVG diagram of the abstract representation of railroads
+ * Output a SVG diagram of the abstract representation of railroads.
+ * The subset of SVG here is intended to suit RFC 7996.
  */
 
 #define _BSD_SOURCE
@@ -149,14 +150,22 @@ svg_ellipsis(struct render_context *ctx, int w, int h)
 }
 
 static void
+svg_use(struct render_context *ctx, const char *id, const char *transform)
+{
+	printf("    <use xlink:href='#%s' x='%d0' y='%d0'", id, ctx->x, ctx->y);
+
+	if (transform != NULL) {
+		printf(" transform='%s'", transform);
+	}
+
+	printf("/>\n");
+}
+
+static void
 justify(struct render_context *ctx, const struct tnode *n, int space,
 	const char *base)
 {
 	unsigned lhs, rhs;
-
-	if (n->type == TNODE_ARROW) {
-		((struct tnode *) n)->w = space; /* XXX: hacky */
-	}
 
 	lhs = (space - n->w) / 2;
 	rhs = (space - n->w) - lhs;
@@ -423,9 +432,8 @@ node_walk_render(const struct tnode *n,
 		break;
 
 	case TNODE_ARROW:
-		printf("    <path d='M%u0 %u0 h%.1f H%u0' class='arrow %s'/>\n",
-			ctx->x, ctx->y, (float) n->w / 0.2, ctx->x + n->w,
-			n->rtl ? "rtl" : "ltr");
+		svg_path_h(&ctx->paths, ctx->x, ctx->y, 1);
+		svg_use(ctx, n->rtl ? "rrd:arrow-rtl" : "rrd:arrow-ltr", "translate(5 0)");
 		ctx->x += n->w;
 		break;
 
@@ -480,13 +488,13 @@ svg_render_rule(const struct tnode *node, const char *base)
 
 	ctx.x = 0;
 	ctx.y = node->a;
-	printf("    <path d='M%u0 %u0 h%d0' marker-start='url(%s)'/>\n",
-		ctx.x, ctx.y, 2, "#rrd:start");
+	svg_use(&ctx, "rrd:station", "scale(-1 1)");
+	svg_path_h(&ctx.paths, ctx.x, ctx.y, 2);
 
-	/* TODO: do want this pointing the other way around, to join with the adjacent path */
-	ctx.x = w - 4;
-	printf("    <path d='M%u0 %u0 h%d0' marker-start='url(%s)'/>\n",
-		ctx.x, ctx.y, -2, "#rrd:start");
+	ctx.x = w - 6;
+	svg_path_h(&ctx.paths, ctx.x, ctx.y, 2);
+	ctx.x += 2;
+	svg_use(&ctx, "rrd:station", NULL);
 
 	ctx.x = 2;
 	ctx.y = node->a;
@@ -606,6 +614,26 @@ svg_dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 }
 
 void
+svg_defs(void)
+{
+	printf("  <defs>\n");
+	printf("    <g id='rrd:station'>\n");
+	printf("      <path d='M.5 -6 v12 m 5 0 v-12' class='station'/>\n"); /* .5 to overlap the line width */
+	printf("    </g>\n");
+	printf("\n");
+
+	/* XXX: should be markers, but aren't for RFC 7996 */
+	printf("    <g id='rrd:arrow-ltr'>\n");
+	printf("      <polyline points='2,-4 10,0 2,4' class='arrow'/>\n"); /* 2 for optical correction */
+	printf("    </g>\n");
+	printf("    <g id='rrd:arrow-rtl' transform='scale(-1 1) translate(-10 0)'>\n");
+	printf("      <use xlink:href='#rrd:arrow-ltr'/>");
+	printf("    </g>\n");
+	printf("  </defs>\n");
+	printf("\n");
+}
+
+void
 svg_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
@@ -669,36 +697,10 @@ svg_output(const struct ast_rule *grammar)
 	printf("    path { fill: transparent; }\n");
 	printf("    text.literal { font-family: monospace; }\n");
 	printf("    line.ellipsis { stroke-dasharray: 4; }\n");
-	printf("    path.arrow.rtl { marker-mid: url(#rrd:arrow-rtl); }\n");
-	printf("    path.arrow.ltr { marker-mid: url(#rrd:arrow-ltr); }\n");
 	printf("  </style>\n");
 	printf("\n");
 
-	printf("  <defs>\n");
-	printf("    <marker id='rrd:start'\n");
-	printf("        markerWidth='10' markerHeight='12'\n");
-	printf("        markerUnits='userSpaceOnUse'\n");
-	printf("        refX='7' refY='6'\n");
-	printf("        orient='auto'>\n"); /* TODO: auto-start-reverse in SVG2 */
-	printf("      <line x1='7' y1='0' x2='7' y2='12' class='arrow'/>\n");
-	printf("      <line x1='2' y1='0' x2='2' y2='12' class='arrow'/>\n");
-	printf("    </marker>\n");
-	printf("\n");
-
-	printf("    <marker id='rrd:arrow-ltr'\n");
-	printf("        markerWidth='5' markerHeight='5'\n");
-	printf("        refX='3' refY='2.5'\n");
-	printf("        orient='auto'>\n");
-	printf("      <polyline points='0,0 5,2.5 0,5' class='arrow'/>\n");
-	printf("    </marker>\n");
-	printf("    <marker id='rrd:arrow-rtl'\n");
-	printf("        markerWidth='5' markerHeight='5'\n");
-	printf("        refX='3' refY='2.5'\n");
-	printf("        orient='auto'>\n");
-	printf("      <polyline points='5,0 0,2.5 5,5' class='arrow'/>\n");
-	printf("    </marker>\n");
-	printf("  </defs>\n");
-	printf("\n");
+	svg_defs();
 
 	z = 0;
 
