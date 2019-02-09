@@ -42,7 +42,8 @@ html_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
 
-	printf("<html DOcTYPE>\n");
+	printf("<DOCTYPE html>\n");
+	printf("<html>\n");
 	printf("\n");
 
 	printf(" <head>\n");
