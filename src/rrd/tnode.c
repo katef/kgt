@@ -429,21 +429,21 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 	case NODE_CI_LITERAL:
 		new->type = TNODE_CI_LITERAL;
 		new->u.literal = esc_literal(node->u.literal);
-		dim->string(new->u.literal, &new->w, &new->a, &new->d);
+		dim->literal_string(new->u.literal, &new->w, &new->a, &new->d);
 		new->w += dim->literal_padding + dim->ci_marker;
 		break;
 
 	case NODE_CS_LITERAL:
 		new->type = TNODE_CS_LITERAL;
 		new->u.literal = esc_literal(node->u.literal);
-		dim->string(new->u.literal, &new->w, &new->a, &new->d);
+		dim->literal_string(new->u.literal, &new->w, &new->a, &new->d);
 		new->w += dim->literal_padding;
 		break;
 
 	case NODE_RULE:
 		new->type = TNODE_RULE;
 		new->u.name = node->u.name;
-		dim->string(new->u.name, &new->w, &new->a, &new->d);
+		dim->rule_string(new->u.name, &new->w, &new->a, &new->d);
 		new->w += dim->rule_padding;
 		break;
 
@@ -659,7 +659,7 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 					label_tnode = new->u.vlist.a[1];
 					label_tnode->type = TNODE_LABEL;
 					label_tnode->u.label = label;
-					dim->string(label, &label_tnode->w, &label_tnode->a, &label_tnode->d);
+					dim->rule_string(label, &label_tnode->w, &label_tnode->a, &label_tnode->d);
 				} else {
 					/* TODO: store label somewhere for rendering to display somehow */
 					assert(!"unimplemented");

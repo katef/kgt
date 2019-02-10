@@ -86,7 +86,8 @@ struct tnode {
 };
 
 struct dim {
-	void (*string)(const char *s, unsigned *w, unsigned *a, unsigned *d);
+	void (*literal_string)(const char *s, unsigned *w, unsigned *a, unsigned *d);
+	void (*rule_string   )(const char *s, unsigned *w, unsigned *a, unsigned *d);
 	unsigned literal_padding;
 	unsigned rule_padding;
 	unsigned ci_marker;

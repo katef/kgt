@@ -539,7 +539,7 @@ svg_render_rule(const struct tnode *node, const char *base)
 }
 
 static void
-dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
+dim_prop_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 {
 	const char *p;
 	double n;
@@ -603,18 +603,32 @@ dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 
 	n = ceil(n);
 
-	/* even numbers only, for sake of w / 2 when centering text */
+	/* even numbers only, for sake of visual rhythm */
 	if (((unsigned) n & 1) == 1) {
 		n++;
 	}
 
-	*w = n;
+	*w = n + 1;
+	*a = 1;
+	*d = 1;
+}
+
+static void
+dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
+{
+	assert(s != NULL);
+	assert(w != NULL);
+	assert(a != NULL);
+	assert(d != NULL);
+
+	*w = strlen(s) + 1;
 	*a = 1;
 	*d = 1;
 }
 
 struct dim svg_dim = {
-	dim_string,
+	dim_mono_string,
+	dim_prop_string,
 	0,
 	0,
 	2

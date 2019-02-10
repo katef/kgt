@@ -280,14 +280,14 @@ render_rule(const struct tnode *node)
 }
 
 static void
-dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
+dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 {
 	assert(s != NULL);
 	assert(w != NULL);
 	assert(a != NULL);
 	assert(d != NULL);
 
-	*w = strlen(s); /* monospace */
+	*w = strlen(s);
 	*a = 0;
 	*d = 1;
 }
@@ -298,7 +298,8 @@ rrtext_output(const struct ast_rule *grammar)
 	const struct ast_rule *p;
 
 	struct dim dim = {
-		dim_string,
+		dim_mono_string,
+		dim_mono_string,
 		4,
 		2,
 		2
