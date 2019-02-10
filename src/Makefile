@@ -25,7 +25,7 @@ ${BUILD}/bin/kgt: ${BUILD}/src/xalloc.o
 	${PART:Msid} ${PART:Mdot} ${PART:Mwsn} \
 	${PART:Mrrd} ${PART:Mrrdot} ${PART:Mrrdump} ${PART:Mrrtdump} \
 	${PART:Mrrparcon} ${PART:Mrrll} ${PART:Mrrta} ${PART:Mrrtext} \
-	${PART:Msvg} ${PART:Mhtml}
+	${PART:Msvg} ${PART:Mhtml5}
 ${BUILD}/bin/kgt: ${BUILD}/lib/${part}.o
 .endfor
 

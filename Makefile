@@ -31,7 +31,7 @@ SUBDIR += src/rrta
 SUBDIR += src/rrtext
 SUBDIR += src/rrdot
 SUBDIR += src/svg
-SUBDIR += src/html
+SUBDIR += src/html5
 SUBDIR += src
 
 .include <subdir.mk>

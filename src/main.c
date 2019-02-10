@@ -34,7 +34,7 @@
 #include "rrta/io.h"
 #include "rrtext/io.h"
 #include "svg/io.h"
-#include "html/io.h"
+#include "html5/io.h"
 
 int prettify = 1;
 int allow_undefined = 1;
@@ -62,8 +62,8 @@ struct io {
 	{ "rrta",     NULL,           rrta_output,     0, rrta_rrd_unsupported     },
 	{ "rrtext",   NULL,           rrtext_output,   0, 0 },
 	{ "svg",      NULL,           svg_output,      0, 0 },
-	{ "html",     NULL,           html_output,     0, 0 },
-	{ "xhtml",    NULL,           xhtml_output,    0, 0 }
+	{ "html5",    NULL,           html5_output,    0, 0 },
+	{ "xhtml5",   NULL,           xhtml5_output,   0, 0 }
 };
 
 enum io_dir {

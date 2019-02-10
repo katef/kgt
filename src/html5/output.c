@@ -119,7 +119,7 @@ output(const struct ast_rule *grammar, int xml)
 }
 
 void
-html_output(const struct ast_rule *grammar)
+html5_output(const struct ast_rule *grammar)
 {
 	printf("<!DOCTYPE html>\n");
 	printf("<html>\n");
@@ -131,7 +131,7 @@ html_output(const struct ast_rule *grammar)
 }
 
 void
-xhtml_output(const struct ast_rule *grammar)
+xhtml5_output(const struct ast_rule *grammar)
 {
 	printf("<?xml version='1.0' encoding='utf-8'?>\n");
 	printf("<!DOCTYPE html>\n");
