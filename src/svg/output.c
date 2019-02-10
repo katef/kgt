@@ -614,7 +614,10 @@ dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 }
 
 struct dim svg_dim = {
-	dim_string
+	dim_string,
+	0,
+	0,
+	2
 };
 
 void

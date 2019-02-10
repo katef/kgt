@@ -298,7 +298,10 @@ rrtext_output(const struct ast_rule *grammar)
 	const struct ast_rule *p;
 
 	struct dim dim = {
-		dim_string
+		dim_string,
+		4,
+		2,
+		2
 	};
 
 	for (p = grammar; p; p = p->next) {

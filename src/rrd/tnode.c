@@ -430,21 +430,21 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 		new->type = TNODE_CI_LITERAL;
 		new->u.literal = esc_literal(node->u.literal);
 		dim->string(new->u.literal, &new->w, &new->a, &new->d);
-		new->w += 4 + 2;
+		new->w += dim->literal_padding + dim->ci_marker;
 		break;
 
 	case NODE_CS_LITERAL:
 		new->type = TNODE_CS_LITERAL;
 		new->u.literal = esc_literal(node->u.literal);
 		dim->string(new->u.literal, &new->w, &new->a, &new->d);
-		new->w += 4;
+		new->w += dim->literal_padding;
 		break;
 
 	case NODE_RULE:
 		new->type = TNODE_RULE;
 		new->u.name = node->u.name;
 		dim->string(new->u.name, &new->w, &new->a, &new->d);
-		new->w += 2;
+		new->w += dim->rule_padding;
 		break;
 
 	case NODE_ALT:

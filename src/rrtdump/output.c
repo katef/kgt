@@ -155,7 +155,10 @@ rrtdump_output(const struct ast_rule *grammar)
 	const struct ast_rule *p;
 
 	struct dim dim = {
-		dim_string
+		dim_string,
+		0,
+		0,
+		0
 	};
 
 	for (p = grammar; p != NULL; p = p->next) {
