@@ -402,7 +402,7 @@ render_hlist(const struct tnode *n,
 	assert(ctx != NULL);
 
 	for (i = 0; i < n->u.hlist.n; i++) {
-		node_walk_render(n->u.hlist.a[!n->rtl ? i : n->u.hlist.n - i], ctx, base);
+		node_walk_render(n->u.hlist.a[!n->rtl ? i : n->u.hlist.n - i - 1], ctx, base);
 
 		if (i + 1 < n->u.hlist.n) {
 			svg_path_h(&ctx->paths, ctx->x, ctx->y, 20);
