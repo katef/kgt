@@ -75,18 +75,12 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 		break;
 
 	case TNODE_CI_LITERAL:
-		print_indent(f, depth);
-		fprintf(f, "LITERAL");
-		print_coords(f, n);
-		fprintf(f, ": \"%s\"/i\n", n->u.literal);
-
-		break;
-
 	case TNODE_CS_LITERAL:
 		print_indent(f, depth);
 		fprintf(f, "LITERAL");
 		print_coords(f, n);
-		fprintf(f, ": \"%s\"\n", n->u.literal);
+		fprintf(f, ": \"%s\"%s\n", n->u.literal,
+			n->type == TNODE_CI_LITERAL ? "/i" : "");
 
 		break;
 
@@ -100,7 +94,7 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 
 	case TNODE_RULE:
 		print_indent(f, depth);
-		fprintf(f, "NAME");
+		fprintf(f, "RULE");
 		print_coords(f, n);
 		fprintf(f, ": <%s>\n", n->u.name);
 
@@ -108,7 +102,7 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 
 	case TNODE_VLIST:
 		print_indent(f, depth);
-		fprintf(f, "ALT");
+		fprintf(f, "VLIST");
 		print_coords(f, n);
 		fprintf(f, " o=%u", n->u.vlist.o); /* XXX: belongs in alt union */
 		fprintf(f, ": [\n");
@@ -123,7 +117,7 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 
 	case TNODE_HLIST:
 		print_indent(f, depth);
-		fprintf(f, "SEQ");
+		fprintf(f, "HLIST");
 		print_coords(f, n);
 		fprintf(f, ": [\n");
 		for (i = 0; i < n->u.hlist.n; i++) {
