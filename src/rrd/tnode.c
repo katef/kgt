@@ -98,7 +98,7 @@ esc_literal(const char *s)
 }
 
 static void
-tnode_free_alt_list(struct tlist_alt *list)
+tnode_free_vlist(struct tnode_vlist *list)
 {
 	size_t i;
 
@@ -113,7 +113,7 @@ tnode_free_alt_list(struct tlist_alt *list)
 }
 
 static void
-tnode_free_seq_list(struct tlist_seq *list)
+tnode_free_hlist(struct tnode_hlist *list)
 {
 	size_t i;
 
@@ -149,12 +149,12 @@ tnode_free(struct tnode *n)
 		free((void *) n->u.label);
 		break;
 
-	case TNODE_ALT:
-		tnode_free_alt_list(&n->u.alt);
+	case TNODE_VLIST:
+		tnode_free_vlist(&n->u.vlist);
 		break;
 
-	case TNODE_SEQ:
-		tnode_free_seq_list(&n->u.seq);
+	case TNODE_HLIST:
+		tnode_free_hlist(&n->u.hlist);
 		break;
 	}
 
@@ -225,12 +225,12 @@ find_node(const struct list *list, char d)
 	assert(!"unreached");
 }
 
-static struct tlist_alt
+static struct tnode_vlist
 tnode_create_alt_list(const struct list *list, int rtl,
 	void (*dim_string)(const char *s, unsigned *w, unsigned *a, unsigned *d))
 {
 	const struct list *p;
-	struct tlist_alt new;
+	struct tnode_vlist new;
 	size_t i;
 	struct bm bm;
 	int hi, lo;
@@ -343,12 +343,12 @@ tnode_create_alt_list(const struct list *list, int rtl,
 	return new;
 }
 
-static struct tlist_seq
-tnode_create_seq_list(const struct list *list, int rtl,
+static struct tnode_hlist
+tnode_create_hlist(const struct list *list, int rtl,
 	void (*dim_string)(const char *s, unsigned *w, unsigned *a, unsigned *d))
 {
 	const struct list *p;
-	struct tlist_seq new;
+	struct tnode_hlist new;
 	size_t i;
 
 	assert(dim_string != NULL);
@@ -453,7 +453,7 @@ tnode_create_node(const struct node *node, int rtl,
 
 	case NODE_ALT:
 	case NODE_ALT_SKIPPABLE:
-		new->type = TNODE_ALT;
+		new->type = TNODE_VLIST;
 
 		/*
 		 * TODO: decide whether to put the skip above or hang it below.
@@ -467,9 +467,9 @@ tnode_create_node(const struct node *node, int rtl,
 			list.node = NULL;
 			list.next = node->u.alt;
 
-			new->u.alt = tnode_create_alt_list(&list, rtl, dim_string);
+			new->u.vlist = tnode_create_alt_list(&list, rtl, dim_string);
 		} else {
-			new->u.alt = tnode_create_alt_list(node->u.alt, rtl, dim_string);
+			new->u.vlist = tnode_create_alt_list(node->u.alt, rtl, dim_string);
 		}
 
 		{
@@ -478,9 +478,9 @@ tnode_create_node(const struct node *node, int rtl,
 
 			w = 0;
 
-			for (i = 0; i < new->u.alt.n; i++) {
-				if (new->u.alt.a[i]->w > w) {
-					w = new->u.alt.a[i]->w;
+			for (i = 0; i < new->u.vlist.n; i++) {
+				if (new->u.vlist.a[i]->w > w) {
+					w = new->u.vlist.a[i]->w;
 				}
 			}
 
@@ -503,33 +503,33 @@ tnode_create_node(const struct node *node, int rtl,
 			a = 0;
 
 			if (node->type == NODE_ALT_SKIPPABLE) {
-				assert(new->u.alt.n > i);
-				assert(new->u.alt.a[i] != NULL);
-				assert(new->u.alt.a[i]->type == TNODE_SKIP);
-				assert(new->u.alt.a[i]->a + new->u.alt.a[i]->d == 1);
+				assert(new->u.vlist.n > i);
+				assert(new->u.vlist.a[i] != NULL);
+				assert(new->u.vlist.a[i]->type == TNODE_SKIP);
+				assert(new->u.vlist.a[i]->a + new->u.vlist.a[i]->d == 1);
 
 				/* arrows are more helpful here */
-				new->u.alt.a[i]->type = TNODE_ARROW;
-				new->u.alt.a[i]->w = 1;
+				new->u.vlist.a[i]->type = TNODE_ARROW;
+				new->u.vlist.a[i]->w = 1;
 
-				a += new->u.alt.a[i]->a + new->u.alt.a[i]->d + 1;
+				a += new->u.vlist.a[i]->a + new->u.vlist.a[i]->d + 1;
 				i++;
 			}
 
-			if (new->u.alt.n > i) {
-				assert(new->u.alt.a[i] != NULL);
+			if (new->u.vlist.n > i) {
+				assert(new->u.vlist.a[i] != NULL);
 
-				a += new->u.alt.a[i]->a;
+				a += new->u.vlist.a[i]->a;
 			}
 
 			new->a = a;
 		}
 
 		{
-			new->o = 0;
+			new->u.vlist.o = 0;
 
 			if (node->type == NODE_ALT_SKIPPABLE) {
-				new->o += 1; /* one alt */
+				new->u.vlist.o += 1; /* one alt */
 			}
 		}
 
@@ -539,8 +539,8 @@ tnode_create_node(const struct node *node, int rtl,
 
 			d = 0;
 
-			for (i = 0; i < new->u.alt.n; i++) {
-				d += 1 + new->u.alt.a[i]->a + new->u.alt.a[i]->d;
+			for (i = 0; i < new->u.vlist.n; i++) {
+				d += 1 + new->u.vlist.a[i]->a + new->u.vlist.a[i]->d;
 			}
 
 			new->d = d - new->a - 1;
@@ -549,16 +549,16 @@ tnode_create_node(const struct node *node, int rtl,
 		{
 			size_t i;
 
-			for (i = 0; i < new->u.alt.n; i++) {
+			for (i = 0; i < new->u.vlist.n; i++) {
 				enum tline z;
 
-				int sameline  = i == new->o;
-				int aboveline = i <  new->o;
-				int belowline = i >  new->o;
+				int sameline  = i == new->u.vlist.o;
+				int aboveline = i <  new->u.vlist.o;
+				int belowline = i >  new->u.vlist.o;
 				int firstalt  = i == 0;
-				int lastalt   = i == new->u.alt.n - 1;
+				int lastalt   = i == new->u.vlist.n - 1;
 
-				if (sameline && new->u.alt.n > 1 && lastalt) {
+				if (sameline && new->u.vlist.n > 1 && lastalt) {
 					z = TLINE_A;
 				} else if (firstalt && aboveline) {
 					z = TLINE_B;
@@ -568,21 +568,21 @@ tnode_create_node(const struct node *node, int rtl,
 					z = TLINE_D;
 				} else if (belowline && i > 0 && lastalt) {
 					z = TLINE_E;
-				} else if (new->u.alt.a[i]->type == TNODE_ELLIPSIS) {
+				} else if (new->u.vlist.a[i]->type == TNODE_ELLIPSIS) {
 					z = TLINE_F;
 				} else {
 					z = TLINE_G;
 				}
 
-				new->u.alt.b[i] = z;
+				new->u.vlist.b[i] = z;
 			}
 		}
 
 		break;
 
 	case NODE_SEQ:
-		new->type = TNODE_SEQ;
-		new->u.seq = tnode_create_seq_list(node->u.seq, rtl, dim_string);
+		new->type = TNODE_HLIST;
+		new->u.hlist = tnode_create_hlist(node->u.seq, rtl, dim_string);
 
 		{
 			unsigned w;
@@ -590,8 +590,8 @@ tnode_create_node(const struct node *node, int rtl,
 
 			w = 0;
 
-			for (i = 0; i < new->u.seq.n; i++) {
-				w += new->u.seq.a[i]->w + 2;
+			for (i = 0; i < new->u.hlist.n; i++) {
+				w += new->u.hlist.a[i]->w + 2;
 			}
 
 			new->w = w - 2;
@@ -603,9 +603,9 @@ tnode_create_node(const struct node *node, int rtl,
 
 			a = 0;
 
-			for (i = 0; i < new->u.seq.n; i++) {
-				if (new->u.seq.a[i]->a > a) {
-					a = new->u.seq.a[i]->a;
+			for (i = 0; i < new->u.hlist.n; i++) {
+				if (new->u.hlist.a[i]->a > a) {
+					a = new->u.hlist.a[i]->a;
 				}
 			}
 
@@ -618,9 +618,9 @@ tnode_create_node(const struct node *node, int rtl,
 
 			d = 0;
 
-			for (i = 0; i < new->u.seq.n; i++) {
-				if (new->u.seq.a[i]->d > d) {
-					d = new->u.seq.a[i]->d;
+			for (i = 0; i < new->u.hlist.n; i++) {
+				if (new->u.hlist.a[i]->d > d) {
+					d = new->u.hlist.a[i]->d;
 				}
 			}
 
@@ -630,22 +630,22 @@ tnode_create_node(const struct node *node, int rtl,
 		break;
 
 	case NODE_LOOP:
-		new->type = TNODE_ALT;
+		new->type = TNODE_VLIST;
 
-		new->u.alt.n = 2;
-		new->u.alt.a = xmalloc(sizeof *new->u.alt.a * new->u.alt.n);
-		new->u.alt.b = xmalloc(sizeof *new->u.alt.b * new->u.alt.n);
+		new->u.vlist.n = 2;
+		new->u.vlist.a = xmalloc(sizeof *new->u.vlist.a * new->u.vlist.n);
+		new->u.vlist.b = xmalloc(sizeof *new->u.vlist.b * new->u.vlist.n);
 
-		new->u.alt.a[0] = tnode_create_node(node->u.loop.forward,   rtl, dim_string);
-		new->u.alt.a[1] = tnode_create_node(node->u.loop.backward, !rtl, dim_string);
+		new->u.vlist.a[0] = tnode_create_node(node->u.loop.forward,   rtl, dim_string);
+		new->u.vlist.a[1] = tnode_create_node(node->u.loop.backward, !rtl, dim_string);
 
-		new->u.alt.b[0] = TLINE_H;
-		new->u.alt.b[1] = TLINE_E;
+		new->u.vlist.b[0] = TLINE_H;
+		new->u.vlist.b[1] = TLINE_E;
 
-		if (new->u.alt.a[1]->type == TNODE_SKIP) {
+		if (new->u.vlist.a[1]->type == TNODE_SKIP) {
 			/* arrows are helpful when going backwards */
-			new->u.alt.a[1]->type = TNODE_ARROW;
-			new->u.alt.a[1]->w = 1;
+			new->u.vlist.a[1]->type = TNODE_ARROW;
+			new->u.vlist.a[1]->w = 1;
 		}
 
 		{
@@ -656,11 +656,11 @@ tnode_create_node(const struct node *node, int rtl,
 			label = esc_literal(s);
 
 			if (strlen(label) != 0) {
-				if (new->u.alt.a[1]->type == TNODE_SKIP || new->u.alt.a[1]->type == TNODE_ARROW) {
+				if (new->u.vlist.a[1]->type == TNODE_SKIP || new->u.vlist.a[1]->type == TNODE_ARROW) {
 					struct tnode *label_tnode;
 
 					/* if there's nothing to show for the backwards node, put the label there */
-					label_tnode = new->u.alt.a[1];
+					label_tnode = new->u.vlist.a[1];
 					label_tnode->type = TNODE_LABEL;
 					label_tnode->u.label = label;
 					dim_string(label, &label_tnode->w, &label_tnode->a, &label_tnode->d);
@@ -675,8 +675,8 @@ tnode_create_node(const struct node *node, int rtl,
 			unsigned w;
 			unsigned wf, wb;
 
-			wf = new->u.alt.a[0]->w;
-			wb = new->u.alt.a[1]->w;
+			wf = new->u.vlist.a[0]->w;
+			wb = new->u.vlist.a[1]->w;
 
 			w = (wf > wb ? wf : wb) + 6;
 
@@ -684,11 +684,11 @@ tnode_create_node(const struct node *node, int rtl,
 		}
 
 		{
-			new->a = new->u.alt.a[0]->a;
+			new->a = new->u.vlist.a[0]->a;
 		}
 
 		{
-			new->o = 0;
+			new->u.vlist.o = 0;
 		}
 
 		{
@@ -697,8 +697,8 @@ tnode_create_node(const struct node *node, int rtl,
 
 			d = 0;
 
-			for (i = 0; i < new->u.alt.n; i++) {
-				d += 1 + new->u.alt.a[i]->a + new->u.alt.a[i]->d;
+			for (i = 0; i < new->u.vlist.n; i++) {
+				d += 1 + new->u.vlist.a[i]->a + new->u.vlist.a[i]->d;
 			}
 
 			new->d = d - new->a - 1;
@@ -710,18 +710,18 @@ tnode_create_node(const struct node *node, int rtl,
 		 * A height of 2 seems simple enough to potentially render above the line.
 		 * We do that only if there isn't already something big above the line.
 		 */
-		if (new->u.alt.a[0]->d >= 4) {
-			if (new->u.alt.a[1]->a + new->u.alt.a[1]->d <= 2) {
-				if (new->u.alt.a[0]->a <= 2 && new->u.alt.a[0]->d > new->u.alt.a[0]->a) {
-					swap(&new->u.alt.a[0], &new->u.alt.a[1]);
+		if (new->u.vlist.a[0]->d >= 4) {
+			if (new->u.vlist.a[1]->a + new->u.vlist.a[1]->d <= 2) {
+				if (new->u.vlist.a[0]->a <= 2 && new->u.vlist.a[0]->d > new->u.vlist.a[0]->a) {
+					swap(&new->u.vlist.a[0], &new->u.vlist.a[1]);
 
-					new->u.alt.b[0] = TLINE_B;
-					new->u.alt.b[1] = TLINE_I;
+					new->u.vlist.b[0] = TLINE_B;
+					new->u.vlist.b[1] = TLINE_I;
 
-					new->o = 1;
+					new->u.vlist.o = 1;
 
-					new->a += new->u.alt.a[0]->a + new->u.alt.a[0]->d + 1;
-					new->d -= new->u.alt.a[0]->a + new->u.alt.a[0]->d + 1;
+					new->a += new->u.vlist.a[0]->a + new->u.vlist.a[0]->d + 1;
+					new->d -= new->u.vlist.a[0]->a + new->u.vlist.a[0]->d + 1;
 				}
 			}
 		}

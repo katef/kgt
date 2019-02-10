@@ -138,39 +138,39 @@ render_tline(struct render_context *ctx, enum tline tline, int rhs, int rtl)
 }
 
 static void
-render_alt(const struct tnode *n, struct render_context *ctx)
+render_vlist(const struct tnode *n, struct render_context *ctx)
 {
 	int x, y;
 	size_t j;
 
 	assert(n != NULL);
-	assert(n->type == TNODE_ALT);
+	assert(n->type == TNODE_VLIST);
 	assert(ctx != NULL);
 
 	x = ctx->x;
 	y = ctx->y;
 
 	/*
-	 * n->o is in terms of indicies; here we would iterate and add the y-distance
+	 * .o is in terms of indicies; here we would iterate and add the y-distance
 	 * for each of those nodes. That'd be .a for the topmost node, plus the height
 	 * of each subsequent node and the depth of each node above it.
 	 */
-	assert(n->o <= 1); /* currently only implemented for one node above the line */
-	if (n->o == 1) {
+	assert(n->u.vlist.o <= 1); /* currently only implemented for one node above the line */
+	if (n->u.vlist.o == 1) {
 		ctx->y -= n->a;
 	}
 
-	for (j = 0; j < n->u.alt.n; j++) {
+	for (j = 0; j < n->u.vlist.n; j++) {
 		ctx->x = x;
 
-		render_tline(ctx, n->u.alt.b[j], 0, n->rtl);
-		justify(ctx, n->u.alt.a[j], n->w - 2);
-		render_tline(ctx, n->u.alt.b[j], 1, n->rtl);
+		render_tline(ctx, n->u.vlist.b[j], 0, n->rtl);
+		justify(ctx, n->u.vlist.a[j], n->w - 2);
+		render_tline(ctx, n->u.vlist.b[j], 1, n->rtl);
 
-		if (j + 1 < n->u.alt.n) {
+		if (j + 1 < n->u.vlist.n) {
 			ctx->y++;
 			ctx->x = x;
-			bars(ctx, n->u.alt.a[j]->d + n->u.alt.a[j + 1]->a, n->w);
+			bars(ctx, n->u.vlist.a[j]->d + n->u.vlist.a[j + 1]->a, n->w);
 		}
 	}
 
@@ -178,18 +178,18 @@ render_alt(const struct tnode *n, struct render_context *ctx)
 }
 
 static void
-render_seq(const struct tnode *n, struct render_context *ctx)
+render_hlist(const struct tnode *n, struct render_context *ctx)
 {
 	size_t i;
 
 	assert(n != NULL);
-	assert(n->type == TNODE_SEQ);
+	assert(n->type == TNODE_HLIST);
 	assert(ctx != NULL);
 
-	for (i = 0; i < n->u.seq.n; i++) {
-		node_walk_render(n->u.seq.a[!n->rtl ? i : n->u.seq.n - i], ctx);
+	for (i = 0; i < n->u.hlist.n; i++) {
+		node_walk_render(n->u.hlist.a[!n->rtl ? i : n->u.hlist.n - i], ctx);
 
-		if (i + 1 < n->u.seq.n) {
+		if (i + 1 < n->u.hlist.n) {
 			bprintf(ctx, "--");
 		}
 	}
@@ -228,12 +228,12 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		bprintf(ctx, " %s ", n->u.name);
 		break;
 
-	case TNODE_ALT:
-		render_alt(n, ctx);
+	case TNODE_VLIST:
+		render_vlist(n, ctx);
 		break;
 
-	case TNODE_SEQ:
-		render_seq(n, ctx);
+	case TNODE_HLIST:
+		render_hlist(n, ctx);
 		break;
 	}
 }

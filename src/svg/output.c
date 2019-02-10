@@ -318,54 +318,54 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 }
 
 static void
-render_alt(const struct tnode *n,
+render_vlist(const struct tnode *n,
 	struct render_context *ctx, const char *base)
 {
 	int x, o, y;
 	size_t j;
 
 	assert(n != NULL);
-	assert(n->type == TNODE_ALT);
+	assert(n->type == TNODE_VLIST);
 	assert(ctx != NULL);
 
 	o = ctx->y;
 
-	assert(n->o <= 1); /* currently only implemented for one node above the line */
-	if (n->o == 1) {
+	assert(n->u.vlist.o <= 1); /* currently only implemented for one node above the line */
+	if (n->u.vlist.o == 1) {
 		ctx->y -= n->a;
 	}
 
 	x = ctx->x;
 	y = ctx->y;
 
-	for (j = 0; j < n->u.alt.n; j++) {
+	for (j = 0; j < n->u.vlist.n; j++) {
 		ctx->x = x;
 
-		render_tline_outer(ctx, n->u.alt.b[j], 0);
-		render_tline_inner(ctx, n->u.alt.b[j], 0);
+		render_tline_outer(ctx, n->u.vlist.b[j], 0);
+		render_tline_inner(ctx, n->u.vlist.b[j], 0);
 
-		justify(ctx, n->u.alt.a[j], n->w - 4, base);
+		justify(ctx, n->u.vlist.a[j], n->w - 4, base);
 
 		ctx->y -= 1;
-		render_tline_inner(ctx, n->u.alt.b[j], 1);
-		render_tline_outer(ctx, n->u.alt.b[j], 1);
+		render_tline_inner(ctx, n->u.vlist.b[j], 1);
+		render_tline_outer(ctx, n->u.vlist.b[j], 1);
 		ctx->y += 1;
 
-		if (j + 1 < n->u.alt.n) {
-			ctx->y += n->u.alt.a[j]->d + n->u.alt.a[j + 1]->a;
+		if (j + 1 < n->u.vlist.n) {
+			ctx->y += n->u.vlist.a[j]->d + n->u.vlist.a[j + 1]->a;
 		}
 	}
 
 
 	/* bars above the line */
-	if (n->o > 0) {
+	if (n->u.vlist.o > 0) {
 		unsigned h;
 
 		h = 0;
 
-		for (j = 0; j < n->o; j++) {
-			if (j + 1 < n->u.alt.n) {
-				h += n->u.alt.a[j]->d + n->u.alt.a[j + 1]->a + 1;
+		for (j = 0; j < n->u.vlist.o; j++) {
+			if (j + 1 < n->u.vlist.n) {
+				h += n->u.vlist.a[j]->d + n->u.vlist.a[j + 1]->a + 1;
 			}
 		}
 
@@ -377,14 +377,14 @@ render_alt(const struct tnode *n,
 	}
 
 	/* bars below the line */
-	if (n->u.alt.n > n->o + 1) {
+	if (n->u.vlist.n > n->u.vlist.o + 1) {
 		unsigned h;
 
 		h = 0;
 
-		for (j = n->o; j < n->u.alt.n; j++) {
-			if (j + 1 < n->u.alt.n) {
-				h += n->u.alt.a[j]->d + n->u.alt.a[j + 1]->a + 1;
+		for (j = n->u.vlist.o; j < n->u.vlist.n; j++) {
+			if (j + 1 < n->u.vlist.n) {
+				h += n->u.vlist.a[j]->d + n->u.vlist.a[j + 1]->a + 1;
 			}
 		}
 
@@ -400,19 +400,19 @@ render_alt(const struct tnode *n,
 }
 
 static void
-render_seq(const struct tnode *n,
+render_hlist(const struct tnode *n,
 	struct render_context *ctx, const char *base)
 {
 	size_t i;
 
 	assert(n != NULL);
-	assert(n->type == TNODE_SEQ);
+	assert(n->type == TNODE_HLIST);
 	assert(ctx != NULL);
 
-	for (i = 0; i < n->u.seq.n; i++) {
-		node_walk_render(n->u.seq.a[!n->rtl ? i : n->u.seq.n - i], ctx, base);
+	for (i = 0; i < n->u.hlist.n; i++) {
+		node_walk_render(n->u.hlist.a[!n->rtl ? i : n->u.hlist.n - i], ctx, base);
 
-		if (i + 1 < n->u.seq.n) {
+		if (i + 1 < n->u.hlist.n) {
 			svg_path_h(&ctx->paths, ctx->x, ctx->y, 2);
 			ctx->x += 2;
 		}
@@ -466,12 +466,12 @@ node_walk_render(const struct tnode *n,
 		}
 		break;
 
-	case TNODE_ALT:
-		render_alt(n, ctx, base);
+	case TNODE_VLIST:
+		render_vlist(n, ctx, base);
 		break;
 
-	case TNODE_SEQ:
-		render_seq(n, ctx, base);
+	case TNODE_HLIST:
+		render_hlist(n, ctx, base);
 		break;
 	}
 }

@@ -9,6 +9,13 @@
 
 struct node;
 
+/*
+ * Various combinations of two endpoints (corner pieces) for a line:
+ *
+ *       .              .
+ *      -A---- node ----B-
+ *       '              '
+ */
 enum tline {
 	TLINE_A,
 	TLINE_B,
@@ -21,13 +28,30 @@ enum tline {
 	TLINE_I
 };
 
-struct tlist_alt {
+/*
+ * A list of vertical line segments:
+ *
+ *       A---- node ----B
+ *       |              |
+ *  .o --C---- node ----D--
+ *       |              |
+ *       E---- node ----F
+ *       |              |
+ *       G---- node ----H
+ */
+struct tnode_vlist {
 	struct tnode **a;
 	enum tline *b;
 	size_t n;
+	unsigned o; /* offset, in indicies */
 };
 
-struct tlist_seq {
+/*
+ * A list of horizontal line segments:
+ *
+ *     -- node -- node -- node --
+ */
+struct tnode_hlist {
 	struct tnode **a;
 	size_t n;
 };
@@ -41,8 +65,8 @@ struct tnode {
 		TNODE_CS_LITERAL,
 		TNODE_LABEL,
 		TNODE_RULE,
-		TNODE_ALT,
-		TNODE_SEQ
+		TNODE_VLIST,
+		TNODE_HLIST
 	} type;
 
 	unsigned w;
@@ -51,15 +75,13 @@ struct tnode {
 
 	int rtl;
 
-	unsigned o; /* offset, in indicies; XXX: applies for alts only. should be inside union */
-
 	union {
 		const char *literal; /* TODO: point to ast_literal instead */
 		const char *name;    /* TODO: point to ast_rule instead */
 		const char *label;
 
-		struct tlist_alt alt;
-		struct tlist_seq seq;
+		struct tnode_vlist vlist;
+		struct tnode_hlist hlist;
 	} u;
 };
 

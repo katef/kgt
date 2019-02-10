@@ -106,28 +106,28 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 
 		break;
 
-	case TNODE_ALT:
+	case TNODE_VLIST:
 		print_indent(f, depth);
 		fprintf(f, "ALT");
 		print_coords(f, n);
-		fprintf(f, " o=%u", n->o); /* XXX: belongs in alt union */
+		fprintf(f, " o=%u", n->u.vlist.o); /* XXX: belongs in alt union */
 		fprintf(f, ": [\n");
-		for (i = 0; i < n->u.alt.n; i++) {
+		for (i = 0; i < n->u.vlist.n; i++) {
 			/* TODO: show tline for each alt */
-			tnode_walk(f, n->u.alt.a[i], depth + 1);
+			tnode_walk(f, n->u.vlist.a[i], depth + 1);
 		}
 		print_indent(f, depth);
 		fprintf(f, "]\n");
 
 		break;
 
-	case TNODE_SEQ:
+	case TNODE_HLIST:
 		print_indent(f, depth);
 		fprintf(f, "SEQ");
 		print_coords(f, n);
 		fprintf(f, ": [\n");
-		for (i = 0; i < n->u.seq.n; i++) {
-			tnode_walk(f, n->u.seq.a[i], depth + 1);
+		for (i = 0; i < n->u.hlist.n; i++) {
+			tnode_walk(f, n->u.hlist.a[i], depth + 1);
 		}
 		print_indent(f, depth);
 		fprintf(f, "]\n");
