@@ -65,15 +65,18 @@ xml_escputc(FILE *f, char c)
 }
 
 static void
-svg_text(struct render_context *ctx, const char *s, const char *class)
+svg_text(struct render_context *ctx, unsigned w, const char *s, const char *class)
 {
 	const char *p;
+	float mid;
 
 	assert(ctx != NULL);
 	assert(s != NULL);
 
-	printf("    <text x='%u0' y='%u5' text-anchor='middle'",
-		ctx->x, ctx->y);
+	mid = (float) w / 2;
+
+	printf("    <text x='%.0f' y='%u5' text-anchor='middle'",
+		10 * (ctx->x + mid), ctx->y);
 
 	if (class != NULL) {
 		printf(" class='%s'", class);
@@ -108,31 +111,21 @@ static void
 svg_textbox(struct render_context *ctx, const char *s, unsigned w, unsigned r,
 	const char *class)
 {
-	unsigned x;
-
-	x = ctx->x;
-
 	svg_rect(ctx, w, r, class);
-	ctx->x += w / 2; /* XXX: either i want floats, or to scale things */
-	svg_text(ctx, s, class);
+	svg_text(ctx, w, s, class);
 
-	ctx->x = x + w;
+	ctx->x += w;
 }
 
 static void
 svg_label(struct render_context *ctx, const char *s, unsigned w)
 {
-	unsigned x;
-
 	assert(ctx != NULL);
 	assert(s != NULL);
 
-	x = ctx->x;
+	svg_text(ctx, w, s, "label");
 
-	ctx->x += w / 2; /* XXX: either i want floats, or to scale things */
-	svg_text(ctx, s, "label");
-
-	ctx->x = x + w;
+	ctx->x += w;
 }
 
 static void
