@@ -116,6 +116,10 @@ single_term(const struct ast_term *term, struct node **r)
 		*r = node_create_name(term->u.token);
 		return 1;
 
+	case TYPE_PROSE:
+		*r = node_create_prose(term->u.prose);
+		return 1;
+
 	case TYPE_GROUP:
 		return transform_alts(term->u.group, r);
 	}

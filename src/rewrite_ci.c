@@ -93,6 +93,7 @@ walk_alt(struct ast_alt *alt)
 		case TYPE_EMPTY:
 		case TYPE_CS_LITERAL:
 		case TYPE_TOKEN:
+		case TYPE_PROSE:
 			break;
 
 		case TYPE_GROUP:

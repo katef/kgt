@@ -106,6 +106,10 @@ output_term(const struct ast_term *term)
 		printf(" <%s>", term->u.token);
 		break;
 
+	case TYPE_PROSE:
+		fprintf(stderr, "unimplemented\n");
+		exit(EXIT_FAILURE);
+
 	case TYPE_GROUP:
 		output_group(term->u.group);
 		break;

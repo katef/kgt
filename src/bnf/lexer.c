@@ -441,21 +441,21 @@ z3(struct lx_bnf_lx *lx)
 
 		case S2: /* e.g. "\n" */
 			switch ((unsigned char) c) {
-			case '\n': state = S11; break;
+			case '\n': state = S10; break;
 			default:  lx_bnf_ungetc(lx, c); return lx->z(lx);
 			}
 			break;
 
 		case S3: /* e.g. "\"" */
 			switch ((unsigned char) c) {
-			case '"': state = S10; break;
+			case '"': state = S11; break;
 			default:  lx_bnf_ungetc(lx, c); return lx->z = z0, lx->z(lx);
 			}
 			break;
 
 		case S4: /* e.g. "'" */
 			switch ((unsigned char) c) {
-			case '\'': state = S10; break;
+			case '\'': state = S11; break;
 			default:  lx_bnf_ungetc(lx, c); return lx->z = z1, lx->z(lx);
 			}
 			break;
@@ -483,11 +483,11 @@ z3(struct lx_bnf_lx *lx)
 		case S9: /* e.g. "::=" */
 			lx_bnf_ungetc(lx, c); return TOK_EQUALS;
 
-		case S10: /* e.g. "''" */
-			lx_bnf_ungetc(lx, c); return TOK_EMPTY;
-
-		case S11: /* e.g. "\n\n" */
+		case S10: /* e.g. "\n\n" */
 			lx_bnf_ungetc(lx, c); return TOK_SEP;
+
+		case S11: /* e.g. "''" */
+			lx_bnf_ungetc(lx, c); return TOK_EMPTY;
 
 		default:
 			; /* unreached */
@@ -520,8 +520,8 @@ z3(struct lx_bnf_lx *lx)
 	case S6: return TOK_EOF;
 	case S7: return TOK_ALT;
 	case S9: return TOK_EQUALS;
-	case S10: return TOK_EMPTY;
-	case S11: return TOK_SEP;
+	case S10: return TOK_SEP;
+	case S11: return TOK_EMPTY;
 	default: errno = EINVAL; return TOK_ERROR;
 	}
 }

@@ -17,6 +17,7 @@
 #include <assert.h>
 
 #include "../ast.h"
+#include "../rrd/node.h"
 
 #include "io.h"
 
@@ -116,6 +117,15 @@ output_term(const struct ast_term *term)
 
 	case TYPE_TOKEN:
 		printf(" %s", term->u.token);
+		break;
+
+	case TYPE_PROSE:
+		if (unquoted_prose(term->u.prose)) {
+			printf(" %s", term->u.prose);
+			break;
+		}
+
+		printf(" ? %s ?", term->u.prose);
 		break;
 
 	case TYPE_GROUP:

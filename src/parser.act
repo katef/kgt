@@ -219,6 +219,16 @@
 		return 0;
 	}
 
+	static const char *
+	ltrim(const char *s)
+	{
+		while (isspace((unsigned char) *s)) {
+			s++;
+		}
+
+		return s;
+	}
+
 	static void
 	rtrim(char *s)
 	{
@@ -229,6 +239,13 @@
 		while (p >= s && isspace((unsigned char) *p)) {
 			*p-- = '\0';
 		}
+	}
+
+	static const char *
+	trim(char *s)
+	{
+		rtrim(s);
+		return ltrim(s);
 	}
 
 	static void
@@ -550,6 +567,16 @@
 		@t = ast_make_token_term(@n);
 	@};
 
+	<make-prose-term>: (l :string) -> (t :ast_term) = @{
+		const char *s;
+
+		s = xstrdup(trim(@l));
+
+		@t = ast_make_prose_term(s);
+
+		free(@l);
+	@};
+
 	<make-group-term>: (a :ast_alt) -> (t :ast_term) = @{
 		@t = ast_make_group_term(@a);
 	@};
@@ -680,7 +707,9 @@
 		/* for dialects which don't use these */
 		(void) string;
 		(void) range;
+		(void) ltrim;
 		(void) rtrim;
+		(void) trim;
 
 		assert(f != NULL);
 

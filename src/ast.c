@@ -124,6 +124,24 @@ ast_make_token_term(const char *token)
 }
 
 struct ast_term *
+ast_make_prose_term(const char *prose)
+{
+	struct ast_term *new;
+
+	assert(prose != NULL);
+
+	new = xmalloc(sizeof *new);
+	new->type    = TYPE_PROSE;
+	new->next    = NULL;
+	new->u.prose = prose;
+
+	new->min = 1;
+	new->max = 1;
+
+	return new;
+}
+
+struct ast_term *
 ast_make_group_term(struct ast_alt *group)
 {
 	struct ast_term *new;

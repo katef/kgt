@@ -6,12 +6,8 @@
 
 /*
  * Extended Backus-Naur Form Parser
- * As defined by ISO/IEC 14977:1996(E)
- *
- * TODO: postfix * (esp for groups, versus individual terms)
- * TODO: - subtraction thingies
- * TODO: names with spaces (<concaternate-name>(list-of-names))
- * TODO: multiplicative 3 * term stuff
+ * As defined by BS 6154
+equivalent to Standard ISO/IEC 14977
  */
 
 %types%
@@ -34,7 +30,7 @@
 	ALT;
 	SEP;
 	!REP;
-	EXCEPT;
+	!EXCEPT;
 
 	STAR;
 	CAT;
@@ -48,7 +44,7 @@
 	!NAME;
 	!CI_LITERAL;
 	CS_LITERAL;
-	PROSE;
+	!PROSE;
 
 	!ESC:  () -> (:char);
 	CHAR:  () -> (:char);
@@ -82,7 +78,7 @@
 	!<make-ci-literal-term>: (:string)      -> (:ast_term);
 	<make-cs-literal-term>:  (:string)      -> (:ast_term);
 	!<make-token-term>:      (:string)      -> (:ast_term);
-	<make-prose-term>:       (:string)      -> (:ast_term);
+	!<make-prose-term>:      (:string)      -> (:ast_term);
 	<make-group-term>:       (:ast_alt)     -> (:ast_term);
 	!<make-range-term>:      (:char, :char) -> (:ast_term);
 
@@ -102,7 +98,7 @@
 	<err-expected-alt>;
 	<err-expected-sep>;
 	<err-expected-equals>;
-	<err-unimplemented-except>;
+	!<err-unimplemented-except>;
 
 	list-of-terms: () -> (:ast_term);
 	list-of-alts:  () -> (:ast_alt);
@@ -125,11 +121,6 @@
 		CS_LITERAL;
 		s = <pattern-buffer>;
 		t = <make-cs-literal-term>(s);
-	||
-		body;
-		PROSE;
-		s = <pattern-buffer>;
-		t = <make-prose-term>(s);
 	||
 		s = IDENT;
 		t = <make-rule-term>(s);
@@ -182,20 +173,11 @@
 		<add-term-to-list>(t, l);
 	};
 
-	list-of-excepts: () -> (l :ast_term) = {
-		l = list-of-terms;
-	||
-		l = list-of-terms;
-		EXCEPT;
-		t = list-of-terms;
-		<err-unimplemented-except>;
-	};
-
 	list-of-alts: () -> (l :ast_alt) = {
-		t = list-of-excepts;
+		t = list-of-terms;
 		l = <make-alt>(t);
 	||
-		t = list-of-excepts;
+		t = list-of-terms;
 
 		{
 			ALT;

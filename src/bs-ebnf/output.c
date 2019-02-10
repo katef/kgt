@@ -5,7 +5,8 @@
  */
 
 /*
- * Wirth Syntax Notation Output.
+ * Extended Backus-Naur Form Output
+ * As defined by ISO/IEC 14977:1996(E)
  *
  * TODO: fprintf(fout), instead of stdout
  */
@@ -19,7 +20,31 @@
 
 #include "io.h"
 
-static void output_alt(const struct ast_alt *alt);
+static void output_term(const struct ast_term *term);
+
+static void
+output_group_alt(const struct ast_alt *alt)
+{
+	const struct ast_term *term;
+
+	for (term = alt->terms; term != NULL; term = term->next) {
+		output_term(term);
+	}
+}
+
+static void
+output_group(const struct ast_alt *group)
+{
+	const struct ast_alt *alt;
+
+	for (alt = group; alt != NULL; alt = alt->next) {
+		output_group_alt(alt);
+
+		if (alt->next != NULL) {
+			printf(" |");
+		}
+	}
+}
 
 static void
 output_term(const struct ast_term *term)
@@ -33,10 +58,10 @@ output_term(const struct ast_term *term)
 		const char *s;
 		const char *e;
 	} a[] = {
-		{ 1, 1, " ( ", " )" },
+		{ 1, 1, " (", " ) " },
 		{ 1, 1, "",    ""   },
-		{ 0, 1, " [ ", " ]" },
-		{ 0, 0, " { ", " }" }
+		{ 0, 1, " [", " ] " },
+		{ 0, 0, " {", " } " }
 	};
 
 	s = NULL;
@@ -54,13 +79,10 @@ output_term(const struct ast_term *term)
 		}
 	}
 
-	/* TODO: for {1,0} output first term inline */
-
 	assert(s != NULL && e != NULL);
 
 	/* EBNF cannot express minimum term repetition; TODO: semantic checks for this */
 	assert(term->min <= 1);
-	assert(term->max <= 1);
 
 	printf("%s", s);
 
@@ -101,7 +123,7 @@ output_term(const struct ast_term *term)
 		exit(EXIT_FAILURE);
 
 	case TYPE_GROUP:
-		output_alt(term->u.group);
+		output_group(term->u.group);
 		break;
 	}
 
@@ -115,6 +137,10 @@ output_alt(const struct ast_alt *alt)
 
 	for (term = alt->terms; term != NULL; term = term->next) {
 		output_term(term);
+
+		if (term->next) {
+			putc(',', stdout);
+		}
 	}
 }
 
@@ -123,20 +149,22 @@ output_rule(const struct ast_rule *rule)
 {
 	const struct ast_alt *alt;
 
-	alt = rule->alts;
 	printf("%s =", rule->name);
-	output_alt(alt);
-
-	for (alt = alt->next; alt != NULL; alt = alt->next) {
-		printf("\n\t|");
+	for (alt = rule->alts; alt != NULL; alt = alt->next) {
 		output_alt(alt);
+
+		if (alt->next != NULL) {
+			printf("\n\t|");
+		}
 	}
 
-	printf(" .\n\n");
+	printf("\n");
+	printf("\t;\n");
+	printf("\n");
 }
 
 void
-wsn_output(const struct ast_rule *grammar)
+iso_ebnf_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
 

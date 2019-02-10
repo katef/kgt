@@ -53,6 +53,10 @@ output_term(const struct ast_term *term)
 	case TYPE_TOKEN:
 		printf(" <%s>", term->u.token);
 		break;
+
+	case TYPE_PROSE:
+		fprintf(stderr, "unimplemented\n");
+		exit(EXIT_FAILURE);
 	}
 }
 

@@ -64,6 +64,10 @@ output_basic(const struct ast_term *term)
 		printf("%s; ", term->u.token);
 		break;
 
+	case TYPE_PROSE:
+		fprintf(stderr, "unimplemented\n");
+		exit(EXIT_FAILURE);
+
 	case TYPE_GROUP:
 		fputs("{ ", stdout);
 		output_alt(term->u.group);
@@ -132,6 +136,7 @@ is_equal(const struct ast_term *a, const struct ast_term *b)
 	case TYPE_CI_LITERAL: return 0 == strcasecmp(a->u.literal, b->u.literal);
 	case TYPE_CS_LITERAL: return 0 == strcmp(a->u.literal,     b->u.literal);
 	case TYPE_TOKEN:      return 0 == strcmp(a->u.token,       b->u.token);
+	case TYPE_PROSE:      return 0 == strcmp(a->u.prose,       b->u.prose);
 	}
 }
 
@@ -157,6 +162,7 @@ output_terminals(const struct ast_rule *grammar)
 
 				case TYPE_RULE:
 				case TYPE_TOKEN:
+				case TYPE_PROSE:
 					continue;
 
 				case TYPE_CI_LITERAL:

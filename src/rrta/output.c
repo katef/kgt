@@ -156,6 +156,10 @@ node_walk(FILE *f, const struct node *n, int depth)
 
 		break;
 
+	case NODE_PROSE:
+		fprintf(stderr, "unimplemented\n");
+		exit(EXIT_FAILURE);
+
 	case NODE_ALT:
 	case NODE_ALT_SKIPPABLE:
 		print_indent(f, depth);

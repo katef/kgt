@@ -10,7 +10,8 @@
 struct ast_alt;
 
 enum ast_features {
-    FEATURE_AST_CI_LITERAL = 1 << 0
+    FEATURE_AST_CI_LITERAL = 1 << 0,
+    FEATURE_AST_PROSE      = 1 << 1
 };
 
 /*
@@ -28,6 +29,7 @@ struct ast_term {
 		TYPE_CS_LITERAL,
 		TYPE_CI_LITERAL,
 		TYPE_TOKEN,
+		TYPE_PROSE,
 		TYPE_GROUP
 	} type;
 
@@ -35,6 +37,7 @@ struct ast_term {
 		struct ast_rule *rule;
 		const char *literal;
 		const char *token;
+		const char *prose;
 		struct ast_alt *group;
 	} u;
 
@@ -84,6 +87,9 @@ ast_make_literal_term(const char *literal, int ci);
 
 struct ast_term *
 ast_make_token_term(const char *token);
+
+struct ast_term *
+ast_make_prose_term(const char *prose);
 
 struct ast_term *
 ast_make_group_term(struct ast_alt *group);

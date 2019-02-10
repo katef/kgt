@@ -90,11 +90,11 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 
 		break;
 
-	case TNODE_LABEL:
+	case TNODE_PROSE:
 		print_indent(f, depth);
-		fprintf(f, "LABEL");
+		fprintf(f, "PROSE");
 		print_coords(f, n);
-		fprintf(f, ": %s\n", n->u.label);
+		fprintf(f, ": %s\n", n->u.prose);
 
 		break;
 
@@ -157,6 +157,7 @@ rrtdump_output(const struct ast_rule *grammar)
 	struct dim dim = {
 		dim_mono_string,
 		dim_mono_string,
+		0,
 		0,
 		0,
 		0

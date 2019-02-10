@@ -18,6 +18,7 @@ enum lx_iso_ebnf_token {
 	TOK_STARTOPT,
 	TOK_SEP,
 	TOK_ALT,
+	TOK_PROSE,
 	TOK_CHAR,
 	TOK_CS_LITERAL,
 	TOK_EOF,

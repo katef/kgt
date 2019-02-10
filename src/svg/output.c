@@ -118,12 +118,12 @@ svg_textbox(struct render_context *ctx, const char *s, unsigned w, unsigned r,
 }
 
 static void
-svg_label(struct render_context *ctx, const char *s, unsigned w)
+svg_prose(struct render_context *ctx, const char *s, unsigned w)
 {
 	assert(ctx != NULL);
 	assert(s != NULL);
 
-	svg_text(ctx, w, s, "label");
+	svg_text(ctx, w, s, "prose");
 
 	ctx->x += w;
 }
@@ -444,8 +444,8 @@ node_walk_render(const struct tnode *n,
 		svg_textbox(ctx, n->u.literal, n->w * 10, 8, "literal");
 		break;
 
-	case TNODE_LABEL:
-		svg_label(ctx, n->u.label, n->w * 10);
+	case TNODE_PROSE:
+		svg_prose(ctx, n->u.prose, n->w * 10);
 		break;
 
 	case TNODE_RULE:
@@ -621,6 +621,7 @@ dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 struct dim svg_dim = {
 	dim_mono_string,
 	dim_prop_string,
+	0,
 	0,
 	0,
 	2

@@ -23,7 +23,7 @@ enum lx_abnf_token {
 	TOK_EQUALS,
 	TOK_SEP,
 	TOK_CHAR,
-	TOK_NAME,
+	TOK_PROSE,
 	TOK_IDENT,
 	TOK_EOF,
 	TOK_ERROR,
