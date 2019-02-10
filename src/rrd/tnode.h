@@ -63,7 +63,7 @@ struct tnode {
 		TNODE_ELLIPSIS,
 		TNODE_CI_LITERAL,
 		TNODE_CS_LITERAL,
-		TNODE_LABEL,
+		TNODE_PROSE,
 		TNODE_RULE,
 		TNODE_VLIST,
 		TNODE_HLIST
@@ -79,7 +79,7 @@ struct tnode {
 	union {
 		const char *literal; /* TODO: point to ast_literal instead */
 		const char *name;    /* TODO: point to ast_rule instead */
-		const char *label;
+		const char *prose;
 
 		struct tnode_vlist vlist;
 		struct tnode_hlist hlist;

@@ -130,6 +130,12 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 		printf("\\>\"");
 		break;
 
+	case NODE_PROSE:
+		printf("label = \"?");
+		escputs(node->u.prose, stdout);
+		printf("?\"");
+		break;
+
 	case NODE_ALT:
 		printf("label = \"ALT\"");
 		break;

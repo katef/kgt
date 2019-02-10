@@ -65,6 +65,12 @@ node_walk(FILE *f, const struct node *n, int depth)
 
 		break;
 
+	case NODE_PROSE:
+		print_indent(f, depth);
+		fprintf(f, "PROSE: ?%s?\n", n->u.prose);
+
+		break;
+
 	case NODE_ALT:
 	case NODE_ALT_SKIPPABLE:
 		print_indent(f, depth);

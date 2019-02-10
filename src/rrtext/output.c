@@ -220,8 +220,8 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		bprintf(ctx, " \"%s\" ", n->u.literal);
 		break;
 
-	case TNODE_LABEL:
-		bprintf(ctx, "%s", n->u.label);
+	case TNODE_PROSE:
+		bprintf(ctx, "%s", n->u.prose);
 		break;
 
 	case TNODE_RULE:

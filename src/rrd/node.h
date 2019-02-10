@@ -16,6 +16,7 @@ struct node {
 		NODE_CI_LITERAL,
 		NODE_CS_LITERAL,
 		NODE_RULE,
+		NODE_PROSE,
 		NODE_ALT,
 		NODE_ALT_SKIPPABLE,
 		NODE_SEQ,
@@ -25,6 +26,7 @@ struct node {
 	union {
 		const char *literal; /* TODO: point to ast_literal instead */
 		const char *name;    /* TODO: point to ast_rule instead */
+		const char *prose;
 
 		struct list *alt;
 		struct list *seq;
@@ -49,6 +51,9 @@ node_create_cs_literal(const char *literal);
 
 struct node *
 node_create_name(const char *name);
+
+struct node *
+node_create_prose(const char *name);
 
 struct node *
 node_create_alt(struct list *alt);

@@ -14,6 +14,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
@@ -107,6 +108,7 @@ atomic(const struct ast_term *term)
 	case TYPE_CI_LITERAL:
 	case TYPE_CS_LITERAL:
 	case TYPE_TOKEN:
+	case TYPE_PROSE:
 		return 1;
 
 	case TYPE_GROUP:
@@ -182,6 +184,10 @@ output_term(const struct ast_term *term)
 	case TYPE_TOKEN:
 		printf(" %s", term->u.token);
 		break;
+
+	case TYPE_PROSE:
+		fprintf(stderr, "unimplemented\n");
+		exit(EXIT_FAILURE);
 
 	case TYPE_GROUP:
 		output_group(term->u.group);

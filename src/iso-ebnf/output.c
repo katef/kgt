@@ -118,6 +118,11 @@ output_term(const struct ast_term *term)
 		printf(" %s", term->u.token);
 		break;
 
+	case TYPE_PROSE:
+		/* TODO: trim whitespace */
+		printf(" ? %s ?", term->u.prose);
+		break;
+
 	case TYPE_GROUP:
 		output_group(term->u.group);
 		break;

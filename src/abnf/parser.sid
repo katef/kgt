@@ -36,9 +36,10 @@
 	!STARTSTAR; !ENDSTAR;
 
 	!EMPTY;
-	NAME;
+	!NAME;
 	CI_LITERAL;
 	CS_LITERAL;
+	!PROSE;
 
 	!ESC:  () -> (:char);
 	CHAR:  () -> (:char);
@@ -72,6 +73,7 @@
 	<make-ci-literal-term>: (:string)      -> (:ast_term);
 	<make-cs-literal-term>: (:string)      -> (:ast_term);
 	!<make-token-term>:     (:string)      -> (:ast_term);
+	!<make-prose-term>:     (:string)      -> (:ast_term);
 	<make-group-term>:      (:ast_alt)     -> (:ast_term);
 	<make-range-term>:      (:char, :char) -> (:ast_term);
 
@@ -134,10 +136,9 @@
 		t = <make-cs-literal-term>(s);
 	||
 		body;
-		NAME;
-/* TODO: case insensitive */
+		PROSE;
 		s = <pattern-buffer>;
-		t = <make-rule-term>(s);
+		t = <make-prose-term>(s);
 	||
 		s = IDENT;
 /* TODO: case insensitive */
@@ -223,15 +224,8 @@
 	};
 
 	rule: () -> (r :ast_rule) = {
-		{
-			body;
-			NAME;
-			s = <pattern-buffer>;
+		s = IDENT;
 /* TODO: case insensitive! */
-		||
-			s = IDENT;
-/* TODO: case insensitive! */
-		};
 /* TODO: maybe need to flag case insensitivity in the AST for rule names,
 but expand out alts for literals */
 

@@ -144,8 +144,8 @@ tnode_free(struct tnode *n)
 		free((void *) n->u.literal);
 		break;
 
-	case TNODE_LABEL:
-		free((void *) n->u.label);
+	case TNODE_PROSE:
+		free((void *) n->u.prose);
 		break;
 
 	case TNODE_VLIST:
@@ -447,6 +447,12 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 		new->w += dim->rule_padding;
 		break;
 
+	case NODE_PROSE:
+		new->type = TNODE_PROSE;
+		new->u.prose = node->u.prose;
+		dim->rule_string(new->u.prose, &new->w, &new->a, &new->d);
+		break;
+
 	case NODE_ALT:
 	case NODE_ALT_SKIPPABLE:
 		new->type = TNODE_VLIST;
@@ -657,8 +663,8 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 
 					/* if there's nothing to show for the backwards node, put the label there */
 					label_tnode = new->u.vlist.a[1];
-					label_tnode->type = TNODE_LABEL;
-					label_tnode->u.label = label;
+					label_tnode->type = TNODE_PROSE;
+					label_tnode->u.prose = label;
 					dim->rule_string(label, &label_tnode->w, &label_tnode->a, &label_tnode->d);
 				} else {
 					/* TODO: store label somewhere for rendering to display somehow */

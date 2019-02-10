@@ -142,6 +142,13 @@ node_walk(FILE *f, const struct node *n)
 
 		break;
 
+	case NODE_PROSE:
+		fprintf(f, "`");
+		escputs(n->u.prose, f);
+		fprintf(f, "`");
+
+		break;
+
 	case NODE_ALT:
 	case NODE_ALT_SKIPPABLE:
 		fprintf(f, "<");

@@ -127,6 +127,12 @@ output_term(const struct ast_rule *grammar,
 		escputs(term->u.token, stdout);
 		break;
 
+	case TYPE_PROSE:
+		fputs("?", stdout);
+		escputs(term->u.prose, stdout);
+		fputs("?", stdout);
+		break;
+
 	case TYPE_GROUP:
 		printf("()");
 		break;
@@ -148,6 +154,7 @@ output_term(const struct ast_rule *grammar,
 	case TYPE_CI_LITERAL:
 	case TYPE_CS_LITERAL:
 	case TYPE_TOKEN:
+	case TYPE_PROSE:
 		printf("\t\"t%p\" [ style = filled ];\n",
 			(void *) term);
 		break;

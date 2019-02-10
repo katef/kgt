@@ -42,6 +42,7 @@
 	!NAME;
 	!CI_LITERAL;
 	CS_LITERAL;
+	!PROSE;
 
 	ESC:    () -> (:char);
 	CHAR:   () -> (:char);
@@ -75,6 +76,7 @@
 	!<make-ci-literal-term>: (:string)      -> (:ast_term);
 	<make-cs-literal-term>:  (:string)      -> (:ast_term);
 	!<make-token-term>:      (:string)      -> (:ast_term);
+	!<make-prose-term>:      (:string)      -> (:ast_term);
 	<make-group-term>:       (:ast_alt)     -> (:ast_term);
 	!<make-range-term>:      (:char, :char) -> (:ast_term);
 

@@ -550,6 +550,10 @@
 		@t = ast_make_token_term(@n);
 	@};
 
+	<make-prose-term>: (l :string) -> (t :ast_term) = @{
+		@t = ast_make_prose_term(@l);
+	@};
+
 	<make-group-term>: (a :ast_alt) -> (t :ast_term) = @{
 		@t = ast_make_group_term(@a);
 	@};

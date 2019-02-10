@@ -102,6 +102,22 @@ node_create_name(const char *name)
 }
 
 struct node *
+node_create_prose(const char *prose)
+{
+	struct node *new;
+
+	assert(prose != NULL);
+
+	new = xmalloc(sizeof *new);
+
+	new->type = NODE_PROSE;
+
+	new->u.prose = prose;
+
+	return new;
+}
+
+struct node *
 node_create_alt(struct list *alt)
 {
 	struct node *new;
