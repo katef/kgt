@@ -62,7 +62,8 @@ struct io {
 	{ "rrta",     NULL,           rrta_output,     0, rrta_rrd_unsupported     },
 	{ "rrtext",   NULL,           rrtext_output,   0, 0 },
 	{ "svg",      NULL,           svg_output,      0, 0 },
-	{ "html",     NULL,           html_output,     0, 0 }
+	{ "html",     NULL,           html_output,     0, 0 },
+	{ "xhtml",    NULL,           xhtml_output,    0, 0 }
 };
 
 enum io_dir {

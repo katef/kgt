@@ -14,4 +14,7 @@ extern int prettify;
 void
 html_output(const struct ast_rule *);
 
+void
+xhtml_output(const struct ast_rule *);
+
 #endif

@@ -37,16 +37,15 @@ extern struct dim svg_dim;
 void svg_render_rule(const struct tnode *node, const char *base);
 void svg_defs(void);
 
-void
-html_output(const struct ast_rule *grammar)
+static void
+output(const struct ast_rule *grammar, int xml)
 {
 	const struct ast_rule *p;
 
-	printf("<DOCTYPE html>\n");
-	printf("<html>\n");
-	printf("\n");
-
 	printf(" <head>\n");
+	if (xml) {
+		printf("  <meta charset='UTF-8'/>\n");
+	}
 
 	printf("  <style>\n");
 	printf("      rect, line, path { stroke-width: 1.5px; stroke: black; fill: transparent; }\n");
@@ -62,7 +61,11 @@ html_output(const struct ast_rule *grammar)
 	printf("  </style>\n");
 	printf("\n");
 
-	printf(" <svg height='0' width='0' style='float: left'>\n"); /* XXX: why does this take space? */
+	printf(" <svg");
+	if (xml) {
+		printf(" xmlns='http://www.w3.org/2000/svg'");
+	}
+	printf(" height='0' width='0' style='float: left'>\n"); /* XXX: why does this take space? */
 	svg_defs();
 	printf(" </svg>\n");
 	printf("\n");
@@ -97,7 +100,11 @@ html_output(const struct ast_rule *grammar)
 		h = (tnode->a + tnode->d + 2) * 10;
 		w = (tnode->w + 7) * 10;
 
-		printf("  <svg height='%u' width='%u' viewBox='-20 -10 %u %u'>\n",
+		printf("  <svg");
+		if (xml) {
+			printf(" xmlns='http://www.w3.org/2000/svg'");
+		}
+		printf(" height='%u' width='%u' viewBox='-20 -10 %u %u'>\n",
 			h, w, w, h);
 		svg_render_rule(tnode, "");
 		printf("  </svg>\n");
@@ -109,6 +116,32 @@ html_output(const struct ast_rule *grammar)
 	}
 
 	printf(" </body>\n");
+}
+
+void
+html_output(const struct ast_rule *grammar)
+{
+	printf("<!DOCTYPE html>\n");
+	printf("<html>\n");
+	printf("\n");
+
+	output(grammar, 0);
+
+	printf("</html>\n");
+}
+
+void
+xhtml_output(const struct ast_rule *grammar)
+{
+	printf("<?xml version='1.0' encoding='utf-8'?>\n");
+	printf("<!DOCTYPE html>\n");
+	printf("<html xml:lang='en' lang='en'\n");
+	printf("  xmlns='http://www.w3.org/1999/xhtml'\n");
+	printf("  xmlns:xlink='http://www.w3.org/1999/xlink'>\n");
+	printf("\n");
+
+	output(grammar, 1);
+
 	printf("</html>\n");
 }
 
