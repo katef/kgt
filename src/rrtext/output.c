@@ -35,7 +35,7 @@
 struct render_context {
 	char **lines;
 	char *scratch;
-	int x, y;
+	int x, y; /* in character indicies */
 };
 
 static void node_walk_render(const struct tnode *n, struct render_context *ctx);

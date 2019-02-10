@@ -35,7 +35,7 @@
 #include "path.h"
 
 struct render_context {
-	int x, y;
+	int x, y; /* in svg units */
 
 	struct path *paths;
 };
@@ -68,15 +68,15 @@ static void
 svg_text(struct render_context *ctx, unsigned w, const char *s, const char *class)
 {
 	const char *p;
-	float mid;
+	unsigned mid;
 
 	assert(ctx != NULL);
 	assert(s != NULL);
 
-	mid = (float) w / 2;
+	mid = w / 2;
 
-	printf("    <text x='%.0f' y='%u5' text-anchor='middle'",
-		10 * (ctx->x + mid), ctx->y);
+	printf("    <text x='%u' y='%u' text-anchor='middle'",
+		ctx->x + mid, ctx->y + 5);
 
 	if (class != NULL) {
 		printf(" class='%s'", class);
@@ -95,9 +95,9 @@ static void
 svg_rect(struct render_context *ctx, unsigned w, unsigned r,
 	const char *class)
 {
-	printf("    <rect x='%d0' y='%d0' height='%u0' width='%u0' rx='%u' ry='%u'",
-		(int) ctx->x, (int) ctx->y - 1,
-		2, w,
+	printf("    <rect x='%d' y='%d' height='%u' width='%u' rx='%u' ry='%u'",
+		ctx->x, ctx->y - 10,
+		20, w,
 		r, r);
 
 	if (class != NULL) {
@@ -131,21 +131,21 @@ svg_label(struct render_context *ctx, const char *s, unsigned w)
 static void
 svg_ellipsis(struct render_context *ctx, int w, int h)
 {
-	ctx->x += 1;
-	ctx->y -= 1;
+	ctx->x += 10;
+	ctx->y -= 10;
 
-	printf("    <line x1='%u0' y1='%u5' x2='%d0' y2='%u5' class='ellipsis'/>",
-		ctx->x, ctx->y,
-		(int) ctx->x + w, ctx->y + h);
+	printf("    <line x1='%d' y1='%d' x2='%d' y2='%d' class='ellipsis'/>",
+		ctx->x - 5, ctx->y + 5,
+		ctx->x + w - 5, ctx->y + h + 5);
 
 	ctx->x += w;
-	ctx->y += 1;
+	ctx->y += 10;
 }
 
 static void
 svg_use(struct render_context *ctx, const char *id, const char *transform)
 {
-	printf("    <use xlink:href='#%s' x='%d0' y='%d0'", id, ctx->x, ctx->y);
+	printf("    <use xlink:href='#%s' x='%d' y='%d'", id, ctx->x, ctx->y);
 
 	if (transform != NULL) {
 		printf(" transform='%s'", transform);
@@ -160,8 +160,8 @@ justify(struct render_context *ctx, const struct tnode *n, int space,
 {
 	unsigned lhs, rhs;
 
-	lhs = (space - n->w) / 2;
-	rhs = (space - n->w) - lhs;
+	lhs = (space - n->w * 10) / 2;
+	rhs = (space - n->w * 10) - lhs;
 
 	if (n->type != TNODE_ELLIPSIS) {
 		svg_path_h(&ctx->paths, ctx->x, ctx->y, lhs);
@@ -175,7 +175,7 @@ justify(struct render_context *ctx, const struct tnode *n, int space,
 	}
 	ctx->x += rhs;
 
-	ctx->y++;
+	ctx->y += 10;
 }
 
 static void
@@ -206,12 +206,12 @@ render_tile(struct render_context *ctx, enum tile tile)
 	int rx, ry;
 
 	switch (tile) {
-	case TILE_BL_N1: tile = TILE_BL; dy = -1; break;
-	case TILE_BR_N1: tile = TILE_BR; dy = -1; break;
-	case TILE_TR_N1: tile = TILE_TR; dy = -1; break;
+	case TILE_BL_N1: tile = TILE_BL; dy = -10; break;
+	case TILE_BR_N1: tile = TILE_BR; dy = -10; break;
+	case TILE_TR_N1: tile = TILE_TR; dy = -10; break;
 
 	case TILE_TL:
-		dy = +1;
+		dy = 10;
 		break;
 
 	case TILE_BR:
@@ -227,22 +227,22 @@ render_tile(struct render_context *ctx, enum tile tile)
 	}
 
 	switch (tile) {
-	case TILE_BL: y =  1; rx = 0; ry = y; break;
-	case TILE_TL: y = -1; rx = 0; ry = y; break;
-	case TILE_BR: y = -1; rx = 1; ry = 0; break;
-	case TILE_TR: y =  1; rx = 1; ry = 0; break;
+	case TILE_BL: y =  10; rx =  0; ry = y; break;
+	case TILE_TL: y = -10; rx =  0; ry = y; break;
+	case TILE_BR: y = -10; rx = 10; ry = 0; break;
+	case TILE_TR: y =  10; rx = 10; ry = 0; break;
 
 	case TILE_LINE:
-		svg_path_h(&ctx->paths, ctx->x, ctx->y + dy, 1);
-		ctx->x += 1;
+		svg_path_h(&ctx->paths, ctx->x, ctx->y + dy, 10);
+		ctx->x += 10;
 		return;
 
 	default:
 		assert(!"unreached");
 	}
 
-	svg_path_q(&ctx->paths, ctx->x, ctx->y + dy, rx, ry, 1, y);
-	ctx->x += 1;
+	svg_path_q(&ctx->paths, ctx->x, ctx->y + dy, rx, ry, 10, y);
+	ctx->x += 10;
 }
 
 static void
@@ -252,7 +252,7 @@ render_tile_bm(struct render_context *ctx, unsigned u)
 
 	if (u == 0) {
 		/* nothing to draw */
-		ctx->x += 1;
+		ctx->x += 10;
 		return;
 	}
 
@@ -260,7 +260,7 @@ render_tile_bm(struct render_context *ctx, unsigned u)
 		render_tile(ctx, v & -v);
 
 		if ((v & v - 1) != 0) {
-			ctx->x -= 1;
+			ctx->x -= 10;
 		}
 	}
 }
@@ -325,7 +325,7 @@ render_vlist(const struct tnode *n,
 
 	assert(n->u.vlist.o <= 1); /* currently only implemented for one node above the line */
 	if (n->u.vlist.o == 1) {
-		ctx->y -= n->a;
+		ctx->y -= n->a * 10;
 	}
 
 	x = ctx->x;
@@ -337,18 +337,17 @@ render_vlist(const struct tnode *n,
 		render_tline_outer(ctx, n->u.vlist.b[j], 0);
 		render_tline_inner(ctx, n->u.vlist.b[j], 0);
 
-		justify(ctx, n->u.vlist.a[j], n->w - 4, base);
+		justify(ctx, n->u.vlist.a[j], n->w * 10 - 40, base);
 
-		ctx->y -= 1;
+		ctx->y -= 10;
 		render_tline_inner(ctx, n->u.vlist.b[j], 1);
 		render_tline_outer(ctx, n->u.vlist.b[j], 1);
-		ctx->y += 1;
+		ctx->y += 10;
 
 		if (j + 1 < n->u.vlist.n) {
-			ctx->y += n->u.vlist.a[j]->d + n->u.vlist.a[j + 1]->a;
+			ctx->y += (n->u.vlist.a[j]->d + n->u.vlist.a[j + 1]->a) * 10;
 		}
 	}
-
 
 	/* bars above the line */
 	if (n->u.vlist.o > 0) {
@@ -358,15 +357,15 @@ render_vlist(const struct tnode *n,
 
 		for (j = 0; j < n->u.vlist.o; j++) {
 			if (j + 1 < n->u.vlist.n) {
-				h += n->u.vlist.a[j]->d + n->u.vlist.a[j + 1]->a + 1;
+				h += (n->u.vlist.a[j]->d + n->u.vlist.a[j + 1]->a + 1) * 10;
 			}
 		}
 
-		ctx->x = x + 1;
-		ctx->y = y + 1;
+		ctx->x = x + 10;
+		ctx->y = y + 10;
 
-		h -= 2; /* for the tline corner pieces */
-		bars(ctx, h, n->w - 2);
+		h -= 20; /* for the tline corner pieces */
+		bars(ctx, h, n->w * 10 - 20);
 	}
 
 	/* bars below the line */
@@ -377,18 +376,18 @@ render_vlist(const struct tnode *n,
 
 		for (j = n->u.vlist.o; j < n->u.vlist.n; j++) {
 			if (j + 1 < n->u.vlist.n) {
-				h += n->u.vlist.a[j]->d + n->u.vlist.a[j + 1]->a + 1;
+				h += (n->u.vlist.a[j]->d + n->u.vlist.a[j + 1]->a + 1) * 10;
 			}
 		}
 
-		ctx->x = x + 1;
-		ctx->y = o + 1;
+		ctx->x = x + 10;
+		ctx->y = o + 10;
 
-		h -= 2; /* for the tline corner pieces */
-		bars(ctx, h, n->w - 2);
+		h -= 20; /* for the tline corner pieces */
+		bars(ctx, h, n->w * 10 - 20);
 	}
 
-	ctx->x = x + n->w;
+	ctx->x = x + n->w * 10;
 	ctx->y = o;
 }
 
@@ -406,8 +405,8 @@ render_hlist(const struct tnode *n,
 		node_walk_render(n->u.hlist.a[!n->rtl ? i : n->u.hlist.n - i], ctx, base);
 
 		if (i + 1 < n->u.hlist.n) {
-			svg_path_h(&ctx->paths, ctx->x, ctx->y, 2);
-			ctx->x += 2;
+			svg_path_h(&ctx->paths, ctx->x, ctx->y, 20);
+			ctx->x += 20;
 		}
 	}
 }
@@ -421,39 +420,39 @@ node_walk_render(const struct tnode *n,
 	switch (n->type) {
 	case TNODE_SKIP:
 		/* TODO: skips under loop alts are too close to the line */
-		ctx->x += n->w;
+		ctx->x += n->w * 10;
 		break;
 
 	case TNODE_ARROW:
-		svg_path_h(&ctx->paths, ctx->x, ctx->y, 1);
+		svg_path_h(&ctx->paths, ctx->x, ctx->y, 10);
 		svg_use(ctx, n->rtl ? "rrd:arrow-rtl" : "rrd:arrow-ltr", "translate(5 0)");
-		ctx->x += n->w;
+		ctx->x += n->w * 10;
 		break;
 
 	case TNODE_ELLIPSIS:
 		/* TODO: 2 looks too long */
-		svg_ellipsis(ctx, 0, 2);
+		svg_ellipsis(ctx, 0, 20);
 		break;
 
 	case TNODE_CI_LITERAL:
-		svg_textbox(ctx, n->u.literal, n->w, 8, "literal");
-		printf("    <text x='%u5' y='%u5' text-anchor='left' class='ci'>%s</text>\n",
-			ctx->x - 2, ctx->y, "&#x29f8;i");
+		svg_textbox(ctx, n->u.literal, n->w * 10, 8, "literal");
+		printf("    <text x='%d' y='%d' text-anchor='left' class='ci'>%s</text>\n",
+			ctx->x - 20 + 5, ctx->y + 5, "&#x29f8;i");
 		break;
 
 	case TNODE_CS_LITERAL:
-		svg_textbox(ctx, n->u.literal, n->w, 8, "literal");
+		svg_textbox(ctx, n->u.literal, n->w * 10, 8, "literal");
 		break;
 
 	case TNODE_LABEL:
-		svg_label(ctx, n->u.label, n->w);
+		svg_label(ctx, n->u.label, n->w * 10);
 		break;
 
 	case TNODE_RULE:
 		if (base != NULL) {
 			printf("<a href='%s#%s'>\n", base, n->u.name); /* XXX: escape */
 		}
-		svg_textbox(ctx, n->u.name, n->w, 0, "rule");
+		svg_textbox(ctx, n->u.name, n->w * 10, 0, "rule");
 		if (base != NULL) {
 			printf("</a>\n");
 		}
@@ -475,22 +474,22 @@ svg_render_rule(const struct tnode *node, const char *base)
 	struct render_context ctx;
 	unsigned w;
 
-	w = node->w + 8;
+	w = (node->w + 8) * 10;
 
 	ctx.paths = NULL;
 
 	ctx.x = 0;
-	ctx.y = node->a;
+	ctx.y = node->a * 10;
 	svg_use(&ctx, "rrd:station", "scale(-1 1)");
-	svg_path_h(&ctx.paths, ctx.x, ctx.y, 2);
+	svg_path_h(&ctx.paths, ctx.x, ctx.y, 20);
 
-	ctx.x = w - 6;
-	svg_path_h(&ctx.paths, ctx.x, ctx.y, 2);
-	ctx.x += 2;
+	ctx.x = w - 60;
+	svg_path_h(&ctx.paths, ctx.x, ctx.y, 20);
+	ctx.x += 20;
 	svg_use(&ctx, "rrd:station", NULL);
 
-	ctx.x = 2;
-	ctx.y = node->a;
+	ctx.x = 20;
+	ctx.y = node->a * 10;
 	node_walk_render(node, &ctx, base);
 
 	/*
@@ -509,15 +508,15 @@ svg_render_rule(const struct tnode *node, const char *base)
 
 		p = svg_path_find_start(ctx.paths);
 
-		printf("    <path d='M%u0 %u0", p->x, p->y);
+		printf("    <path d='M%d %d", p->x, p->y);
 
 		do {
 			unsigned nx, ny;
 
 			switch (p->type) {
-			case PATH_H: printf(" h%d0", p->u.n); break;
-			case PATH_V: printf(" v%d0", p->u.n); break;
-			case PATH_Q: printf(" q%d0 %d0 %d0 %d0", p->u.q[0], p->u.q[1], p->u.q[2], p->u.q[3]); break;
+			case PATH_H: printf(" h%d", p->u.n); break;
+			case PATH_V: printf(" v%d", p->u.n); break;
+			case PATH_Q: printf(" q%d %d %d %d", p->u.q[0], p->u.q[1], p->u.q[2], p->u.q[3]); break;
 			}
 
 			svg_path_move(p, &nx, &ny);
@@ -701,8 +700,8 @@ svg_output(const struct ast_rule *grammar)
 	printf("  xmlns='http://www.w3.org/2000/svg'\n");
 	printf("  xmlns:xlink='http://www.w3.org/1999/xlink'\n");
 	printf("\n");
-	printf("  viewBox='-20 -50 %u0 %u0'\n", w, h); /* TODO */
-	printf("  width='%u0' height='%u0'>\n", w, h);
+	printf("  viewBox='-20 -50 %u %u'\n", w * 10, h * 10); /* TODO */
+	printf("  width='%u0' height='%u'>\n", w, h * 10);
 	printf("\n");
 
 	printf("  <style>\n");
@@ -719,10 +718,10 @@ svg_output(const struct ast_rule *grammar)
 	z = 0;
 
 	for (i = 0, p = grammar; p; p = p->next, i++) {
-		printf("  <g transform='translate(%u0 %u0)'>\n",
-			4, z);
-		printf("    <text x='-%u0' y='-%u0'>%s:</text>\n",
-			4, 2, p->name);
+		printf("  <g transform='translate(%d %u)'>\n",
+			40, z * 10);
+		printf("    <text x='-%d' y='-%d'>%s:</text>\n",
+			40, 20, p->name);
 
 		svg_render_rule(a[i], NULL);
 

@@ -94,10 +94,10 @@ html_output(const struct ast_rule *grammar)
 		printf("  <h2><a name='%s'>%s:</a></h2>\n",
 			p->name, p->name);
 
-		h = tnode->a + tnode->d + 2;
-		w = tnode->w + 7;
+		h = (tnode->a + tnode->d + 2) * 10;
+		w = (tnode->w + 7) * 10;
 
-		printf("  <svg height='%u0' width='%u0' viewBox='-20 -10 %u0 %u0'>\n",
+		printf("  <svg height='%u' width='%u' viewBox='-20 -10 %u %u'>\n",
 			h, w, w, h);
 		svg_render_rule(tnode, "");
 		printf("  </svg>\n");

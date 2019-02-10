@@ -69,6 +69,7 @@ struct tnode {
 		TNODE_HLIST
 	} type;
 
+	/* in abstract rrd units */
 	unsigned w;
 	unsigned a; /* ascender  - height including and above the line  */
 	unsigned d; /* descender - depth below the line */
