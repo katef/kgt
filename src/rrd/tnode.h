@@ -93,6 +93,7 @@ struct dim {
 	unsigned rule_padding;
 	unsigned prose_padding;
 	unsigned ci_marker;
+	unsigned ellipsis_depth;
 };
 
 void

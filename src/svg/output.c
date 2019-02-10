@@ -430,8 +430,7 @@ node_walk_render(const struct tnode *n,
 		break;
 
 	case TNODE_ELLIPSIS:
-		/* TODO: 2 looks too long */
-		svg_ellipsis(ctx, 0, 20);
+		svg_ellipsis(ctx, 0, (n->a + n->d + 1) * 10);
 		break;
 
 	case TNODE_CI_LITERAL:
@@ -624,7 +623,8 @@ struct dim svg_dim = {
 	0,
 	0,
 	0,
-	2
+	2,
+	0
 };
 
 void
@@ -710,7 +710,7 @@ svg_output(const struct ast_rule *grammar)
 	printf("    rect, line, path { stroke-linecap: square; stroke-linejoin: rounded; }\n");
 	printf("    path { fill: transparent; }\n");
 	printf("    text.literal { font-family: monospace; }\n");
-	printf("    line.ellipsis { stroke-dasharray: 4; }\n");
+	printf("    line.ellipsis { stroke-dasharray: 1 3.5; }\n");
 	printf("  </style>\n");
 	printf("\n");
 

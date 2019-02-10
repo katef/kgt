@@ -308,7 +308,8 @@ rrtext_output(const struct ast_rule *grammar)
 		4,
 		2,
 		4,
-		2
+		2,
+		1
 	};
 
 	for (p = grammar; p; p = p->next) {

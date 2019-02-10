@@ -154,6 +154,7 @@ rrtdump_output(const struct ast_rule *grammar)
 		0,
 		0,
 		0,
+		0,
 		0
 	};
 

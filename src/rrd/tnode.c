@@ -32,7 +32,7 @@ static struct tnode *
 tnode_create_node(const struct node *node, int rtl, const struct dim *dim);
 
 static struct tnode *
-tnode_create_ellipsis(void);
+tnode_create_ellipsis(const struct dim *dim);
 
 static void
 swap(struct tnode **a, struct tnode **b)
@@ -322,7 +322,7 @@ tnode_create_alt_list(const struct list *list, int rtl, const struct dim *dim)
 
 		default:
 			new.a[i++] = tnode_create_node(find_node(list, lo), rtl, dim);
-			new.a[i++] = tnode_create_ellipsis();
+			new.a[i++] = tnode_create_ellipsis(dim);
 			new.a[i++] = tnode_create_node(find_node(list, hi - 1), rtl, dim);
 
 			for (j = lo; j <= hi - 1; j++) {
@@ -391,16 +391,18 @@ loop_label(unsigned min, unsigned max, char *s)
 }
 
 static struct tnode *
-tnode_create_ellipsis(void)
+tnode_create_ellipsis(const struct dim *dim)
 {
 	struct tnode *new;
+
+	assert(dim != NULL);
 
 	new = xmalloc(sizeof *new);
 
 	new->type = TNODE_ELLIPSIS;
 	new->w = 1;
 	new->a = 0;
-	new->d = 1;
+	new->d = dim->ellipsis_depth;
 
 	return new;
 }
