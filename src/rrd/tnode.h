@@ -91,6 +91,7 @@ struct dim {
 	void (*rule_string   )(const char *s, unsigned *w, unsigned *a, unsigned *d);
 	unsigned literal_padding;
 	unsigned rule_padding;
+	unsigned prose_padding;
 	unsigned ci_marker;
 };
 

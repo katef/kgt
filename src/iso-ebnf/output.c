@@ -17,6 +17,7 @@
 #include <assert.h>
 
 #include "../ast.h"
+#include "../rrd/node.h"
 
 #include "io.h"
 
@@ -119,7 +120,11 @@ output_term(const struct ast_term *term)
 		break;
 
 	case TYPE_PROSE:
-		/* TODO: trim whitespace */
+		if (unquoted_prose(term->u.prose)) {
+			printf(" %s", term->u.prose);
+			break;
+		}
+
 		printf(" ? %s ?", term->u.prose);
 		break;
 

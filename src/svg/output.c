@@ -623,6 +623,7 @@ struct dim svg_dim = {
 	dim_prop_string,
 	0,
 	0,
+	0,
 	2
 };
 

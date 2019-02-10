@@ -14,6 +14,12 @@
 
 #include "../xalloc.h"
 
+int
+unquoted_prose(const char *prose)
+{
+	return prose[0] == '(' && prose[strlen(prose) - 1] == ')';
+}
+
 void
 node_free(struct node *n)
 {

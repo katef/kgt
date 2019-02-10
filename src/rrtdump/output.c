@@ -159,6 +159,7 @@ rrtdump_output(const struct ast_rule *grammar)
 		dim_mono_string,
 		0,
 		0,
+		0,
 		0
 	};
 

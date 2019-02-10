@@ -221,7 +221,12 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_PROSE:
-		bprintf(ctx, "%s", n->u.prose);
+		if (unquoted_prose(n->u.prose)) {
+			bprintf(ctx, "%s", n->u.prose);
+			break;
+		}
+
+		bprintf(ctx, "? %s ?", n->u.prose);
 		break;
 
 	case TNODE_RULE:
@@ -302,6 +307,7 @@ rrtext_output(const struct ast_rule *grammar)
 		dim_mono_string,
 		4,
 		2,
+		4,
 		2
 	};
 

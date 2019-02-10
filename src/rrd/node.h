@@ -40,6 +40,9 @@ struct node {
 	} u;
 };
 
+int
+unquoted_prose(const char *prose);
+
 void
 node_free(struct node *);
 
