@@ -85,12 +85,15 @@ struct tnode {
 	} u;
 };
 
+struct dim {
+	void (*string)(const char *s, unsigned *w, unsigned *a, unsigned *d);
+};
+
 void
 tnode_free(struct tnode *n);
 
 struct tnode *
-rrd_to_tnode(const struct node *node,
-	void (*dim_string)(const char *s, unsigned *w, unsigned *a, unsigned *d));
+rrd_to_tnode(const struct node *node, const struct dim *dim);
 
 #endif
 

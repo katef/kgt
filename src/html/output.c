@@ -32,9 +32,9 @@
 
 #include "io.h"
 
-/* xxx */
+/* XXX */
+extern struct dim svg_dim;
 void svg_render_rule(const struct tnode *node, const char *base);
-void svg_dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d);
 void svg_defs(void);
 
 void
@@ -86,7 +86,7 @@ html_output(const struct ast_rule *grammar)
 			rrd_pretty(&rrd);
 		}
 
-		tnode = rrd_to_tnode(rrd, svg_dim_string);
+		tnode = rrd_to_tnode(rrd, &svg_dim);
 
 		node_free(rrd);
 

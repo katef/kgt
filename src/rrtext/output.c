@@ -297,6 +297,10 @@ rrtext_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
 
+	struct dim dim = {
+		dim_string
+	};
+
 	for (p = grammar; p; p = p->next) {
 		struct node *rrd;
 		struct tnode *tnode;
@@ -310,7 +314,7 @@ rrtext_output(const struct ast_rule *grammar)
 			rrd_pretty(&rrd);
 		}
 
-		tnode = rrd_to_tnode(rrd, dim_string);
+		tnode = rrd_to_tnode(rrd, &dim);
 
 		node_free(rrd);
 

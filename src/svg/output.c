@@ -538,8 +538,8 @@ svg_render_rule(const struct tnode *node, const char *base)
 	}
 }
 
-void
-svg_dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
+static void
+dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 {
 	const char *p;
 	double n;
@@ -613,6 +613,10 @@ svg_dim_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 	*d = 1;
 }
 
+struct dim svg_dim = {
+	dim_string
+};
+
 void
 svg_defs(void)
 {
@@ -670,7 +674,7 @@ svg_output(const struct ast_rule *grammar)
 			rrd_pretty(&rrd);
 		}
 
-		a[i] = rrd_to_tnode(rrd, svg_dim_string);
+		a[i] = rrd_to_tnode(rrd, &svg_dim);
 
 		if (a[i]->w > w) {
 			w = a[i]->w;

@@ -29,8 +29,7 @@
 #include "../xalloc.h"
 
 static struct tnode *
-tnode_create_node(const struct node *node, int rtl,
-	void (*dim_string)(const char *s, unsigned *w, unsigned *a, unsigned *d));
+tnode_create_node(const struct node *node, int rtl, const struct dim *dim);
 
 static struct tnode *
 tnode_create_ellipsis(void);
@@ -226,8 +225,7 @@ find_node(const struct list *list, char d)
 }
 
 static struct tnode_vlist
-tnode_create_alt_list(const struct list *list, int rtl,
-	void (*dim_string)(const char *s, unsigned *w, unsigned *a, unsigned *d))
+tnode_create_alt_list(const struct list *list, int rtl, const struct dim *dim)
 {
 	const struct list *p;
 	struct tnode_vlist new;
@@ -235,7 +233,7 @@ tnode_create_alt_list(const struct list *list, int rtl,
 	struct bm bm;
 	int hi, lo;
 
-	assert(dim_string != NULL);
+	assert(dim != NULL);
 
 	new.n = list_count(list); /* worst case */
 	if (new.n == 0) {
@@ -253,7 +251,7 @@ tnode_create_alt_list(const struct list *list, int rtl,
 		unsigned char c;
 
 		if (!char_terminal(p->node, &c)) {
-			new.a[i++] = tnode_create_node(p->node, rtl, dim_string);
+			new.a[i++] = tnode_create_node(p->node, rtl, dim);
 			continue;
 		}
 
@@ -275,7 +273,7 @@ tnode_create_alt_list(const struct list *list, int rtl,
 		}
 
 		if (!isalnum((unsigned char) lo) && isalnum((unsigned char) hi)) {
-			new.a[i++] = tnode_create_node(find_node(list, lo), rtl, dim_string);
+			new.a[i++] = tnode_create_node(find_node(list, lo), rtl, dim);
 			bm_unset(&bm, lo);
 
 			hi = lo;
@@ -316,16 +314,16 @@ tnode_create_alt_list(const struct list *list, int rtl,
 		case 1:
 		case 2:
 		case 3:
-			new.a[i++] = tnode_create_node(find_node(list, lo), rtl, dim_string);
+			new.a[i++] = tnode_create_node(find_node(list, lo), rtl, dim);
 			bm_unset(&bm, lo);
 
 			hi = lo;
 			break;
 
 		default:
-			new.a[i++] = tnode_create_node(find_node(list, lo), rtl, dim_string);
+			new.a[i++] = tnode_create_node(find_node(list, lo), rtl, dim);
 			new.a[i++] = tnode_create_ellipsis();
-			new.a[i++] = tnode_create_node(find_node(list, hi - 1), rtl, dim_string);
+			new.a[i++] = tnode_create_node(find_node(list, hi - 1), rtl, dim);
 
 			for (j = lo; j <= hi - 1; j++) {
 				bm_unset(&bm, j);
@@ -344,14 +342,13 @@ tnode_create_alt_list(const struct list *list, int rtl,
 }
 
 static struct tnode_hlist
-tnode_create_hlist(const struct list *list, int rtl,
-	void (*dim_string)(const char *s, unsigned *w, unsigned *a, unsigned *d))
+tnode_create_hlist(const struct list *list, int rtl, const struct dim *dim)
 {
 	const struct list *p;
 	struct tnode_hlist new;
 	size_t i;
 
-	assert(dim_string != NULL);
+	assert(dim != NULL);
 
 	new.n = list_count(list);
 	if (new.n == 0) {
@@ -362,7 +359,7 @@ tnode_create_hlist(const struct list *list, int rtl,
 	new.a = xmalloc(sizeof *new.a * new.n);
 
 	for (i = 0, p = list; p != NULL; p = p->next) {
-		new.a[i++] = tnode_create_node(p->node, rtl, dim_string);
+		new.a[i++] = tnode_create_node(p->node, rtl, dim);
 	}
 
 	assert(i == new.n);
@@ -409,12 +406,11 @@ tnode_create_ellipsis(void)
 }
 
 static struct tnode *
-tnode_create_node(const struct node *node, int rtl,
-	void (*dim_string)(const char *s, unsigned *w, unsigned *a, unsigned *d))
+tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 {
 	struct tnode *new;
 
-	assert(dim_string != NULL);
+	assert(dim != NULL);
 
 	new = xmalloc(sizeof *new);
 
@@ -433,21 +429,21 @@ tnode_create_node(const struct node *node, int rtl,
 	case NODE_CI_LITERAL:
 		new->type = TNODE_CI_LITERAL;
 		new->u.literal = esc_literal(node->u.literal);
-		dim_string(new->u.literal, &new->w, &new->a, &new->d);
+		dim->string(new->u.literal, &new->w, &new->a, &new->d);
 		new->w += 4 + 2;
 		break;
 
 	case NODE_CS_LITERAL:
 		new->type = TNODE_CS_LITERAL;
 		new->u.literal = esc_literal(node->u.literal);
-		dim_string(new->u.literal, &new->w, &new->a, &new->d);
+		dim->string(new->u.literal, &new->w, &new->a, &new->d);
 		new->w += 4;
 		break;
 
 	case NODE_RULE:
 		new->type = TNODE_RULE;
 		new->u.name = node->u.name;
-		dim_string(new->u.name, &new->w, &new->a, &new->d);
+		dim->string(new->u.name, &new->w, &new->a, &new->d);
 		new->w += 2;
 		break;
 
@@ -467,9 +463,9 @@ tnode_create_node(const struct node *node, int rtl,
 			list.node = NULL;
 			list.next = node->u.alt;
 
-			new->u.vlist = tnode_create_alt_list(&list, rtl, dim_string);
+			new->u.vlist = tnode_create_alt_list(&list, rtl, dim);
 		} else {
-			new->u.vlist = tnode_create_alt_list(node->u.alt, rtl, dim_string);
+			new->u.vlist = tnode_create_alt_list(node->u.alt, rtl, dim);
 		}
 
 		{
@@ -582,7 +578,7 @@ tnode_create_node(const struct node *node, int rtl,
 
 	case NODE_SEQ:
 		new->type = TNODE_HLIST;
-		new->u.hlist = tnode_create_hlist(node->u.seq, rtl, dim_string);
+		new->u.hlist = tnode_create_hlist(node->u.seq, rtl, dim);
 
 		{
 			unsigned w;
@@ -636,8 +632,8 @@ tnode_create_node(const struct node *node, int rtl,
 		new->u.vlist.a = xmalloc(sizeof *new->u.vlist.a * new->u.vlist.n);
 		new->u.vlist.b = xmalloc(sizeof *new->u.vlist.b * new->u.vlist.n);
 
-		new->u.vlist.a[0] = tnode_create_node(node->u.loop.forward,   rtl, dim_string);
-		new->u.vlist.a[1] = tnode_create_node(node->u.loop.backward, !rtl, dim_string);
+		new->u.vlist.a[0] = tnode_create_node(node->u.loop.forward,   rtl, dim);
+		new->u.vlist.a[1] = tnode_create_node(node->u.loop.backward, !rtl, dim);
 
 		new->u.vlist.b[0] = TLINE_H;
 		new->u.vlist.b[1] = TLINE_E;
@@ -663,7 +659,7 @@ tnode_create_node(const struct node *node, int rtl,
 					label_tnode = new->u.vlist.a[1];
 					label_tnode->type = TNODE_LABEL;
 					label_tnode->u.label = label;
-					dim_string(label, &label_tnode->w, &label_tnode->a, &label_tnode->d);
+					dim->string(label, &label_tnode->w, &label_tnode->a, &label_tnode->d);
 				} else {
 					/* TODO: store label somewhere for rendering to display somehow */
 					assert(!"unimplemented");
@@ -733,14 +729,13 @@ tnode_create_node(const struct node *node, int rtl,
 }
 
 struct tnode *
-rrd_to_tnode(const struct node *node,
-	void (*dim_string)(const char *s, unsigned *w, unsigned *a, unsigned *d))
+rrd_to_tnode(const struct node *node, const struct dim *dim)
 {
 	struct tnode *n;
 
-	assert(dim_string != NULL);
+	assert(dim != NULL);
 
-	n = tnode_create_node(node, 0, dim_string);
+	n = tnode_create_node(node, 0, dim);
 
 	return n;
 }

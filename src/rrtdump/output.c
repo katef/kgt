@@ -154,6 +154,10 @@ rrtdump_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
 
+	struct dim dim = {
+		dim_string
+	};
+
 	for (p = grammar; p != NULL; p = p->next) {
 		struct tnode *tnode;
 		struct node *rrd;
@@ -163,7 +167,7 @@ rrtdump_output(const struct ast_rule *grammar)
 			return;
 		}
 
-		tnode = rrd_to_tnode(rrd, dim_string);
+		tnode = rrd_to_tnode(rrd, &dim);
 
 		if (!prettify) {
 			printf("%s:\n", p->name);
@@ -178,7 +182,7 @@ rrtdump_output(const struct ast_rule *grammar)
 
 			rrd_pretty(&rrd);
 
-			tnode = rrd_to_tnode(rrd, dim_string);
+			tnode = rrd_to_tnode(rrd, &dim);
 
 			printf("%s: (after prettify)\n", p->name);
 			tnode_walk(stdout, tnode, 1);
