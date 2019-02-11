@@ -247,16 +247,21 @@ tnode_create_alt_list(const struct list *list, int rtl, const struct dim *dim)
 
 	hi = -1;
 
-	for (i = 0, p = list; p != NULL; p = p->next) {
+	i = 0;
+	p = list;
+
+	while (p != NULL) {
 		unsigned char c;
 
 		if (!char_terminal(p->node, &c)) {
 			new.a[i++] = tnode_create_node(p->node, rtl, dim);
+			p = p->next;
 			continue;
 		}
 
 		if (!bm_get(&bm, c)) {
 			/* already output */
+			p = p->next;
 			continue;
 		}
 
@@ -277,6 +282,7 @@ tnode_create_alt_list(const struct list *list, int rtl, const struct dim *dim)
 			bm_unset(&bm, lo);
 
 			hi = lo;
+			p = p->next;
 			continue;
 		}
 
