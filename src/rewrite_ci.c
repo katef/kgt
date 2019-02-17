@@ -101,7 +101,7 @@ walk_alt(struct ast_alt *alt)
 			break;
 
 		case TYPE_RULE:
-			rewrite_ci_literals(term->u.rule);
+			/* (struct ast_term).u.rule is just for the name; don't recurr into it */
 			break;
 
 		case TYPE_CI_LITERAL:

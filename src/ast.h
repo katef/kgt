@@ -34,7 +34,7 @@ struct ast_term {
 	} type;
 
 	union {
-		struct ast_rule *rule;
+		const struct ast_rule *rule; /* just for sake of the name */
 		const char *literal;
 		const char *token;
 		const char *prose;
