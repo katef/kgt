@@ -259,7 +259,7 @@ render_tile_bm(struct render_context *ctx, unsigned u)
 	for (v = u; v != 0; v &= v - 1) {
 		render_tile(ctx, v & -v);
 
-		if ((v & v - 1) != 0) {
+		if ((v & (v - 1)) != 0) {
 			ctx->x -= 10;
 		}
 	}
