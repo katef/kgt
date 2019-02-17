@@ -5,7 +5,7 @@
  */
 
 /*
- * Backus-Naur Form Output.
+ * RFC 5511 RBNF Output.
  *
  * TODO: fprintf(fout), instead of stdout
  */
@@ -95,12 +95,9 @@ output_term(const struct ast_term *term)
 		break;
 
 	case TYPE_CI_LITERAL:
+	case TYPE_CS_LITERAL:
 		fprintf(stderr, "unimplemented\n");
 		exit(EXIT_FAILURE);
-
-	case TYPE_CS_LITERAL:
-		printf(" <%s>", term->u.literal);
-		break;
 
 	case TYPE_TOKEN:
 		printf(" <%s>", term->u.token);
