@@ -1698,7 +1698,7 @@ ZL0:;
 						r = ast_find_rule(g, t->u.rule->name);
 						if (r != NULL) {
 							free((char *) t->u.rule->name);
-							ast_free_rule(t->u.rule);
+							ast_free_rule((void *) t->u.rule);
 							t->u.rule = r;
 							continue;
 						}
