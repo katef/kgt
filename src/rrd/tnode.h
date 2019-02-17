@@ -17,15 +17,15 @@ struct node;
  *       '              '
  */
 enum tline {
-	TLINE_A,
+	TLINE_A, TLINE_a,
 	TLINE_B,
-	TLINE_C,
-	TLINE_D,
+	TLINE_C, TLINE_c,
+	TLINE_D, TLINE_d,
 	TLINE_E,
 	TLINE_F,
-	TLINE_G,
-	TLINE_H,
-	TLINE_I
+	TLINE_G, TLINE_g,
+	TLINE_H, TLINE_h,
+	TLINE_I, TLINE_i
 };
 
 /*
@@ -74,8 +74,6 @@ struct tnode {
 	unsigned w;
 	unsigned a; /* ascender  - height including and above the line  */
 	unsigned d; /* descender - depth below the line */
-
-	int rtl;
 
 	union {
 		const char *literal; /* TODO: point to ast_literal instead */

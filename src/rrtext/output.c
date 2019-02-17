@@ -112,22 +112,22 @@ bars(struct render_context *ctx, unsigned n, unsigned w)
 }
 
 static void
-render_tline(struct render_context *ctx, enum tline tline, int rhs, int rtl)
+render_tline(struct render_context *ctx, enum tline tline, int rhs)
 {
 	const char *a;
 
 	assert(ctx != NULL);
 
 	switch (tline) {
-	case TLINE_A: a = rtl ? "<^" : "^>"; break;
-	case TLINE_B: a = ",.";              break;
-	case TLINE_C: a = rtl ? "<v" : "v>"; break;
-	case TLINE_D: a = rtl ? "<+" : "+>"; break;
-	case TLINE_E: a = "`'";              break;
-	case TLINE_F: a = "||";              break;
-	case TLINE_G: a = rtl ? "^<" : ">^"; break;
-	case TLINE_H: a = rtl ? "v<" : ">v"; break;
-	case TLINE_I: a = rtl ? "^<" : ">^"; break;
+	case TLINE_A: a = "<^"; break; case TLINE_a: a = "^>"; break;
+	case TLINE_B: a = ",."; break;
+	case TLINE_C: a = "<v"; break; case TLINE_c: a = "v>"; break;
+	case TLINE_D: a = "<+"; break; case TLINE_d: a = "+>"; break;
+	case TLINE_E: a = "`'"; break;
+	case TLINE_F: a = "||"; break;
+	case TLINE_G: a = "^<"; break; case TLINE_g: a = ">^"; break;
+	case TLINE_H: a = "v<"; break; case TLINE_h: a = ">v"; break;
+	case TLINE_I: a = "^<"; break; case TLINE_i: a = ">^"; break;
 
 	default:
 		a = "??";
@@ -163,9 +163,9 @@ render_vlist(const struct tnode *n, struct render_context *ctx)
 	for (j = 0; j < n->u.vlist.n; j++) {
 		ctx->x = x;
 
-		render_tline(ctx, n->u.vlist.b[j], 0, n->rtl);
+		render_tline(ctx, n->u.vlist.b[j], 0);
 		justify(ctx, n->u.vlist.a[j], n->w - 2);
-		render_tline(ctx, n->u.vlist.b[j], 1, n->rtl);
+		render_tline(ctx, n->u.vlist.b[j], 1);
 
 		if (j + 1 < n->u.vlist.n) {
 			ctx->y++;

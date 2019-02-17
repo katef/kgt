@@ -424,8 +424,6 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 
 	new = xmalloc(sizeof *new);
 
-	new->rtl = rtl;
-
 	if (node == NULL) {
 		new->type = TNODE_SKIP;
 		new->w = 0;
@@ -574,19 +572,19 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 				int lastalt   = i == new->u.vlist.n - 1;
 
 				if (sameline && new->u.vlist.n > 1 && lastalt) {
-					z = TLINE_A;
+					z = rtl ? TLINE_A : TLINE_a;
 				} else if (firstalt && aboveline) {
 					z = TLINE_B;
 				} else if (firstalt && sameline) {
-					z = TLINE_C;
+					z = rtl ? TLINE_C : TLINE_c;
 				} else if (sameline) {
-					z = TLINE_D;
+					z = rtl ? TLINE_D : TLINE_d;
 				} else if (belowline && i > 0 && lastalt) {
 					z = TLINE_E;
 				} else if (new->u.vlist.a[i]->type == TNODE_ELLIPSIS) {
 					z = TLINE_F;
 				} else {
-					z = TLINE_G;
+					z = rtl ? TLINE_G : TLINE_g;
 				}
 
 				new->u.vlist.b[i] = z;
@@ -654,7 +652,7 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 		new->u.vlist.a[0] = tnode_create_node(node->u.loop.forward,   rtl, dim);
 		new->u.vlist.a[1] = tnode_create_node(node->u.loop.backward, !rtl, dim);
 
-		new->u.vlist.b[0] = TLINE_H;
+		new->u.vlist.b[0] = rtl ? TLINE_H : TLINE_h;
 		new->u.vlist.b[1] = TLINE_E;
 
 		if (new->u.vlist.a[1]->type == TNODE_SKIP) {
@@ -731,7 +729,7 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 					swap(&new->u.vlist.a[0], &new->u.vlist.a[1]);
 
 					new->u.vlist.b[0] = TLINE_B;
-					new->u.vlist.b[1] = TLINE_I;
+					new->u.vlist.b[1] = rtl ? TLINE_I : TLINE_i;
 
 					new->u.vlist.o = 1;
 

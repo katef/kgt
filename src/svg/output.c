@@ -273,16 +273,22 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 	assert(ctx != NULL);
 
 	switch (tline) {
-	case TLINE_A: u[0] = TILE_LINE;  u[1] = TILE_LINE; break;
+	case TLINE_A:
+	case TLINE_a: u[0] = TILE_LINE;  u[1] = TILE_LINE; break;
 	case TLINE_B: u[0] = TILE_TL;    u[1] = TILE_TR;   break;
-	case TLINE_C: u[0] = TILE_LINE;  u[1] = TILE_LINE; break;
-	case TLINE_D: u[0] = TILE_LINE;  u[1] = TILE_LINE; break;
+	case TLINE_C:
+	case TLINE_c: u[0] = TILE_LINE;  u[1] = TILE_LINE; break;
+	case TLINE_D:
+	case TLINE_d: u[0] = TILE_LINE;  u[1] = TILE_LINE; break;
 	case TLINE_E: u[0] = TILE_BL_N1; u[1] = TILE_BR;   break;
 	case TLINE_F: u[0] = 0;          u[1] = 0;         break;
-	case TLINE_G: u[0] = TILE_BL_N1; u[1] = TILE_BR;   break;
+	case TLINE_G:
+	case TLINE_g: u[0] = TILE_BL_N1; u[1] = TILE_BR;   break;
 
-	case TLINE_H: u[0] = TILE_LINE | TILE_TL;    u[1] = TILE_LINE | TILE_TR; break;
-	case TLINE_I: u[0] = TILE_LINE | TILE_BL_N1; u[1] = TILE_LINE | TILE_BR; break;
+	case TLINE_H:
+	case TLINE_h: u[0] = TILE_LINE | TILE_TL;    u[1] = TILE_LINE | TILE_TR; break;
+	case TLINE_I:
+	case TLINE_i: u[0] = TILE_LINE | TILE_BL_N1; u[1] = TILE_LINE | TILE_BR; break;
 
 	default: u[0] = 0; u[1] = 0; break;
 	}
@@ -298,11 +304,16 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 	assert(ctx != NULL);
 
 	switch (tline) {
-	case TLINE_A: u[0] = TILE_LINE | TILE_BR; u[1] = TILE_LINE | TILE_BL_N1; break;
-	case TLINE_C: u[0] = TILE_LINE | TILE_TR; u[1] = TILE_LINE | TILE_TL;    break;
-	case TLINE_D: u[0] = TILE_LINE | TILE_BR | TILE_TR; u[1] = TILE_LINE | TILE_BL_N1 | TILE_TL; break;
-	case TLINE_H: u[0] = TILE_LINE;           u[1] = TILE_LINE; break;
-	case TLINE_I: u[0] = TILE_LINE;           u[1] = TILE_LINE; break;
+	case TLINE_A:
+	case TLINE_a: u[0] = TILE_LINE | TILE_BR; u[1] = TILE_LINE | TILE_BL_N1; break;
+	case TLINE_C:
+	case TLINE_c: u[0] = TILE_LINE | TILE_TR; u[1] = TILE_LINE | TILE_TL;    break;
+	case TLINE_D:
+	case TLINE_d: u[0] = TILE_LINE | TILE_BR | TILE_TR; u[1] = TILE_LINE | TILE_BL_N1 | TILE_TL; break;
+	case TLINE_H:
+	case TLINE_h: u[0] = TILE_LINE;           u[1] = TILE_LINE; break;
+	case TLINE_I:
+	case TLINE_i: u[0] = TILE_LINE;           u[1] = TILE_LINE; break;
 
 	default: u[0] = 0; u[1] = 0; break;
 	}
