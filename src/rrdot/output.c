@@ -149,7 +149,19 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 		break;
 
 	case NODE_LOOP:
-		printf("label = \"<b> &larr;|LOOP|<f> &rarr;\""); /* TODO: utf */
+		printf("label = \"<b> &larr;|LOOP "); /* TODO: utf8 */
+
+		if (node->u.loop.min == 1 && node->u.loop.max == 1) {
+			/* nothing */
+		} else if (!node->u.loop.max) {
+			printf("\\{%u,""\\}&times;", node->u.loop.min);
+		} else if (node->u.loop.min == node->u.loop.max) {
+			printf("%u&times;", node->u.loop.min);
+		} else {
+			printf("\\{%u,%u\\}&times;", node->u.loop.min, node->u.loop.max);
+		}
+
+		printf("|<f> &rarr;\"");
 		break;
 
 	default:
