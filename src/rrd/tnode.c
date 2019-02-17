@@ -376,15 +376,15 @@ tnode_create_hlist(const struct list *list, int rtl, const struct dim *dim)
 static size_t
 loop_label(unsigned min, unsigned max, char *s)
 {
-	assert(max >= min);
 	assert(s != NULL);
+	assert(max >= min || max == 0);
 
 	if (max == 1 && min == 1) {
 		return sprintf(s, "(exactly once)");
 	} else if (max == 0 && min > 0) {
 		return sprintf(s, "(at least %u times)", min);
 	} else if (max > 0 && min == 0) {
-		return sprintf(s, "(up to %d times)", max);
+		return sprintf(s, "(up to %u times)", max);
 	} else if (max > 0 && min == max) {
 		return sprintf(s, "(%u times)", max);
 	} else if (max > 1 && min > 1) {

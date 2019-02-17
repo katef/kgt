@@ -185,6 +185,7 @@ finite_term(const struct ast_term *term, struct node **r)
 	struct node *n;
 
 	assert(r != NULL);
+	assert(term->max > 0);
 
 	if (!single_term(term, &n)) {
 		return 0;
@@ -206,27 +207,48 @@ finite_term(const struct ast_term *term, struct node **r)
 }
 
 static int
+atleast_term(const struct ast_term *term, struct node **r)
+{
+	struct node *n;
+
+	assert(r != NULL);
+
+	if (!single_term(term, &n)) {
+		return 0;
+	}
+
+	*r = node_create_loop(NULL, n);
+
+	(*r)->u.loop.min = term->min;
+
+	return 1;
+}
+
+static int
 transform_term(const struct ast_term *term, struct node **r)
 {
 	size_t i;
 
-	struct {
-		unsigned int min;
-		unsigned int max;
-		int (*f)(const struct ast_term *term, struct node **r);
-	} a[] = {
-		{ 1, 1, single_term     },
-		{ 0, 1, optional_term   },
-		{ 1, 0, oneormore_term  },
-		{ 0, 0, zeroormore_term }
-	};
-
 	assert(r != NULL);
 
-	for (i = 0; i < sizeof a / sizeof *a; i++) {
-		if (term->min == a[i].min && term->max == a[i].max) {
-			return a[i].f(term, r);
-		}
+	if (term->min == 1 && term->max == 1) {
+		return single_term(term, r);
+	}
+
+	if (term->min == 0 && term->max == 1) {
+		return optional_term(term, r);
+	}
+
+	if (term->min == 1 && term->max == 0) {
+		return oneormore_term(term, r);
+	}
+
+	if (term->min == 0 && term->max == 0) {
+		return zeroormore_term(term, r);
+	}
+
+	if (term->max == 0) {
+		return atleast_term(term, r);
 	}
 
 	return finite_term(term, r);
