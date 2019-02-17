@@ -423,9 +423,15 @@ node_walk_render(const struct tnode *n,
 		ctx->x += n->w * 10;
 		break;
 
-	case TNODE_ARROW:
+	case TNODE_RTL_ARROW:
 		svg_path_h(&ctx->paths, ctx->x, ctx->y, 10);
-		svg_use(ctx, n->rtl ? "rrd:arrow-rtl" : "rrd:arrow-ltr", "translate(5 0)");
+		svg_use(ctx, "rrd:arrow-rtl", "translate(5 0)");
+		ctx->x += n->w * 10;
+		break;
+
+	case TNODE_LTR_ARROW:
+		svg_path_h(&ctx->paths, ctx->x, ctx->y, 10);
+		svg_use(ctx, "rrd:arrow-ltr", "translate(5 0)");
 		ctx->x += n->w * 10;
 		break;
 

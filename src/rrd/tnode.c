@@ -134,7 +134,8 @@ tnode_free(struct tnode *n)
 
 	switch (n->type) {
 	case TNODE_SKIP:
-	case TNODE_ARROW:
+	case TNODE_RTL_ARROW:
+	case TNODE_LTR_ARROW:
 	case TNODE_ELLIPSIS:
 	case TNODE_RULE:
 		break;
@@ -523,7 +524,7 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 				assert(new->u.vlist.a[i]->a + new->u.vlist.a[i]->d == 1);
 
 				/* arrows are more helpful here */
-				new->u.vlist.a[i]->type = TNODE_ARROW;
+				new->u.vlist.a[i]->type = rtl ? TNODE_RTL_ARROW : TNODE_LTR_ARROW;
 				new->u.vlist.a[i]->w = 1;
 
 				a += new->u.vlist.a[i]->a + new->u.vlist.a[i]->d + 1;
@@ -658,7 +659,7 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 
 		if (new->u.vlist.a[1]->type == TNODE_SKIP) {
 			/* arrows are helpful when going backwards */
-			new->u.vlist.a[1]->type = TNODE_ARROW;
+			new->u.vlist.a[1]->type = !rtl ? TNODE_RTL_ARROW : TNODE_LTR_ARROW;
 			new->u.vlist.a[1]->w = 1;
 		}
 
@@ -670,7 +671,7 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 			label = esc_literal(s);
 
 			if (strlen(label) != 0) {
-				if (new->u.vlist.a[1]->type == TNODE_SKIP || new->u.vlist.a[1]->type == TNODE_ARROW) {
+				if (new->u.vlist.a[1]->type == TNODE_SKIP || new->u.vlist.a[1]->type == (rtl ? TNODE_RTL_ARROW : TNODE_LTR_ARROW)) {
 					struct tnode *label_tnode;
 
 					/* if there's nothing to show for the backwards node, put the label there */

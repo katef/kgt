@@ -58,9 +58,17 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 
 		break;
 
-	case TNODE_ARROW:
+	case TNODE_RTL_ARROW:
 		print_indent(f, depth);
-		fprintf(f, "ARROW");
+		fprintf(f, "RTL_ARROW");
+		print_coords(f, n);
+		fprintf(f, "\n");
+
+		break;
+
+	case TNODE_LTR_ARROW:
+		print_indent(f, depth);
+		fprintf(f, "LTR_ARROW");
 		print_coords(f, n);
 		fprintf(f, "\n");
 
