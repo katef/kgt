@@ -9,6 +9,7 @@
 
 struct node;
 
+void rrd_pretty_ci(int *changed, struct node **);
 void rrd_pretty_affixes(int *changed, struct node **);
 void rrd_pretty_bottom(int *changed, struct node **);
 void rrd_pretty_redundant(int *changed, struct node **);

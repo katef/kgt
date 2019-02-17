@@ -7,6 +7,7 @@ SRC += src/rrd/tnode.c
 
 SRC += src/rrd/rewrite_ci.c
 
+SRC += src/rrd/pretty_ci.c
 SRC += src/rrd/pretty_collapse.c
 SRC += src/rrd/pretty_affix.c
 SRC += src/rrd/pretty_bottom.c
