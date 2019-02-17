@@ -187,7 +187,7 @@ render_hlist(const struct tnode *n, struct render_context *ctx)
 	assert(ctx != NULL);
 
 	for (i = 0; i < n->u.hlist.n; i++) {
-		node_walk_render(n->u.hlist.a[!n->rtl ? i : n->u.hlist.n - i - 1], ctx);
+		node_walk_render(n->u.hlist.a[i], ctx);
 
 		if (i + 1 < n->u.hlist.n) {
 			bprintf(ctx, "--");

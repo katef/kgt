@@ -365,7 +365,8 @@ tnode_create_hlist(const struct list *list, int rtl, const struct dim *dim)
 	new.a = xmalloc(sizeof *new.a * new.n);
 
 	for (i = 0, p = list; p != NULL; p = p->next) {
-		new.a[i++] = tnode_create_node(p->node, rtl, dim);
+		new.a[!rtl ? i : new.n - i - 1] = tnode_create_node(p->node, rtl, dim);
+		i++;
 	}
 
 	assert(i == new.n);
