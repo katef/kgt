@@ -1,119 +1,109 @@
+<?xml version='1.0' encoding='utf-8'?>
 <svg
   xmlns='http://www.w3.org/2000/svg'
   xmlns:xlink='http://www.w3.org/1999/xlink'
 
-  viewBox='-20 -50 420 420'
-  width='420' height='420'>
+  viewBox='-20 -50 360 420'
+  width='360' height='420'>
 
   <style>
     rect, line, path { stroke-width: 1.5px; stroke: black; fill: transparent; }
     rect, line, path { stroke-linecap: square; stroke-linejoin: rounded; }
     path { fill: transparent; }
     text.literal { font-family: monospace; }
-    line.ellipsis { stroke-dasharray: 4; }
-    path.arrow.rtl { marker-mid: url(#rrd:arrow-rtl); }
-    path.arrow.ltr { marker-mid: url(#rrd:arrow-ltr); }
+    line.ellipsis { stroke-dasharray: 1 3.5; }
   </style>
 
   <defs>
-    <marker id='rrd:start'
-        markerWidth='10' markerHeight='12'
-        markerUnits='userSpaceOnUse'
-        refX='7' refY='6'
-        orient='auto'>
-      <line x1='7' y1='0' x2='7' y2='12' class='arrow'/>
-      <line x1='2' y1='0' x2='2' y2='12' class='arrow'/>
-    </marker>
+    <g id='rrd:station'>
+      <path d='M.5 -6 v12 m 5 0 v-12' class='station'/>
+    </g>
 
-    <marker id='rrd:arrow-ltr'
-        markerWidth='5' markerHeight='5'
-        refX='3' refY='2.5'
-        orient='auto'>
-      <polyline points='0,0 5,2.5 0,5' class='arrow'/>
-    </marker>
-    <marker id='rrd:arrow-rtl'
-        markerWidth='5' markerHeight='5'
-        refX='3' refY='2.5'
-        orient='auto'>
-      <polyline points='5,0 0,2.5 5,5' class='arrow'/>
-    </marker>
+    <g id='rrd:arrow-ltr'>
+      <polyline points='2,-4 10,0 2,4' class='arrow'/>
+    </g>
+    <g id='rrd:arrow-rtl' transform='scale(-1 1) translate(-10 0)'>
+      <use xlink:href='#rrd:arrow-ltr'/>
+    </g>
   </defs>
 
-  <g transform='translate(40 00)'>
+  <g transform='translate(40 0)'>
     <text x='-40' y='-20'>expr:</text>
-    <path d='M00 10 h20' marker-start='url(#rrd:start)'/>
-    <path d='M320 10 h-20' marker-start='url(#rrd:start)'/>
-    <rect x='50' y='00' height='20' width='60' rx='0' ry='0' class='rule'/>
-    <text x='80' y='15' text-anchor='middle' class='rule'>term</text>
-    <rect x='130' y='00' height='20' width='60' rx='8' ry='8' class='literal'/>
-    <text x='160' y='15' text-anchor='middle' class='literal'>+</text>
-    <rect x='210' y='00' height='20' width='60' rx='0' ry='0' class='rule'/>
-    <text x='240' y='15' text-anchor='middle' class='rule'>expr</text>
-    <rect x='130' y='30' height='20' width='60' rx='0' ry='0' class='rule'/>
-    <text x='160' y='45' text-anchor='middle' class='rule'>term</text>
-    <path d='M290 20 v10'/>
-    <path d='M190 40 h90 q10 00 10 -10'/>
-    <path d='M30 30 q00 10 10 10 h90'/>
-    <path d='M290 20 q00 -10 10 -10'/>
-    <path d='M270 10 h30'/>
-    <path d='M190 10 h20'/>
-    <path d='M110 10 h20'/>
-    <path d='M20 10 h30'/>
-    <path d='M20 10 q10 00 10 10 v10'/>
+    <use xlink:href='#rrd:station' x='0' y='10' transform='scale(-1 1)'/>
+    <use xlink:href='#rrd:station' x='260' y='10'/>
+    <rect x='50' y='0' height='20' width='50' rx='0' ry='0' class='rule'/>
+    <text x='75' y='15' text-anchor='middle' class='rule'>term</text>
+    <rect x='120' y='0' height='20' width='20' rx='8' ry='8' class='literal'/>
+    <text x='130' y='15' text-anchor='middle' class='literal'>+</text>
+    <rect x='160' y='0' height='20' width='50' rx='0' ry='0' class='rule'/>
+    <text x='185' y='15' text-anchor='middle' class='rule'>expr</text>
+    <rect x='105' y='30' height='20' width='50' rx='0' ry='0' class='rule'/>
+    <text x='130' y='45' text-anchor='middle' class='rule'>term</text>
+    <path d='M230 20 v10'/>
+    <path d='M155 40 h65 q10 0 10 -10'/>
+    <path d='M30 30 q0 10 10 10 h65'/>
+    <path d='M230 20 q0 -10 10 -10'/>
+    <path d='M210 10 h50'/>
+    <path d='M140 10 h20'/>
+    <path d='M100 10 h20'/>
+    <path d='M20 10 q10 0 10 10 v10'/>
+    <path d='M0 10 h50'/>
   </g>
 
   <g transform='translate(40 100)'>
     <text x='-40' y='-20'>term:</text>
-    <path d='M00 10 h20' marker-start='url(#rrd:start)'/>
-    <path d='M340 10 h-20' marker-start='url(#rrd:start)'/>
-    <rect x='50' y='00' height='20' width='80' rx='0' ry='0' class='rule'/>
-    <text x='90' y='15' text-anchor='middle' class='rule'>factor</text>
-    <rect x='150' y='00' height='20' width='60' rx='8' ry='8' class='literal'/>
-    <text x='180' y='15' text-anchor='middle' class='literal'>*</text>
-    <rect x='230' y='00' height='20' width='60' rx='0' ry='0' class='rule'/>
-    <text x='260' y='15' text-anchor='middle' class='rule'>term</text>
-    <rect x='130' y='30' height='20' width='80' rx='0' ry='0' class='rule'/>
-    <text x='170' y='45' text-anchor='middle' class='rule'>factor</text>
-    <path d='M310 20 v10'/>
-    <path d='M210 40 h90 q10 00 10 -10'/>
-    <path d='M30 30 q00 10 10 10 h90'/>
-    <path d='M310 20 q00 -10 10 -10'/>
-    <path d='M290 10 h30'/>
-    <path d='M210 10 h20'/>
-    <path d='M130 10 h20'/>
-    <path d='M20 10 h30'/>
-    <path d='M20 10 q10 00 10 10 v10'/>
+    <use xlink:href='#rrd:station' x='0' y='10' transform='scale(-1 1)'/>
+    <use xlink:href='#rrd:station' x='280' y='10'/>
+    <rect x='50' y='0' height='20' width='70' rx='0' ry='0' class='rule'/>
+    <text x='85' y='15' text-anchor='middle' class='rule'>factor</text>
+    <rect x='140' y='0' height='20' width='20' rx='8' ry='8' class='literal'/>
+    <text x='150' y='15' text-anchor='middle' class='literal'>*</text>
+    <rect x='180' y='0' height='20' width='50' rx='0' ry='0' class='rule'/>
+    <text x='205' y='15' text-anchor='middle' class='rule'>term</text>
+    <rect x='105' y='30' height='20' width='70' rx='0' ry='0' class='rule'/>
+    <text x='140' y='45' text-anchor='middle' class='rule'>factor</text>
+    <path d='M250 20 v10'/>
+    <path d='M175 40 h65 q10 0 10 -10'/>
+    <path d='M30 30 q0 10 10 10 h65'/>
+    <path d='M250 20 q0 -10 10 -10'/>
+    <path d='M230 10 h50'/>
+    <path d='M160 10 h20'/>
+    <path d='M120 10 h20'/>
+    <path d='M20 10 q10 0 10 10 v10'/>
+    <path d='M0 10 h50'/>
   </g>
 
   <g transform='translate(40 200)'>
     <text x='-40' y='-20'>factor:</text>
-    <path d='M00 10 h20' marker-start='url(#rrd:start)'/>
-    <path d='M320 10 h-20' marker-start='url(#rrd:start)'/>
-    <rect x='50' y='00' height='20' width='60' rx='8' ry='8' class='literal'/>
-    <text x='80' y='15' text-anchor='middle' class='literal'>(</text>
-    <rect x='130' y='00' height='20' width='60' rx='0' ry='0' class='rule'/>
-    <text x='160' y='15' text-anchor='middle' class='rule'>expr</text>
-    <rect x='210' y='00' height='20' width='60' rx='8' ry='8' class='literal'/>
-    <text x='240' y='15' text-anchor='middle' class='literal'>)</text>
-    <rect x='130' y='30' height='20' width='60' rx='0' ry='0' class='rule'/>
-    <text x='160' y='45' text-anchor='middle' class='rule'>const</text>
-    <path d='M290 20 v10'/>
-    <path d='M190 40 h90 q10 00 10 -10'/>
-    <path d='M30 30 q00 10 10 10 h90'/>
-    <path d='M290 20 q00 -10 10 -10'/>
-    <path d='M270 10 h30'/>
-    <path d='M190 10 h20'/>
-    <path d='M110 10 h20'/>
-    <path d='M20 10 h30'/>
-    <path d='M20 10 q10 00 10 10 v10'/>
+    <use xlink:href='#rrd:station' x='0' y='10' transform='scale(-1 1)'/>
+    <use xlink:href='#rrd:station' x='230' y='10'/>
+    <rect x='50' y='0' height='20' width='20' rx='8' ry='8' class='literal'/>
+    <text x='60' y='15' text-anchor='middle' class='literal'>(</text>
+    <rect x='90' y='0' height='20' width='50' rx='0' ry='0' class='rule'/>
+    <text x='115' y='15' text-anchor='middle' class='rule'>expr</text>
+    <rect x='160' y='0' height='20' width='20' rx='8' ry='8' class='literal'/>
+    <text x='170' y='15' text-anchor='middle' class='literal'>)</text>
+    <rect x='90' y='30' height='20' width='50' rx='0' ry='0' class='rule'/>
+    <text x='115' y='45' text-anchor='middle' class='rule'>const</text>
+    <path d='M200 20 v10'/>
+    <path d='M140 40 h50 q10 0 10 -10'/>
+    <path d='M30 30 q0 10 10 10 h50'/>
+    <path d='M200 20 q0 -10 10 -10'/>
+    <path d='M180 10 h50'/>
+    <path d='M140 10 h20'/>
+    <path d='M70 10 h20'/>
+    <path d='M20 10 q10 0 10 10 v10'/>
+    <path d='M0 10 h50'/>
   </g>
 
   <g transform='translate(40 300)'>
     <text x='-40' y='-20'>const:</text>
-    <path d='M00 10 h20' marker-start='url(#rrd:start)'/>
-    <path d='M120 10 h-20' marker-start='url(#rrd:start)'/>
-    <rect x='20' y='00' height='20' width='80' rx='0' ry='0' class='rule'/>
-    <text x='60' y='15' text-anchor='middle' class='rule'>integer</text>
+    <use xlink:href='#rrd:station' x='0' y='10' transform='scale(-1 1)'/>
+    <use xlink:href='#rrd:station' x='110' y='10'/>
+    <rect x='20' y='0' height='20' width='70' rx='0' ry='0' class='rule'/>
+    <text x='55' y='15' text-anchor='middle' class='rule'>integer</text>
+    <path d='M90 10 h20'/>
+    <path d='M0 10 h20'/>
   </g>
 
 </svg>
