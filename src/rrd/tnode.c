@@ -32,6 +32,10 @@ static struct tnode *
 tnode_create_node(const struct node *node, int rtl, const struct dim *dim);
 
 static struct tnode *
+tnode_create_comment(const struct tnode *tnode, const char *s,
+	const struct dim *dim);
+
+static struct tnode *
 tnode_create_ellipsis(const struct dim *dim);
 
 static void
@@ -147,6 +151,11 @@ tnode_free(struct tnode *n)
 
 	case TNODE_PROSE:
 		free((void *) n->u.prose);
+		break;
+
+	case TNODE_COMMENT:
+		free((void *) n->u.comment.s);
+		tnode_free(n->u.comment.tnode);
 		break;
 
 	case TNODE_VLIST:
@@ -451,6 +460,42 @@ tnode_create_ellipsis(const struct dim *dim)
 }
 
 static struct tnode *
+tnode_create_comment(const struct tnode *tnode, const char *s,
+	const struct dim *dim)
+{
+	struct tnode *new;
+	size_t z;
+	unsigned w, a, d;
+
+	assert(tnode != NULL);
+	assert(s != NULL);
+	assert(dim != NULL);
+
+	new = xmalloc(sizeof *new);
+
+	new->type = TNODE_COMMENT;
+	new->u.comment.s = s;
+	new->u.comment.tnode = tnode;
+
+	/* TODO: place comment above or below, depending on tnode type (or pass in);
+	 * store in .comment struct as enum */
+	new->w = new->u.comment.tnode->w;
+	new->a = new->u.comment.tnode->a;
+	new->d = new->u.comment.tnode->d + dim->comment_height;
+
+	dim->rule_string(new->u.comment.s, &w, &a, &d);
+
+	if (new->w < w) {
+		new->w = w;
+	}
+
+	new->a += a;
+	new->d += d;
+
+	return new;
+}
+
+static struct tnode *
 tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 {
 	struct tnode *new;
@@ -494,9 +539,7 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 		new->type = TNODE_PROSE;
 		new->u.prose = node->u.prose;
 		dim->rule_string(new->u.prose, &new->w, &new->a, &new->d);
-		if (!unquoted_prose(node->u.prose)) {
-			new->w += dim->prose_padding;
-		}
+		new->w += dim->prose_padding;
 		break;
 
 	case NODE_ALT:
@@ -697,29 +740,6 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 		}
 
 		{
-			char s[128]; /* XXX */
-			const char *label;
-
-			loop_label(node->u.loop.min, node->u.loop.max, s);
-			label = esc_literal(s);
-
-			if (strlen(label) != 0) {
-				if (new->u.vlist.a[1]->type == TNODE_SKIP || new->u.vlist.a[1]->type == (rtl ? TNODE_RTL_ARROW : TNODE_LTR_ARROW)) {
-					struct tnode *label_tnode;
-
-					/* if there's nothing to show for the backwards node, put the label there */
-					label_tnode = new->u.vlist.a[1];
-					label_tnode->type = TNODE_PROSE;
-					label_tnode->u.prose = label;
-					dim->rule_string(label, &label_tnode->w, &label_tnode->a, &label_tnode->d);
-				} else {
-					/* TODO: store label somewhere for rendering to display somehow */
-					assert(!"unimplemented");
-				}
-			}
-		}
-
-		{
 			unsigned w;
 			unsigned wf, wb;
 
@@ -771,6 +791,18 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 					new->a += new->u.vlist.a[0]->a + new->u.vlist.a[0]->d + 1;
 					new->d -= new->u.vlist.a[0]->a + new->u.vlist.a[0]->d + 1;
 				}
+			}
+		}
+
+		{
+			char s[128]; /* XXX */
+			const char *label;
+
+			loop_label(node->u.loop.min, node->u.loop.max, s);
+			label = esc_literal(s);
+
+			if (strlen(label) != 0) {
+				new = tnode_create_comment(new, label, dim);
 			}
 		}
 

@@ -155,13 +155,23 @@ svg_use(struct render_context *ctx, const char *id, const char *transform)
 }
 
 static void
+centre(unsigned *lhs, unsigned *rhs, unsigned space, unsigned w)
+{
+	assert(lhs != NULL);
+	assert(rhs != NULL);
+	assert(space >= w);
+
+	*lhs = (space - w) / 2;
+	*rhs = (space - w) - *lhs;
+}
+
+static void
 justify(struct render_context *ctx, const struct tnode *n, int space,
 	const char *base)
 {
 	unsigned lhs, rhs;
 
-	lhs = (space - n->w * 10) / 2;
-	rhs = (space - n->w * 10) - lhs;
+	centre(&lhs, &rhs, space, n->w * 10);
 
 	if (n->type != TNODE_ELLIPSIS) {
 		svg_path_h(&ctx->paths, ctx->x, ctx->y, lhs);
@@ -174,8 +184,6 @@ justify(struct render_context *ctx, const struct tnode *n, int space,
 		svg_path_h(&ctx->paths, ctx->x, ctx->y, rhs);
 	}
 	ctx->x += rhs;
-
-	ctx->y += 10;
 }
 
 static void
@@ -350,9 +358,9 @@ render_vlist(const struct tnode *n,
 
 		justify(ctx, n->u.vlist.a[j], n->w * 10 - 40, base);
 
-		ctx->y -= 10;
 		render_tline_inner(ctx, n->u.vlist.b[j], 1);
 		render_tline_outer(ctx, n->u.vlist.b[j], 1);
+
 		ctx->y += 10;
 
 		if (j + 1 < n->u.vlist.n) {
@@ -463,6 +471,27 @@ node_walk_render(const struct tnode *n,
 	case TNODE_PROSE:
 		svg_prose(ctx, n->u.prose, n->w * 10);
 		break;
+
+	case TNODE_COMMENT: {
+		unsigned offset = 5;
+
+		ctx->y += n->d * 10;
+
+		/* TODO: - 5 again for loops with a backwards skip (because they're short) */
+		if (n->u.comment.tnode->type == TNODE_VLIST
+		&& n->u.comment.tnode->u.vlist.o == 0
+		&& n->u.comment.tnode->u.vlist.n == 2
+		&& (n->u.comment.tnode->u.vlist.a[1]->type == TNODE_SKIP || n->u.comment.tnode->u.vlist.a[1]->type == TNODE_RTL_ARROW || n->u.comment.tnode->u.vlist.a[1]->type == TNODE_LTR_ARROW)) {
+			offset += 10;
+		}
+
+		ctx->y -= offset; /* off-grid */
+		svg_text(ctx, n->w * 10, n->u.comment.s, "comment");
+		ctx->y += offset;
+		ctx->y -= n->d * 10;
+		justify(ctx, n->u.comment.tnode, n->w * 10, base);
+		break;
+	}
 
 	case TNODE_RULE:
 		if (base != NULL) {
@@ -640,6 +669,7 @@ struct dim svg_dim = {
 	0,
 	0,
 	0,
+	1,
 	2,
 	0
 };

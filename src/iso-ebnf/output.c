@@ -120,11 +120,6 @@ output_term(const struct ast_term *term)
 		break;
 
 	case TYPE_PROSE:
-		if (unquoted_prose(term->u.prose)) {
-			printf(" %s", term->u.prose);
-			break;
-		}
-
 		printf(" ? %s ?", term->u.prose);
 		break;
 
