@@ -472,15 +472,26 @@ node_walk_render(const struct tnode *n,
 		svg_prose(ctx, n->u.prose, n->w * 10);
 		break;
 
-	case TNODE_COMMENT:
+	case TNODE_COMMENT: {
+		unsigned offset = 5;
+
 		ctx->y += n->d * 10;
-		ctx->y -= 5; /* off-grid */
-		/* TODO: - 5 again for loops with a backwards skip */
+
+		/* TODO: - 5 again for loops with a backwards skip (because they're short) */
+		if (n->u.comment.tnode->type == TNODE_VLIST
+		&& n->u.comment.tnode->u.vlist.o == 0
+		&& n->u.comment.tnode->u.vlist.n == 2
+		&& (n->u.comment.tnode->u.vlist.a[1]->type == TNODE_SKIP || n->u.comment.tnode->u.vlist.a[1]->type == TNODE_RTL_ARROW || n->u.comment.tnode->u.vlist.a[1]->type == TNODE_LTR_ARROW)) {
+			offset += 10;
+		}
+
+		ctx->y -= offset; /* off-grid */
 		svg_text(ctx, n->w * 10, n->u.comment.s, "comment");
-		ctx->y += 5;
+		ctx->y += offset;
 		ctx->y -= n->d * 10;
 		justify(ctx, n->u.comment.tnode, n->w * 10, base);
 		break;
+	}
 
 	case TNODE_RULE:
 		if (base != NULL) {
