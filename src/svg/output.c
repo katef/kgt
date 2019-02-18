@@ -495,11 +495,11 @@ node_walk_render(const struct tnode *n,
 
 	case TNODE_RULE:
 		if (base != NULL) {
-			printf("<a href='%s#%s'>\n", base, n->u.name); /* XXX: escape */
+			printf("    <a href='%s#%s'>\n", base, n->u.name); /* XXX: escape */
 		}
 		svg_textbox(ctx, n->u.name, n->w * 10, 0, "rule");
 		if (base != NULL) {
-			printf("</a>\n");
+			printf("    </a>\n");
 		}
 		break;
 
@@ -688,7 +688,7 @@ svg_defs(void)
 	printf("      <polyline points='2,-4 10,0 2,4' class='arrow'/>\n"); /* 2 for optical correction */
 	printf("    </g>\n");
 	printf("    <g id='rrd:arrow-rtl' transform='scale(-1 1) translate(-10 0)'>\n");
-	printf("      <use xlink:href='#rrd:arrow-ltr'/>");
+	printf("      <use xlink:href='#rrd:arrow-ltr'/>\n");
 	printf("    </g>\n");
 	printf("  </defs>\n");
 	printf("\n");
