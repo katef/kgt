@@ -744,6 +744,7 @@ svg_output(const struct ast_rule *grammar)
 	w += 12;
 	h += 5;
 
+	printf("<?xml version='1.0' encoding='utf-8'?>\n");
 	printf("<svg\n");
 	printf("  xmlns='http://www.w3.org/2000/svg'\n");
 	printf("  xmlns:xlink='http://www.w3.org/1999/xlink'\n");
