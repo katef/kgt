@@ -375,27 +375,62 @@ tnode_create_hlist(const struct list *list, int rtl, const struct dim *dim)
 	return new;
 }
 
+static const char *
+times(unsigned n)
+{
+	const char *a[] = {
+		"never",
+		"once", "twice",
+		"three times", "four times", "five times", "six times",
+		"seven times", "eight times", "nine times", "ten times",
+		"eleven times", "twelve times"
+	};
+
+	if (n > sizeof a / sizeof *a - 1) {
+		return NULL;
+	}
+
+	return a[n];
+}
+
 static size_t
 loop_label(unsigned min, unsigned max, char *s)
 {
+	const char *h;
+
 	assert(s != NULL);
 	assert(max >= min || max == 0);
 
-	if (max == 1 && min == 1) {
-		return sprintf(s, "(exactly once)");
-	} else if (max == 0 && min > 0) {
-		return sprintf(s, "(at least %u times)", min);
-	} else if (max > 0 && min == 0) {
-		return sprintf(s, "(up to %u times)", max);
-	} else if (max > 0 && min == max) {
-		return sprintf(s, "(%u times)", max);
-	} else if (max > 1 && min > 1) {
-		return sprintf(s, "(%u-%u times)", min, max);
+	if (min == 0 && max == 0) {
+		*s = '\0';
+		return 0;
 	}
 
-	*s = '\0';
+	if (max == min) {
+		if (h = times(max), h != NULL) {
+			return sprintf(s, "(%s only)", h);
+		} else {
+			return sprintf(s, "(%u times)", max);
+		}
+	}
 
-	return 0;
+	if (min == 0) {
+		if (h = times(max), h != NULL) {
+			return sprintf(s, "(%s at most)", h);
+		} else {
+			return sprintf(s, "(%u times at most)", max);
+		}
+	}
+
+	if (max == 0) {
+		if (h = times(min), h != NULL) {
+			return sprintf(s, "(at least %s)", h);
+		} else {
+			return sprintf(s, "(at least %u times)", min);
+		}
+	}
+
+	return sprintf(s, "(%u-%u times)", min, max);
 }
 
 static struct tnode *
