@@ -742,29 +742,6 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 		}
 
 		{
-			char s[128]; /* XXX */
-			const char *label;
-
-			loop_label(node->u.loop.min, node->u.loop.max, s);
-			label = esc_literal(s);
-
-			if (strlen(label) != 0) {
-				if (new->u.vlist.a[1]->type == TNODE_SKIP || new->u.vlist.a[1]->type == (rtl ? TNODE_RTL_ARROW : TNODE_LTR_ARROW)) {
-					struct tnode *label_tnode;
-
-					/* if there's nothing to show for the backwards node, put the label there */
-					label_tnode = new->u.vlist.a[1];
-					label_tnode->type = TNODE_PROSE;
-					label_tnode->u.prose = label;
-					dim->rule_string(label, &label_tnode->w, &label_tnode->a, &label_tnode->d);
-				} else {
-					/* TODO: store label somewhere for rendering to display somehow */
-					assert(!"unimplemented");
-				}
-			}
-		}
-
-		{
 			unsigned w;
 			unsigned wf, wb;
 
@@ -816,6 +793,18 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 					new->a += new->u.vlist.a[0]->a + new->u.vlist.a[0]->d + 1;
 					new->d -= new->u.vlist.a[0]->a + new->u.vlist.a[0]->d + 1;
 				}
+			}
+		}
+
+		{
+			char s[128]; /* XXX */
+			const char *label;
+
+			loop_label(node->u.loop.min, node->u.loop.max, s);
+			label = esc_literal(s);
+
+			if (strlen(label) != 0) {
+				new = tnode_create_comment(new, label, dim);
 			}
 		}
 
