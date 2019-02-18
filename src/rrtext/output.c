@@ -269,11 +269,6 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_PROSE:
-		if (unquoted_prose(n->u.prose)) {
-			bprintf(ctx, "%s", n->u.prose);
-			break;
-		}
-
 		bprintf(ctx, "? %s ?", n->u.prose);
 		break;
 

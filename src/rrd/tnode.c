@@ -539,9 +539,7 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 		new->type = TNODE_PROSE;
 		new->u.prose = node->u.prose;
 		dim->rule_string(new->u.prose, &new->w, &new->a, &new->d);
-		if (!unquoted_prose(node->u.prose)) {
-			new->w += dim->prose_padding;
-		}
+		new->w += dim->prose_padding;
 		break;
 
 	case NODE_ALT:
