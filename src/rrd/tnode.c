@@ -32,6 +32,10 @@ static struct tnode *
 tnode_create_node(const struct node *node, int rtl, const struct dim *dim);
 
 static struct tnode *
+tnode_create_comment(const struct tnode *tnode, const char *s,
+	const struct dim *dim);
+
+static struct tnode *
 tnode_create_ellipsis(const struct dim *dim);
 
 static void
@@ -147,6 +151,11 @@ tnode_free(struct tnode *n)
 
 	case TNODE_PROSE:
 		free((void *) n->u.prose);
+		break;
+
+	case TNODE_COMMENT:
+		free((void *) n->u.comment.s);
+		tnode_free(n->u.comment.tnode);
 		break;
 
 	case TNODE_VLIST:
@@ -446,6 +455,42 @@ tnode_create_ellipsis(const struct dim *dim)
 	new->w = 1;
 	new->a = 0;
 	new->d = dim->ellipsis_depth;
+
+	return new;
+}
+
+static struct tnode *
+tnode_create_comment(const struct tnode *tnode, const char *s,
+	const struct dim *dim)
+{
+	struct tnode *new;
+	size_t z;
+	unsigned w, a, d;
+
+	assert(tnode != NULL);
+	assert(s != NULL);
+	assert(dim != NULL);
+
+	new = xmalloc(sizeof *new);
+
+	new->type = TNODE_COMMENT;
+	new->u.comment.s = s;
+	new->u.comment.tnode = tnode;
+
+	/* TODO: place comment above or below, depending on tnode type (or pass in);
+	 * store in .comment struct as enum */
+	new->w = new->u.comment.tnode->w;
+	new->a = new->u.comment.tnode->a;
+	new->d = new->u.comment.tnode->d + dim->comment_height;
+
+	dim->rule_string(new->u.comment.s, &w, &a, &d);
+
+	if (new->w < w) {
+		new->w = w;
+	}
+
+	new->a += a;
+	new->d += d;
 
 	return new;
 }

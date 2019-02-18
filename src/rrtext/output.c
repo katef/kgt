@@ -77,11 +77,26 @@ bprintf(struct render_context *ctx, const char *fmt, ...)
 }
 
 static void
+centre(unsigned *lhs, unsigned *rhs, unsigned space, unsigned w)
+{
+	assert(lhs != NULL);
+	assert(rhs != NULL);
+	assert(space >= w);
+
+	*lhs = (space - w) / 2;
+	*rhs = (space - w) - *lhs;
+}
+
+static void
 justify(struct render_context *ctx, const struct tnode *n, int space)
 {
-	unsigned lhs = (space - n->w) / 2;
-	unsigned rhs = (space - n->w) - lhs;
+	unsigned lhs, rhs;
 	unsigned i;
+
+	assert(n != NULL);
+	assert(space >= n->w);
+
+	centre(&lhs, &rhs, space, n->w);
 
 	for (i = 0; i < lhs; i++) {
 		bprintf(ctx, n->type == TNODE_ELLIPSIS ? " " : "-");
@@ -196,6 +211,35 @@ render_hlist(const struct tnode *n, struct render_context *ctx)
 }
 
 static void
+render_comment(const struct tnode *n, struct render_context *ctx)
+{
+	unsigned x, y;
+	unsigned lhs, rhs;
+
+	assert(n != NULL);
+	assert(n->type == TNODE_COMMENT);
+	assert(ctx != NULL);
+
+	x = ctx->x;
+	y = ctx->y;
+
+	justify(ctx, n->u.comment.tnode, n->w);
+
+	assert(strlen(n->u.comment.s) <= n->w);
+	centre(&lhs, &rhs, n->w, strlen(n->u.comment.s));
+
+	ctx->x = x + lhs;
+	ctx->y = y + n->d - 1;
+
+	bprintf(ctx, "%s", n->u.comment.s);
+
+	ctx->x += rhs;
+	ctx->y = y;
+
+	assert(ctx->x == x + n->w);
+}
+
+static void
 node_walk_render(const struct tnode *n, struct render_context *ctx)
 {
 	assert(ctx != NULL);
@@ -231,6 +275,10 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		}
 
 		bprintf(ctx, "? %s ?", n->u.prose);
+		break;
+
+	case TNODE_COMMENT:
+		render_comment(n, ctx);
 		break;
 
 	case TNODE_RULE:
@@ -312,6 +360,7 @@ rrtext_output(const struct ast_rule *grammar)
 		4,
 		2,
 		4,
+		0,
 		2,
 		1
 	};

@@ -64,6 +64,7 @@ struct tnode {
 		TNODE_ELLIPSIS,
 		TNODE_CI_LITERAL,
 		TNODE_CS_LITERAL,
+		TNODE_COMMENT,
 		TNODE_PROSE,
 		TNODE_RULE,
 		TNODE_VLIST,
@@ -80,6 +81,11 @@ struct tnode {
 		const char *name;    /* TODO: point to ast_rule instead */
 		const char *prose;
 
+		struct {
+			const char *s;
+			const struct tnode *tnode;
+		} comment;
+
 		struct tnode_vlist vlist;
 		struct tnode_hlist hlist;
 	} u;
@@ -91,6 +97,7 @@ struct dim {
 	unsigned literal_padding;
 	unsigned rule_padding;
 	unsigned prose_padding;
+	unsigned comment_height;
 	unsigned ci_marker;
 	unsigned ellipsis_depth;
 };

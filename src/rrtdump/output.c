@@ -99,6 +99,18 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 
 		break;
 
+	case TNODE_COMMENT:
+		print_indent(f, depth);
+		fprintf(f, "COMMENT");
+		print_coords(f, n);
+		fprintf(f, " \"%s\"", n->u.comment.s);
+		fprintf(f, ": (\n");
+		tnode_walk(f, n->u.comment.tnode, depth + 1);
+		print_indent(f, depth);
+		fprintf(f, ")\n");
+
+		break;
+
 	case TNODE_RULE:
 		print_indent(f, depth);
 		fprintf(f, "RULE");
@@ -158,6 +170,7 @@ rrtdump_output(const struct ast_rule *grammar)
 	struct dim dim = {
 		dim_mono_string,
 		dim_mono_string,
+		0,
 		0,
 		0,
 		0,
