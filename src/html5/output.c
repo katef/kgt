@@ -56,6 +56,7 @@ output(const struct ast_rule *grammar, int xml)
 	printf("      a:hover rect { fill: aliceblue; }\n");
 	printf("      h2 { font-size: inherit; font-weight: inherit; }\n");
 	printf("      line.ellipsis { stroke-dasharray: 1 3.5; }\n");
+	printf("      tspan.hex { font-family: monospace; font-size: 90%%; }\n");
 	printf("      path.arrow.rtl { marker-mid: url(#rrd:arrow-rtl); }\n");
 	printf("      path.arrow.ltr { marker-mid: url(#rrd:arrow-ltr); }\n");
 	printf("  </style>\n");

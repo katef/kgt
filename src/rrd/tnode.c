@@ -51,55 +51,6 @@ swap(struct tnode **a, struct tnode **b)
 	*b = tmp;
 }
 
-/* made-up to suit text output */
-static size_t
-escputc(char *s, char c)
-{
-	assert(s != NULL);
-
-	switch (c) {
-	case '\\': return sprintf(s, "\\\\");
-	case '\"': return sprintf(s, "\\\"");
-
-	case '\a': return sprintf(s, "\\a");
-	case '\b': return sprintf(s, "\\b");
-	case '\f': return sprintf(s, "\\f");
-	case '\n': return sprintf(s, "\\n");
-	case '\r': return sprintf(s, "\\r");
-	case '\t': return sprintf(s, "\\t");
-	case '\v': return sprintf(s, "\\v");
-
-	default:
-		break;
-	}
-
-	if (!isprint((unsigned char) c)) {
-		return sprintf(s, "\\x%02x", (unsigned char) c);
-	}
-
-	return sprintf(s, "%c", c);
-}
-
-static char *
-esc_literal(const char *s)
-{
-	const char *p;
-	char *a, *q;
-	size_t n;
-
-	n = strlen(s) * 4 + 1; /* worst case for \xXX */
-
-	a = xmalloc(n);
-
-	for (p = s, q = a; *p != '\0'; p++) {
-		q += escputc(q, *p);
-	}
-
-	*q = '\0';
-
-	return a;
-}
-
 static void
 tnode_free_vlist(struct tnode_vlist *list)
 {
@@ -516,28 +467,28 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 	switch (node->type) {
 	case NODE_CI_LITERAL:
 		new->type = TNODE_CI_LITERAL;
-		new->u.literal = esc_literal(node->u.literal);
+		new->u.literal = xstrdup(node->u.literal);
 		dim->literal_string(new->u.literal, &new->w, &new->a, &new->d);
 		new->w += dim->literal_padding + dim->ci_marker;
 		break;
 
 	case NODE_CS_LITERAL:
 		new->type = TNODE_CS_LITERAL;
-		new->u.literal = esc_literal(node->u.literal);
+		new->u.literal = xstrdup(node->u.literal);
 		dim->literal_string(new->u.literal, &new->w, &new->a, &new->d);
 		new->w += dim->literal_padding;
 		break;
 
 	case NODE_RULE:
 		new->type = TNODE_RULE;
-		new->u.name = node->u.name;
+		new->u.name = xstrdup(node->u.name);
 		dim->rule_string(new->u.name, &new->w, &new->a, &new->d);
 		new->w += dim->rule_padding;
 		break;
 
 	case NODE_PROSE:
 		new->type = TNODE_PROSE;
-		new->u.prose = node->u.prose;
+		new->u.prose = xstrdup(node->u.prose);
 		dim->rule_string(new->u.prose, &new->w, &new->a, &new->d);
 		new->w += dim->prose_padding;
 		break;
@@ -799,7 +750,7 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 			const char *label;
 
 			loop_label(node->u.loop.min, node->u.loop.max, s);
-			label = esc_literal(s);
+			label = xstrdup(s);
 
 			if (strlen(label) != 0) {
 				new = tnode_create_comment(new, label, dim);

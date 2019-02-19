@@ -43,9 +43,11 @@ struct render_context {
 static void node_walk_render(const struct tnode *n,
 	struct render_context *ctx, const char *base);
 
-int
-xml_escputc(FILE *f, char c)
+static int
+svg_escputc(FILE *f, char c)
 {
+	const char *name;
+
 	assert(f != NULL);
 
 	switch (c) {
@@ -53,15 +55,23 @@ xml_escputc(FILE *f, char c)
 	case '<': return fputs("&lt;", f);
 	case '>': return fputs("&gt;", f);
 
+	case '\a': name = "BEL"; break;
+	case '\b': name = "BS";  break;
+	case '\f': name = "FF";  break;
+	case '\n': name = "LF";  break;
+	case '\r': name = "CR";  break;
+	case '\t': name = "TAB"; break;
+	case '\v': name = "VT";  break;
+
 	default:
-		break;
+		if (!isprint((unsigned char) c)) {
+			return fprintf(f, "&#x3008;<tspan class='hex'>%02X</tspan>&#x3009;", (unsigned char) c);
+		}
+
+		return fprintf(f, "%c", c);
 	}
 
-	if (!isprint((unsigned char) c)) {
-		return fprintf(f, "&#x%02x;", (unsigned char) c);
-	}
-
-	return fprintf(f, "%c", c);
+	return fprintf(f, "&#x3008;<tspan class='esc'>%s</tspan>&#x3009;", name);
 }
 
 static void
@@ -85,7 +95,7 @@ svg_text(struct render_context *ctx, unsigned w, const char *s, const char *clas
 	printf(">");
 
 	for (p = s; *p != '\0'; p++) {
-		xml_escputc(stdout, *p);
+		svg_escputc(stdout, *p);
 	}
 
 	printf("</text>\n");
@@ -653,12 +663,33 @@ dim_prop_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 static void
 dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 {
+	const char *p;
+	double n;
+
 	assert(s != NULL);
 	assert(w != NULL);
 	assert(a != NULL);
 	assert(d != NULL);
 
-	*w = strlen(s) + 1;
+	n = 0.0;
+
+	for (p = s; *p != '\0'; p++) {
+		if (*p == '\t' || *p == '\a') {
+			n += 4.00;
+			continue;
+		}
+
+		if (!isprint((unsigned char) *p)) {
+			n += 2.93; /* <XY> */
+			continue;
+		}
+
+		n += 1.0;
+	}
+
+	n = ceil(n);
+
+	*w = n + 1;
 	*a = 1;
 	*d = 1;
 }
@@ -759,6 +790,7 @@ svg_output(const struct ast_rule *grammar)
 	printf("    path { fill: transparent; }\n");
 	printf("    text.literal { font-family: monospace; }\n");
 	printf("    line.ellipsis { stroke-dasharray: 1 3.5; }\n");
+	printf("    tspan.hex { font-family: monospace; font-size: 90%%; }\n");
 	printf("  </style>\n");
 	printf("\n");
 

@@ -76,6 +76,36 @@ bprintf(struct render_context *ctx, const char *fmt, ...)
 	ctx->x += n;
 }
 
+/* made-up to suit text output */
+static void
+escputc(struct render_context *ctx, char c)
+{
+	assert(ctx != NULL);
+
+	switch (c) {
+	case '\\': bprintf(ctx, "\\\\"); return;
+	case '\"': bprintf(ctx, "\\\""); return;
+
+	case '\a': bprintf(ctx, "\\a"); return;
+	case '\b': bprintf(ctx, "\\b"); return;
+	case '\f': bprintf(ctx, "\\f"); return;
+	case '\n': bprintf(ctx, "\\n"); return;
+	case '\r': bprintf(ctx, "\\r"); return;
+	case '\t': bprintf(ctx, "\\t"); return;
+	case '\v': bprintf(ctx, "\\v"); return;
+
+	default:
+		break;
+	}
+
+	if (!isprint((unsigned char) c)) {
+		bprintf(ctx, "\\x%02x", (unsigned char) c);
+		return;
+	}
+
+	bprintf(ctx, "%c", c);
+}
+
 static void
 centre(unsigned *lhs, unsigned *rhs, unsigned space, unsigned w)
 {
@@ -240,6 +270,20 @@ render_comment(const struct tnode *n, struct render_context *ctx)
 }
 
 static void
+render_string(struct render_context *ctx, char quote, const char *s)
+{
+	const char *p;
+
+	bprintf(ctx, "%c", quote);
+
+	for (p = s; *p != '\0'; p++) {
+		escputc(ctx, *p);
+	}
+
+	bprintf(ctx, "%c", quote);
+}
+
+static void
 node_walk_render(const struct tnode *n, struct render_context *ctx)
 {
 	assert(ctx != NULL);
@@ -261,15 +305,21 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_CI_LITERAL:
-		bprintf(ctx, " \"%s\"/i ", n->u.literal);
+		bprintf(ctx, " ");
+		render_string(ctx, '"', n->u.literal);
+		bprintf(ctx, "/i ");
 		break;
 
 	case TNODE_CS_LITERAL:
-		bprintf(ctx, " \"%s\" ", n->u.literal);
+		bprintf(ctx, " ");
+		render_string(ctx, '"', n->u.literal);
+		bprintf(ctx, " ");
 		break;
 
 	case TNODE_PROSE:
-		bprintf(ctx, "? %s ?", n->u.prose);
+		bprintf(ctx, " ");
+		render_string(ctx, '?', n->u.prose);
+		bprintf(ctx, " ");
 		break;
 
 	case TNODE_COMMENT:
@@ -277,7 +327,9 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_RULE:
-		bprintf(ctx, " %s ", n->u.name);
+		bprintf(ctx, " ");
+		render_string(ctx, '"', n->u.name);
+		bprintf(ctx, " ");
 		break;
 
 	case TNODE_VLIST:
@@ -334,12 +386,43 @@ render_rule(const struct tnode *node)
 static void
 dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 {
+	const char *p;
+	unsigned n;
+
 	assert(s != NULL);
 	assert(w != NULL);
 	assert(a != NULL);
 	assert(d != NULL);
 
-	*w = strlen(s);
+	n = 0;
+
+	for (p = s; *p != '\0'; p++) {
+		switch (*p) {
+		case '\\':
+		case '\"':
+		case '\a':
+		case '\b':
+		case '\f':
+		case '\n':
+		case '\r':
+		case '\t':
+		case '\v':
+			n += 2;
+			continue;
+
+		default:
+			break;
+		}
+
+		if (!isprint((unsigned char) *p)) {
+			n += 4;
+			continue;
+		}
+
+		n += 1;
+	}
+
+	*w = n + 2;
 	*a = 0;
 	*d = 1;
 }
@@ -352,7 +435,7 @@ rrtext_output(const struct ast_rule *grammar)
 	struct dim dim = {
 		dim_mono_string,
 		dim_mono_string,
-		4,
+		2,
 		2,
 		4,
 		0,
