@@ -781,7 +781,6 @@ svg_output(const struct ast_rule *grammar)
 	printf("  xmlns='http://www.w3.org/2000/svg'\n");
 	printf("  xmlns:xlink='http://www.w3.org/1999/xlink'\n");
 	printf("\n");
-	printf("  viewBox='0 0 %u %u'\n", w * 10, h * 10 + 60); /* TODO */
 	printf("  width='%u0' height='%u'>\n", w, h * 10 + 60);
 	printf("\n");
 
