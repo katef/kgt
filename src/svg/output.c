@@ -533,18 +533,18 @@ svg_render_rule(const struct tnode *node, const char *base)
 
 	ctx.paths = NULL;
 
-	ctx.x = -40; /* mirrored around 0 */
+	ctx.x = -10; /* mirrored around 0 */
 	ctx.y = node->a * 10 + 10;
 	svg_use(&ctx, "rrd:station", "scale(-1 1)");
-	ctx.x = 40;
+	ctx.x = 10;
 	svg_path_h(&ctx.paths, ctx.x, ctx.y, 20);
 
-	ctx.x = w - 20;
+	ctx.x = w - 50;
 	svg_path_h(&ctx.paths, ctx.x, ctx.y, 20);
 	ctx.x += 20;
 	svg_use(&ctx, "rrd:station", NULL);
 
-	ctx.x = 60;
+	ctx.x = 30;
 	ctx.y = node->a * 10 + 10;
 	node_walk_render(node, &ctx, base);
 
@@ -800,9 +800,9 @@ svg_output(const struct ast_rule *grammar)
 
 	for (i = 0, p = grammar; p; p = p->next, i++) {
 		printf("  <g transform='translate(%u %u)'>\n",
-			0, z * 10 + 30);
-		printf("    <text x='%u' y='%u'>%s:</text>\n",
-			10, 5, p->name);
+			40, z * 10 + 50);
+		printf("    <text x='%d' y='%d'>%s:</text>\n",
+			-30, -10, p->name);
 
 		svg_render_rule(a[i], NULL);
 

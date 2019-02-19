@@ -59,6 +59,7 @@ output(const struct ast_rule *grammar, int xml)
 	printf("      tspan.hex { font-family: monospace; font-size: 90%%; }\n");
 	printf("      path.arrow.rtl { marker-mid: url(#rrd:arrow-rtl); }\n");
 	printf("      path.arrow.ltr { marker-mid: url(#rrd:arrow-ltr); }\n");
+	printf("      svg { margin-left: 30px; }\n");
 	printf("  </style>\n");
 	printf("\n");
 
@@ -98,8 +99,8 @@ output(const struct ast_rule *grammar, int xml)
 		printf("  <h2><a name='%s'>%s:</a></h2>\n",
 			p->name, p->name);
 
-		h = (tnode->a + tnode->d + 3) * 10;
-		w = (tnode->w + 9) * 10;
+		h = (tnode->a + tnode->d + 1) * 10 + 5;
+		w = (tnode->w + 6) * 10;
 
 		printf("  <svg");
 		if (xml) {
