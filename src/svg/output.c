@@ -533,18 +533,19 @@ svg_render_rule(const struct tnode *node, const char *base)
 
 	ctx.paths = NULL;
 
-	ctx.x = 0;
-	ctx.y = node->a * 10;
+	ctx.x = -40; /* mirrored around 0 */
+	ctx.y = node->a * 10 + 10;
 	svg_use(&ctx, "rrd:station", "scale(-1 1)");
+	ctx.x = 40;
 	svg_path_h(&ctx.paths, ctx.x, ctx.y, 20);
 
-	ctx.x = w - 60;
+	ctx.x = w - 20;
 	svg_path_h(&ctx.paths, ctx.x, ctx.y, 20);
 	ctx.x += 20;
 	svg_use(&ctx, "rrd:station", NULL);
 
-	ctx.x = 20;
-	ctx.y = node->a * 10;
+	ctx.x = 60;
+	ctx.y = node->a * 10 + 10;
 	node_walk_render(node, &ctx, base);
 
 	/*
@@ -767,7 +768,7 @@ svg_output(const struct ast_rule *grammar)
 		if (a[i]->w > w) {
 			w = a[i]->w;
 		}
-		h += a[i]->a + a[i]->d + 5;
+		h += a[i]->a + a[i]->d + 6;
 
 		node_free(rrd);
 	}
@@ -780,8 +781,8 @@ svg_output(const struct ast_rule *grammar)
 	printf("  xmlns='http://www.w3.org/2000/svg'\n");
 	printf("  xmlns:xlink='http://www.w3.org/1999/xlink'\n");
 	printf("\n");
-	printf("  viewBox='-20 -50 %u %u'\n", w * 10, h * 10); /* TODO */
-	printf("  width='%u0' height='%u'>\n", w, h * 10);
+	printf("  viewBox='0 0 %u %u'\n", w * 10, h * 10 + 60); /* TODO */
+	printf("  width='%u0' height='%u'>\n", w, h * 10 + 60);
 	printf("\n");
 
 	printf("  <style>\n");
@@ -799,17 +800,17 @@ svg_output(const struct ast_rule *grammar)
 	z = 0;
 
 	for (i = 0, p = grammar; p; p = p->next, i++) {
-		printf("  <g transform='translate(%d %u)'>\n",
-			40, z * 10);
-		printf("    <text x='-%d' y='-%d'>%s:</text>\n",
-			40, 20, p->name);
+		printf("  <g transform='translate(%u %u)'>\n",
+			0, z * 10 + 30);
+		printf("    <text x='%u' y='%u'>%s:</text>\n",
+			10, 5, p->name);
 
 		svg_render_rule(a[i], NULL);
 
 		printf("  </g>\n");
 		printf("\n");
 
-		z += a[i]->a + a[i]->d + 5;
+		z += a[i]->a + a[i]->d + 6;
 	}
 
 	for (i = 0, p = grammar; p; p = p->next, i++) {

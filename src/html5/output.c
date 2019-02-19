@@ -98,14 +98,14 @@ output(const struct ast_rule *grammar, int xml)
 		printf("  <h2><a name='%s'>%s:</a></h2>\n",
 			p->name, p->name);
 
-		h = (tnode->a + tnode->d + 2) * 10;
-		w = (tnode->w + 7) * 10;
+		h = (tnode->a + tnode->d + 3) * 10;
+		w = (tnode->w + 9) * 10;
 
 		printf("  <svg");
 		if (xml) {
 			printf(" xmlns='http://www.w3.org/2000/svg'");
 		}
-		printf(" height='%u' width='%u' viewBox='-20 -10 %u %u'>\n",
+		printf(" height='%u' width='%u' viewBox='0 0 %u %u'>\n",
 			h, w, w, h);
 		svg_render_rule(tnode, "");
 		printf("  </svg>\n");
