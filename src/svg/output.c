@@ -153,15 +153,16 @@ svg_ellipsis(struct render_context *ctx, int w, int h)
 }
 
 static void
-svg_use(struct render_context *ctx, const char *id, const char *transform)
+svg_arrow(struct render_context *ctx, int x, int y, int rtl)
 {
-	printf("    <use xlink:href='#%s' x='%d' y='%d'", id, ctx->x, ctx->y);
+	unsigned h = 6;
 
-	if (transform != NULL) {
-		printf(" transform='%s'", transform);
-	}
+	assert(ctx != NULL);
 
-	printf("/>\n");
+	/* XXX: should be markers, but aren't for RFC 7996 */
+	/* 2 for optical correction */
+	printf("    <path d='M%d %d l%d %u v-%u z' class='arrow'/>\n",
+		x + (rtl ? -2 : 2), y, rtl ? 4 : -4, h / 2, h);
 }
 
 static void
@@ -454,13 +455,13 @@ node_walk_render(const struct tnode *n,
 
 	case TNODE_RTL_ARROW:
 		svg_path_h(&ctx->paths, ctx->x, ctx->y, 10);
-		svg_use(ctx, "rrd:arrow-rtl", "translate(5 0)");
+		svg_arrow(ctx, ctx->x + n->w * 5, ctx->y, 1);
 		ctx->x += n->w * 10;
 		break;
 
 	case TNODE_LTR_ARROW:
 		svg_path_h(&ctx->paths, ctx->x, ctx->y, 10);
-		svg_use(ctx, "rrd:arrow-ltr", "translate(5 0)");
+		svg_arrow(ctx, ctx->x + n->w * 5, ctx->y, 0);
 		ctx->x += n->w * 10;
 		break;
 
@@ -524,6 +525,17 @@ node_walk_render(const struct tnode *n,
 }
 
 void
+svg_render_station(int x, int y)
+{
+	int gap = 4;
+	int h = 12;
+
+	/* .5 to overlap the line width */
+	printf("    <path d='M%u.5 %u v%d m %d 0 v-%d' class='station'/>\n",
+		x, y - h / 2, h, gap, h);
+}
+
+void
 svg_render_rule(const struct tnode *node, const char *base)
 {
 	struct render_context ctx;
@@ -533,16 +545,16 @@ svg_render_rule(const struct tnode *node, const char *base)
 
 	ctx.paths = NULL;
 
-	ctx.x = -10; /* mirrored around 0 */
+	ctx.x = 5;
 	ctx.y = node->a * 10 + 10;
-	svg_use(&ctx, "rrd:station", "scale(-1 1)");
+	svg_render_station(ctx.x, ctx.y);
 	ctx.x = 10;
 	svg_path_h(&ctx.paths, ctx.x, ctx.y, 20);
 
 	ctx.x = w - 50;
 	svg_path_h(&ctx.paths, ctx.x, ctx.y, 20);
 	ctx.x += 20;
-	svg_use(&ctx, "rrd:station", NULL);
+	svg_render_station(ctx.x, ctx.y);
 
 	ctx.x = 30;
 	ctx.y = node->a * 10 + 10;
@@ -707,26 +719,6 @@ struct dim svg_dim = {
 };
 
 void
-svg_defs(void)
-{
-	printf("  <defs>\n");
-	printf("    <g id='rrd:station'>\n");
-	printf("      <path d='M.5 -6 v12 m 5 0 v-12' class='station'/>\n"); /* .5 to overlap the line width */
-	printf("    </g>\n");
-	printf("\n");
-
-	/* XXX: should be markers, but aren't for RFC 7996 */
-	printf("    <g id='rrd:arrow-ltr'>\n");
-	printf("      <polyline points='2,-4 10,0 2,4' class='arrow'/>\n"); /* 2 for optical correction */
-	printf("    </g>\n");
-	printf("    <g id='rrd:arrow-rtl' transform='scale(-1 1) translate(-10 0)'>\n");
-	printf("      <use xlink:href='#rrd:arrow-ltr'/>\n");
-	printf("    </g>\n");
-	printf("  </defs>\n");
-	printf("\n");
-}
-
-void
 svg_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
@@ -791,10 +783,9 @@ svg_output(const struct ast_rule *grammar)
 	printf("    text.literal { font-family: monospace; }\n");
 	printf("    line.ellipsis { stroke-dasharray: 1 3.5; }\n");
 	printf("    tspan.hex { font-family: monospace; font-size: 90%%; }\n");
+	printf("    path.arrow { fill: black; }\n");
 	printf("  </style>\n");
 	printf("\n");
-
-	svg_defs();
 
 	z = 0;
 
