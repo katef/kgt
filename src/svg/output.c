@@ -35,7 +35,7 @@
 #include "path.h"
 
 struct render_context {
-	int x, y; /* in svg units */
+	unsigned x, y;
 
 	struct path *paths;
 };
@@ -105,7 +105,7 @@ static void
 svg_rect(struct render_context *ctx, unsigned w, unsigned r,
 	const char *class)
 {
-	printf("    <rect x='%d' y='%d' height='%u' width='%u' rx='%u' ry='%u'",
+	printf("    <rect x='%u' y='%u' height='%u' width='%u' rx='%u' ry='%u'",
 		ctx->x, ctx->y - 10,
 		20, w,
 		r, r);
@@ -139,12 +139,12 @@ svg_prose(struct render_context *ctx, const char *s, unsigned w)
 }
 
 static void
-svg_ellipsis(struct render_context *ctx, int w, int h)
+svg_ellipsis(struct render_context *ctx, unsigned w, unsigned h)
 {
 	ctx->x += 10;
 	ctx->y -= 10;
 
-	printf("    <line x1='%d' y1='%d' x2='%d' y2='%d' class='ellipsis'/>",
+	printf("    <line x1='%u' y1='%u' x2='%u' y2='%u' class='ellipsis'/>",
 		ctx->x - 5, ctx->y + 5,
 		ctx->x + w - 5, ctx->y + h + 5);
 
@@ -153,7 +153,7 @@ svg_ellipsis(struct render_context *ctx, int w, int h)
 }
 
 static void
-svg_arrow(struct render_context *ctx, int x, int y, int rtl)
+svg_arrow(struct render_context *ctx, unsigned x, unsigned y, int rtl)
 {
 	unsigned h = 6;
 
@@ -161,8 +161,8 @@ svg_arrow(struct render_context *ctx, int x, int y, int rtl)
 
 	/* XXX: should be markers, but aren't for RFC 7996 */
 	/* 2 for optical correction */
-	printf("    <path d='M%d %d l%d %u v-%u z' class='arrow'/>\n",
-		x + (rtl ? -2 : 2), y, rtl ? 4 : -4, h / 2, h);
+	printf("    <path d='M%d %u l%d %u v%d z' class='arrow'/>\n",
+		(int) x + (rtl ? -2 : 2), y, rtl ? 4 : -4, h / 2, -h);
 }
 
 static void
@@ -177,7 +177,7 @@ centre(unsigned *lhs, unsigned *rhs, unsigned space, unsigned w)
 }
 
 static void
-justify(struct render_context *ctx, const struct tnode *n, int space,
+justify(struct render_context *ctx, const struct tnode *n, unsigned space,
 	const char *base)
 {
 	unsigned lhs, rhs;
@@ -344,7 +344,7 @@ static void
 render_vlist(const struct tnode *n,
 	struct render_context *ctx, const char *base)
 {
-	int x, o, y;
+	unsigned x, o, y;
 	size_t j;
 
 	assert(n != NULL);
@@ -471,7 +471,7 @@ node_walk_render(const struct tnode *n,
 
 	case TNODE_CI_LITERAL:
 		svg_textbox(ctx, n->u.literal, n->w * 10, 8, "literal");
-		printf("    <text x='%d' y='%d' text-anchor='left' class='ci'>%s</text>\n",
+		printf("    <text x='%u' y='%u' text-anchor='left' class='ci'>%s</text>\n",
 			ctx->x - 20 + 5, ctx->y + 5, "&#x29f8;i");
 		break;
 
@@ -525,14 +525,14 @@ node_walk_render(const struct tnode *n,
 }
 
 void
-svg_render_station(int x, int y)
+svg_render_station(unsigned x, unsigned y)
 {
-	int gap = 4;
-	int h = 12;
+	unsigned gap = 4;
+	unsigned h = 12;
 
 	/* .5 to overlap the line width */
-	printf("    <path d='M%u.5 %u v%d m %d 0 v-%d' class='station'/>\n",
-		x, y - h / 2, h, gap, h);
+	printf("    <path d='M%u.5 %u v%u m %u 0 v%d' class='station'/>\n",
+		x, y - h / 2, h, gap, -h);
 }
 
 void

@@ -35,7 +35,7 @@
 struct render_context {
 	char **lines;
 	char *scratch;
-	int x, y; /* in character indicies */
+	unsigned x, y; /* in character indicies */
 };
 
 static void node_walk_render(const struct tnode *n, struct render_context *ctx);
@@ -62,7 +62,7 @@ static void
 bprintf(struct render_context *ctx, const char *fmt, ...)
 {
 	va_list ap;
-	int n;
+	unsigned n;
 
 	assert(ctx != NULL);
 	assert(ctx->scratch != NULL);
@@ -118,7 +118,7 @@ centre(unsigned *lhs, unsigned *rhs, unsigned space, unsigned w)
 }
 
 static void
-justify(struct render_context *ctx, const struct tnode *n, int space)
+justify(struct render_context *ctx, const struct tnode *n, unsigned space)
 {
 	unsigned lhs, rhs;
 	unsigned i;
@@ -185,7 +185,7 @@ render_tline(struct render_context *ctx, enum tline tline, int rhs)
 static void
 render_vlist(const struct tnode *n, struct render_context *ctx)
 {
-	int x, y;
+	unsigned x, y;
 	size_t j;
 
 	assert(n != NULL);
@@ -347,7 +347,7 @@ render_rule(const struct tnode *node)
 {
 	struct render_context ctx;
 	unsigned w, h;
-	int i;
+	unsigned i;
 
 	w = node->w + 8;
 	h = node->a + node->d;
