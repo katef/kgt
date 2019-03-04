@@ -38,16 +38,16 @@
 	STARTOPT;   ENDOPT;
 	STARTSTAR;  ENDSTAR;
 
-	EMPTY;
-	!NAME;
-	!CI_LITERAL;
-	CS_LITERAL;
-	!PROSE;
-
 	ESC:    () -> (:char);
 	CHAR:   () -> (:char);
 	IDENT:  () -> (:string);
 	!COUNT: () -> (:count);
+
+	EMPTY;
+	!NAME:       () -> (:string);
+	!CI_LITERAL: () -> (:string);
+	CS_LITERAL:  () -> (:string);
+	!PROSE:      () -> (:string);
 
 	!BINSTR:   () -> (:string);
 	!OCTSTR:   () -> (:string);
@@ -62,7 +62,6 @@
 %productions%
 
 	<pattern-char>:   (:char) -> ();
-	<pattern-buffer>: ()      -> (:string);
 
 	!<rep-one-or-more>: () -> (:count, :count);
 	<rep-zero-or-more>: () -> (:count, :count);
@@ -118,8 +117,7 @@
 		t = <make-empty-term>;
 	||
 		body;
-		CS_LITERAL;
-		s = <pattern-buffer>;
+		s = CS_LITERAL;
 		t = <make-cs-literal-term>(s);
 	||
 		s = IDENT;
