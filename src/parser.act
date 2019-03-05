@@ -623,7 +623,7 @@
 
 		a = NULL;
 
-		for (i = @m; i <= @n; i++) {
+		for (i = (unsigned char) @m; i <= (unsigned char) @n; i++) {
 			struct ast_alt *new;
 			struct ast_term *t;
 
