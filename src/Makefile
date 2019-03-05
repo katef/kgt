@@ -5,6 +5,7 @@ SRC += src/ast_binary.c
 SRC += src/bitmap.c
 SRC += src/main.c
 SRC += src/rewrite_ci.c
+SRC += src/txt.c
 SRC += src/xalloc.c
 
 PROG += kgt
@@ -21,6 +22,7 @@ ${BUILD}/bin/kgt: ${BUILD}/src/ast_binary.o
 ${BUILD}/bin/kgt: ${BUILD}/src/bitmap.o
 ${BUILD}/bin/kgt: ${BUILD}/src/main.o
 ${BUILD}/bin/kgt: ${BUILD}/src/rewrite_ci.o
+${BUILD}/bin/kgt: ${BUILD}/src/txt.o
 ${BUILD}/bin/kgt: ${BUILD}/src/xalloc.o
 
 .for part in ${PART:Mbnf} ${PART:Mblab} ${PART:Mabnf} ${PART:Miso-ebnf} ${PART:Mrbnf} \
