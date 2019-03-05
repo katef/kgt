@@ -13,6 +13,7 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "../txt.h"
 #include "../ast.h"
 
 #include "../rrd/rrd.h"
@@ -72,6 +73,25 @@ escputs(const char *s, FILE *f)
 	return 0;
 }
 
+static int
+escputt(const struct txt *t, FILE *f)
+{
+	size_t i;
+	int r;
+
+	assert(t != NULL);
+	assert(t->p != NULL);
+
+	for (i = 0; i < t->n; i++) {
+		r = escputc(t->p[i], f);
+		if (r < 0) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
 static void
 rrd_print_dot(const char *prefix, const void *parent, const char *port,
 	const struct node *node)
@@ -114,13 +134,13 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 	switch (node->type) {
 	case NODE_CI_LITERAL:
 		printf("style = filled, shape = box, label = \"\\\"");
-		escputs(node->u.literal, stdout);
+		escputt(&node->u.literal, stdout);
 		printf("\\\"\"/i");
 		break;
 
 	case NODE_CS_LITERAL:
 		printf("style = filled, shape = box, label = \"\\\"");
-		escputs(node->u.literal, stdout);
+		escputt(&node->u.literal, stdout);
 		printf("\\\"\"");
 		break;
 

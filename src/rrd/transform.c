@@ -13,6 +13,7 @@
 #include <stddef.h>
 #include <errno.h>
 
+#include "../txt.h"
 #include "../ast.h"
 #include "../xalloc.h"
 
@@ -105,11 +106,11 @@ single_term(const struct ast_term *term, struct node **r)
 
 	case TYPE_CI_LITERAL:
 		/* can't create a sequence of alts; the tokenisation would be wrong */
-		*r = node_create_ci_literal(term->u.literal);
+		*r = node_create_ci_literal(&term->u.literal);
 		return 1;
 
 	case TYPE_CS_LITERAL:
-		*r = node_create_cs_literal(term->u.literal);
+		*r = node_create_cs_literal(&term->u.literal);
 		return 1;
 
 	case TYPE_TOKEN:

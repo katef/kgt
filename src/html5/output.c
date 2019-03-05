@@ -20,6 +20,7 @@
 #include <ctype.h>
 #include <math.h>
 
+#include "../txt.h"
 #include "../ast.h"
 #include "../xalloc.h"
 

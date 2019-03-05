@@ -15,7 +15,9 @@
 #include <string.h>
 #include <strings.h>
 #include <assert.h>
+#include <ctype.h>
 
+#include "../txt.h"
 #include "../ast.h"
 #include "../xalloc.h"
 
@@ -30,14 +32,15 @@ output_section(const char *section)
 }
 
 static void
-output_literal(const char *s)
+output_literal(const struct txt *t)
 {
 	char c;
 
-	assert(s != NULL);
+	assert(t != NULL);
+	assert(t->p != NULL);
 
-	c = strchr(s, '\"') ? '\'' : '\"';
-	printf("%c%s%c; ", c, s, c);
+	c = memchr(t->p, '\"', t->n) ? '\'' : '\"';
+	printf("%c%.*s%c; ", c, (int) t->n, t->p, c);
 }
 
 static void
@@ -57,7 +60,7 @@ output_basic(const struct ast_term *term)
 		exit(EXIT_FAILURE);
 
 	case TYPE_CS_LITERAL:
-		output_literal(term->u.literal);
+		output_literal(&term->u.literal);
 		break;
 
 	case TYPE_TOKEN:
@@ -132,11 +135,11 @@ is_equal(const struct ast_term *a, const struct ast_term *b)
 	}
 
 	switch (a->type) {
-	case TYPE_RULE:       return 0 == strcmp(a->u.rule->name,  b->u.rule->name);
-	case TYPE_CI_LITERAL: return 0 == strcasecmp(a->u.literal, b->u.literal);
-	case TYPE_CS_LITERAL: return 0 == strcmp(a->u.literal,     b->u.literal);
-	case TYPE_TOKEN:      return 0 == strcmp(a->u.token,       b->u.token);
-	case TYPE_PROSE:      return 0 == strcmp(a->u.prose,       b->u.prose);
+	case TYPE_RULE:       return 0 == strcmp(a->u.rule->name,    b->u.rule->name);
+	case TYPE_CI_LITERAL: return 0 == txtcasecmp(&a->u.literal, &b->u.literal);
+	case TYPE_CS_LITERAL: return 0 == txtcmp(&a->u.literal,     &b->u.literal);
+	case TYPE_TOKEN:      return 0 == strcmp(a->u.token,         b->u.token);
+	case TYPE_PROSE:      return 0 == strcmp(a->u.prose,         b->u.prose);
 	}
 }
 

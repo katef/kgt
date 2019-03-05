@@ -16,6 +16,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "../txt.h"
 #include "../ast.h"
 #include "../rrd/node.h"
 
@@ -101,14 +102,14 @@ output_term(const struct ast_term *term)
 		exit(EXIT_FAILURE);
 
 	case TYPE_CS_LITERAL: {
-			const char *p;
+			size_t i;
 
 			fputs(" \"", stdout);
-			for (p = term->u.literal; *p != '\0'; p++) {
-				if (*p == '\"') {
+			for (i = 0; i < term->u.literal.n; i++) {
+				if (term->u.literal.p[i] == '\"') {
 					fputs("\"\"", stdout);
 				} else {
-					putc(*p, stdout);
+					putc(term->u.literal.p[i], stdout);
 				}
 			}
 			putc('\"', stdout);

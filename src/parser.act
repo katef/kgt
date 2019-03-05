@@ -22,6 +22,7 @@
 
 	char   -> map_char;
 	string -> map_string;
+	txt    -> map_txt;
 	count  -> map_count;
 
 	ast_term -> map_term;
@@ -39,6 +40,7 @@
 	#include <errno.h>
 	#include <ctype.h>
 
+	#include "../txt.h"
 	#include "../ast.h"
 	#include "../xalloc.h"
 
@@ -73,6 +75,7 @@
 
 	typedef char         map_char;
 	typedef const char * map_string;
+	typedef struct txt   map_txt;
 	typedef unsigned int map_count;
 
 	typedef struct ast_term * map_term;
@@ -138,10 +141,13 @@
 	}
 
 	static int
-	string(const char *p, char *q, int base)
+	string(const char *p, struct txt *t, int base)
 	{
+		char *q;
+
 		assert(p != NULL);
-		assert(q != NULL);
+		assert(t != NULL);
+		assert(t->p != NULL);
 		assert(base > 0);
 
 		{
@@ -155,6 +161,8 @@
 
 			p += z;
 		}
+
+		q = t->p;
 
 		for (;;) {
 			unsigned long n;
@@ -181,8 +189,7 @@
 			p = e + 1;
 		}
 
-		/* XXX: need to support \0 in strings */
-		*q = '\0';
+		t->n = q - t->p;
 
 		return 0;
 	}
@@ -360,12 +367,14 @@
 		@s = pattern_buffer(lex_state);
 	@};
 
-	CI_LITERAL: () -> (s :string) = @{
-		@s = pattern_buffer(lex_state);
+	CI_LITERAL: () -> (t :txt) = @{
+		@t.p = pattern_buffer(lex_state);
+		@t.n = strlen(@t.p);
 	@};
 
-	CS_LITERAL: () -> (s :string) = @{
-		@s = pattern_buffer(lex_state);
+	CS_LITERAL: () -> (t :txt) = @{
+		@t.p = pattern_buffer(lex_state);
+		@t.n = strlen(@t.p);
 	@};
 
 	PROSE: () -> (s :string) = @{
@@ -373,14 +382,14 @@
 	@};
 
 
-	BINSTR: () -> (s :string) = @{
-		@s = xstrdup(lex_state->buf.a);
-		if (@s == NULL) {
+	BINSTR: () -> (t :txt) = @{
+		@t.p = xstrdup(lex_state->buf.a);
+		if (@t.p == NULL) {
 			perror("xstrdup");
 			exit(EXIT_FAILURE);
 		}
 
-		if (-1 == string(lex_state->buf.a, @s,  2)) {
+		if (-1 == string(lex_state->buf.a, &@t,  2)) {
 			if (errno == ERANGE) {
 				err(lex_state, "binary sequence %s out of range: expected %s0..%s%s inclusive",
 					lex_state->buf.a, prefix(2), prefix(2), "11111111");
@@ -393,14 +402,14 @@
 		/* TODO: free */
 	@};
 
-	OCTSTR: () -> (s :string) = @{
-		@s = xstrdup(lex_state->buf.a);
-		if (@s == NULL) {
+	OCTSTR: () -> (t :txt) = @{
+		@t.p = xstrdup(lex_state->buf.a);
+		if (@t.p == NULL) {
 			perror("xstrdup");
 			exit(EXIT_FAILURE);
 		}
 
-		if (-1 == string(lex_state->buf.a, @s,  8)) {
+		if (-1 == string(lex_state->buf.a, &@t,  8)) {
 			if (errno == ERANGE) {
 				err(lex_state, "octal sequence %s out of range: expected %s0..%s%o inclusive",
 					lex_state->buf.a, prefix(8), prefix(8), UCHAR_MAX);
@@ -413,14 +422,14 @@
 		/* TODO: free */
 	@};
 
-	DECSTR: () -> (s :string) = @{
-		@s = xstrdup(lex_state->buf.a);
-		if (@s == NULL) {
+	DECSTR: () -> (t :txt) = @{
+		@t.p = xstrdup(lex_state->buf.a);
+		if (@t.p == NULL) {
 			perror("xstrdup");
 			exit(EXIT_FAILURE);
 		}
 
-		if (-1 == string(lex_state->buf.a, @s, 10)) {
+		if (-1 == string(lex_state->buf.a, &@t, 10)) {
 			if (errno == ERANGE) {
 				err(lex_state, "decimal sequence %s out of range: expected %s0..%s%u inclusive",
 					lex_state->buf.a, prefix(10), prefix(10), UCHAR_MAX);
@@ -433,14 +442,14 @@
 		/* TODO: free */
 	@};
 
-	HEXSTR: () -> (s :string) = @{
-		@s = xstrdup(lex_state->buf.a);
-		if (@s == NULL) {
+	HEXSTR: () -> (t :txt) = @{
+		@t.p = xstrdup(lex_state->buf.a);
+		if (@t.p == NULL) {
 			perror("xstrdup");
 			exit(EXIT_FAILURE);
 		}
 
-		if (-1 == string(lex_state->buf.a, @s, 16)) {
+		if (-1 == string(lex_state->buf.a, &@t, 16)) {
 			if (errno == ERANGE) {
 				err(lex_state, "hex sequence %s out of range: expected %s0..%s%x inclusive",
 					lex_state->buf.a, prefix(16), prefix(16), UCHAR_MAX);
@@ -575,19 +584,19 @@
 		@t = ast_make_rule_term(r);
 	@};
 
-	<make-ci-literal-term>: (l :string) -> (t :ast_term) = @{
-		char *p;
+	<make-ci-literal-term>: (x :txt) -> (t :ast_term) = @{
+		size_t i;
 
 		/* normalise case-insensitive strings for aesthetic reasons only */
-		for (p = @l; *p != '\0'; p++) {
-			*p = tolower((unsigned char) *p);
+		for (i = 0; i < @x.n; i++) {
+			((char *) @x.p)[i] = tolower((unsigned char) @x.p[i]);
 		}
 
-		@t = ast_make_literal_term(@l, 1);
+		@t = ast_make_literal_term(&@x, 1);
 	@};
 
-	<make-cs-literal-term>: (l :string) -> (t :ast_term) = @{
-		@t = ast_make_literal_term(@l, 0);
+	<make-cs-literal-term>: (x :txt) -> (t :ast_term) = @{
+		@t = ast_make_literal_term(&@x, 0);
 	@};
 
 	<make-token-term>: (n :string) -> (t :ast_term) = @{

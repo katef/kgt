@@ -36,7 +36,7 @@ struct ast_term {
 
 	union {
 		const struct ast_rule *rule; /* just for sake of the name */
-		const char *literal;
+		struct txt literal;
 		const char *token;
 		const char *prose;
 		struct ast_alt *group;
@@ -84,7 +84,7 @@ struct ast_term *
 ast_make_char_term(char c);
 
 struct ast_term *
-ast_make_literal_term(const char *literal, int ci);
+ast_make_literal_term(const struct txt *literal, int ci);
 
 struct ast_term *
 ast_make_token_term(const char *token);

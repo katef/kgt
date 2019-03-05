@@ -8,6 +8,8 @@
 #include <stddef.h>
 #include <assert.h>
 
+#include "../txt.h"
+
 #include "pretty.h"
 #include "node.h"
 #include "list.h"

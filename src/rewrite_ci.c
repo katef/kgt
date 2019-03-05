@@ -10,24 +10,29 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 
+#include "txt.h"
 #include "ast.h"
 #include "rewrite.h"
 #include "xalloc.h"
 
 static void
-add_alt(struct ast_alt **alt, const char *s)
+add_alt(struct ast_alt **alt, const struct txt *t)
 {
 	struct ast_term *term;
 	struct ast_alt *new;
+	struct txt q;
 
 	assert(alt != NULL);
-	assert(s != NULL);
+	assert(t != NULL);
+	assert(t->p != NULL);
 
-	s = xstrdup(s);
+	/* TODO: move ownership to ast_make_*() and no need to make a new struct txt here */
+	q = xtxtdup(t);
 
-	term = ast_make_literal_term(s, 0);
+	term = ast_make_literal_term(&q, 0);
 
 	new = ast_make_alt(term);
 	new->next = *alt;
@@ -35,52 +40,52 @@ add_alt(struct ast_alt **alt, const char *s)
 }
 
 static void
-f(struct ast_alt **alt, char *s, char *p)
+f(struct ast_alt **alt, const struct txt *t, char *p, size_t n)
 {
 	assert(alt != NULL);
-	assert(s != NULL);
+	assert(t != NULL);
+	assert(t->p != NULL);
+	assert(p != NULL);
 
-	if (*p == '\0') {
-		add_alt(alt, s);
+	if (n == 0) {
+		add_alt(alt, t);
 		return;
 	}
 
 	if (!isalpha((unsigned char) *p)) {
-		f(alt, s, p + 1);
+		f(alt, t, p + 1, n - 1);
 		return;
 	}
 
 	*p = toupper((unsigned char) *p);
-	f(alt, s, p + 1);
+	f(alt, t, p + 1, n - 1);
 	*p = tolower((unsigned char) *p);
-	f(alt, s, p + 1);
+	f(alt, t, p + 1, n - 1);
 }
 
 static void
 rewrite_ci(struct ast_term *term)
 {
-	char *s, *p;
+	size_t i;
 
 	assert(term->type == TYPE_CI_LITERAL);
 
-	s = (void *) term->u.literal;
-
 	/* case is normalised during AST creation */
-	for (p = s; *p != '\0'; p++) {
-		if (!isalpha((unsigned char) *p)) {
+	for (i = 0; i < term->u.literal.n; i++) {
+		if (!isalpha((unsigned char) term->u.literal.p[i])) {
 			continue;
 		}
 
-		assert(islower((unsigned char) *p));
+		assert(islower((unsigned char) term->u.literal.p[i]));
 	}
 
 	/* we repurpose the existing node, which breaks abstraction for freeing */
 	term->type = TYPE_GROUP;
 	term->u.group = NULL;
 
-	f(&term->u.group, s, s);
+	f(&term->u.group, &term->u.literal, (void *) term->u.literal.p, term->u.literal.n);
 
-	free(s);
+	free((void *) term->u.literal.p);
 }
 
 static void

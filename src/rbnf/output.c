@@ -15,6 +15,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "../txt.h"
 #include "../ast.h"
 
 #include "io.h"

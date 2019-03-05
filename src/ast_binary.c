@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <ctype.h>
 
+#include "txt.h"
 #include "ast.h"
 
 static int
@@ -31,12 +32,14 @@ walk_alts(const struct ast_alt *alts)
 }
 
 static int
-binary_literal(const char *s)
+binary_literal(const struct txt *t)
 {
-	const char *p;
+	size_t i;
 
-	for (p = s; *p != '\0'; p++) {
-		if (!isprint((unsigned char) *p)) {
+	assert(t != NULL);
+
+	for (i = 0; i < t->n; i++) {
+		if (!isprint((unsigned char) t->p[i])) {
 			return 1;
 		}
 	}
@@ -56,7 +59,7 @@ walk_term(const struct ast_term *term)
 
 	case TYPE_CI_LITERAL:
 	case TYPE_CS_LITERAL:
-		return binary_literal(term->u.literal);
+		return binary_literal(&term->u.literal);
 
 	case TYPE_GROUP:
 		return walk_alts(term->u.group);

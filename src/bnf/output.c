@@ -15,6 +15,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "../txt.h"
 #include "../ast.h"
 
 #include "io.h"
@@ -45,8 +46,8 @@ output_term(const struct ast_term *term)
 	case TYPE_CS_LITERAL: {
 			char c;
 
-			c = strchr(term->u.literal, '\"') ? '\'' : '\"';
-			printf(" %c%s%c", c, term->u.literal, c);
+			c = memchr(term->u.literal.p, '\"', term->u.literal.n) ? '\'' : '\"';
+			printf(" %c%.*s%c", c, (int) term->u.literal.n, term->u.literal.p, c);
 		}
 		break;
 

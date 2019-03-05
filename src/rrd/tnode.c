@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "../txt.h"
 #include "../ast.h"
 #include "../bitmap.h"
 #include "../xalloc.h"
@@ -97,7 +98,7 @@ tnode_free(struct tnode *n)
 
 	case TNODE_CI_LITERAL:
 	case TNODE_CS_LITERAL:
-		free((void *) n->u.literal);
+		free((void *) n->u.literal.p);
 		break;
 
 	case TNODE_PROSE:
@@ -135,11 +136,11 @@ char_terminal(const struct node *node, unsigned char *c)
 		return 0;
 	}
 
-	if (strlen(node->u.literal) != 1) {
+	if (node->u.literal.n != 1) {
 		return 0;
 	}
 
-	*c = (unsigned) node->u.literal[0];
+	*c = (unsigned) node->u.literal.p[0];
 
 	return 1;
 }
@@ -467,15 +468,15 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 	switch (node->type) {
 	case NODE_CI_LITERAL:
 		new->type = TNODE_CI_LITERAL;
-		new->u.literal = xstrdup(node->u.literal);
-		dim->literal_string(new->u.literal, &new->w, &new->a, &new->d);
+		new->u.literal = xtxtdup(&node->u.literal);
+		dim->literal_txt(&new->u.literal, &new->w, &new->a, &new->d);
 		new->w += dim->literal_padding + dim->ci_marker;
 		break;
 
 	case NODE_CS_LITERAL:
 		new->type = TNODE_CS_LITERAL;
-		new->u.literal = xstrdup(node->u.literal);
-		dim->literal_string(new->u.literal, &new->w, &new->a, &new->d);
+		new->u.literal = xtxtdup(&node->u.literal);
+		dim->literal_txt(&new->u.literal, &new->w, &new->a, &new->d);
 		new->w += dim->literal_padding;
 		break;
 

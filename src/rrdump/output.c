@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../txt.h"
 #include "../ast.h"
 
 #include "../rrd/rrd.h"

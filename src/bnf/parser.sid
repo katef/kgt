@@ -12,6 +12,7 @@
 
 	char;
 	string;
+	txt;
 	count;
 
 	ast_rule;
@@ -41,14 +42,14 @@
 
 	EMPTY;
 	NAME:        () -> (:string);
-	!CI_LITERAL: () -> (:string);
-	CS_LITERAL:  () -> (:string);
+	!CI_LITERAL: () -> (:txt);
+	CS_LITERAL:  () -> (:txt);
 	!PROSE:      () -> (:string);
 
-	!BINSTR:   () -> (:string);
-	!OCTSTR:   () -> (:string);
-	!DECSTR:   () -> (:string);
-	!HEXSTR:   () -> (:string);
+	!BINSTR:   () -> (:txt);
+	!OCTSTR:   () -> (:txt);
+	!DECSTR:   () -> (:txt);
+	!HEXSTR:   () -> (:txt);
 
 	!BINRANGE: () -> (:char, :char);
 	!OCTRANGE: () -> (:char, :char);
@@ -68,8 +69,8 @@
 
 	<make-empty-term>:       ()             -> (:ast_term);
 	<make-rule-term>:        (:string)      -> (:ast_term);
-	!<make-ci-literal-term>: (:string)      -> (:ast_term);
-	<make-cs-literal-term>:  (:string)      -> (:ast_term);
+	!<make-ci-literal-term>: (:txt)         -> (:ast_term);
+	<make-cs-literal-term>:  (:txt)         -> (:ast_term);
 	!<make-token-term>:      (:string)      -> (:ast_term);
 	!<make-prose-term>:      (:string)      -> (:ast_term);
 	!<make-group-term>:      (:ast_alt)     -> (:ast_term);
@@ -109,8 +110,8 @@
 		t = <make-empty-term>;
 	||
 		body;
-		s = CS_LITERAL;
-		t = <make-cs-literal-term>(s);
+		x = CS_LITERAL;
+		t = <make-cs-literal-term>(x);
 	||
 		body;
 		s = NAME;

@@ -24,8 +24,8 @@ struct node {
 	} type;
 
 	union {
-		const char *literal; /* TODO: point to ast_literal instead */
-		const char *name;    /* TODO: point to ast_rule instead */
+		struct txt literal; /* TODO: point to ast_literal instead */
+		const char *name;   /* TODO: point to ast_rule instead */
 		const char *prose;
 
 		struct list *alt;
@@ -44,10 +44,10 @@ void
 node_free(struct node *);
 
 struct node *
-node_create_ci_literal(const char *literal);
+node_create_ci_literal(const struct txt *literal);
 
 struct node *
-node_create_cs_literal(const char *literal);
+node_create_cs_literal(const struct txt *literal);
 
 struct node *
 node_create_name(const char *name);

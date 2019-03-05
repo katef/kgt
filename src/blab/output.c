@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <ctype.h>
 
+#include "../txt.h"
 #include "../ast.h"
 
 #include "io.h"
@@ -139,21 +140,21 @@ output_term(const struct ast_term *term)
 		break;
 
 	case TYPE_CI_LITERAL: {
-			const char *p;
+			size_t i;
 
 			putc(' ', stdout);
 
 			/* XXX: the tokenization here is wrong; this should be a single token */
 
-			for (p = term->u.literal; *p != '\0'; p++) {
+			for (i = 0; i < term->u.literal.n; i++) {
 				char uc, lc;
 
-				uc = toupper((unsigned char) *p);
-				lc = tolower((unsigned char) *p);
+				uc = toupper((unsigned char) term->u.literal.p[i]);
+				lc = tolower((unsigned char) term->u.literal.p[i]);
 
 				if (uc == lc) {
 					putc('[', stdout);
-					(void) blab_escputc(stdout, *p);
+					(void) blab_escputc(stdout, term->u.literal.p[i]);
 					putc(']', stdout);
 					continue;
 				}
@@ -169,12 +170,12 @@ output_term(const struct ast_term *term)
 		break;
 
 	case TYPE_CS_LITERAL: {
-			const char *p;
+			size_t i;
 
 			fputs(" \"", stdout);
 
-			for (p = term->u.literal; *p != '\0'; p++) {
-				(void) blab_escputc(stdout, *p);
+			for (i = 0; i < term->u.literal.n; i++) {
+				(void) blab_escputc(stdout, term->u.literal.p[i]);
 			}
 
 			putc('\"', stdout);

@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "../txt.h"
 #include "../ast.h"
 #include "../xalloc.h"
 
@@ -270,17 +271,31 @@ render_comment(const struct tnode *n, struct render_context *ctx)
 }
 
 static void
-render_string(struct render_context *ctx, char quote, const char *s)
+render_txt(struct render_context *ctx, char quote, const struct txt *t)
 {
-	const char *p;
+	size_t i;
+
+	assert(t != NULL);
+	assert(t->p != NULL);
 
 	bprintf(ctx, "%c", quote);
 
-	for (p = s; *p != '\0'; p++) {
-		escputc(ctx, *p);
+	for (i = 0; i < t->n; i++) {
+		escputc(ctx, t->p[i]);
 	}
 
 	bprintf(ctx, "%c", quote);
+}
+
+static void
+render_string(struct render_context *ctx, char quote, const char *s)
+{
+	struct txt t;
+
+	t.p = s;
+	t.n = strlen(s);
+
+	return render_txt(ctx, quote, &t);
 }
 
 static void
@@ -306,13 +321,13 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 
 	case TNODE_CI_LITERAL:
 		bprintf(ctx, " ");
-		render_string(ctx, '"', n->u.literal);
+		render_txt(ctx, '"', &n->u.literal);
 		bprintf(ctx, "/i ");
 		break;
 
 	case TNODE_CS_LITERAL:
 		bprintf(ctx, " ");
-		render_string(ctx, '"', n->u.literal);
+		render_txt(ctx, '"', &n->u.literal);
 		bprintf(ctx, " ");
 		break;
 
@@ -384,20 +399,21 @@ render_rule(const struct tnode *node)
 }
 
 static void
-dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
+dim_mono_txt(const struct txt *t, unsigned *w, unsigned *a, unsigned *d)
 {
-	const char *p;
+	size_t i;
 	unsigned n;
 
-	assert(s != NULL);
+	assert(t != NULL);
+	assert(t->p != NULL);
 	assert(w != NULL);
 	assert(a != NULL);
 	assert(d != NULL);
 
 	n = 0;
 
-	for (p = s; *p != '\0'; p++) {
-		switch (*p) {
+	for (i = 0; i < t->n; i++) {
+		switch (t->p[i]) {
 		case '\\':
 		case '\"':
 		case '\a':
@@ -414,7 +430,7 @@ dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 			break;
 		}
 
-		if (!isprint((unsigned char) *p)) {
+		if (!isprint((unsigned char) t->p[i])) {
 			n += 4;
 			continue;
 		}
@@ -427,13 +443,29 @@ dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 	*d = 1;
 }
 
+static void
+dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
+{
+	struct txt t;
+
+	assert(s != NULL);
+	assert(w != NULL);
+	assert(a != NULL);
+	assert(d != NULL);
+
+	t.p = s;
+	t.n = strlen(s);
+
+	dim_mono_txt(&t, w, a, d);
+}
+
 void
 rrtext_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
 
 	struct dim dim = {
-		dim_mono_string,
+		dim_mono_txt,
 		dim_mono_string,
 		2,
 		2,

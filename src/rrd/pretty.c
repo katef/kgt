@@ -11,6 +11,7 @@
 #include <stddef.h>
 #include <assert.h>
 
+#include "../txt.h"
 #include "../xalloc.h"
 
 #include "node.h"

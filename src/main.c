@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "txt.h"
 #include "ast.h"
 #include "rewrite.h"
 #include "xalloc.h"
