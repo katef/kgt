@@ -794,7 +794,7 @@ prod_term(lex_state lex_state, act_state act_state, map_term *ZOt)
 
 		a = NULL;
 
-		for (i = (ZIm); i <= (ZIn); i++) {
+		for (i = (unsigned char) (ZIm); i <= (unsigned char) (ZIn); i++) {
 			struct ast_alt *new;
 			struct ast_term *t;
 
