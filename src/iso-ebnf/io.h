@@ -9,7 +9,7 @@
 
 struct ast_rule;
 
-#define iso_ebnf_ast_unsupported (FEATURE_AST_CI_LITERAL | FEATURE_AST_PROSE)
+#define iso_ebnf_ast_unsupported (FEATURE_AST_CI_LITERAL | FEATURE_AST_PROSE | FEATURE_AST_BINARY)
 
 struct ast_rule *
 iso_ebnf_input(int (*f)(void *opaque), void *opaque);

@@ -1,6 +1,7 @@
 .include "../share/mk/top.mk"
 
 SRC += src/ast.c
+SRC += src/ast_binary.c
 SRC += src/bitmap.c
 SRC += src/main.c
 SRC += src/rewrite_ci.c
@@ -16,6 +17,7 @@ PROG += kgt
 LFLAGS.kgt += -lm
 
 ${BUILD}/bin/kgt: ${BUILD}/src/ast.o
+${BUILD}/bin/kgt: ${BUILD}/src/ast_binary.o
 ${BUILD}/bin/kgt: ${BUILD}/src/bitmap.o
 ${BUILD}/bin/kgt: ${BUILD}/src/main.o
 ${BUILD}/bin/kgt: ${BUILD}/src/rewrite_ci.o

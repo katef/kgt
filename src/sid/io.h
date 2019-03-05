@@ -9,7 +9,7 @@
 
 struct ast_rule;
 
-#define sid_ast_unsupported FEATURE_AST_CI_LITERAL
+#define sid_ast_unsupported (FEATURE_AST_CI_LITERAL | FEATURE_AST_BINARY)
 
 void
 sid_output(const struct ast_rule *grammar);

@@ -9,7 +9,7 @@
 
 struct ast_rule;
 
-#define wsn_ast_unsupported FEATURE_AST_CI_LITERAL
+#define wsn_ast_unsupported (FEATURE_AST_CI_LITERAL | FEATURE_AST_BINARY)
 
 struct ast_rule *
 wsn_input(int (*f)(void *opaque), void *opaque);

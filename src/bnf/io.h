@@ -9,7 +9,7 @@
 
 struct ast_rule;
 
-#define bnf_ast_unsupported FEATURE_AST_CI_LITERAL
+#define bnf_ast_unsupported (FEATURE_AST_CI_LITERAL | FEATURE_AST_BINARY)
 
 struct ast_rule *
 bnf_input(int (*f)(void *opaque), void *opaque);
