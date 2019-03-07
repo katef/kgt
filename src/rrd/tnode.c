@@ -231,13 +231,11 @@ tnode_create_alt_list(const struct list *list, int rtl, const struct dim *dim)
 		lo = bm_next(&bm, hi, 1);
 		if (lo > UCHAR_MAX) {
 			/* end of list */
+			break;
 		}
 
 		/* end of range */
 		hi = bm_next(&bm, lo, 0);
-		if (hi > UCHAR_MAX && lo < UCHAR_MAX) {
-			hi = UCHAR_MAX;
-		}
 
 		if (!isalnum((unsigned char) lo) && isalnum((unsigned char) hi)) {
 			new.a[i++] = tnode_create_node(find_node(list, lo), rtl, dim);
