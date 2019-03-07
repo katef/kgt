@@ -157,6 +157,45 @@ bars(struct render_context *ctx, unsigned n, unsigned w)
 	}
 }
 
+static char *tile[] = {
+	NULL, /* \000 */
+	"^", /* \001 */
+	",", /* \002 */
+	".", /* \003 */
+	"v", /* \004 */
+	"+", /* \005 */
+	"`", /* \006 */
+
+	/* whitespace, not used for rtrim() */
+	NULL, /* \007 */
+	NULL, /* \010 */
+	NULL, /* \011 */
+	NULL, /* \012 */
+	NULL, /* \013 */
+	NULL, /* \014 */
+	NULL, /* \015 */
+
+	"'", /* \016 */
+	"|", /* \017 */
+	">", /* \020 */
+	"<"  /* \021 */
+};
+
+static void
+tile_puts(const char *s)
+{
+	const char *p;
+
+	for (p = s; *p != '\0'; p++) {
+		if ((unsigned char) *p < sizeof tile / sizeof *tile) {
+			printf("%s", tile[(unsigned char) *p]);
+			continue;
+		}
+
+		printf("%c", *p);
+	}
+}
+
 static void
 render_tline(struct render_context *ctx, enum tline tline, int rhs)
 {
@@ -165,15 +204,15 @@ render_tline(struct render_context *ctx, enum tline tline, int rhs)
 	assert(ctx != NULL);
 
 	switch (tline) {
-	case TLINE_A: a = "<^"; break; case TLINE_a: a = "^>"; break;
-	case TLINE_B: a = ",."; break;
-	case TLINE_C: a = "<v"; break; case TLINE_c: a = "v>"; break;
-	case TLINE_D: a = "<+"; break; case TLINE_d: a = "+>"; break;
-	case TLINE_E: a = "`'"; break;
-	case TLINE_F: a = "||"; break;
-	case TLINE_G: a = "^<"; break; case TLINE_g: a = ">^"; break;
-	case TLINE_H: a = "v<"; break; case TLINE_h: a = ">v"; break;
-	case TLINE_I: a = "^<"; break; case TLINE_i: a = ">^"; break;
+	case TLINE_A: a = "\021\001"; break; case TLINE_a: a = "\001\020"; break;
+	case TLINE_B: a = "\002\003"; break;
+	case TLINE_C: a = "\021\004"; break; case TLINE_c: a = "\004\020"; break;
+	case TLINE_D: a = "\021\005"; break; case TLINE_d: a = "\005\020"; break;
+	case TLINE_E: a = "\006\016"; break;
+	case TLINE_F: a = "\017\017"; break;
+	case TLINE_G: a = "\001\021"; break; case TLINE_g: a = "\020\001"; break;
+	case TLINE_H: a = "\004\021"; break; case TLINE_h: a = "\020\004"; break;
+	case TLINE_I: a = "\001\021"; break; case TLINE_i: a = "\020\001"; break;
 
 	default:
 		a = "??";
@@ -388,7 +427,9 @@ render_rule(const struct tnode *node)
 
 	for (i = 0; i < h; i++) {
 		rtrim(ctx.lines[i]);
-		printf("    %s\n", ctx.lines[i]);
+		printf("    ");
+		tile_puts(ctx.lines[i]);
+		printf("\n");
 		free(ctx.lines[i]);
 	}
 
