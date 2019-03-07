@@ -342,9 +342,7 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_RULE:
-		bprintf(ctx, " ");
-		render_string(ctx, '"', n->u.name);
-		bprintf(ctx, " ");
+		render_string(ctx, ' ', n->u.name);
 		break;
 
 	case TNODE_VLIST:
@@ -468,7 +466,7 @@ rrtext_output(const struct ast_rule *grammar)
 		dim_mono_txt,
 		dim_mono_string,
 		2,
-		2,
+		0,
 		4,
 		0,
 		2,
