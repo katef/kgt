@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "../txt.h"
 #include "../xalloc.h"
 
 #include "pretty.h"

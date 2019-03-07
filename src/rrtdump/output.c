@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../txt.h"
 #include "../ast.h"
 
 #include "../rrd/rrd.h"
@@ -86,7 +87,7 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 		print_indent(f, depth);
 		fprintf(f, "LITERAL");
 		print_coords(f, n);
-		fprintf(f, ": \"%s\"%s\n", n->u.literal,
+		fprintf(f, ": \"%.*s\"%s\n", (int) n->u.literal.n, n->u.literal.p,
 			n->type == TNODE_CI_LITERAL ? "/i" : "");
 
 		break;

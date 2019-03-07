@@ -8,6 +8,7 @@
 #define KGT_RRD_TNODE_H
 
 struct node;
+struct txt;
 
 /*
  * Various combinations of two endpoints (corner pieces) for a line:
@@ -77,8 +78,8 @@ struct tnode {
 	unsigned d; /* descender - depth below the line */
 
 	union {
-		const char *literal; /* TODO: point to ast_literal instead */
-		const char *name;    /* TODO: point to ast_rule instead */
+		struct txt literal; /* TODO: point to ast_literal instead */
+		const char *name;   /* TODO: point to ast_rule instead */
 		const char *prose;
 
 		struct {
@@ -92,8 +93,8 @@ struct tnode {
 };
 
 struct dim {
-	void (*literal_string)(const char *s, unsigned *w, unsigned *a, unsigned *d);
-	void (*rule_string   )(const char *s, unsigned *w, unsigned *a, unsigned *d);
+	void (*literal_txt)(const struct txt *t, unsigned *w, unsigned *a, unsigned *d);
+	void (*rule_string)(const char *s, unsigned *w, unsigned *a, unsigned *d);
 	unsigned literal_padding;
 	unsigned rule_padding;
 	unsigned prose_padding;

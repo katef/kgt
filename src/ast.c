@@ -9,18 +9,20 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include "txt.h"
 #include "ast.h"
 #include "xalloc.h"
 
 static int
-isalphastr(const char *s)
+isalphastr(const struct txt *t)
 {
-	const char *p;
+	size_t i;
 
-	assert(s != NULL);
+	assert(t != NULL);
+	assert(t->p != NULL);
 
-	for (p = s; *p != '\0'; p++) {
-		if (isalpha((unsigned char) *p)) {
+	for (i = 0; i < t->n; i++) {
+		if (isalpha((unsigned char) t->p[i])) {
 			return 1;
 		}
 	}
@@ -65,16 +67,16 @@ struct ast_term *
 ast_make_char_term(char c)
 {
 	struct ast_term *new;
-	char *s;
+	char *a;
 
-	s = xmalloc(2); /* XXX: i don't like this */
-	s[0] = c;
-	s[1] = '\0';
+	a = xmalloc(1); /* XXX: i don't like this */
+	a[0] = c;
 
 	new = xmalloc(sizeof *new);
-	new->type      = TYPE_CS_LITERAL;
-	new->next      = NULL;
-	new->u.literal = s;
+	new->type        = TYPE_CS_LITERAL;
+	new->next        = NULL;
+	new->u.literal.p = a;
+	new->u.literal.n = 1;
 
 	new->min = 1;
 	new->max = 1;
@@ -83,19 +85,20 @@ ast_make_char_term(char c)
 }
 
 struct ast_term *
-ast_make_literal_term(const char *literal, int ci)
+ast_make_literal_term(const struct txt *literal, int ci)
 {
 	struct ast_term *new;
 
 	assert(literal != NULL);
+	assert(literal->p != NULL);
 
 	new = xmalloc(sizeof *new);
 	new->type      = ci ? TYPE_CI_LITERAL : TYPE_CS_LITERAL;
 	new->next      = NULL;
-	new->u.literal = literal;
+	new->u.literal = *literal;
 
 	/* no need for case-insensitive strings if there are no letters */
-	if (!isalphastr(new->u.literal)) {
+	if (!isalphastr(&new->u.literal)) {
 		new->type = TYPE_CS_LITERAL;
 	}
 

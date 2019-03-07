@@ -9,8 +9,11 @@
 
 #include <stddef.h>
 
+struct txt;
+
 void *xmalloc(size_t size);
 char *xstrdup(const char *s);
+struct txt xtxtdup(const struct txt *t);
 void xerror(const char *msg, ...);
 
 #endif

@@ -15,6 +15,7 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "../txt.h"
 #include "../ast.h"
 
 #include "../rrd/rrd.h"
@@ -97,6 +98,26 @@ escputs(const char *s, FILE *f)
 	return n;
 }
 
+/* TODO: centralise */
+static int
+escputt(const struct txt *t, FILE *f)
+{
+	size_t i;
+	int r;
+
+	assert(t != NULL);
+	assert(t->p != NULL);
+
+	for (i = 0; i < t->n; i++) {
+		r = escputc(t->p[i], f);
+		if (r < 0) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
 int
 normal(const struct list *list)
 {
@@ -143,7 +164,7 @@ node_walk(FILE *f, const struct node *n, int depth)
 	case NODE_CS_LITERAL:
 		print_indent(f, depth);
 		fprintf(f, "Terminal(\"");
-		escputs(n->u.literal, f);
+		escputt(&n->u.literal, f);
 		fprintf(f, "\")");
 
 		break;

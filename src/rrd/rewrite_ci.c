@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "../txt.h"
 #include "../ast.h"
 #include "../xalloc.h"
 
@@ -23,68 +24,69 @@
 #include "../rrd/list.h"
 
 static void
-add_alt(struct list **list, const char *s)
+add_alt(struct list **list, const struct txt *t)
 {
 	struct node *node;
+	struct txt q;
 
 	assert(list != NULL);
-	assert(s != NULL);
+	assert(t != NULL);
+	assert(t->p != NULL);
 
-	s = xstrdup(s);
+	q = xtxtdup(t);
 
-	node = node_create_cs_literal(s);
+	node = node_create_cs_literal(&q);
 
 	list_push(list, node);
 }
 
 /* TODO: centralise */
 static void
-f(struct list **list, char *s, char *p)
+f(struct list **list, const struct txt *t, char *p, size_t n)
 {
 	assert(list != NULL);
-	assert(s != NULL);
+	assert(t != NULL);
+	assert(t->p != NULL);
 
-	if (*p == '\0') {
-		add_alt(list, s);
+	if (n == 0) {
+		add_alt(list, t);
 		return;
 	}
 
 	if (!isalpha((unsigned char) *p)) {
-		f(list, s, p + 1);
+		f(list, t, p + 1, n - 1);
 		return;
 	}
 
 	*p = toupper((unsigned char) *p);
-	f(list, s, p + 1);
+	f(list, t, p + 1, n - 1);
 	*p = tolower((unsigned char) *p);
-	f(list, s, p + 1);
+	f(list, t, p + 1, n - 1);
 }
 
 static void
 rewrite_ci(struct node *n)
 {
-	char *s, *p;
+	size_t i;
 
 	assert(n->type == NODE_CI_LITERAL);
 
-	s = (void *) n->u.literal;
-
 	/* case is normalised during AST creation */
-	for (p = s; *p != '\0'; p++) {
-		if (!isalpha((unsigned char) *p)) {
+	for (i = 0; i < n->u.literal.n; i++) {
+		if (!isalpha((unsigned char) n->u.literal.p[i])) {
 			continue;
 		}
 
-		assert(islower((unsigned char) *p));
+		assert(islower((unsigned char) n->u.literal.p[i]));
 	}
 
 	/* we repurpose the existing node, which breaks abstraction for freeing */
 	n->type = NODE_ALT;
 	n->u.alt = NULL;
 
-	f(&n->u.alt, s, s);
+	f(&n->u.alt, &n->u.literal, (void *) n->u.literal.p, n->u.literal.n);
 
-	free(s);
+	free((void *) n->u.literal.p);
 }
 
 static void

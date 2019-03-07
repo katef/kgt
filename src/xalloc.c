@@ -4,12 +4,14 @@
  * See LICENCE for the full copyright terms.
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
 
 #include "xalloc.h"
+#include "txt.h"
 
 void *
 xmalloc(size_t size)
@@ -32,6 +34,22 @@ xstrdup(const char *s)
 
 	new = xmalloc(strlen(s) + 1);
 	return strcpy(new, s);
+}
+
+struct txt
+xtxtdup(const struct txt *t)
+{
+	struct txt new;
+
+	assert(t != NULL);
+	assert(t->p != NULL);
+
+	new.n = t->n;
+	new.p = xmalloc(new.n);
+
+	memcpy(new.p, t->p, new.n);
+
+	return new;
 }
 
 void

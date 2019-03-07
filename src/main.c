@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "txt.h"
 #include "ast.h"
 #include "rewrite.h"
 #include "xalloc.h"
@@ -57,9 +58,9 @@ struct io {
 	{ "rrdot",    NULL,           rrdot_output,    0, 0 },
 	{ "rrdump",   NULL,           rrdump_output,   0, 0 },
 	{ "rrtdump",  NULL,           rrtdump_output,  0, 0 },
-	{ "rrparcon", NULL,           rrparcon_output, 0, rrparcon_rrd_unsupported },
-	{ "rrll",     NULL,           rrll_output,     0, rrll_rrd_unsupported     },
-	{ "rrta",     NULL,           rrta_output,     0, rrta_rrd_unsupported     },
+	{ "rrparcon", NULL,           rrparcon_output, rrparcon_ast_unsupported, rrparcon_rrd_unsupported },
+	{ "rrll",     NULL,           rrll_output,     rrll_ast_unsupported, rrll_rrd_unsupported     },
+	{ "rrta",     NULL,           rrta_output,     rrta_ast_unsupported, rrta_rrd_unsupported     },
 	{ "rrtext",   NULL,           rrtext_output,   0, 0 },
 	{ "svg",      NULL,           svg_output,      0, 0 },
 	{ "html5",    NULL,           html5_output,    0, 0 },
@@ -184,6 +185,13 @@ main(int argc, char *argv[])
 			/* TODO: option to query if output is possible without rewriting */
 			switch (v & -v) {
 			case FEATURE_AST_CI_LITERAL: r = 1; rewrite_ci_literals(g); break;
+
+			case FEATURE_AST_BINARY:
+				if (ast_binary(g)) {
+					fprintf(stderr, "Binary strings not supported for this output language\n");
+					exit(EXIT_FAILURE);
+				}
+				break;
 			}
 
 			if (!r) {

@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "../txt.h"
 #include "../xalloc.h"
 
 #include "pretty.h"
@@ -41,7 +42,7 @@ ci_alt(int *changed, struct node *n)
 		switch (p->node->type) {
 		case NODE_CI_LITERAL:
 		case NODE_CS_LITERAL:
-			if (strlen(p->node->u.literal) != 1) {
+			if (p->node->u.literal.n != 1) {
 				return;
 			}
 
@@ -56,19 +57,19 @@ ci_alt(int *changed, struct node *n)
 
 		switch (p->node->type) {
 			struct node *new;
-			char *s;
+			struct txt t;
 
 		case NODE_CI_LITERAL:
-			if (!isalpha((unsigned char) *p->node->u.literal)) {
+			if (!isalpha((unsigned char) *p->node->u.literal.p)) {
 				break;
 			}
 
 			p->node->type = NODE_CS_LITERAL;
-			* (char *) p->node->u.literal = tolower((unsigned char) *p->node->u.literal);
+			* (char *) p->node->u.literal.p = tolower((unsigned char) *p->node->u.literal.p);
 
-			s = xstrdup(p->node->u.literal);
-			*s = toupper((unsigned char) *s);
-			new = node_create_cs_literal(s);
+			t = xtxtdup(&p->node->u.literal);
+			* (char *) t.p = toupper((unsigned char) *t.p);
+			new = node_create_cs_literal(&t);
 			list_push(&list, new);
 
 			*changed = 1;

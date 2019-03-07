@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "../txt.h"
 #include "../ast.h"
 
 #include "io.h"
@@ -60,6 +61,25 @@ escputs(const char *s, FILE *f)
 
 	for (p = s; *p != '\0'; p++) {
 		r = escputc(*p, f);
+		if (r < 0) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
+static int
+escputt(const struct txt *t, FILE *f)
+{
+	size_t i;
+	int r;
+
+	assert(t != NULL);
+	assert(t->p != NULL);
+
+	for (i = 0; i < t->n; i++) {
+		r = escputc(t->p[i], f);
 		if (r < 0) {
 			return -1;
 		}
@@ -116,7 +136,7 @@ output_term(const struct ast_rule *grammar,
 	case TYPE_CI_LITERAL:
 	case TYPE_CS_LITERAL:
 		fputs("&quot;", stdout);
-		escputs(term->u.literal, stdout);
+		escputt(&term->u.literal, stdout);
 		fputs("&quot;", stdout);
 		if (term->type == TYPE_CI_LITERAL) {
 			fputs("/i", stdout);

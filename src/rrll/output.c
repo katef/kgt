@@ -16,6 +16,7 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "../txt.h"
 #include "../ast.h"
 
 #include "../rrd/rrd.h"
@@ -87,6 +88,26 @@ escputs(const char *s, FILE *f)
 }
 
 /* TODO: centralise */
+static int
+escputt(const struct txt *t, FILE *f)
+{
+	size_t i;
+	int r;
+
+	assert(t != NULL);
+	assert(t->p != NULL);
+
+	for (i = 0; i < t->n; i++) {
+		r = escputc(t->p[i], f);
+		if (r < 0) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
+/* TODO: centralise */
 static size_t
 loop_label(unsigned min, unsigned max, char *s)
 {
@@ -130,7 +151,7 @@ node_walk(FILE *f, const struct node *n)
 
 	case NODE_CS_LITERAL:
 		fprintf(f, "\"");
-		escputs(n->u.literal, f);
+		escputt(&n->u.literal, f);
 		fprintf(f, "\"");
 
 		break;

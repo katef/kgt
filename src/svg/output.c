@@ -21,6 +21,7 @@
 #include <ctype.h>
 #include <math.h>
 
+#include "../txt.h"
 #include "../ast.h"
 #include "../xalloc.h"
 
@@ -75,13 +76,14 @@ svg_escputc(FILE *f, char c)
 }
 
 static void
-svg_text(struct render_context *ctx, unsigned w, const char *s, const char *class)
+svg_text(struct render_context *ctx, unsigned w, const struct txt *t, const char *class)
 {
-	const char *p;
 	unsigned mid;
+	size_t i;
 
 	assert(ctx != NULL);
-	assert(s != NULL);
+	assert(t != NULL);
+	assert(t->p != NULL);
 
 	mid = w / 2;
 
@@ -94,11 +96,25 @@ svg_text(struct render_context *ctx, unsigned w, const char *s, const char *clas
 
 	printf(">");
 
-	for (p = s; *p != '\0'; p++) {
-		svg_escputc(stdout, *p);
+	for (i = 0; i < t->n; i++) {
+		svg_escputc(stdout, t->p[i]);
 	}
 
 	printf("</text>\n");
+}
+
+static void
+svg_string(struct render_context *ctx, unsigned w, const char *s, const char *class)
+{
+	struct txt t;
+
+	assert(ctx != NULL);
+	assert(s != NULL);
+
+	t.p = s;
+	t.n = strlen(s);
+
+	svg_text(ctx, w, &t, class);
 }
 
 static void
@@ -118,11 +134,14 @@ svg_rect(struct render_context *ctx, unsigned w, unsigned r,
 }
 
 static void
-svg_textbox(struct render_context *ctx, const char *s, unsigned w, unsigned r,
+svg_textbox(struct render_context *ctx, const struct txt *t, unsigned w, unsigned r,
 	const char *class)
 {
+	assert(t != NULL);
+	assert(t->p != NULL);
+
 	svg_rect(ctx, w, r, class);
-	svg_text(ctx, w, s, class);
+	svg_text(ctx, w, t, class);
 
 	ctx->x += w;
 }
@@ -133,7 +152,7 @@ svg_prose(struct render_context *ctx, const char *s, unsigned w)
 	assert(ctx != NULL);
 	assert(s != NULL);
 
-	svg_text(ctx, w, s, "prose");
+	svg_string(ctx, w, s, "prose");
 
 	ctx->x += w;
 }
@@ -470,13 +489,13 @@ node_walk_render(const struct tnode *n,
 		break;
 
 	case TNODE_CI_LITERAL:
-		svg_textbox(ctx, n->u.literal, n->w * 10, 8, "literal");
+		svg_textbox(ctx, &n->u.literal, n->w * 10, 8, "literal");
 		printf("    <text x='%u' y='%u' text-anchor='left' class='ci'>%s</text>\n",
 			ctx->x - 20 + 5, ctx->y + 5, "&#x29f8;i");
 		break;
 
 	case TNODE_CS_LITERAL:
-		svg_textbox(ctx, n->u.literal, n->w * 10, 8, "literal");
+		svg_textbox(ctx, &n->u.literal, n->w * 10, 8, "literal");
 		break;
 
 	case TNODE_PROSE:
@@ -497,7 +516,7 @@ node_walk_render(const struct tnode *n,
 		}
 
 		ctx->y -= offset; /* off-grid */
-		svg_text(ctx, n->w * 10, n->u.comment.s, "comment");
+		svg_string(ctx, n->w * 10, n->u.comment.s, "comment");
 		ctx->y += offset;
 		ctx->y -= n->d * 10;
 		justify(ctx, n->u.comment.tnode, n->w * 10, base);
@@ -508,7 +527,14 @@ node_walk_render(const struct tnode *n,
 		if (base != NULL) {
 			printf("    <a href='%s#%s'>\n", base, n->u.name); /* XXX: escape */
 		}
-		svg_textbox(ctx, n->u.name, n->w * 10, 0, "rule");
+		{
+			struct txt t;
+
+			t.p = n->u.name;
+			t.n = strlen(n->u.name);
+
+			svg_textbox(ctx, &t, n->w * 10, 0, "rule");
+		}
 		if (base != NULL) {
 			printf("    </a>\n");
 		}
@@ -674,25 +700,26 @@ dim_prop_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 }
 
 static void
-dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
+dim_mono_txt(const struct txt *t, unsigned *w, unsigned *a, unsigned *d)
 {
-	const char *p;
+	size_t i;
 	double n;
 
-	assert(s != NULL);
+	assert(t != NULL);
+	assert(t->p != NULL);
 	assert(w != NULL);
 	assert(a != NULL);
 	assert(d != NULL);
 
 	n = 0.0;
 
-	for (p = s; *p != '\0'; p++) {
-		if (*p == '\t' || *p == '\a') {
+	for (i = 0; i < t->n; i++) {
+		if (t->p[i] == '\t' || t->p[i] == '\a') {
 			n += 4.00;
 			continue;
 		}
 
-		if (!isprint((unsigned char) *p)) {
+		if (!isprint((unsigned char) t->p[i])) {
 			n += 2.93; /* <XY> */
 			continue;
 		}
@@ -708,7 +735,7 @@ dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 }
 
 struct dim svg_dim = {
-	dim_mono_string,
+	dim_mono_txt,
 	dim_prop_string,
 	0,
 	0,

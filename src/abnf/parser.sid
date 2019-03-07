@@ -12,6 +12,7 @@
 
 	char;
 	string;
+	txt;
 	count;
 
 	ast_rule;
@@ -35,21 +36,21 @@
 	STARTOPT;   ENDOPT;
 	!STARTSTAR; !ENDSTAR;
 
-	!EMPTY;
-	!NAME;
-	CI_LITERAL;
-	CS_LITERAL;
-	!PROSE;
-
 	!ESC:  () -> (:char);
 	CHAR:  () -> (:char);
 	IDENT: () -> (:string);
 	COUNT: () -> (:count);
 
-	BINSTR:   () -> (:string);
-	!OCTSTR:  () -> (:string);
-	DECSTR:   () -> (:string);
-	HEXSTR:   () -> (:string);
+	!EMPTY;
+	!NAME:      () -> (:string);
+	CI_LITERAL: () -> (:txt);
+	CS_LITERAL: () -> (:txt);
+	PROSE:      () -> (:string);
+
+	BINSTR:   () -> (:txt);
+	!OCTSTR:  () -> (:txt);
+	DECSTR:   () -> (:txt);
+	HEXSTR:   () -> (:txt);
 
 	BINRANGE:  () -> (:char, :char);
 	!OCTRANGE: () -> (:char, :char);
@@ -59,7 +60,6 @@
 %productions%
 
 	<pattern-char>:   (:char) -> ();
-	<pattern-buffer>: ()      -> (:string);
 
 	!<rep-one-or-more>: () -> (:count, :count);
 	<rep-zero-or-more>: () -> (:count, :count);
@@ -70,10 +70,10 @@
 
 	!<make-empty-term>:     ()             -> (:ast_term);
 	<make-rule-term>:       (:string)      -> (:ast_term);
-	<make-ci-literal-term>: (:string)      -> (:ast_term);
-	<make-cs-literal-term>: (:string)      -> (:ast_term);
+	<make-ci-literal-term>: (:txt)         -> (:ast_term);
+	<make-cs-literal-term>: (:txt)         -> (:ast_term);
 	!<make-token-term>:     (:string)      -> (:ast_term);
-	!<make-prose-term>:     (:string)      -> (:ast_term);
+	<make-prose-term>:      (:string)      -> (:ast_term);
 	<make-group-term>:      (:ast_alt)     -> (:ast_term);
 	<make-range-term>:      (:char, :char) -> (:ast_term);
 
@@ -97,12 +97,12 @@
 
 	list-of-alts: () -> (:ast_alt);
 
-	escstr: () -> (s :string) = {
-		s = BINSTR;
+	escstr: () -> (x :txt) = {
+		x = BINSTR;
 	||
-		s = DECSTR;
+		x = DECSTR;
 	||
-		s = HEXSTR;
+		x = HEXSTR;
 	};
 
 	escrange: () -> (m :char, n :char) = {
@@ -126,26 +126,23 @@
 
 	term: () -> (t :ast_term) = {
 		body;
-		CI_LITERAL;
-		s = <pattern-buffer>;
-		t = <make-ci-literal-term>(s);
+		x = CI_LITERAL;
+		t = <make-ci-literal-term>(x);
 	||
 		body;
-		CS_LITERAL;
-		s = <pattern-buffer>;
-		t = <make-cs-literal-term>(s);
+		x = CS_LITERAL;
+		t = <make-cs-literal-term>(x);
 	||
 		body;
-		PROSE;
-		s = <pattern-buffer>;
+		s = PROSE;
 		t = <make-prose-term>(s);
 	||
-		s = IDENT;
+		x = IDENT;
 /* TODO: case insensitive */
-		t = <make-rule-term>(s);
+		t = <make-rule-term>(x);
 	||
-		s = escstr;
-		t = <make-cs-literal-term>(s);
+		x = escstr;
+		t = <make-cs-literal-term>(x);
 	||
 		(m, n) = escrange;
 		t = <make-range-term>(m, n);

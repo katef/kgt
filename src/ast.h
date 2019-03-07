@@ -11,7 +11,8 @@ struct ast_alt;
 
 enum ast_features {
     FEATURE_AST_CI_LITERAL = 1 << 0,
-    FEATURE_AST_PROSE      = 1 << 1
+    FEATURE_AST_PROSE      = 1 << 1,
+    FEATURE_AST_BINARY     = 1 << 2
 };
 
 /*
@@ -35,7 +36,7 @@ struct ast_term {
 
 	union {
 		const struct ast_rule *rule; /* just for sake of the name */
-		const char *literal;
+		struct txt literal;
 		const char *token;
 		const char *prose;
 		struct ast_alt *group;
@@ -83,7 +84,7 @@ struct ast_term *
 ast_make_char_term(char c);
 
 struct ast_term *
-ast_make_literal_term(const char *literal, int ci);
+ast_make_literal_term(const struct txt *literal, int ci);
 
 struct ast_term *
 ast_make_token_term(const char *token);
@@ -105,6 +106,9 @@ ast_find_rule(const struct ast_rule *grammar, const char *name);
 
 void
 ast_free_rule(struct ast_rule *rule);
+
+int
+ast_binary(const struct ast_rule *ast);
 
 #endif
 

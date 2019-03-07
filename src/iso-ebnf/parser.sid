@@ -18,6 +18,7 @@
 
 	char;
 	string;
+	txt;
 	count;
 
 	ast_rule;
@@ -44,21 +45,21 @@
 	STARTOPT;   ENDOPT;
 	STARTSTAR;  ENDSTAR;
 
-	!EMPTY;
-	!NAME;
-	!CI_LITERAL;
-	CS_LITERAL;
-	PROSE;
-
 	!ESC:  () -> (:char);
 	CHAR:  () -> (:char);
 	IDENT: () -> (:string);
 	COUNT: () -> (:count);
 
-	!BINSTR:   () -> (:string);
-	!OCTSTR:   () -> (:string);
-	!DECSTR:   () -> (:string);
-	!HEXSTR:   () -> (:string);
+	!EMPTY;
+	!NAME:       () -> (:string);
+	!CI_LITERAL: () -> (:txt);
+	CS_LITERAL:  () -> (:txt);
+	PROSE:       () -> (:string);
+
+	!BINSTR:   () -> (:txt);
+	!OCTSTR:   () -> (:txt);
+	!DECSTR:   () -> (:txt);
+	!HEXSTR:   () -> (:txt);
 
 	!BINRANGE: () -> (:char, :char);
 	!OCTRANGE: () -> (:char, :char);
@@ -68,7 +69,6 @@
 %productions%
 
 	<pattern-char>:   (:char) -> ();
-	<pattern-buffer>: ()      -> (:string);
 
 	!<rep-one-or-more>: () -> (:count, :count);
 	<rep-zero-or-more>: () -> (:count, :count);
@@ -79,8 +79,8 @@
 
 	<make-empty-term>:       ()             -> (:ast_term);
 	<make-rule-term>:        (:string)      -> (:ast_term);
-	!<make-ci-literal-term>: (:string)      -> (:ast_term);
-	<make-cs-literal-term>:  (:string)      -> (:ast_term);
+	!<make-ci-literal-term>: (:txt)         -> (:ast_term);
+	<make-cs-literal-term>:  (:txt)         -> (:ast_term);
 	!<make-token-term>:      (:string)      -> (:ast_term);
 	<make-prose-term>:       (:string)      -> (:ast_term);
 	<make-group-term>:       (:ast_alt)     -> (:ast_term);
@@ -122,13 +122,11 @@
 		t = <make-empty-term>;
 	||
 		body;
-		CS_LITERAL;
-		s = <pattern-buffer>;
-		t = <make-cs-literal-term>(s);
+		x = CS_LITERAL;
+		t = <make-cs-literal-term>(x);
 	||
 		body;
-		PROSE;
-		s = <pattern-buffer>;
+		s = PROSE;
 		t = <make-prose-term>(s);
 	||
 		s = IDENT;
