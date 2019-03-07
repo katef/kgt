@@ -228,8 +228,6 @@ atleast_term(const struct ast_term *term, struct node **r)
 static int
 transform_term(const struct ast_term *term, struct node **r)
 {
-	size_t i;
-
 	assert(r != NULL);
 
 	if (term->min == 1 && term->max == 1) {

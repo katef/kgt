@@ -414,7 +414,6 @@ tnode_create_comment(const struct tnode *tnode, const char *s,
 	const struct dim *dim)
 {
 	struct tnode *new;
-	size_t z;
 	unsigned w, a, d;
 
 	assert(tnode != NULL);
