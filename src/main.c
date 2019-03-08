@@ -62,6 +62,7 @@ struct io {
 	{ "rrll",     NULL,           rrll_output,     rrll_ast_unsupported, rrll_rrd_unsupported     },
 	{ "rrta",     NULL,           rrta_output,     rrta_ast_unsupported, rrta_rrd_unsupported     },
 	{ "rrtext",   NULL,           rrtext_output,   0, 0 },
+	{ "rrutf8",   NULL,           rrutf8_output,   0, 0 },
 	{ "svg",      NULL,           svg_output,      0, 0 },
 	{ "html5",    NULL,           html5_output,    0, 0 },
 	{ "xhtml5",   NULL,           xhtml5_output,   0, 0 }

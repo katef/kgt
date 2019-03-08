@@ -200,9 +200,14 @@
 					<td><ulink url="https://github.com/tabatkins/railroad-diagrams">Tab Atkins Jr. Railroad diagram</ulink> output.</td>
 				</tr>
 				<tr>
+					<td><code>rrutf8</code></td>
+					<td>O</td>
+					<td>Unicode railroad diagram &ascii;-art using UTF-8 encoding.</td>
+				</tr>
+				<tr>
 					<td><code>rrtext</code></td>
 					<td>O</td>
-					<td>Railroad diagram &ascii;-art.</td>
+					<td>Plaintext railroad diagram &ascii;-art.</td>
 				</tr>
 			</tbody>
 		</table>

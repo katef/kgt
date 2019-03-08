@@ -12,6 +12,9 @@ struct ast_rule;
 extern int prettify;
 
 void
+rrutf8_output(const struct ast_rule *);
+
+void
 rrtext_output(const struct ast_rule *);
 
 #endif

@@ -130,13 +130,13 @@ justify(struct render_context *ctx, const struct tnode *n, unsigned space)
 	centre(&lhs, &rhs, space, n->w);
 
 	for (i = 0; i < lhs; i++) {
-		bprintf(ctx, n->type == TNODE_ELLIPSIS ? " " : "-");
+		bprintf(ctx, n->type == TNODE_ELLIPSIS ? " " : "\022");
 	}
 
 	node_walk_render(n, ctx);
 
 	for (i = 0; i < rhs; i++) {
-		bprintf(ctx, n->type == TNODE_ELLIPSIS ? " " : "-");
+		bprintf(ctx, n->type == TNODE_ELLIPSIS ? " " : "\022");
 	}
 }
 
@@ -149,11 +149,60 @@ bars(struct render_context *ctx, unsigned n, unsigned w)
 	x = ctx->x;
 
 	for (i = 0; i < n; i++) {
-		bprintf(ctx, "|");
+		bprintf(ctx, "\017");
 		ctx->x += w - 2;
-		bprintf(ctx, "|");
+		bprintf(ctx, "\017");
 		ctx->y++;
 		ctx->x = x;
+	}
+}
+
+static char *tile[][2] = {
+	{ NULL, NULL }, /* \000 */
+	{ "^", "\xe2\x95\xb0" }, /* \001 */
+	{ ",", "\xe2\x95\xad" }, /* \002 */
+	{ ".", "\xe2\x95\xae" }, /* \003 */
+	{ "v", "\xe2\x95\xad" }, /* \004 */
+	{ "+", "\xe2\x94\xbc" }, /* \005 */
+	{ "`", "\xe2\x95\xb0" }, /* \006 */
+
+	/* whitespace, not used because of rtrim() */
+	{ NULL, NULL }, /* \007 */
+	{ NULL, NULL }, /* \010 */
+	{ NULL, NULL }, /* \011 */
+	{ NULL, NULL }, /* \012 */
+	{ NULL, NULL }, /* \013 */
+	{ NULL, NULL }, /* \014 */
+	{ NULL, NULL }, /* \015 */
+
+	{ "'", "\xe2\x95\xaf" }, /* \016 */
+	{ "|", "\xe2\x94\x82" }, /* \017 */
+	{ ">", "\xe2\x95\xad" }, /* \020 */
+	{ "<", "\xe2\x95\xaf" }, /* \021 */
+
+	{ "-", "\xe2\x94\x80" }, /* \022 */
+	{ "|", "\xe2\x94\x9c" }, /* \023 */
+	{ "|", "\xe2\x94\xa4" }, /* \024 */
+	{ ">", "\xe2\x95\xb0" }, /* \025 */
+	{ "<", "\xe2\x95\xae" }, /* \026 */
+	{ "<", "\xe2\x94\xbc" }, /* \027 */
+	{ "v", "\xe2\x95\xae" }, /* \030 */
+	{ ">", "\xe2\x94\xbc" }, /* \031 */
+	{ "^", "\xe2\x95\xaf" }  /* \032 */
+};
+
+static void
+tile_puts(const char *s, int utf8)
+{
+	const char *p;
+
+	for (p = s; *p != '\0'; p++) {
+		if ((unsigned char) *p < sizeof tile / sizeof *tile) {
+			printf("%s", tile[(unsigned char) *p][utf8]);
+			continue;
+		}
+
+		printf("%c", *p);
 	}
 }
 
@@ -165,15 +214,15 @@ render_tline(struct render_context *ctx, enum tline tline, int rhs)
 	assert(ctx != NULL);
 
 	switch (tline) {
-	case TLINE_A: a = "<^"; break; case TLINE_a: a = "^>"; break;
-	case TLINE_B: a = ",."; break;
-	case TLINE_C: a = "<v"; break; case TLINE_c: a = "v>"; break;
-	case TLINE_D: a = "<+"; break; case TLINE_d: a = "+>"; break;
-	case TLINE_E: a = "`'"; break;
-	case TLINE_F: a = "||"; break;
-	case TLINE_G: a = "^<"; break; case TLINE_g: a = ">^"; break;
-	case TLINE_H: a = "v<"; break; case TLINE_h: a = ">v"; break;
-	case TLINE_I: a = "^<"; break; case TLINE_i: a = ">^"; break;
+	case TLINE_A: a = "\021\001"; break; case TLINE_a: a = "\032\025"; break;
+	case TLINE_B: a = "\002\003"; break;
+	case TLINE_C: a = "\026\004"; break; case TLINE_c: a = "\030\020"; break;
+	case TLINE_D: a = "\027\005"; break; case TLINE_d: a = "\005\031"; break;
+	case TLINE_E: a = "\006\016"; break;
+	case TLINE_F: a = "\017\017"; break;
+	case TLINE_G: a = "\001\021"; break; case TLINE_g: a = "\025\032"; break;
+	case TLINE_H: a = "\004\026"; break; case TLINE_h: a = "\020\030"; break;
+	case TLINE_I: a = "\001\021"; break; case TLINE_i: a = "\025\032"; break;
 
 	default:
 		a = "??";
@@ -236,7 +285,7 @@ render_hlist(const struct tnode *n, struct render_context *ctx)
 		node_walk_render(n->u.hlist.a[i], ctx);
 
 		if (i + 1 < n->u.hlist.n) {
-			bprintf(ctx, "--");
+			bprintf(ctx, "\022\022");
 		}
 	}
 }
@@ -356,7 +405,7 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 }
 
 static void
-render_rule(const struct tnode *node)
+render_rule(const struct tnode *node, int utf8)
 {
 	struct render_context ctx;
 	unsigned w, h;
@@ -377,10 +426,10 @@ render_rule(const struct tnode *node)
 	ctx.scratch = xmalloc(w + 1);
 
 	ctx.y = node->a;
-	bprintf(&ctx, "||--");
+	bprintf(&ctx, "\017\023\022\022");
 
 	ctx.x = w - 4;
-	bprintf(&ctx, "--||");
+	bprintf(&ctx, "\022\022\024\017");
 
 	ctx.x = 4;
 	ctx.y = node->a;
@@ -388,7 +437,9 @@ render_rule(const struct tnode *node)
 
 	for (i = 0; i < h; i++) {
 		rtrim(ctx.lines[i]);
-		printf("    %s\n", ctx.lines[i]);
+		printf("    ");
+		tile_puts(ctx.lines[i], utf8);
+		printf("\n");
 		free(ctx.lines[i]);
 	}
 
@@ -458,20 +509,11 @@ dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 }
 
 void
-rrtext_output(const struct ast_rule *grammar)
+rr_output(const struct ast_rule *grammar, struct dim *dim, int utf8)
 {
 	const struct ast_rule *p;
 
-	struct dim dim = {
-		dim_mono_txt,
-		dim_mono_string,
-		2,
-		0,
-		4,
-		0,
-		2,
-		1
-	};
+	assert(dim != NULL);
 
 	for (p = grammar; p; p = p->next) {
 		struct node *rrd;
@@ -486,15 +528,49 @@ rrtext_output(const struct ast_rule *grammar)
 			rrd_pretty(&rrd);
 		}
 
-		tnode = rrd_to_tnode(rrd, &dim);
+		tnode = rrd_to_tnode(rrd, dim);
 
 		node_free(rrd);
 
 		printf("%s:\n", p->name);
-		render_rule(tnode);
+		render_rule(tnode, utf8);
 		printf("\n");
 
 		tnode_free(tnode);
 	}
+}
+
+void
+rrutf8_output(const struct ast_rule *grammar)
+{
+	struct dim dim = {
+		dim_mono_txt,
+		dim_mono_string,
+		2,
+		0,
+		4,
+		0,
+		2,
+		1
+	};
+
+	rr_output(grammar, &dim, 1);
+}
+
+void
+rrtext_output(const struct ast_rule *grammar)
+{
+	struct dim dim = {
+		dim_mono_txt,
+		dim_mono_string,
+		2,
+		0,
+		4,
+		0,
+		2,
+		1
+	};
+
+	rr_output(grammar, &dim, 0);
 }
 
