@@ -192,10 +192,9 @@ static char *tile[][2] = {
 };
 
 static void
-tile_puts(const char *s)
+tile_puts(const char *s, int utf8)
 {
 	const char *p;
-int utf8 = 0;
 
 	for (p = s; *p != '\0'; p++) {
 		if ((unsigned char) *p < sizeof tile / sizeof *tile) {
@@ -406,7 +405,7 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 }
 
 static void
-render_rule(const struct tnode *node)
+render_rule(const struct tnode *node, int utf8)
 {
 	struct render_context ctx;
 	unsigned w, h;
@@ -439,7 +438,7 @@ render_rule(const struct tnode *node)
 	for (i = 0; i < h; i++) {
 		rtrim(ctx.lines[i]);
 		printf("    ");
-		tile_puts(ctx.lines[i]);
+		tile_puts(ctx.lines[i], utf8);
 		printf("\n");
 		free(ctx.lines[i]);
 	}
@@ -510,20 +509,11 @@ dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 }
 
 void
-rrtext_output(const struct ast_rule *grammar)
+rr_output(const struct ast_rule *grammar, struct dim *dim, int utf8)
 {
 	const struct ast_rule *p;
 
-	struct dim dim = {
-		dim_mono_txt,
-		dim_mono_string,
-		2,
-		0,
-		4,
-		0,
-		2,
-		1
-	};
+	assert(dim != NULL);
 
 	for (p = grammar; p; p = p->next) {
 		struct node *rrd;
@@ -538,15 +528,49 @@ rrtext_output(const struct ast_rule *grammar)
 			rrd_pretty(&rrd);
 		}
 
-		tnode = rrd_to_tnode(rrd, &dim);
+		tnode = rrd_to_tnode(rrd, dim);
 
 		node_free(rrd);
 
 		printf("%s:\n", p->name);
-		render_rule(tnode);
+		render_rule(tnode, utf8);
 		printf("\n");
 
 		tnode_free(tnode);
 	}
+}
+
+void
+rrutf8_output(const struct ast_rule *grammar)
+{
+	struct dim dim = {
+		dim_mono_txt,
+		dim_mono_string,
+		2,
+		0,
+		4,
+		0,
+		2,
+		1
+	};
+
+	rr_output(grammar, &dim, 1);
+}
+
+void
+rrtext_output(const struct ast_rule *grammar)
+{
+	struct dim dim = {
+		dim_mono_txt,
+		dim_mono_string,
+		2,
+		0,
+		4,
+		0,
+		2,
+		1
+	};
+
+	rr_output(grammar, &dim, 0);
 }
 
