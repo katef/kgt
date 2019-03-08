@@ -548,7 +548,7 @@ rrutf8_output(const struct ast_rule *grammar)
 		dim_mono_string,
 		2,
 		0,
-		4,
+		2,
 		0,
 		2,
 		1
@@ -565,7 +565,7 @@ rrtext_output(const struct ast_rule *grammar)
 		dim_mono_string,
 		2,
 		0,
-		4,
+		2,
 		0,
 		2,
 		1
