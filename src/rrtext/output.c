@@ -320,31 +320,27 @@ render_comment(const struct tnode *n, struct render_context *ctx)
 }
 
 static void
-render_txt(struct render_context *ctx, char quote, const struct txt *t)
+render_txt(struct render_context *ctx, const struct txt *t)
 {
 	size_t i;
 
 	assert(t != NULL);
 	assert(t->p != NULL);
 
-	bprintf(ctx, "%c", quote);
-
 	for (i = 0; i < t->n; i++) {
 		escputc(ctx, t->p[i]);
 	}
-
-	bprintf(ctx, "%c", quote);
 }
 
 static void
-render_string(struct render_context *ctx, char quote, const char *s)
+render_string(struct render_context *ctx, const char *s)
 {
 	struct txt t;
 
 	t.p = s;
 	t.n = strlen(s);
 
-	return render_txt(ctx, quote, &t);
+	render_txt(ctx, &t);
 }
 
 static void
@@ -369,21 +365,21 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_CI_LITERAL:
-		bprintf(ctx, " ");
-		render_txt(ctx, '"', &n->u.literal);
-		bprintf(ctx, "/i ");
+		bprintf(ctx, " \"");
+		render_txt(ctx, &n->u.literal);
+		bprintf(ctx, "\"/i ");
 		break;
 
 	case TNODE_CS_LITERAL:
-		bprintf(ctx, " ");
-		render_txt(ctx, '"', &n->u.literal);
-		bprintf(ctx, " ");
+		bprintf(ctx, " \"");
+		render_txt(ctx, &n->u.literal);
+		bprintf(ctx, "\" ");
 		break;
 
 	case TNODE_PROSE:
-		bprintf(ctx, " ");
-		render_string(ctx, '?', n->u.prose);
-		bprintf(ctx, " ");
+		bprintf(ctx, "? ");
+		render_string(ctx, n->u.prose);
+		bprintf(ctx, " ?");
 		break;
 
 	case TNODE_COMMENT:
@@ -391,7 +387,9 @@ node_walk_render(const struct tnode *n, struct render_context *ctx)
 		break;
 
 	case TNODE_RULE:
-		render_string(ctx, ' ', n->u.name);
+		bprintf(ctx, " ");
+		render_string(ctx, n->u.name);
+		bprintf(ctx, " ");
 		break;
 
 	case TNODE_VLIST:
