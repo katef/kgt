@@ -130,13 +130,13 @@ justify(struct render_context *ctx, const struct tnode *n, unsigned space)
 	centre(&lhs, &rhs, space, n->w);
 
 	for (i = 0; i < lhs; i++) {
-		bprintf(ctx, n->type == TNODE_ELLIPSIS ? " " : "-");
+		bprintf(ctx, n->type == TNODE_ELLIPSIS ? " " : "\022");
 	}
 
 	node_walk_render(n, ctx);
 
 	for (i = 0; i < rhs; i++) {
-		bprintf(ctx, n->type == TNODE_ELLIPSIS ? " " : "-");
+		bprintf(ctx, n->type == TNODE_ELLIPSIS ? " " : "\022");
 	}
 }
 
@@ -149,46 +149,57 @@ bars(struct render_context *ctx, unsigned n, unsigned w)
 	x = ctx->x;
 
 	for (i = 0; i < n; i++) {
-		bprintf(ctx, "|");
+		bprintf(ctx, "\017");
 		ctx->x += w - 2;
-		bprintf(ctx, "|");
+		bprintf(ctx, "\017");
 		ctx->y++;
 		ctx->x = x;
 	}
 }
 
-static char *tile[] = {
-	NULL, /* \000 */
-	"^", /* \001 */
-	",", /* \002 */
-	".", /* \003 */
-	"v", /* \004 */
-	"+", /* \005 */
-	"`", /* \006 */
+static char *tile[][2] = {
+	{ NULL, NULL }, /* \000 */
+	{ "^", "\xe2\x95\xb0" }, /* \001 */
+	{ ",", "\xe2\x95\xad" }, /* \002 */
+	{ ".", "\xe2\x95\xae" }, /* \003 */
+	{ "v", "\xe2\x95\xad" }, /* \004 */
+	{ "+", "\xe2\x94\xbc" }, /* \005 */
+	{ "`", "\xe2\x95\xb0" }, /* \006 */
 
-	/* whitespace, not used for rtrim() */
-	NULL, /* \007 */
-	NULL, /* \010 */
-	NULL, /* \011 */
-	NULL, /* \012 */
-	NULL, /* \013 */
-	NULL, /* \014 */
-	NULL, /* \015 */
+	/* whitespace, not used because of rtrim() */
+	{ NULL, NULL }, /* \007 */
+	{ NULL, NULL }, /* \010 */
+	{ NULL, NULL }, /* \011 */
+	{ NULL, NULL }, /* \012 */
+	{ NULL, NULL }, /* \013 */
+	{ NULL, NULL }, /* \014 */
+	{ NULL, NULL }, /* \015 */
 
-	"'", /* \016 */
-	"|", /* \017 */
-	">", /* \020 */
-	"<"  /* \021 */
+	{ "'", "\xe2\x95\xaf" }, /* \016 */
+	{ "|", "\xe2\x94\x82" }, /* \017 */
+	{ ">", "\xe2\x95\xad" }, /* \020 */
+	{ "<", "\xe2\x95\xaf" }, /* \021 */
+
+	{ "-", "\xe2\x94\x80" }, /* \022 */
+	{ "|", "\xe2\x94\x9c" }, /* \023 */
+	{ "|", "\xe2\x94\xa4" }, /* \024 */
+	{ ">", "\xe2\x95\xb0" }, /* \025 */
+	{ "<", "\xe2\x95\xae" }, /* \026 */
+	{ "<", "\xe2\x94\xbc" }, /* \027 */
+	{ "v", "\xe2\x95\xae" }, /* \030 */
+	{ ">", "\xe2\x94\xbc" }, /* \031 */
+	{ "^", "\xe2\x95\xaf" }  /* \032 */
 };
 
 static void
 tile_puts(const char *s)
 {
 	const char *p;
+int utf8 = 0;
 
 	for (p = s; *p != '\0'; p++) {
 		if ((unsigned char) *p < sizeof tile / sizeof *tile) {
-			printf("%s", tile[(unsigned char) *p]);
+			printf("%s", tile[(unsigned char) *p][utf8]);
 			continue;
 		}
 
@@ -204,15 +215,15 @@ render_tline(struct render_context *ctx, enum tline tline, int rhs)
 	assert(ctx != NULL);
 
 	switch (tline) {
-	case TLINE_A: a = "\021\001"; break; case TLINE_a: a = "\001\020"; break;
+	case TLINE_A: a = "\021\001"; break; case TLINE_a: a = "\032\025"; break;
 	case TLINE_B: a = "\002\003"; break;
-	case TLINE_C: a = "\021\004"; break; case TLINE_c: a = "\004\020"; break;
-	case TLINE_D: a = "\021\005"; break; case TLINE_d: a = "\005\020"; break;
+	case TLINE_C: a = "\026\004"; break; case TLINE_c: a = "\030\020"; break;
+	case TLINE_D: a = "\027\005"; break; case TLINE_d: a = "\005\031"; break;
 	case TLINE_E: a = "\006\016"; break;
 	case TLINE_F: a = "\017\017"; break;
-	case TLINE_G: a = "\001\021"; break; case TLINE_g: a = "\020\001"; break;
-	case TLINE_H: a = "\004\021"; break; case TLINE_h: a = "\020\004"; break;
-	case TLINE_I: a = "\001\021"; break; case TLINE_i: a = "\020\001"; break;
+	case TLINE_G: a = "\001\021"; break; case TLINE_g: a = "\025\032"; break;
+	case TLINE_H: a = "\004\026"; break; case TLINE_h: a = "\020\030"; break;
+	case TLINE_I: a = "\001\021"; break; case TLINE_i: a = "\025\032"; break;
 
 	default:
 		a = "??";
@@ -275,7 +286,7 @@ render_hlist(const struct tnode *n, struct render_context *ctx)
 		node_walk_render(n->u.hlist.a[i], ctx);
 
 		if (i + 1 < n->u.hlist.n) {
-			bprintf(ctx, "--");
+			bprintf(ctx, "\022\022");
 		}
 	}
 }
@@ -416,10 +427,10 @@ render_rule(const struct tnode *node)
 	ctx.scratch = xmalloc(w + 1);
 
 	ctx.y = node->a;
-	bprintf(&ctx, "||--");
+	bprintf(&ctx, "\017\023\022\022");
 
 	ctx.x = w - 4;
-	bprintf(&ctx, "--||");
+	bprintf(&ctx, "\022\022\024\017");
 
 	ctx.x = 4;
 	ctx.y = node->a;
