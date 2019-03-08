@@ -18,24 +18,24 @@ examples for each dialect. kgt can't parse them all yet.
 kgt reads from _stdin_ in dialect `-l ...` and writes to _stdout_
 in format `-e ...`:
 
-    ; kgt -l bnf -e rrtext < examples/expr.bnf
+    ; kgt -l bnf -e rrutf8 < examples.expr.bnf
     expr:
-        ||--v-- term -- "+" -- expr -->--||
-            |                         |
-            `--------- term ----------'
+        │├──╮── term ── "+" ── expr ──╭──┤│
+            │                         │
+            ╰───────── term ──────────╯
     
     term:
-        ||--v-- factor -- "*" -- term -->--||
-            |                           |
-            `--------- factor ----------'
+        │├──╮── factor ── "*" ── term ──╭──┤│
+            │                           │
+            ╰───────── factor ──────────╯
     
     factor:
-        ||--v-- "(" -- expr -- ")" -->--||
-            |                        |
-            `-------- const ---------'
+        │├──╮── "(" ── expr ── ")" ──╭──┤│
+            │                        │
+            ╰──────── const ─────────╯
     
     const:
-        ||-- integer --||
+        │├── integer ──┤│
 
 and the same grammar output as SVG instead:
 
