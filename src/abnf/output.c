@@ -267,10 +267,6 @@ output_group(const struct ast_alt *group)
 static void
 output_repetition(unsigned int min, unsigned int max)
 {
-	if (min == 0 && max == 0) {
-		assert(!"unreached");
-	}
-
 	if (min == 0 && max == 1) {
 		assert(!"unreached");
 	}
@@ -280,7 +276,7 @@ output_repetition(unsigned int min, unsigned int max)
 		return;
 	}
 
-	if (min == max) {
+	if (min != 0 && min == max) {
 		printf("%u", min);
 		return;
 	}
@@ -330,8 +326,6 @@ output_term(const struct ast_term *term)
 
 	if (term->min == 0 && term->max == 1) {
 		printf("[ ");
-	} else if (term->min == 0 && term->max == 0) {
-		printf("{ ");
 	} else {
 		output_repetition(term->min, term->max);
 
@@ -372,8 +366,6 @@ output_term(const struct ast_term *term)
 
 	if (term->min == 0 && term->max == 1) {
 		printf(" ]");
-	} else if (term->min == 0 && term->max == 0) {
-		printf(" }");
 	} else if (!a) {
 		printf(" )");
 	}
