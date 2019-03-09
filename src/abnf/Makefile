@@ -2,6 +2,7 @@
 
 SRC += src/abnf/lexer.c
 SRC += src/abnf/parser.c
+SRC += src/abnf/output.c
 
 LEXER  += src/abnf/lexer.lx
 PARSER += src/abnf/parser.sid

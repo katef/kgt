@@ -50,7 +50,7 @@ struct io {
 	{ "bnf",      bnf_input,      bnf_output,      bnf_ast_unsupported, 0 },
 	{ "blab",     NULL,           blab_output,     0, 0 },
 	{ "wsn",      wsn_input,      wsn_output,      wsn_ast_unsupported, 0 },
-	{ "abnf",     abnf_input,     NULL,            0, 0 },
+	{ "abnf",     abnf_input,     abnf_output,     0, 0 },
 	{ "iso-ebnf", iso_ebnf_input, iso_ebnf_output, iso_ebnf_ast_unsupported, 0 },
 	{ "rbnf",     rbnf_input,     rbnf_output,     rbnf_ast_unsupported, 0 },
 	{ "sid",      NULL,           sid_output,      sid_ast_unsupported, 0 },
