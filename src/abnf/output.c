@@ -7,36 +7,44 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <ctype.h>
 
 #include "../txt.h"
 #include "../ast.h"
+#include "../bitmap.h"
 #include "../rrd/node.h"
 
 #include "io.h"
 
-static void output_alt(const struct ast_alt *alt);
+static void output_term(const struct ast_term *term);
 
 static void
-output_group(const struct ast_alt *group)
+output_byte(char c)
 {
-	const struct ast_alt *alt;
+	printf("%%x%02X", (unsigned char) c);
+}
 
-	if (group->next != NULL) {
-		printf("(");
-	}
+static void
+output_range(char lo, char hi)
+{
+	printf("%%x%02X-%02X", (unsigned char) lo, (unsigned char) hi);
+}
 
-	for (alt = group; alt != NULL; alt = alt->next) {
-		output_alt(alt);
+static int
+txthas(const struct txt *t, int (*f)(int c))
+{
+	size_t i;
 
-		if (alt->next != NULL) {
-			printf(" / ");
+	assert(t != NULL);
+
+	for (i = 0; i < t->n; i++) {
+		if (f(t->p[i])) {
+			return 1;
 		}
 	}
 
-	if (group->next != NULL) {
-		printf(")");
-	}
+	return 0;
 }
 
 static int
@@ -61,22 +69,6 @@ needesc(int c)
 	}
 }
 
-static int
-txthas(const struct txt *t, int (*f)(int c))
-{
-	size_t i;
-
-	assert(t != NULL);
-
-	for (i = 0; i < t->n; i++) {
-		if (f(t->p[i])) {
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
 static void
 output_string(char prefix, const struct txt *t)
 {
@@ -85,7 +77,7 @@ output_string(char prefix, const struct txt *t)
 	assert(t != NULL);
 
 	if (t->n == 1 && needesc(*t->p)) {
-		printf("%%x%02X", (unsigned char) *t->p);
+		output_byte(*t->p);
 		return;
 	}
 
@@ -107,6 +99,169 @@ output_string(char prefix, const struct txt *t)
 	}
 
 	putc('\"', stdout);
+}
+
+static int
+char_terminal(const struct ast_term *term, unsigned char *c)
+{
+	assert(c != NULL);
+
+	/* one terminal only */
+	if (term == NULL || term->next != NULL) {
+		return 0;
+	}
+
+	/* we collate ranges for case-sensitive strings only */
+	if (term->type != TYPE_CS_LITERAL) {
+		return 0;
+	}
+
+	if (term->u.literal.n != 1) {
+		return 0;
+	}
+
+	*c = (unsigned) term->u.literal.p[0];
+
+	return 1;
+}
+
+static void
+collate_ranges(struct bm *bm, const struct ast_alt *alts)
+{
+	const struct ast_alt *p;
+
+	assert(bm != NULL);
+
+	bm_clear(bm);
+
+	for (p = alts; p != NULL; p = p->next) {
+		unsigned char c;
+
+		if (!char_terminal(p->terms, &c)) {
+			continue;
+		}
+
+		bm_set(bm, c);
+	}
+}
+
+static void
+output_terms(const struct ast_term *terms)
+{
+	const struct ast_term *term;
+
+	for (term = terms; term != NULL; term = term->next) {
+		output_term(term);
+
+		if (term->next) {
+			putc(' ', stdout);
+		}
+	}
+}
+
+static void
+output_alts(const struct ast_alt *alts)
+{
+	const struct ast_alt *p;
+	struct bm bm;
+	int hi, lo;
+	int first;
+
+	collate_ranges(&bm, alts);
+
+	hi = -1;
+
+	p = alts;
+
+	first = 1;
+
+	while (p != NULL) {
+		unsigned char c;
+
+		if (!char_terminal(p->terms, &c)) {
+			if (!first) {
+				printf(" / ");
+			} else {
+				first = 0;
+			}
+
+			output_terms(p->terms);
+			p = p->next;
+			continue;
+		}
+
+		if (!bm_get(&bm, c)) {
+			/* already output */
+			p = p->next;
+			continue;
+		}
+
+		if (!first) {
+			printf(" / ");
+		} else {
+			first = 0;
+		}
+
+		/* start of range */
+		lo = bm_next(&bm, hi, 1);
+		if (lo > UCHAR_MAX) {
+			/* end of list */
+			break;
+		}
+
+		/* end of range */
+		hi = bm_next(&bm, lo, 0);
+
+		/*
+		 * Character classes aren't relevant for ABNF
+		 * since we can only output hex escapes.
+		 */
+
+		assert(hi > lo);
+
+		switch (hi - lo) {
+			int j;
+
+		case 1:
+		case 2:
+		case 3:
+			{
+				struct txt t;
+				char a[1];
+				a[0] = (unsigned char) lo;
+				t.p = a;
+				t.n = sizeof a / sizeof *a;
+				output_string('s', &t);
+			}
+			bm_unset(&bm, lo);
+
+			hi = lo;
+			break;
+
+		default:
+			output_range(lo, hi - 1);
+
+			for (j = lo; j <= hi - 1; j++) {
+				bm_unset(&bm, j);
+			}
+
+			break;
+		}
+	}
+}
+
+static void
+output_group(const struct ast_alt *group)
+{
+	if (group->next != NULL) {
+		printf("(");
+	}
+
+	output_alts(group);
+
+	if (group->next != NULL) {
+		printf(")");
+	}
 }
 
 static void
@@ -225,32 +380,11 @@ output_term(const struct ast_term *term)
 }
 
 static void
-output_alt(const struct ast_alt *alt)
-{
-	const struct ast_term *term;
-
-	for (term = alt->terms; term != NULL; term = term->next) {
-		output_term(term);
-
-		if (term->next) {
-			putc(' ', stdout);
-		}
-	}
-}
-
-static void
 output_rule(const struct ast_rule *rule)
 {
-	const struct ast_alt *alt;
-
 	printf("%s = ", rule->name);
-	for (alt = rule->alts; alt != NULL; alt = alt->next) {
-		output_alt(alt);
 
-		if (alt->next != NULL) {
-			printf("\n\t/ ");
-		}
-	}
+	output_alts(rule->alts);
 
 	printf("\n");
 	printf("\n");
