@@ -16,6 +16,7 @@ PREFIX ?= /usr/local
 # layout
 SUBDIR += src/bnf
 SUBDIR += src/blab
+SUBDIR += src/ebnfhtml5
 SUBDIR += src/dot
 SUBDIR += src/abnf
 SUBDIR += src/iso-ebnf
