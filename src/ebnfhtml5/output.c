@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include "../txt.h"
 #include "../ast.h"
@@ -24,6 +25,38 @@
 #include "io.h"
 
 static void output_alt(const struct ast_alt *alt);
+
+/* TODO: centralise */
+static int
+xml_escputc(FILE *f, char c)
+{
+	const char *name;
+
+	assert(f != NULL);
+
+	switch (c) {
+	case '&': return fputs("&amp;", f);
+	case '<': return fputs("&lt;", f);
+	case '>': return fputs("&gt;", f);
+
+	case '\a': name = "BEL"; break;
+	case '\b': name = "BS";  break;
+	case '\f': name = "FF";  break;
+	case '\n': name = "LF";  break;
+	case '\r': name = "CR";  break;
+	case '\t': name = "TAB"; break;
+	case '\v': name = "VT";  break;
+
+	default:
+		if (!isprint((unsigned char) c)) {
+			return fprintf(f, "&#x3008;<tspan class='hex'>%02X</tspan>&#x3009;", (unsigned char) c);
+		}
+
+		return fprintf(f, "%c", c);
+	}
+
+	return fprintf(f, "&#x3008;<tspan class='esc'>%s</tspan>&#x3009;", name);
+}
 
 static int
 atomic(const struct ast_term *term)
@@ -86,7 +119,7 @@ output_literal(const char *prefix, const struct txt *t)
 	printf("<tt class='literal %s'>&quot;", prefix);
 
 	for (i = 0; i < t->n; i++) {
-		putc(t->p[i], stdout);
+		xml_escputc(stdout, t->p[i]);
 	}
 
 	printf("&quot;</tt>");
@@ -159,7 +192,7 @@ output_term(const struct ast_term *term)
 	}
 
 	if (term->max > 1) {
-		printf("<sub>(%u, %u)</sub>", term->min, term->max);
+		printf("<sub class='rep'>{%u, %u}</sub>", term->min, term->max);
 	}
 }
 
