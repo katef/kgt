@@ -21,6 +21,7 @@
 
 #include "bnf/io.h"
 #include "blab/io.h"
+#include "ebnfhtml5/io.h"
 #include "wsn/io.h"
 #include "abnf/io.h"
 #include "iso-ebnf/io.h"
@@ -47,18 +48,20 @@ struct io {
 	enum ast_features ast_unsupported;
 	enum rrd_features rrd_unsupported;
 } io[] = {
-	{ "bnf",      bnf_input,      bnf_output,      bnf_ast_unsupported, 0 },
-	{ "blab",     NULL,           blab_output,     0, 0 },
-	{ "wsn",      wsn_input,      wsn_output,      wsn_ast_unsupported, 0 },
-	{ "abnf",     abnf_input,     abnf_output,     0, 0 },
-	{ "iso-ebnf", iso_ebnf_input, iso_ebnf_output, iso_ebnf_ast_unsupported, 0 },
-	{ "rbnf",     rbnf_input,     rbnf_output,     rbnf_ast_unsupported, 0 },
-	{ "sid",      NULL,           sid_output,      sid_ast_unsupported, 0 },
-	{ "dot",      NULL,           dot_output,      0, 0 },
-	{ "rrdot",    NULL,           rrdot_output,    0, 0 },
-	{ "rrdump",   NULL,           rrdump_output,   0, 0 },
-	{ "rrtdump",  NULL,           rrtdump_output,  0, 0 },
-	{ "rrparcon", NULL,           rrparcon_output, rrparcon_ast_unsupported, rrparcon_rrd_unsupported },
+	{ "bnf",        bnf_input,      bnf_output,         bnf_ast_unsupported, 0 },
+	{ "blab",       NULL,           blab_output,        0, 0 },
+	{ "ebnfhtml5",  NULL,           ebnf_html5_output,  0, 0 },
+	{ "ebnfxhtml5", NULL,           ebnf_xhtml5_output, 0, 0 },
+	{ "wsn",        wsn_input,      wsn_output,         wsn_ast_unsupported, 0 },
+	{ "abnf",       abnf_input,     abnf_output,        0, 0 },
+	{ "iso-ebnf",   iso_ebnf_input, iso_ebnf_output,    iso_ebnf_ast_unsupported, 0 },
+	{ "rbnf",       rbnf_input,     rbnf_output,        rbnf_ast_unsupported, 0 },
+	{ "sid",        NULL,           sid_output,         sid_ast_unsupported, 0 },
+	{ "dot",        NULL,           dot_output,         0, 0 },
+	{ "rrdot",      NULL,           rrdot_output,       0, 0 },
+	{ "rrdump",     NULL,           rrdump_output,      0, 0 },
+	{ "rrtdump",    NULL,           rrtdump_output,     0, 0 },
+	{ "rrparcon",   NULL,           rrparcon_output,    rrparcon_ast_unsupported, rrparcon_rrd_unsupported },
 	{ "rrll",     NULL,           rrll_output,     rrll_ast_unsupported, rrll_rrd_unsupported     },
 	{ "rrta",     NULL,           rrta_output,     rrta_ast_unsupported, rrta_rrd_unsupported     },
 	{ "rrtext",   NULL,           rrtext_output,   0, 0 },
