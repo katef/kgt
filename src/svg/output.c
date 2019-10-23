@@ -39,6 +39,7 @@ struct render_context {
 	unsigned x, y;
 
 	struct path *paths;
+	const struct ast_rule *grammar;
 };
 
 static void node_walk_render(const struct tnode *n,
@@ -523,8 +524,15 @@ node_walk_render(const struct tnode *n,
 		break;
 	}
 
-	case TNODE_RULE:
-		if (base != NULL) {
+	case TNODE_RULE: {
+		/*
+		 * We don't make something a link if it doesn't have a destination in
+		 * the same document. That is, rules need not be defined in the same
+		 * grammar. 
+		 */
+		int dest_exists = !!ast_find_rule(ctx->grammar, n->u.name);
+
+		if (base != NULL && dest_exists) {
 			printf("    <a href='%s#%s'>\n", base, n->u.name); /* XXX: escape */
 		}
 		{
@@ -535,10 +543,11 @@ node_walk_render(const struct tnode *n,
 
 			svg_textbox(ctx, &t, n->w * 10, 0, "rule");
 		}
-		if (base != NULL) {
+		if (base != NULL && dest_exists) {
 			printf("    </a>\n");
 		}
 		break;
+	}
 
 	case TNODE_VLIST:
 		render_vlist(n, ctx, base);
@@ -562,12 +571,20 @@ svg_render_station(unsigned x, unsigned y)
 }
 
 void
-svg_render_rule(const struct tnode *node, const char *base)
+svg_render_rule(const struct tnode *node, const char *base,
+	const struct ast_rule *grammar)
 {
 	struct render_context ctx;
 	unsigned w;
 
 	w = (node->w + 8) * 10;
+
+	/*
+	 * Just to save passing it along through every production;
+	 * this is only used informatively, and has nothing to do
+	 * with the structure of rendering.
+	 */
+	ctx.grammar = grammar;
 
 	ctx.paths = NULL;
 
@@ -822,7 +839,7 @@ svg_output(const struct ast_rule *grammar)
 		printf("    <text x='%d' y='%d'>%s:</text>\n",
 			-30, -10, p->name);
 
-		svg_render_rule(a[i], NULL);
+		svg_render_rule(a[i], NULL, grammar);
 
 		printf("  </g>\n");
 		printf("\n");

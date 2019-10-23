@@ -35,7 +35,8 @@
 
 /* XXX */
 extern struct dim svg_dim;
-void svg_render_rule(const struct tnode *node, const char *base);
+void svg_render_rule(const struct tnode *node, const char *base,
+	const struct ast_rule *grammar);
 
 static void
 output(const struct ast_rule *grammar, int xml)
@@ -96,7 +97,7 @@ output(const struct ast_rule *grammar, int xml)
 			printf(" xmlns='http://www.w3.org/2000/svg'");
 		}
 		printf(" height='%u' width='%u'>\n", h, w);
-		svg_render_rule(tnode, "");
+		svg_render_rule(tnode, "", grammar);
 		printf("  </svg>\n");
 
 		printf(" </section>\n");
