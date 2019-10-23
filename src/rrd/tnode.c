@@ -52,6 +52,29 @@ swap(struct tnode **a, struct tnode **b)
 	*b = tmp;
 }
 
+static int
+isnamed(char c)
+{
+	/*
+	 * These correspond to the values rendered as named
+	 * characters in SVG output (i.e. <TAB> and friends),
+	 * and as common escapes ("\t" and so on) for text output.
+	 */
+	switch (c) {
+	case '\a':
+	case '\b':
+	case '\f':
+	case '\n':
+	case '\r':
+	case '\t':
+	case '\v':
+		return 1;
+
+	default:
+		return 0;
+	}
+}
+
 static void
 tnode_free_vlist(struct tnode_vlist *list)
 {
@@ -238,6 +261,21 @@ tnode_create_alt_list(const struct list *list, int rtl, const struct dim *dim)
 		hi = bm_next(&bm, lo, 0);
 
 		if (!isalnum((unsigned char) lo) && isalnum((unsigned char) hi)) {
+			new.a[i++] = tnode_create_node(find_node(list, lo), rtl, dim);
+			bm_unset(&bm, lo);
+
+			hi = lo;
+			p = p->next;
+			continue;
+		}
+
+		/*
+		 * If the range begins or ends on any named item (e.g. <TAB>),
+		 * the output would be confusing since it's not immediately
+		 * evident which values are included. So we elect to render the
+		 * range as invidual elements instead.
+		 */
+		if (isnamed((unsigned char) lo) || isnamed((unsigned char) hi)) {
 			new.a[i++] = tnode_create_node(find_node(list, lo), rtl, dim);
 			bm_unset(&bm, lo);
 
