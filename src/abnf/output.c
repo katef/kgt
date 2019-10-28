@@ -356,8 +356,9 @@ output_term(const struct ast_term *term)
 		break;
 
 	case TYPE_PROSE:
+		/* TODO: escaping to somehow avoid > */
 		printf("< %s >", term->u.prose);
-		exit(EXIT_FAILURE);
+		break;
 
 	case TYPE_GROUP:
 		output_group(term->u.group);

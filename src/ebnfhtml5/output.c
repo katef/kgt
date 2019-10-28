@@ -140,6 +140,8 @@ output_term(const struct ast_term *term)
 		printf("<span class='rep'>%c</span> ", r[0]);
 	}
 
+	/* TODO: escaping */
+
 	switch (term->type) {
 	case TYPE_EMPTY:
 		printf("<span class='empty'>&epsilon;</span>");

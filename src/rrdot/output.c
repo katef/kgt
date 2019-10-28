@@ -151,6 +151,7 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 		break;
 
 	case NODE_PROSE:
+		/* TODO: escaping to somehow avoid ? */
 		printf("label = \"?");
 		escputs(node->u.prose, stdout);
 		printf("?\"");

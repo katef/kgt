@@ -164,6 +164,7 @@ node_walk(FILE *f, const struct node *n)
 		break;
 
 	case NODE_PROSE:
+		/* TODO: escaping to somehow avoid ` */
 		fprintf(f, "`");
 		escputs(n->u.prose, f);
 		fprintf(f, "`");
