@@ -5,6 +5,7 @@
  */
 
 #define _POSIX_C_SOURCE 2
+#define _XOPEN_SOURCE 500
 
 #include <unistd.h>
 
@@ -79,7 +80,7 @@ enum io_dir {
 static void
 xusage(void)
 {
-	printf("usage: kgt [-nu] [-l <language>] [ -e <language> ]\n");
+	printf("usage: kgt [-nu] [-w <whitelist>] [-l <language>] [ -e <language> ]\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -140,17 +141,24 @@ main(int argc, char *argv[])
 {
 	struct ast_rule *g;
 	struct io *in, *out;
+	const char *filter;
 
 	in  = lang(IO_IN, "bnf");
 	out = in;
+	filter = NULL;
 
 	{
 		int c;
 
-		while ((c = getopt(argc, argv, "hnl:e:u")) != -1) {
+		while (c = getopt(argc, argv, "hw:nl:e:u"), c != -1) {
 			switch (c) {
 			case 'l': in  = lang(IO_IN,  optarg); break;
 			case 'e': out = lang(IO_OUT, optarg); break;
+
+			case 'w':
+				/* comma-separated whitelist of rule names */
+				filter = optarg;
+				break;
 
 			case 'n':
 				prettify = 0;
@@ -203,6 +211,41 @@ main(int argc, char *argv[])
 				exit(EXIT_FAILURE);
 			}
 		}
+	}
+
+	if (filter != NULL) {
+		struct ast_rule *new, **tail;
+		struct ast_rule *p, *next;
+
+		new  = NULL;
+		tail = &new;
+
+		for (p = g; p != NULL; p = next) {
+			char *tmp, *save;
+			const char *t;
+
+			next = p->next;
+
+			tmp = strdup(filter);
+			if (tmp == NULL) {
+				perror("strdup");
+				exit(EXIT_FAILURE);
+			}
+
+			for (t = strtok_r(tmp, ",", &save); t != NULL; t = strtok_r(NULL, ",", &save)) {
+				if (0 == strcmp(p->name, t)) {
+					p->next = *tail;
+					*tail = p;
+					break;
+				}
+
+				/* TODO: otherwise free *p */
+			}
+
+			free(tmp);
+		}
+
+		g = new;
 	}
 
 	out->out(g);

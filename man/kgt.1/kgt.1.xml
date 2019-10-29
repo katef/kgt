@@ -7,7 +7,8 @@
 -->
 
 <!DOCTYPE refentry SYSTEM "minidocbook.dtd" [
-	<!ENTITY dialect.arg "<replaceable>dialect</replaceable>">
+	<!ENTITY dialect.arg   "<replaceable>dialect</replaceable>">
+	<!ENTITY whitelist.arg "<replaceable>whitelist</replaceable>">
 
 	<!ENTITY stdin.lit  "<literal>stdin</literal>">
 	<!ENTITY stdout.lit "<literal>stdout</literal>">
@@ -26,6 +27,7 @@
 	<!ENTITY rbnf "<acronym role='Routing Backus-Naur Form'>RBNF</acronym>">
 	<!ENTITY wsn  "<acronym role='Wirth Syntax Notation'>RBNF</acronym>">
 
+	<!ENTITY w.opt "<option>-w</option>&nbsp;&whitelist.arg;">
 	<!ENTITY n.opt "<option>-n</option>">
 	<!ENTITY u.opt "<option>-u</option>">
 	<!ENTITY l.opt "<option>-l</option>&nbsp;&dialect.arg;">
@@ -217,6 +219,16 @@
 		<title>Options</title>
 
 		<variablelist>
+			<varlistentry>
+				<term>&w.opt;</term>
+
+				<listitem>
+					<para>Whitelist rules by name. The whitelist is given as a
+						comma-separated list.
+						When not specified, the default is to permit all rules.</para>
+				</listitem>
+			</varlistentry>
+
 			<varlistentry>
 				<term>&n.opt;</term>
 
