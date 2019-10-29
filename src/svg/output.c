@@ -35,6 +35,11 @@
 #include "io.h"
 #include "path.h"
 
+extern const char *css_file;
+
+void
+cat(const char *in, const char *indent);
+
 struct render_context {
 	unsigned x, y;
 
@@ -821,6 +826,7 @@ svg_output(const struct ast_rule *grammar)
 	printf("\n");
 
 	printf("  <style>\n");
+
 	printf("    rect, line, path { stroke-width: 1.5px; stroke: black; fill: transparent; }\n");
 	printf("    rect, line, path { stroke-linecap: square; stroke-linejoin: rounded; }\n");
 	printf("    path { fill: transparent; }\n");
@@ -828,6 +834,11 @@ svg_output(const struct ast_rule *grammar)
 	printf("    line.ellipsis { stroke-dasharray: 1 3.5; }\n");
 	printf("    tspan.hex { font-family: monospace; font-size: 90%%; }\n");
 	printf("    path.arrow { fill: black; }\n");
+
+	if (css_file != NULL) {
+		cat(css_file, "    ");
+	}
+
 	printf("  </style>\n");
 	printf("\n");
 
