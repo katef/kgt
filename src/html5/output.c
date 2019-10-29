@@ -45,8 +45,7 @@ cat(const char *in, const char *indent)
 {
 	FILE *f;
 
-/* TODO: BUFSIZ */
-	char buf[10];
+	char buf[BUFSIZ];
 
 	f = fopen(in, "r");
 	if (f == NULL) {
