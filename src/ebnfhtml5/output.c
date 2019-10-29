@@ -24,6 +24,11 @@
 
 #include "io.h"
 
+extern const char *css_file;
+
+void
+cat(const char *in, const char *indent);
+
 static void output_alt(const struct ast_alt *alt);
 
 /* TODO: centralise */
@@ -296,6 +301,10 @@ output(const struct ast_rule *grammar, int xml)
 	printf("    dl.bnf { margin: 2em 4em; }\n");
 	printf("    dl.bnf dt { margin: 0.25em 0; }\n");
 	printf("    dl.bnf dd { margin-left: 2em; }\n");
+
+	if (css_file != NULL) {
+		cat(css_file, "    ");
+	}
 
 	printf("  </style>\n");
 

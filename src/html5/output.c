@@ -38,6 +38,41 @@ extern struct dim svg_dim;
 void svg_render_rule(const struct tnode *node, const char *base,
 	const struct ast_rule *grammar);
 
+extern const char *css_file;
+
+void
+cat(const char *in, const char *indent)
+{
+	FILE *f;
+
+/* TODO: BUFSIZ */
+	char buf[10];
+
+	f = fopen(in, "r");
+	if (f == NULL) {
+		perror(in);
+		exit(EXIT_FAILURE);
+	}
+
+	fputs(indent, stdout);
+
+	for (;;) {
+		buf[sizeof buf - 1] = 'x';
+
+		if (!fgets(buf, sizeof buf, f)) {
+			break;
+		}
+
+		fputs(buf, stdout);
+
+		if (buf[sizeof buf - 1] != '\0' || buf[sizeof buf - 2] == '\n') {
+			fputs(indent, stdout);
+		}
+	}
+
+	(void) fclose(f);
+}
+
 static void
 output(const struct ast_rule *grammar, int xml)
 {
@@ -49,6 +84,7 @@ output(const struct ast_rule *grammar, int xml)
 	}
 
 	printf("  <style>\n");
+
 	printf("      rect, line, path { stroke-width: 1.5px; stroke: black; fill: transparent; }\n");
 	printf("      rect, line, path { stroke-linecap: square; stroke-linejoin: rounded; }\n");
 	printf("      path { fill: transparent; }\n");
@@ -60,6 +96,11 @@ output(const struct ast_rule *grammar, int xml)
 	printf("      tspan.hex { font-family: monospace; font-size: 90%%; }\n");
 	printf("      path.arrow { fill: black; }\n");
 	printf("      svg { margin-left: 30px; }\n");
+
+	if (css_file != NULL) {
+		cat(css_file, "      ");
+	}
+
 	printf("  </style>\n");
 
 	printf(" </head>\n");

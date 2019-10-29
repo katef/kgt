@@ -27,6 +27,7 @@
 	<!ENTITY rbnf "<acronym role='Routing Backus-Naur Form'>RBNF</acronym>">
 	<!ENTITY wsn  "<acronym role='Wirth Syntax Notation'>RBNF</acronym>">
 
+	<!ENTITY c.opt "<option>-w</option>&nbsp;&file.arg;">
 	<!ENTITY w.opt "<option>-w</option>&nbsp;&whitelist.arg;">
 	<!ENTITY n.opt "<option>-n</option>">
 	<!ENTITY u.opt "<option>-u</option>">
@@ -226,6 +227,16 @@
 					<para>Whitelist rules by name. The whitelist is given as a
 						comma-separated list.
 						When not specified, the default is to permit all rules.</para>
+				</listitem>
+			</varlistentry>
+
+			<varlistentry>
+				<term>&c.opt;</term>
+
+				<listitem>
+					<para>A &css; file to include inlined into output.
+						This is relevant for &html; format output only,
+						and has no effect for other formats.</para>
 				</listitem>
 			</varlistentry>
 

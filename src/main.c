@@ -41,6 +41,7 @@
 
 int prettify = 1;
 int allow_undefined = 1;
+const char *css_file;
 
 struct io {
 	const char *name;
@@ -150,10 +151,14 @@ main(int argc, char *argv[])
 	{
 		int c;
 
-		while (c = getopt(argc, argv, "hw:nl:e:u"), c != -1) {
+		while (c = getopt(argc, argv, "hw:c:nl:e:u"), c != -1) {
 			switch (c) {
 			case 'l': in  = lang(IO_IN,  optarg); break;
 			case 'e': out = lang(IO_OUT, optarg); break;
+
+			case 'c':
+				css_file = optarg;
+				break;
 
 			case 'w':
 				/* comma-separated whitelist of rule names */
