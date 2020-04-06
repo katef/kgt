@@ -481,11 +481,6 @@ node_walk_render(const struct tnode *n,
 	assert(ctx != NULL);
 
 	switch (n->type) {
-	case TNODE_SKIP:
-		/* TODO: skips under loop alts are too close to the line */
-		ctx->x += n->w * 10;
-		break;
-
 	case TNODE_RTL_ARROW:
 		svg_path_h(&ctx->paths, ctx->x, ctx->y, 10);
 		svg_arrow(ctx, ctx->x + n->w * 5, ctx->y, 1);
@@ -525,7 +520,7 @@ node_walk_render(const struct tnode *n,
 		if (n->u.comment.tnode->type == TNODE_VLIST
 		&& n->u.comment.tnode->u.vlist.o == 0
 		&& n->u.comment.tnode->u.vlist.n == 2
-		&& (n->u.comment.tnode->u.vlist.a[1]->type == TNODE_SKIP || n->u.comment.tnode->u.vlist.a[1]->type == TNODE_RTL_ARROW || n->u.comment.tnode->u.vlist.a[1]->type == TNODE_LTR_ARROW)) {
+		&& ((n->u.comment.tnode->u.vlist.a[1]->type == TNODE_VLIST && n->u.comment.tnode->u.vlist.a[1]->u.vlist.n == 0) || n->u.comment.tnode->u.vlist.a[1]->type == TNODE_RTL_ARROW || n->u.comment.tnode->u.vlist.a[1]->type == TNODE_LTR_ARROW)) {
 			offset += 10;
 		}
 
@@ -563,6 +558,7 @@ node_walk_render(const struct tnode *n,
 	}
 
 	case TNODE_VLIST:
+		/* TODO: .n == 0 skips under loop alts are too close to the line */
 		render_vlist(n, ctx, base);
 		break;
 

@@ -50,14 +50,6 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 	switch (n->type) {
 		size_t i;
 
-	case TNODE_SKIP:
-		print_indent(f, depth);
-		fprintf(f, "SKIP");
-		print_coords(f, n);
-		fprintf(f, "\n");
-
-		break;
-
 	case TNODE_RTL_ARROW:
 		print_indent(f, depth);
 		fprintf(f, "RTL_ARROW");

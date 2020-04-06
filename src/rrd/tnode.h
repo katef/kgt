@@ -59,7 +59,6 @@ struct tnode_hlist {
 
 struct tnode {
 	enum {
-		TNODE_SKIP,
 		TNODE_RTL_ARROW,
 		TNODE_LTR_ARROW,
 		TNODE_ELLIPSIS,
