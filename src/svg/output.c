@@ -387,7 +387,14 @@ render_vlist(const struct tnode *n,
 	x = ctx->x;
 	y = ctx->y;
 
-	for (j = 0; j < n->u.vlist.n; j++) {
+
+	/*
+	 * A vlist of 0 items is a special case, meaning to draw
+	 * a horizontal line only.
+	 */
+	if (n->u.vlist.n == 0 && n->w > 0) {
+		svg_path_h(&ctx->paths, ctx->x, ctx->y, n->w * 10);
+	} else for (j = 0; j < n->u.vlist.n; j++) {
 		ctx->x = x;
 
 		render_tline_outer(ctx, n->u.vlist.b[j], 0);
