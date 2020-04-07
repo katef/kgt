@@ -31,7 +31,7 @@ isalphastr(const struct txt *t)
 }
 
 struct ast_term *
-ast_make_empty_term(void)
+ast_make_empty_term(int invisible)
 {
 	struct ast_term *new;
 
@@ -42,11 +42,13 @@ ast_make_empty_term(void)
 	new->min = 1;
 	new->max = 1;
 
+	new->invisible = invisible;
+
 	return new;
 }
 
 struct ast_term *
-ast_make_rule_term(struct ast_rule *rule)
+ast_make_rule_term(int invisible, struct ast_rule *rule)
 {
 	struct ast_term *new;
 
@@ -60,11 +62,13 @@ ast_make_rule_term(struct ast_rule *rule)
 	new->min = 1;
 	new->max = 1;
 
+	new->invisible = invisible;
+
 	return new;
 }
 
 struct ast_term *
-ast_make_char_term(char c)
+ast_make_char_term(int invisible, char c)
 {
 	struct ast_term *new;
 	char *a;
@@ -81,11 +85,13 @@ ast_make_char_term(char c)
 	new->min = 1;
 	new->max = 1;
 
+	new->invisible = invisible;
+
 	return new;
 }
 
 struct ast_term *
-ast_make_literal_term(const struct txt *literal, int ci)
+ast_make_literal_term(int invisible, const struct txt *literal, int ci)
 {
 	struct ast_term *new;
 
@@ -105,11 +111,13 @@ ast_make_literal_term(const struct txt *literal, int ci)
 	new->min = 1;
 	new->max = 1;
 
+	new->invisible = invisible;
+
 	return new;
 }
 
 struct ast_term *
-ast_make_token_term(const char *token)
+ast_make_token_term(int invisible, const char *token)
 {
 	struct ast_term *new;
 
@@ -123,11 +131,13 @@ ast_make_token_term(const char *token)
 	new->min = 1;
 	new->max = 1;
 
+	new->invisible = invisible;
+
 	return new;
 }
 
 struct ast_term *
-ast_make_prose_term(const char *prose)
+ast_make_prose_term(int invisible, const char *prose)
 {
 	struct ast_term *new;
 
@@ -141,11 +151,13 @@ ast_make_prose_term(const char *prose)
 	new->min = 1;
 	new->max = 1;
 
+	new->invisible = invisible;
+
 	return new;
 }
 
 struct ast_term *
-ast_make_group_term(struct ast_alt *group)
+ast_make_group_term(int invisible, struct ast_alt *group)
 {
 	struct ast_term *new;
 
@@ -157,17 +169,21 @@ ast_make_group_term(struct ast_alt *group)
 	new->min = 1;
 	new->max = 1;
 
+	new->invisible = invisible;
+
 	return new;
 }
 
 struct ast_alt *
-ast_make_alt(struct ast_term *terms)
+ast_make_alt(int invisible, struct ast_term *terms)
 {
 	struct ast_alt *new;
 
 	new = xmalloc(sizeof *new);
 	new->terms = terms;
 	new->next  = NULL;
+
+	new->invisible = invisible;
 
 	return new;
 }
