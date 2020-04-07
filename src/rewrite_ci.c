@@ -66,6 +66,7 @@ f(struct ast_alt **alt, const struct txt *t, char *p, size_t n)
 static void
 rewrite_ci(struct ast_term *term)
 {
+	struct txt tmp;
 	size_t i;
 
 	assert(term->type == TYPE_CI_LITERAL);
@@ -79,13 +80,16 @@ rewrite_ci(struct ast_term *term)
 		assert(islower((unsigned char) term->u.literal.p[i]));
 	}
 
+	assert(term->u.literal.p != NULL);
+	tmp = term->u.literal;
+
 	/* we repurpose the existing node, which breaks abstraction for freeing */
 	term->type = TYPE_GROUP;
 	term->u.group = NULL;
 
-	f(&term->u.group, &term->u.literal, (void *) term->u.literal.p, term->u.literal.n);
+	f(&term->u.group, &tmp, (void *) tmp.p, tmp.n);
 
-	free((void *) term->u.literal.p);
+	free((void *) tmp.p);
 }
 
 static void

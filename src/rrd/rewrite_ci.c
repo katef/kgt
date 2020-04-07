@@ -67,6 +67,7 @@ f(struct list **list, const struct txt *t, char *p, size_t n)
 static void
 rewrite_ci(struct node *n)
 {
+	struct txt tmp;
 	size_t i;
 
 	assert(n->type == NODE_CI_LITERAL);
@@ -80,13 +81,16 @@ rewrite_ci(struct node *n)
 		assert(islower((unsigned char) n->u.literal.p[i]));
 	}
 
+	assert(n->u.literal.p != NULL);
+	tmp = n->u.literal;
+
 	/* we repurpose the existing node, which breaks abstraction for freeing */
 	n->type = NODE_ALT;
 	n->u.alt = NULL;
 
-	f(&n->u.alt, &n->u.literal, (void *) n->u.literal.p, n->u.literal.n);
+	f(&n->u.alt, &tmp, (void *) tmp.p, tmp.n);
 
-	free((void *) n->u.literal.p);
+	free((void *) tmp.p);
 }
 
 static void
