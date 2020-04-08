@@ -9,8 +9,10 @@
  */
 
 #include <assert.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <ctype.h>
 
 #include "txt.h"
@@ -40,27 +42,48 @@ add_alt(struct ast_alt **alt, const struct txt *t)
 }
 
 static void
-f(struct ast_alt **alt, const struct txt *t, char *p, size_t n)
+permute_cases(struct ast_alt **alt, const struct txt *t)
 {
+	size_t i, j;
+	unsigned long long num_alphas, perm_count;
+	unsigned long long alpha_inds[CHAR_BIT * sizeof i - 1]; /* - 1 because we shift (1 << n) by this size */
+	size_t n;
+	char *p;
+
 	assert(alt != NULL);
 	assert(t != NULL);
 	assert(t->p != NULL);
-	assert(p != NULL);
+	
+	p = (void *) t->p;
+	n = t->n;
+	
+	num_alphas = 0;
+	for (i = 0; i < n; i++) {
+		if (!isalpha((unsigned char) p[i])) {
+			continue;
+		}
 
-	if (n == 0) {
+		if (num_alphas + 1 > sizeof alpha_inds / sizeof *alpha_inds) {
+			fprintf(stderr, "Too many alpha characters in case-invensitive string "
+				"\"%.*s\", max is %u\n",
+				(int) t->n, t->p,
+				(unsigned) (sizeof alpha_inds / sizeof *alpha_inds));
+			exit(EXIT_FAILURE);
+		}
+
+		alpha_inds[num_alphas++] = i;
+	}
+
+	perm_count = (1ULL << num_alphas); /* this limits us to sizeof perm_count */
+	for (i = 0; i < perm_count; i++) {
+		for (j = 0; j < num_alphas; j++) {
+			p[alpha_inds[j]] = ((i >> j) & 1ULL)
+				? tolower((unsigned char) p[alpha_inds[j]])
+				: toupper((unsigned char) p[alpha_inds[j]]);
+		}
+		
 		add_alt(alt, t);
-		return;
 	}
-
-	if (!isalpha((unsigned char) *p)) {
-		f(alt, t, p + 1, n - 1);
-		return;
-	}
-
-	*p = toupper((unsigned char) *p);
-	f(alt, t, p + 1, n - 1);
-	*p = tolower((unsigned char) *p);
-	f(alt, t, p + 1, n - 1);
 }
 
 static void
@@ -87,7 +110,7 @@ rewrite_ci(struct ast_term *term)
 	term->type = TYPE_GROUP;
 	term->u.group = NULL;
 
-	f(&term->u.group, &tmp, (void *) tmp.p, tmp.n);
+	permute_cases(&term->u.group, &tmp);
 
 	free((void *) tmp.p);
 }
