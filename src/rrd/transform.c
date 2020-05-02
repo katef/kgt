@@ -124,6 +124,8 @@ single_term(const struct ast_term *term, struct node **r)
 	case TYPE_GROUP:
 		return transform_alts(term->u.group, r);
 	}
+
+	assert(!"unreached");
 }
 
 static int

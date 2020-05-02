@@ -115,6 +115,8 @@ atomic(const struct ast_term *term)
 	case TYPE_GROUP:
 		return 0;
 	}
+
+	assert(!"unreached");
 }
 
 static void

@@ -58,6 +58,9 @@ output_term(const struct ast_term *term)
 	case TYPE_PROSE:
 		fprintf(stderr, "unimplemented\n");
 		exit(EXIT_FAILURE);
+
+	case TYPE_GROUP:
+		break;
 	}
 }
 

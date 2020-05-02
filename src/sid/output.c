@@ -135,12 +135,19 @@ is_equal(const struct ast_term *a, const struct ast_term *b)
 	}
 
 	switch (a->type) {
+	case TYPE_EMPTY:      return 1;
 	case TYPE_RULE:       return 0 == strcmp(a->u.rule->name,    b->u.rule->name);
 	case TYPE_CI_LITERAL: return 0 == txtcasecmp(&a->u.literal, &b->u.literal);
 	case TYPE_CS_LITERAL: return 0 == txtcmp(&a->u.literal,     &b->u.literal);
 	case TYPE_TOKEN:      return 0 == strcmp(a->u.token,         b->u.token);
 	case TYPE_PROSE:      return 0 == strcmp(a->u.prose,         b->u.prose);
+
+	case TYPE_GROUP:
+		/* unimplemented */
+		return 0;
 	}
+
+	assert(!"unreached");
 }
 
 static void

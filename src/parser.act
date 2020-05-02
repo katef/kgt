@@ -162,7 +162,7 @@
 			p += z;
 		}
 
-		q = t->p;
+		q = (void *) t->p;
 
 		for (;;) {
 			unsigned long n;
@@ -463,7 +463,7 @@
 	@};
 
 	BINRANGE: () -> (m :char, n :char) = @{
-		if (-1 == range(lex_state->buf.a, &@m, &@n,  2)) {
+		if (-1 == range(lex_state->buf.a, (unsigned char *) &@m, (unsigned char *) &@n,  2)) {
 			if (errno == ERANGE) {
 				err(lex_state, "hex sequence %s out of range: expected %s0..%s%x inclusive",
 					lex_state->buf.a, prefix(2), prefix(2), UCHAR_MAX);
@@ -475,7 +475,7 @@
 	@};
 
 	OCTRANGE: () -> (m :char, n :char) = @{
-		if (-1 == range(lex_state->buf.a, &@m, &@n,  8)) {
+		if (-1 == range(lex_state->buf.a, (unsigned char *) &@m, (unsigned char *) &@n,  8)) {
 			if (errno == ERANGE) {
 				err(lex_state, "octal sequence %s out of range: expected %s0..%s%o inclusive",
 					lex_state->buf.a, prefix(8), prefix(8), UCHAR_MAX);
@@ -487,7 +487,7 @@
 	@};
 
 	DECRANGE: () -> (m :char, n :char) = @{
-		if (-1 == range(lex_state->buf.a, &@m, &@n, 10)) {
+		if (-1 == range(lex_state->buf.a, (unsigned char *) &@m, (unsigned char *) &@n, 10)) {
 			if (errno == ERANGE) {
 				err(lex_state, "decimal sequence %s out of range: expected %s0..%s%u inclusive",
 					lex_state->buf.a, prefix(10), prefix(10), UCHAR_MAX);
@@ -499,7 +499,7 @@
 	@};
 
 	HEXRANGE: () -> (m :char, n :char) = @{
-		if (-1 == range(lex_state->buf.a, &@m, &@n, 16)) {
+		if (-1 == range(lex_state->buf.a, (unsigned char *) &@m, (unsigned char *) &@n, 16)) {
 			if (errno == ERANGE) {
 				err(lex_state, "hex sequence %s out of range: expected %s0..%s%x inclusive",
 					lex_state->buf.a, prefix(16), prefix(16), UCHAR_MAX);
@@ -523,16 +523,28 @@
 	<rep-one-or-more>: () -> (min :count, max :count) = @{
 		@min = 1;
 		@max = 0;
+
+		/* workaround for SID's ! = f(); */
+		(void) @min;
+		(void) @max;
 	@};
 
 	<rep-zero-or-more>: () -> (min :count, max :count) = @{
 		@min = 0;
 		@max = 0;
+
+		/* workaround for SID's ! = f(); */
+		(void) @min;
+		(void) @max;
 	@};
 
 	<rep-zero-or-one>: () -> (min :count, max :count) = @{
 		@min = 0;
 		@max = 1;
+
+		/* workaround for SID's ! = f(); */
+		(void) @min;
+		(void) @max;
 	@};
 
 	<set-repeat>: (t :ast_term, min :count, max :count) -> () = @{
@@ -606,11 +618,11 @@
 	<make-prose-term>: (l :string) -> (t :ast_term) = @{
 		const char *s;
 
-		s = xstrdup(trim(@l));
+		s = xstrdup(trim((char *) @l));
 
 		@t = ast_make_prose_term(s);
 
-		free(@l);
+		free((void *) @l);
 	@};
 
 	<make-group-term>: (a :ast_alt) -> (t :ast_term) = @{
@@ -746,6 +758,7 @@
 		(void) ltrim;
 		(void) rtrim;
 		(void) trim;
+		(void) err_unimplemented;
 
 		assert(f != NULL);
 
@@ -823,7 +836,7 @@
 
 							token = t->u.rule->name;
 
-							ast_free_rule(t->u.rule);
+							ast_free_rule((void *) t->u.rule);
 
 							t->type    = TYPE_TOKEN;
 							t->u.token = token;

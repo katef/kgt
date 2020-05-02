@@ -5,6 +5,7 @@
  */
 
 #define _BSD_SOURCE
+#define _DEFAULT_SOURCE
 
 #include <assert.h>
 #include <limits.h>
@@ -130,7 +131,7 @@ tnode_free(struct tnode *n)
 
 	case TNODE_COMMENT:
 		free((void *) n->u.comment.s);
-		tnode_free(n->u.comment.tnode);
+		tnode_free((void *) n->u.comment.tnode);
 		break;
 
 	case TNODE_VLIST:

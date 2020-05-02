@@ -88,6 +88,8 @@ atomic(const struct ast_term *term)
 
 		return atomic(term->u.group->terms);
 	}
+
+	assert(!"unreached");
 }
 
 static const char *

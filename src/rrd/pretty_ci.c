@@ -47,6 +47,14 @@ ci_alt(int *changed, struct node *n)
 			}
 
 			break;
+
+		case NODE_RULE:
+		case NODE_PROSE:
+		case NODE_ALT:
+		case NODE_ALT_SKIPPABLE:
+		case NODE_SEQ:
+		case NODE_LOOP:
+			break;
 		}
 	}
 
@@ -75,6 +83,15 @@ ci_alt(int *changed, struct node *n)
 			*changed = 1;
 
 			break;
+
+		case NODE_CS_LITERAL:
+		case NODE_RULE:
+		case NODE_PROSE:
+		case NODE_ALT:
+		case NODE_ALT_SKIPPABLE:
+		case NODE_SEQ:
+		case NODE_LOOP:
+			break;
 		}
 	}
 
@@ -101,6 +118,14 @@ rrd_pretty_ci(int *changed, struct node **n)
 	}
 
 	switch ((*n)->type) {
+	case NODE_CI_LITERAL:
+	case NODE_CS_LITERAL:
+	case NODE_RULE:
+	case NODE_PROSE:
+	case NODE_SEQ:
+	case NODE_LOOP:
+		break;
+
 	case NODE_ALT:
 	case NODE_ALT_SKIPPABLE:
 		ci_alt(changed, *n);

@@ -23,6 +23,13 @@ rrd_pretty_collapse(int *changed, struct node **n)
 	}
 
 	switch ((*n)->type) {
+	case NODE_CI_LITERAL:
+	case NODE_CS_LITERAL:
+	case NODE_RULE:
+	case NODE_PROSE:
+	case NODE_LOOP:
+		break;
+
 	case NODE_ALT:
 		if (list_count((*n)->u.alt) == 1) {
 			struct node *dead;

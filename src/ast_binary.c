@@ -64,6 +64,8 @@ walk_term(const struct ast_term *term)
 	case TYPE_GROUP:
 		return walk_alts(term->u.group);
 	}
+
+	assert(!"unreached");
 }
 
 int

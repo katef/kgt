@@ -50,13 +50,13 @@ node_walk(FILE *f, const struct node *n, int depth)
 
 	case NODE_CI_LITERAL:
 		print_indent(f, depth);
-		fprintf(f, "LITERAL: \"%s\"/i\n", n->u.literal);
+		fprintf(f, "LITERAL: \"%.*s\"/i\n", (int) n->u.literal.n, n->u.literal.p);
 
 		break;
 
 	case NODE_CS_LITERAL:
 		print_indent(f, depth);
-		fprintf(f, "LITERAL: \"%s\"\n", n->u.literal);
+		fprintf(f, "LITERAL: \"%.*s\"\n", (int) n->u.literal.n, n->u.literal.p);
 
 		break;
 

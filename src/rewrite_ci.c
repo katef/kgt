@@ -45,8 +45,8 @@ static void
 permute_cases(struct ast_alt **alt, const struct txt *t)
 {
 	size_t i, j;
-	unsigned long long num_alphas, perm_count;
-	unsigned long long alpha_inds[CHAR_BIT * sizeof i - 1]; /* - 1 because we shift (1 << n) by this size */
+	unsigned long num_alphas, perm_count;
+	unsigned long alpha_inds[CHAR_BIT * sizeof i - 1]; /* - 1 because we shift (1 << n) by this size */
 	size_t n;
 	char *p;
 
@@ -74,10 +74,10 @@ permute_cases(struct ast_alt **alt, const struct txt *t)
 		alpha_inds[num_alphas++] = i;
 	}
 
-	perm_count = (1ULL << num_alphas); /* this limits us to sizeof perm_count */
+	perm_count = (1UL << num_alphas); /* this limits us to sizeof perm_count */
 	for (i = 0; i < perm_count; i++) {
 		for (j = 0; j < num_alphas; j++) {
-			p[alpha_inds[j]] = ((i >> j) & 1ULL)
+			p[alpha_inds[j]] = ((i >> j) & 1UL)
 				? tolower((unsigned char) p[alpha_inds[j]])
 				: toupper((unsigned char) p[alpha_inds[j]]);
 		}

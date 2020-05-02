@@ -32,6 +32,7 @@ node_free(struct node *n)
 		break;
 
 	case NODE_RULE:
+	case NODE_PROSE:
 		break;
 
 	case NODE_ALT:
@@ -224,6 +225,9 @@ node_compare(const struct node *a, const struct node *b)
 
 	case NODE_RULE:
 		return 0 == strcmp(a->u.name, b->u.name);
+
+	case NODE_PROSE:
+		return 0 == strcmp(a->u.prose, b->u.prose);
 
 	case NODE_ALT:
 	case NODE_ALT_SKIPPABLE:

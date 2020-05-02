@@ -151,6 +151,19 @@ tnode_walk(FILE *f, const struct tnode *n, int depth)
 }
 
 static void
+dim_mono_txt(const struct txt *t, unsigned *w, unsigned *a, unsigned *d)
+{
+	assert(t != NULL);
+	assert(w != NULL);
+	assert(a != NULL);
+	assert(d != NULL);
+
+	*w = t->n;
+	*a = 0;
+	*d = 1;
+}
+
+static void
 dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 {
 	assert(s != NULL);
@@ -169,7 +182,7 @@ rrtdump_output(const struct ast_rule *grammar)
 	const struct ast_rule *p;
 
 	struct dim dim = {
-		dim_mono_string,
+		dim_mono_txt,
 		dim_mono_string,
 		0,
 		0,

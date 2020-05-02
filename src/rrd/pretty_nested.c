@@ -112,6 +112,13 @@ rrd_pretty_nested(int *changed, struct node **n)
 	case NODE_SEQ:
 		nested_seq(changed, *n);
 		break;
+
+	case NODE_CI_LITERAL:
+	case NODE_CS_LITERAL:
+	case NODE_RULE:
+	case NODE_PROSE:
+	case NODE_LOOP:
+		break;
 	}
 }
 

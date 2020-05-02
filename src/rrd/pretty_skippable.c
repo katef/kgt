@@ -82,6 +82,13 @@ rrd_pretty_skippable(int *changed, struct node **n)
 	case NODE_SEQ:
 		redundant_skip(changed, &(*n)->u.seq);
 		break;
+
+	case NODE_CI_LITERAL:
+	case NODE_CS_LITERAL:
+	case NODE_RULE:
+	case NODE_PROSE:
+	case NODE_LOOP:
+		break;
 	}
 }
 

@@ -47,7 +47,7 @@ xtxtdup(const struct txt *t)
 	new.n = t->n;
 	new.p = xmalloc(new.n);
 
-	memcpy(new.p, t->p, new.n);
+	memcpy((void *) new.p, t->p, new.n);
 
 	return new;
 }
