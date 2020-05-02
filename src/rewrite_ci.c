@@ -20,6 +20,9 @@
 #include "rewrite.h"
 #include "xalloc.h"
 
+static int
+walk_alts(struct ast_alt *alts);
+
 static void
 add_alt(struct ast_alt **alt, const struct txt *t)
 {
@@ -116,43 +119,53 @@ rewrite_ci(struct ast_term *term)
 }
 
 static void
-walk_alt(struct ast_alt *alt)
+walk_term(struct ast_term *term)
 {
+	assert(term != NULL);
+
+	switch (term->type) {
+	case TYPE_EMPTY:
+	case TYPE_CS_LITERAL:
+	case TYPE_TOKEN:
+	case TYPE_PROSE:
+		break;
+
+	case TYPE_GROUP:
+		walk_alts(term->u.group);
+		break;
+
+	case TYPE_RULE:
+		/* (struct ast_term).u.rule is just for the name; don't recurr into it */
+		break;
+
+	case TYPE_CI_LITERAL:
+		rewrite_ci(term);
+		break;
+	}
+}
+
+static int
+walk_alts(struct ast_alt *alts)
+{
+	struct ast_alt *alt;
 	struct ast_term *term;
 
-	for (term = alt->terms; term != NULL; term = term->next) {
-		switch (term->type) {
-		case TYPE_EMPTY:
-		case TYPE_CS_LITERAL:
-		case TYPE_TOKEN:
-		case TYPE_PROSE:
-			break;
-
-		case TYPE_GROUP:
-			walk_alt(term->u.group);
-			break;
-
-		case TYPE_RULE:
-			/* (struct ast_term).u.rule is just for the name; don't recurr into it */
-			break;
-
-		case TYPE_CI_LITERAL:
-			rewrite_ci(term);
-			break;
+	for (alt = alts; alt != NULL; alt = alt->next) {
+		for (term = alt->terms; term != NULL; term = term->next) {
+			walk_term(term);
 		}
 	}
+
+	return 0;
 }
 
 void
 rewrite_ci_literals(struct ast_rule *grammar)
 {
 	struct ast_rule *rule;
-	struct ast_alt *alt;
 
 	for (rule = grammar; rule != NULL; rule = rule->next) {
-		for (alt = rule->alts; alt != NULL; alt = alt->next) {
-			walk_alt(alt);
-		}
+		walk_alts(rule->alts);
 	}
 }
 

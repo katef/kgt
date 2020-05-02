@@ -12,24 +12,7 @@
 #include "ast.h"
 
 static int
-walk_term(const struct ast_term *term);
-
-static int
-walk_alts(const struct ast_alt *alts)
-{
-	const struct ast_alt *p;
-	const struct ast_term *q;
-
-	for (p = alts; p != NULL; p = p->next) {
-		for (q = p->terms; q != NULL; q = q->next) {
-			if (walk_term(q)) {
-				return 1;
-			}
-		}
-	}
-
-	return 0;
-}
+walk_alts(const struct ast_alt *alts);
 
 static int
 binary_literal(const struct txt *t)
@@ -50,6 +33,8 @@ binary_literal(const struct txt *t)
 static int
 walk_term(const struct ast_term *term)
 {
+	assert(term != NULL);
+
 	switch (term->type) {
 	case TYPE_EMPTY:
 	case TYPE_RULE:
@@ -68,9 +53,34 @@ walk_term(const struct ast_term *term)
 	assert(!"unreached");
 }
 
-int
-ast_binary(const struct ast_rule *ast)
+static int
+walk_alts(const struct ast_alt *alts)
 {
-	return walk_alts(ast->alts);
+	const struct ast_alt *alt;
+	const struct ast_term *term;
+
+	for (alt = alts; alt != NULL; alt = alt->next) {
+		for (term = alt->terms; term != NULL; term = term->next) {
+			if (walk_term(term)) {
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+int
+ast_binary(const struct ast_rule *grammar)
+{
+	const struct ast_rule *rule;
+
+	for (rule = grammar; rule != NULL; rule = rule->next) {
+		if (walk_alts(rule->alts)) {
+			return 1;
+		}
+	}
+
+	return 0;
 }
 
