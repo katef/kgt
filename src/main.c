@@ -196,12 +196,10 @@ main(int argc, char *argv[])
 		unsigned v;
 
 		for (v = out->ast_unsupported; v != 0; v &= v - 1) {
-			int r;
-
 			/* TODO: expose these rewritings as CLI options too; set as bits in v */
 			/* TODO: option to query if output is possible without rewriting */
 			switch (v & -v) {
-			case FEATURE_AST_CI_LITERAL: r = 1; rewrite_ci_literals(g); break;
+			case FEATURE_AST_CI_LITERAL: rewrite_ci_literals(g); break;
 
 			case FEATURE_AST_BINARY:
 				if (ast_binary(g)) {
@@ -209,11 +207,6 @@ main(int argc, char *argv[])
 					exit(EXIT_FAILURE);
 				}
 				break;
-			}
-
-			if (!r) {
-				perror("ast_transform_*");
-				exit(EXIT_FAILURE);
 			}
 		}
 	}
