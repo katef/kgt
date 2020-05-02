@@ -51,9 +51,9 @@ struct io {
 	enum rrd_features rrd_unsupported;
 } io[] = {
 	{ "bnf",        bnf_input,      bnf_output,         bnf_ast_unsupported, 0 },
-	{ "blab",       NULL,           blab_output,        0, 0 },
-	{ "ebnfhtml5",  NULL,           ebnf_html5_output,  0, 0 },
-	{ "ebnfxhtml5", NULL,           ebnf_xhtml5_output, 0, 0 },
+	{ "blab",       NULL,           blab_output,        blab_ast_unsupported, 0 },
+	{ "ebnfhtml5",  NULL,           ebnf_html5_output,  ebnf_html5_ast_unsupported, 0 },
+	{ "ebnfxhtml5", NULL,           ebnf_xhtml5_output, ebnf_html5_ast_unsupported, 0 },
 	{ "wsn",        wsn_input,      wsn_output,         wsn_ast_unsupported, 0 },
 	{ "abnf",       abnf_input,     abnf_output,        0, 0 },
 	{ "iso-ebnf",   iso_ebnf_input, iso_ebnf_output,    iso_ebnf_ast_unsupported, 0 },
@@ -200,6 +200,7 @@ main(int argc, char *argv[])
 			/* TODO: option to query if output is possible without rewriting */
 			switch (v & -v) {
 			case FEATURE_AST_CI_LITERAL: rewrite_ci_literals(g); break;
+			case FEATURE_AST_INVISIBLE:  rewrite_invisible(g);   break;
 
 			case FEATURE_AST_BINARY:
 				if (ast_binary(g)) {

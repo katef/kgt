@@ -9,6 +9,11 @@
 
 struct ast_rule;
 
+/*
+ * We don't mark FEATURE_AST_INVISIBLE as unsupported here, because this EBNF
+ * is supposed to be a source format; it's not presentational.
+ */
+
 #define iso_ebnf_ast_unsupported (FEATURE_AST_CI_LITERAL | FEATURE_AST_PROSE | FEATURE_AST_BINARY)
 
 struct ast_rule *

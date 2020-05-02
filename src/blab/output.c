@@ -125,6 +125,7 @@ output_term(const struct ast_term *term)
 	int a;
 
 	assert(term != NULL);
+	assert(!term->invisible);
 
 	a = atomic(term);
 
@@ -208,6 +209,8 @@ static void
 output_alt(const struct ast_alt *alt)
 {
 	const struct ast_term *term;
+
+	assert(!alt->invisible);
 
 	for (term = alt->terms; term != NULL; term = term->next) {
 		output_term(term);

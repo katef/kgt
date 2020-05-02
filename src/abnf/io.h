@@ -9,6 +9,11 @@
 
 struct ast_rule;
 
+/*
+ * We don't mark FEATURE_AST_INVISIBLE as unsupported here, because ABNF
+ * is supposed to be a source format; it's not presentational.
+ */
+
 struct ast_rule *
 abnf_input(int (*f)(void *opaque), void *opaque);
 

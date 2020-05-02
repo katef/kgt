@@ -9,6 +9,12 @@
 
 struct ast_rule;
 
+/*
+ * We mark FEATURE_AST_INVISIBLE as unsupported here, because this EBNF
+ * is supposed to be a presentational format.
+ */
+#define ebnf_html5_ast_unsupported (FEATURE_AST_INVISIBLE)
+
 void
 ebnf_html5_output(const struct ast_rule *grammar);
 

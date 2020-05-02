@@ -9,7 +9,7 @@
 
 struct ast_rule;
 
-#define rbnf_ast_unsupported (FEATURE_AST_CI_LITERAL | FEATURE_AST_BINARY)
+#define rbnf_ast_unsupported (FEATURE_AST_CI_LITERAL | FEATURE_AST_BINARY | FEATURE_AST_INVISIBLE)
 
 struct ast_rule *
 rbnf_input(int (*f)(void *opaque), void *opaque);

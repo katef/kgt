@@ -108,11 +108,21 @@ output_term(const struct ast_rule *grammar,
 {
 	assert(term->max >= term->min || !term->max);
 
-	printf("\t\"a%p\" -> \"t%p\";\n",
+	printf("\t\"a%p\" -> \"t%p\"",
 		(void *) alt, (void *) term);
+	if (term->invisible) {
+		printf(" [ color = blue, style = dashed ]");
+	}
+	printf(";\n");
 
-	printf("\t\"t%p\" [ shape = record, label = \"",
+	printf("\t\"t%p\" [ shape = record, ",
 		(void *) term);
+
+	if (term->invisible) {
+		printf("color = blue, fontcolor = blue, style = \"rounded,dashed\", ");
+	}
+
+	printf("label = \"");
 
 	if (term->min == 1 && term->max == 1) {
 		/* nothing */
@@ -175,8 +185,14 @@ output_term(const struct ast_rule *grammar,
 	case TYPE_CS_LITERAL:
 	case TYPE_TOKEN:
 	case TYPE_PROSE:
-		printf("\t\"t%p\" [ style = filled ];\n",
+		printf("\t\"t%p\" [ style = filled",
 			(void *) term);
+
+		if (term->invisible) {
+			printf(", color = blue, fillcolor = aliceblue, style = \"dashed,filled\" ");
+		}
+
+		printf("];\n");
 		break;
 
 	case TYPE_GROUP:
@@ -191,8 +207,14 @@ output_alt(const struct ast_rule *grammar,
 {
 	const struct ast_term *term;
 
-	printf("\t\"a%p\" [ label = \"|\" ];\n",
+	printf("\t\"a%p\" [ label = \"|\"",
 		(void *) alt);
+
+if (alt->invisible) {
+	printf(", color = blue ");
+}
+
+	printf("];\n");
 
 	for (term = alt->terms; term != NULL; term = term->next) {
 		output_term(grammar, alt, term);

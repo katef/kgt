@@ -12,7 +12,8 @@ struct ast_alt;
 enum ast_features {
     FEATURE_AST_CI_LITERAL = 1 << 0,
     FEATURE_AST_PROSE      = 1 << 1,
-    FEATURE_AST_BINARY     = 1 << 2
+    FEATURE_AST_BINARY     = 1 << 2,
+    FEATURE_AST_INVISIBLE  = 1 << 3
 };
 
 /*
@@ -110,6 +111,12 @@ ast_find_rule(const struct ast_rule *grammar, const char *name);
 
 void
 ast_free_rule(struct ast_rule *rule);
+
+void
+ast_free_alt(struct ast_alt *alt);
+
+void
+ast_free_term(struct ast_term *term);
 
 int
 ast_binary(const struct ast_rule *ast);

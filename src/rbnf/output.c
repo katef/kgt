@@ -64,6 +64,9 @@ output_term(const struct ast_term *term)
 		{ 0, 0, " [", " ... ] " }
 	};
 
+	assert(term != NULL);
+	assert(!term->invisible);
+
 	s = NULL;
 	e = NULL;
 
@@ -120,6 +123,9 @@ static void
 output_alt(const struct ast_alt *alt)
 {
 	const struct ast_term *term;
+
+	assert(alt != NULL);
+	assert(!alt->invisible);
 
 	for (term = alt->terms; term != NULL; term = term->next) {
 		output_term(term);

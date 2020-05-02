@@ -12,5 +12,8 @@ struct ast_rule;
 void
 rewrite_ci_literals(struct ast_rule *g);
 
+void
+rewrite_invisible(struct ast_rule *g);
+
 #endif
 

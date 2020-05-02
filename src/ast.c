@@ -222,6 +222,21 @@ ast_find_rule(const struct ast_rule *grammar, const char *name)
 void
 ast_free_rule(struct ast_rule *rule)
 {
+	/* XXX: free contents */
 	free(rule);
+}
+
+void
+ast_free_alt(struct ast_alt *alt)
+{
+	/* XXX: free contents */
+	free(alt);
+}
+
+void
+ast_free_term(struct ast_term *term)
+{
+	/* XXX: free contents */
+	free(term);
 }
 
