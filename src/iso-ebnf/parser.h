@@ -24,7 +24,7 @@
 extern void prod_iso_Hebnf(lex_state, act_state, map_rule *);
 /* BEGINNING OF TRAILER */
 
-#line 845 "src/parser.act"
+#line 858 "src/parser.act"
 
 
 #line 31 "src/iso-ebnf/parser.h"

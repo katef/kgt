@@ -143,7 +143,7 @@
 			p += z;
 		}
 
-		q = t->p;
+		q = (void *) t->p;
 
 		for (;;) {
 			unsigned long n;
@@ -340,7 +340,7 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-group-term */
 			{
-#line 617 "src/parser.act"
+#line 629 "src/parser.act"
 
 		(ZIt) = ast_make_group_term((ZIa));
 	
@@ -369,7 +369,7 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-group-term */
 			{
-#line 617 "src/parser.act"
+#line 629 "src/parser.act"
 
 		(ZIt) = ast_make_group_term((ZIa));
 	
@@ -378,24 +378,28 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 			/* END OF ACTION: make-group-term */
 			/* BEGINNING OF ACTION: rep-zero-or-one */
 			{
-#line 534 "src/parser.act"
+#line 542 "src/parser.act"
 
 		(ZImin) = 0;
 		(ZImax) = 1;
+
+		/* workaround for SID's ! = f(); */
+		(void) (ZImin);
+		(void) (ZImax);
 	
-#line 387 "src/iso-ebnf/parser.c"
+#line 391 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: rep-zero-or-one */
 			/* BEGINNING OF ACTION: set-repeat */
 			{
-#line 539 "src/parser.act"
+#line 551 "src/parser.act"
 
 		assert((ZImax) >= (ZImin) || !(ZImax));
 
 		(ZIt)->min = (ZImin);
 		(ZIt)->max = (ZImax);
 	
-#line 399 "src/iso-ebnf/parser.c"
+#line 403 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: set-repeat */
 		}
@@ -420,33 +424,37 @@ prod_factor(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-group-term */
 			{
-#line 617 "src/parser.act"
+#line 629 "src/parser.act"
 
 		(ZIt) = ast_make_group_term((ZIa));
 	
-#line 428 "src/iso-ebnf/parser.c"
+#line 432 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: make-group-term */
 			/* BEGINNING OF ACTION: rep-zero-or-more */
 			{
-#line 529 "src/parser.act"
+#line 533 "src/parser.act"
 
 		(ZImin) = 0;
 		(ZImax) = 0;
+
+		/* workaround for SID's ! = f(); */
+		(void) (ZImin);
+		(void) (ZImax);
 	
-#line 438 "src/iso-ebnf/parser.c"
+#line 446 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: rep-zero-or-more */
 			/* BEGINNING OF ACTION: set-repeat */
 			{
-#line 539 "src/parser.act"
+#line 551 "src/parser.act"
 
 		assert((ZImax) >= (ZImin) || !(ZImax));
 
 		(ZIt)->min = (ZImin);
 		(ZIt)->max = (ZImax);
 	
-#line 450 "src/iso-ebnf/parser.c"
+#line 458 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: set-repeat */
 		}
@@ -497,21 +505,21 @@ ZL1:;
 	{
 		/* BEGINNING OF ACTION: make-empty-rule */
 		{
-#line 650 "src/parser.act"
+#line 662 "src/parser.act"
 
 		(ZIl) = NULL;
 	
-#line 505 "src/iso-ebnf/parser.c"
+#line 513 "src/iso-ebnf/parser.c"
 		}
 		/* END OF ACTION: make-empty-rule */
 		/* BEGINNING OF ACTION: err-syntax */
 		{
-#line 697 "src/parser.act"
+#line 709 "src/parser.act"
 
 		err(lex_state, "Syntax error");
 		exit(EXIT_FAILURE);
 	
-#line 515 "src/iso-ebnf/parser.c"
+#line 523 "src/iso-ebnf/parser.c"
 		}
 		/* END OF ACTION: err-syntax */
 	}
@@ -615,7 +623,7 @@ ZL2_body:;
 
 		ZIc = lex_state->buf.a[0];
 	
-#line 619 "src/iso-ebnf/parser.c"
+#line 627 "src/iso-ebnf/parser.c"
 						}
 						/* END OF EXTRACT: CHAR */
 						break;
@@ -633,7 +641,7 @@ ZL2_body:;
 		/* TODO */
 		*lex_state->p++ = (ZIc);
 	
-#line 637 "src/iso-ebnf/parser.c"
+#line 645 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: pattern-char */
 			/* BEGINNING OF INLINE: body */
@@ -681,13 +689,13 @@ prod_term(lex_state lex_state, act_state act_state, map_term *ZOt)
 			exit(EXIT_FAILURE);
 		}
 	
-#line 685 "src/iso-ebnf/parser.c"
+#line 693 "src/iso-ebnf/parser.c"
 			}
 			/* END OF EXTRACT: IDENT */
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-rule-term */
 			{
-#line 578 "src/parser.act"
+#line 590 "src/parser.act"
 
 		struct ast_rule *r;
 
@@ -705,7 +713,7 @@ prod_term(lex_state lex_state, act_state act_state, map_term *ZOt)
 
 		(ZIt) = ast_make_rule_term(r);
 	
-#line 709 "src/iso-ebnf/parser.c"
+#line 717 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: make-rule-term */
 		}
@@ -724,11 +732,11 @@ prod_term(lex_state lex_state, act_state act_state, map_term *ZOt)
 		{
 			/* BEGINNING OF ACTION: make-empty-term */
 			{
-#line 566 "src/parser.act"
+#line 578 "src/parser.act"
 
 		(ZIt) = ast_make_empty_term();
 	
-#line 732 "src/iso-ebnf/parser.c"
+#line 740 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: make-empty-term */
 		}
@@ -777,7 +785,7 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			exit(EXIT_FAILURE);
 		}
 	
-#line 781 "src/iso-ebnf/parser.c"
+#line 789 "src/iso-ebnf/parser.c"
 			}
 			/* END OF EXTRACT: IDENT */
 			break;
@@ -801,11 +809,11 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			{
 				/* BEGINNING OF ACTION: err-expected-equals */
 				{
-#line 709 "src/parser.act"
+#line 721 "src/parser.act"
 
 		err_expected(lex_state, "production rule assignment");
 	
-#line 809 "src/iso-ebnf/parser.c"
+#line 817 "src/iso-ebnf/parser.c"
 				}
 				/* END OF ACTION: err-expected-equals */
 			}
@@ -819,11 +827,11 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 		}
 		/* BEGINNING OF ACTION: make-rule */
 		{
-#line 646 "src/parser.act"
+#line 658 "src/parser.act"
 
 		(ZIr) = ast_make_rule((ZIs), (ZIa));
 	
-#line 827 "src/iso-ebnf/parser.c"
+#line 835 "src/iso-ebnf/parser.c"
 		}
 		/* END OF ACTION: make-rule */
 		/* BEGINNING OF INLINE: 91 */
@@ -842,11 +850,11 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			{
 				/* BEGINNING OF ACTION: err-expected-sep */
 				{
-#line 705 "src/parser.act"
+#line 717 "src/parser.act"
 
 		err_expected(lex_state, "production rule separator");
 	
-#line 850 "src/iso-ebnf/parser.c"
+#line 858 "src/iso-ebnf/parser.c"
 				}
 				/* END OF ACTION: err-expected-sep */
 			}
@@ -879,7 +887,7 @@ prod_repeatable_Hfactor(lex_state lex_state, act_state act_state, map_term *ZOt)
 		ZIn = strtoul(lex_state->buf.a, NULL, 10);
 		/* TODO: range check */
 	
-#line 883 "src/iso-ebnf/parser.c"
+#line 891 "src/iso-ebnf/parser.c"
 			}
 			/* END OF EXTRACT: COUNT */
 			ADVANCE_LEXER;
@@ -897,7 +905,7 @@ prod_repeatable_Hfactor(lex_state lex_state, act_state act_state, map_term *ZOt)
 			}
 			/* BEGINNING OF ACTION: mul-repeat */
 			{
-#line 546 "src/parser.act"
+#line 558 "src/parser.act"
 
 		assert((ZIn) > 0);
 
@@ -916,7 +924,7 @@ prod_repeatable_Hfactor(lex_state lex_state, act_state act_state, map_term *ZOt)
 		(ZIt)->min *= (ZIn);
 		(ZIt)->max *= (ZIn);
 	
-#line 920 "src/iso-ebnf/parser.c"
+#line 928 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: mul-repeat */
 		}
@@ -956,7 +964,7 @@ prod_95(lex_state lex_state, act_state act_state, map_rule *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-rule-to-list */
 			{
-#line 665 "src/parser.act"
+#line 677 "src/parser.act"
 
 		if (ast_find_rule((ZIr), (*ZIl)->name)) {
 			fprintf(stderr, "production rule <%s> already exists\n", (*ZIl)->name);
@@ -968,7 +976,7 @@ prod_95(lex_state lex_state, act_state act_state, map_rule *ZIl)
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIr);
 	
-#line 972 "src/iso-ebnf/parser.c"
+#line 980 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: add-rule-to-list */
 		}
@@ -1010,11 +1018,11 @@ prod_96(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 				{
 					/* BEGINNING OF ACTION: err-expected-alt */
 					{
-#line 701 "src/parser.act"
+#line 713 "src/parser.act"
 
 		err_expected(lex_state, "alternative separator");
 	
-#line 1018 "src/iso-ebnf/parser.c"
+#line 1026 "src/iso-ebnf/parser.c"
 					}
 					/* END OF ACTION: err-expected-alt */
 				}
@@ -1028,21 +1036,21 @@ prod_96(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 			}
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 642 "src/parser.act"
+#line 654 "src/parser.act"
 
 		(ZIl) = ast_make_alt((*ZIt));
 	
-#line 1036 "src/iso-ebnf/parser.c"
+#line 1044 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: make-alt */
 			/* BEGINNING OF ACTION: add-alt-to-list */
 			{
-#line 660 "src/parser.act"
+#line 672 "src/parser.act"
 
 		assert((ZIl)->next == NULL);
 		(ZIl)->next = (ZIa);
 	
-#line 1046 "src/iso-ebnf/parser.c"
+#line 1054 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: add-alt-to-list */
 		}
@@ -1051,11 +1059,11 @@ prod_96(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 		{
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 642 "src/parser.act"
+#line 654 "src/parser.act"
 
 		(ZIl) = ast_make_alt((*ZIt));
 	
-#line 1059 "src/iso-ebnf/parser.c"
+#line 1067 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: make-alt */
 		}
@@ -1087,11 +1095,11 @@ prod_97(lex_state lex_state, act_state act_state)
 			}
 			/* BEGINNING OF ACTION: err-unimplemented-except */
 			{
-#line 713 "src/parser.act"
+#line 725 "src/parser.act"
 
 		err_unimplemented(lex_state, "\"except\" productions");
 	
-#line 1095 "src/iso-ebnf/parser.c"
+#line 1103 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: err-unimplemented-except */
 		}
@@ -1123,12 +1131,12 @@ prod_98(lex_state lex_state, act_state act_state, map_term *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-term-to-list */
 			{
-#line 655 "src/parser.act"
+#line 667 "src/parser.act"
 
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIt);
 	
-#line 1132 "src/iso-ebnf/parser.c"
+#line 1140 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: add-term-to-list */
 		}
@@ -1161,17 +1169,17 @@ prod_99(lex_state lex_state, act_state act_state, map_term *ZOt)
 		ZIx.p = pattern_buffer(lex_state);
 		ZIx.n = strlen(ZIx.p);
 	
-#line 1165 "src/iso-ebnf/parser.c"
+#line 1173 "src/iso-ebnf/parser.c"
 			}
 			/* END OF EXTRACT: CS_LITERAL */
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-cs-literal-term */
 			{
-#line 599 "src/parser.act"
+#line 611 "src/parser.act"
 
 		(ZIt) = ast_make_literal_term(&(ZIx), 0);
 	
-#line 1175 "src/iso-ebnf/parser.c"
+#line 1183 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: make-cs-literal-term */
 		}
@@ -1186,23 +1194,23 @@ prod_99(lex_state lex_state, act_state act_state, map_term *ZOt)
 
 		ZIs = pattern_buffer(lex_state);
 	
-#line 1190 "src/iso-ebnf/parser.c"
+#line 1198 "src/iso-ebnf/parser.c"
 			}
 			/* END OF EXTRACT: PROSE */
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-prose-term */
 			{
-#line 609 "src/parser.act"
+#line 621 "src/parser.act"
 
 		const char *s;
 
-		s = xstrdup(trim((ZIs)));
+		s = xstrdup(trim((char *) (ZIs)));
 
 		(ZIt) = ast_make_prose_term(s);
 
-		free((ZIs));
+		free((void *) (ZIs));
 	
-#line 1206 "src/iso-ebnf/parser.c"
+#line 1214 "src/iso-ebnf/parser.c"
 			}
 			/* END OF ACTION: make-prose-term */
 		}
@@ -1246,7 +1254,7 @@ ZL0:;
 
 /* BEGINNING OF TRAILER */
 
-#line 843 "src/parser.act"
+#line 856 "src/parser.act"
 
 
 	static int
@@ -1281,6 +1289,7 @@ ZL0:;
 		(void) ltrim;
 		(void) rtrim;
 		(void) trim;
+		(void) err_unimplemented;
 
 		assert(f != NULL);
 
@@ -1358,7 +1367,7 @@ ZL0:;
 
 							token = t->u.rule->name;
 
-							ast_free_rule(t->u.rule);
+							ast_free_rule((void *) t->u.rule);
 
 							t->type    = TYPE_TOKEN;
 							t->u.token = token;
@@ -1375,6 +1384,6 @@ ZL0:;
 		return g;
 	}
 
-#line 1379 "src/iso-ebnf/parser.c"
+#line 1388 "src/iso-ebnf/parser.c"
 
 /* END OF FILE */

@@ -143,7 +143,7 @@
 			p += z;
 		}
 
-		q = t->p;
+		q = (void *) t->p;
 
 		for (;;) {
 			unsigned long n;
@@ -489,7 +489,7 @@ ZL1:;
 	{
 		/* BEGINNING OF ACTION: make-empty-rule */
 		{
-#line 650 "src/parser.act"
+#line 662 "src/parser.act"
 
 		(ZIl) = NULL;
 	
@@ -498,7 +498,7 @@ ZL1:;
 		/* END OF ACTION: make-empty-rule */
 		/* BEGINNING OF ACTION: err-syntax */
 		{
-#line 697 "src/parser.act"
+#line 709 "src/parser.act"
 
 		err(lex_state, "Syntax error");
 		exit(EXIT_FAILURE);
@@ -522,7 +522,7 @@ prod_term(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-empty-term */
 			{
-#line 566 "src/parser.act"
+#line 578 "src/parser.act"
 
 		(ZIt) = ast_make_empty_term();
 	
@@ -602,7 +602,7 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			{
 				/* BEGINNING OF ACTION: err-expected-equals */
 				{
-#line 709 "src/parser.act"
+#line 721 "src/parser.act"
 
 		err_expected(lex_state, "production rule assignment");
 	
@@ -620,7 +620,7 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 		}
 		/* BEGINNING OF ACTION: make-rule */
 		{
-#line 646 "src/parser.act"
+#line 658 "src/parser.act"
 
 		(ZIr) = ast_make_rule((ZIs), (ZIa));
 	
@@ -648,7 +648,7 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			{
 				/* BEGINNING OF ACTION: err-expected-sep */
 				{
-#line 705 "src/parser.act"
+#line 717 "src/parser.act"
 
 		err_expected(lex_state, "production rule separator");
 	
@@ -683,7 +683,7 @@ prod_90(lex_state lex_state, act_state act_state, map_rule *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-rule-to-list */
 			{
-#line 665 "src/parser.act"
+#line 677 "src/parser.act"
 
 		if (ast_find_rule((ZIr), (*ZIl)->name)) {
 			fprintf(stderr, "production rule <%s> already exists\n", (*ZIl)->name);
@@ -737,7 +737,7 @@ prod_91(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 				{
 					/* BEGINNING OF ACTION: err-expected-alt */
 					{
-#line 701 "src/parser.act"
+#line 713 "src/parser.act"
 
 		err_expected(lex_state, "alternative separator");
 	
@@ -755,7 +755,7 @@ prod_91(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 			}
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 642 "src/parser.act"
+#line 654 "src/parser.act"
 
 		(ZIl) = ast_make_alt((*ZIt));
 	
@@ -764,7 +764,7 @@ prod_91(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 			/* END OF ACTION: make-alt */
 			/* BEGINNING OF ACTION: add-alt-to-list */
 			{
-#line 660 "src/parser.act"
+#line 672 "src/parser.act"
 
 		assert((ZIl)->next == NULL);
 		(ZIl)->next = (ZIa);
@@ -778,7 +778,7 @@ prod_91(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 		{
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 642 "src/parser.act"
+#line 654 "src/parser.act"
 
 		(ZIl) = ast_make_alt((*ZIt));
 	
@@ -813,7 +813,7 @@ prod_92(lex_state lex_state, act_state act_state, map_term *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-term-to-list */
 			{
-#line 655 "src/parser.act"
+#line 667 "src/parser.act"
 
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIt);
@@ -857,7 +857,7 @@ prod_93(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-cs-literal-term */
 			{
-#line 599 "src/parser.act"
+#line 611 "src/parser.act"
 
 		(ZIt) = ast_make_literal_term(&(ZIx), 0);
 	
@@ -882,7 +882,7 @@ prod_93(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-rule-term */
 			{
-#line 578 "src/parser.act"
+#line 590 "src/parser.act"
 
 		struct ast_rule *r;
 
@@ -920,7 +920,7 @@ ZL0:;
 
 /* BEGINNING OF TRAILER */
 
-#line 843 "src/parser.act"
+#line 856 "src/parser.act"
 
 
 	static int
@@ -955,6 +955,7 @@ ZL0:;
 		(void) ltrim;
 		(void) rtrim;
 		(void) trim;
+		(void) err_unimplemented;
 
 		assert(f != NULL);
 
@@ -1032,7 +1033,7 @@ ZL0:;
 
 							token = t->u.rule->name;
 
-							ast_free_rule(t->u.rule);
+							ast_free_rule((void *) t->u.rule);
 
 							t->type    = TYPE_TOKEN;
 							t->u.token = token;
@@ -1049,6 +1050,6 @@ ZL0:;
 		return g;
 	}
 
-#line 1053 "src/bnf/parser.c"
+#line 1054 "src/bnf/parser.c"
 
 /* END OF FILE */
