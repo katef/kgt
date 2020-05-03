@@ -25,7 +25,7 @@
 #include "../rrd/list.h"
 
 static void
-add_alt(struct list **list, const struct txt *t)
+add_alt(int invisible, struct list **list, const struct txt *t)
 {
 	struct node *node;
 	struct txt q;
@@ -36,14 +36,14 @@ add_alt(struct list **list, const struct txt *t)
 
 	q = xtxtdup(t);
 
-	node = node_create_cs_literal(&q);
+	node = node_create_cs_literal(invisible, &q);
 
 	list_push(list, node);
 }
 
 /* TODO: centralise */
 static void
-permute_cases(struct list **list, const struct txt *t)
+permute_cases(int invisible, struct list **list, const struct txt *t)
 {
 	size_t i, j;
 	unsigned long num_alphas, perm_count;
@@ -84,7 +84,7 @@ permute_cases(struct list **list, const struct txt *t)
 				: toupper((unsigned char) p[alpha_inds[j]]);
 		}
 
-		add_alt(list, t);
+		add_alt(invisible, list, t);
 	}
 }
 
@@ -112,7 +112,8 @@ rewrite_ci(struct node *n)
 	n->type = NODE_ALT;
 	n->u.alt = NULL;
 
-	permute_cases(&n->u.alt, &tmp);
+	/* invisibility of new alts is inherited from n->invisible itself */
+	permute_cases(n->invisible, &n->u.alt, &tmp);
 
 	free((void *) tmp.p);
 }

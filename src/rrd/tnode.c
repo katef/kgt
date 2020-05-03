@@ -113,7 +113,6 @@ tnode_free(struct tnode *n)
 	}
 
 	switch (n->type) {
-	case TNODE_SKIP:
 	case TNODE_RTL_ARROW:
 	case TNODE_LTR_ARROW:
 	case TNODE_ELLIPSIS:
@@ -235,6 +234,10 @@ tnode_create_alt_list(const struct list *list, int rtl, const struct dim *dim)
 
 	i = 0;
 	p = list;
+
+/* TODO: how to handle invisible alts? have the corner tiles hidden?
+at the moment we render an empty line, which makes sense in seqs but not in alts
+*/
 
 	while (p != NULL) {
 		unsigned char c;
@@ -493,10 +496,15 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 	new = xmalloc(sizeof *new);
 
 	if (node == NULL) {
-		new->type = TNODE_SKIP;
+		new->type = TNODE_VLIST;
 		new->w = 0;
 		new->a = 0;
 		new->d = 1;
+
+		new->u.vlist.n = 0;
+		new->u.vlist.o = 0;
+		new->u.vlist.a = NULL;
+		new->u.vlist.b = NULL;
 
 		return new;
 	}
@@ -584,7 +592,7 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 			if (node->type == NODE_ALT_SKIPPABLE) {
 				assert(new->u.vlist.n > i);
 				assert(new->u.vlist.a[i] != NULL);
-				assert(new->u.vlist.a[i]->type == TNODE_SKIP);
+				assert(new->u.vlist.a[i]->type == TNODE_VLIST && new->u.vlist.a[i]->u.vlist.n == 0);
 				assert(new->u.vlist.a[i]->a + new->u.vlist.a[i]->d == 1);
 
 				/* arrows are more helpful here */
@@ -721,7 +729,7 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 		new->u.vlist.b[0] = rtl ? TLINE_H : TLINE_h;
 		new->u.vlist.b[1] = TLINE_E;
 
-		if (new->u.vlist.a[1]->type == TNODE_SKIP) {
+		if (new->u.vlist.a[1]->type == TNODE_VLIST && new->u.vlist.a[1]->u.vlist.n == 0) {
 			/* arrows are helpful when going backwards */
 			new->u.vlist.a[1]->type = !rtl ? TNODE_RTL_ARROW : TNODE_LTR_ARROW;
 			new->u.vlist.a[1]->w = 1;
@@ -795,6 +803,33 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 		}
 
 		break;
+	}
+
+/* TODO:
+we make a tnode subtree above, and then if it is invisible, replace the entire thing
+with a regular skip or arrow or whatever
+TODO: option to show invisible nodes
+
+we do this after constructing the node in order to find its width
+*/
+	if (node->invisible) {
+		struct tnode *old;
+
+		old = new;
+
+		new = xmalloc(sizeof *new);
+
+		new->type = TNODE_VLIST;
+		new->w = old->w;
+		new->a = old->a;
+		new->d = old->d;
+
+		new->u.vlist.n = 0;
+		new->u.vlist.o = 0;
+		new->u.vlist.a = NULL;
+		new->u.vlist.b = NULL;
+
+		tnode_free(old);
 	}
 
 	return new;

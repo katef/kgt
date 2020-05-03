@@ -124,22 +124,31 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 		break;
 	}
 
-	printf("\t\"%s/%p\"%s -> \"%s/%p\";\n",
+	printf("\t\"%s/%p\"%s -> \"%s/%p\"",
 		prefix, parent, port,
 		prefix, (void *) node);
+	if (node->invisible) {
+		printf(" [ color = blue, style = dashed ]");
+	}
+	printf(";\n");
 
 	printf("\t\"%s/%p\" [ ",
 		prefix, (void *) node);
+	if (node->invisible) {
+		printf("color = blue, fontcolor = blue, fillcolor = aliceblue, style = \"rounded,dashed\", ");
+	}
 
 	switch (node->type) {
 	case NODE_CI_LITERAL:
-		printf("style = filled, shape = box, label = \"\\\"");
+		printf("style = \"%s\", shape = box, label = \"\\\"",
+			node->invisible ? "filled,dashed" : "filled");
 		escputt(&node->u.literal, stdout);
 		printf("\\\"\"/i");
 		break;
 
 	case NODE_CS_LITERAL:
-		printf("style = filled, shape = box, label = \"\\\"");
+		printf("style = \"%s\", shape = box, label = \"\\\"",
+			node->invisible ? "filled,dashed" : "filled");
 		escputt(&node->u.literal, stdout);
 		printf("\\\"\"");
 		break;

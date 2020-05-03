@@ -84,6 +84,7 @@
 	struct act_state {
 		enum LX_TOKEN lex_tok;
 		enum LX_TOKEN lex_tok_save;
+		int invisible;
 	};
 
 	struct lex_state {
@@ -575,7 +576,7 @@
 
 
 	<make-empty-term>: () -> (t :ast_term) = @{
-		@t = ast_make_empty_term();
+		@t = ast_make_empty_term(act_state->invisible);
 	@};
 
 	<make-rule-term>: (n :string) -> (t :ast_term) = @{
@@ -593,7 +594,7 @@
 			@!;
 		}
 
-		@t = ast_make_rule_term(r);
+		@t = ast_make_rule_term(act_state->invisible, r);
 	@};
 
 	<make-ci-literal-term>: (x :txt) -> (t :ast_term) = @{
@@ -604,15 +605,15 @@
 			((char *) @x.p)[i] = tolower((unsigned char) @x.p[i]);
 		}
 
-		@t = ast_make_literal_term(&@x, 1);
+		@t = ast_make_literal_term(act_state->invisible, &@x, 1);
 	@};
 
 	<make-cs-literal-term>: (x :txt) -> (t :ast_term) = @{
-		@t = ast_make_literal_term(&@x, 0);
+		@t = ast_make_literal_term(act_state->invisible, &@x, 0);
 	@};
 
 	<make-token-term>: (n :string) -> (t :ast_term) = @{
-		@t = ast_make_token_term(@n);
+		@t = ast_make_token_term(act_state->invisible, @n);
 	@};
 
 	<make-prose-term>: (l :string) -> (t :ast_term) = @{
@@ -620,13 +621,23 @@
 
 		s = xstrdup(trim((char *) @l));
 
-		@t = ast_make_prose_term(s);
-
 		free((void *) @l);
+
+		if (!strcmp(s, "kgt:invisible")) {
+			act_state->invisible = 1;
+
+			@t = ast_make_empty_term(act_state->invisible);
+		} else if (!strcmp(s, "kgt:visible")) {
+			act_state->invisible = 0;
+
+			@t = ast_make_empty_term(act_state->invisible);
+		} else {
+			@t = ast_make_prose_term(act_state->invisible, s);
+		}
 	@};
 
 	<make-group-term>: (a :ast_alt) -> (t :ast_term) = @{
-		@t = ast_make_group_term(@a);
+		@t = ast_make_group_term(act_state->invisible, @a);
 	@};
 
 	<make-range-term>: (m :char, n :char) -> (t :ast_term) = @{
@@ -639,19 +650,19 @@
 			struct ast_alt *new;
 			struct ast_term *t;
 
-			t = ast_make_char_term(i);
-			new = ast_make_alt(t);
+			t = ast_make_char_term(act_state->invisible, i);
+			new = ast_make_alt(act_state->invisible, t);
 
 			new->next = a;
 			a = new;
 		}
 
-		@t = ast_make_group_term(a);
+		@t = ast_make_group_term(act_state->invisible, a);
 	@};
 
 
 	<make-alt>: (t :ast_term) -> (a :ast_alt) = @{
-		@a = ast_make_alt(@t);
+		@a = ast_make_alt(act_state->invisible, @t);
 	@};
 
 	<make-rule>: (n :string, a :ast_alt) -> (r :ast_rule) = @{
@@ -791,6 +802,8 @@
 
 		/* This is a workaround for ADVANCE_LEXER assuming a pointer */
 		act_state = &act_state_s;
+
+		act_state->invisible = 0;
 
 		ADVANCE_LEXER;
 		FORM_ENTRY(lex_state, act_state, &g);

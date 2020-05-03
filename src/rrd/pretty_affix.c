@@ -76,14 +76,14 @@ collapse_suffix(int *changed, struct list **head, struct node *loop)
 	assert(loop->type == NODE_LOOP);
 
 	/* if loop .forward isn't a NODE_SEQ, make it one */
-	node_make_seq(&loop->u.loop.forward);
+	node_make_seq(loop->invisible, &loop->u.loop.forward);
 
 	assert(loop->u.loop.forward != NULL);
 	assert(loop->u.loop.forward->type == NODE_SEQ);
 	assert(loop->u.loop.forward->u.seq != NULL);
 
 	/* if loop .backward isn't a NODE_SEQ, make it one */
-	node_make_seq(&loop->u.loop.backward);
+	node_make_seq(loop->invisible, &loop->u.loop.backward);
 
 	assert(loop->u.loop.backward != NULL);
 	assert(loop->u.loop.backward->type == NODE_SEQ);
@@ -116,14 +116,14 @@ collapse_prefix(int *changed, struct list **head, struct node *loop)
 	assert(loop->type == NODE_LOOP);
 
 	/* if loop .forward isn't a NODE_SEQ, make it one */
-	node_make_seq(&loop->u.loop.forward);
+	node_make_seq(loop->invisible, &loop->u.loop.forward);
 
 	assert(loop->u.loop.forward != NULL);
 	assert(loop->u.loop.forward->type == NODE_SEQ);
 	assert(loop->u.loop.forward->u.seq != NULL);
 
 	/* if loop .backward isn't a NODE_SEQ, make it one */
-	node_make_seq(&loop->u.loop.backward);
+	node_make_seq(loop->invisible, &loop->u.loop.backward);
 
 	assert(loop->u.loop.backward != NULL);
 	assert(loop->u.loop.backward->type == NODE_SEQ);

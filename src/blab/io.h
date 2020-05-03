@@ -9,6 +9,8 @@
 
 struct ast_rule;
 
+#define blab_ast_unsupported (FEATURE_AST_INVISIBLE)
+
 void
 blab_output(const struct ast_rule *grammar);
 

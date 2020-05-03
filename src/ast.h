@@ -12,7 +12,8 @@ struct ast_alt;
 enum ast_features {
     FEATURE_AST_CI_LITERAL = 1 << 0,
     FEATURE_AST_PROSE      = 1 << 1,
-    FEATURE_AST_BINARY     = 1 << 2
+    FEATURE_AST_BINARY     = 1 << 2,
+    FEATURE_AST_INVISIBLE  = 1 << 3
 };
 
 /*
@@ -45,6 +46,8 @@ struct ast_term {
 	unsigned int min;
 	unsigned int max; /* false (0) for unlimited */
 
+	int invisible;
+
 	struct ast_term *next;
 };
 
@@ -56,6 +59,8 @@ struct ast_term {
 struct ast_alt {
 	struct ast_term *terms;
 	/* TODO: struct ast_term *negs; - negative terms here */
+
+	int invisible;
 
 	struct ast_alt *next;
 };
@@ -75,28 +80,28 @@ struct ast_rule {
 };
 
 struct ast_term *
-ast_make_empty_term(void);
+ast_make_empty_term(int invisible);
 
 struct ast_term *
-ast_make_rule_term(struct ast_rule *rule);
+ast_make_rule_term(int invisible, struct ast_rule *rule);
 
 struct ast_term *
-ast_make_char_term(char c);
+ast_make_char_term(int invisible, char c);
 
 struct ast_term *
-ast_make_literal_term(const struct txt *literal, int ci);
+ast_make_literal_term(int invisible, const struct txt *literal, int ci);
 
 struct ast_term *
-ast_make_token_term(const char *token);
+ast_make_token_term(int invisible, const char *token);
 
 struct ast_term *
-ast_make_prose_term(const char *prose);
+ast_make_prose_term(int invisible, const char *prose);
 
 struct ast_term *
-ast_make_group_term(struct ast_alt *group);
+ast_make_group_term(int invisible, struct ast_alt *group);
 
 struct ast_alt *
-ast_make_alt(struct ast_term *terms);
+ast_make_alt(int invisible, struct ast_term *terms);
 
 struct ast_rule *
 ast_make_rule(const char *name, struct ast_alt *alts);
@@ -106,6 +111,12 @@ ast_find_rule(const struct ast_rule *grammar, const char *name);
 
 void
 ast_free_rule(struct ast_rule *rule);
+
+void
+ast_free_alt(struct ast_alt *alt);
+
+void
+ast_free_term(struct ast_term *term);
 
 int
 ast_binary(const struct ast_rule *ast);

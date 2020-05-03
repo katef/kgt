@@ -153,6 +153,8 @@ node_walk(FILE *f, const struct node *n, int depth)
 		return;
 	}
 
+	assert(!n->invisible);
+
 	switch (n->type) {
 		const struct list *p;
 

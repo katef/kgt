@@ -46,7 +46,7 @@ transform_terms(const struct ast_alt *alt, struct node **r)
 		tail = &(*tail)->next;
 	}
 
-	*r = node_create_seq(list);
+	*r = node_create_seq(alt->invisible, list);
 
 	return 1;
 
@@ -79,7 +79,7 @@ transform_alts(const struct ast_alt *alts, struct node **r)
 		tail = &(*tail)->next;
 	}
 
-	*r = node_create_alt(list);
+	*r = node_create_alt(alts->invisible, list);
 
 	return 1;
 
@@ -101,24 +101,24 @@ single_term(const struct ast_term *term, struct node **r)
 		return 1;
 
 	case TYPE_RULE:
-		*r = node_create_name(term->u.rule->name);
+		*r = node_create_name(term->invisible, term->u.rule->name);
 		return 1;
 
 	case TYPE_CI_LITERAL:
 		/* can't create a sequence of alts; the tokenisation would be wrong */
-		*r = node_create_ci_literal(&term->u.literal);
+		*r = node_create_ci_literal(term->invisible, &term->u.literal);
 		return 1;
 
 	case TYPE_CS_LITERAL:
-		*r = node_create_cs_literal(&term->u.literal);
+		*r = node_create_cs_literal(term->invisible, &term->u.literal);
 		return 1;
 
 	case TYPE_TOKEN:
-		*r = node_create_name(term->u.token);
+		*r = node_create_name(term->invisible, term->u.token);
 		return 1;
 
 	case TYPE_PROSE:
-		*r = node_create_prose(term->u.prose);
+		*r = node_create_prose(term->invisible, term->u.prose);
 		return 1;
 
 	case TYPE_GROUP:
@@ -144,7 +144,7 @@ optional_term(const struct ast_term *term, struct node **r)
 
 	list_push(&list, n);
 
-	*r = node_create_alt_skippable(list);
+	*r = node_create_alt_skippable(term->invisible, list);
 
 	return 1;
 }
@@ -160,7 +160,7 @@ oneormore_term(const struct ast_term *term, struct node **r)
 		return 0;
 	}
 
-	*r = node_create_loop(n, NULL);
+	*r = node_create_loop(term->invisible, n, NULL);
 
 	return 1;
 }
@@ -176,7 +176,7 @@ zeroormore_term(const struct ast_term *term, struct node **r)
 		return 0;
 	}
 
-	*r = node_create_loop(NULL, n);
+	*r = node_create_loop(term->invisible, NULL, n);
 
 	return 1;
 }
@@ -195,11 +195,11 @@ finite_term(const struct ast_term *term, struct node **r)
 	}
 
 	if (term->min > 0) {
-		loop = node_create_loop(n, NULL);
+		loop = node_create_loop(term->invisible, n, NULL);
 		loop->u.loop.min = term->min - 1;
 		loop->u.loop.max = term->max - 1;
 	} else {
-		loop = node_create_loop(NULL, n);
+		loop = node_create_loop(term->invisible, NULL, n);
 		loop->u.loop.min = term->min;
 		loop->u.loop.max = term->max;
 	}
@@ -220,7 +220,7 @@ atleast_term(const struct ast_term *term, struct node **r)
 		return 0;
 	}
 
-	*r = node_create_loop(NULL, n);
+	*r = node_create_loop(term->invisible, NULL, n);
 
 	(*r)->u.loop.min = term->min;
 

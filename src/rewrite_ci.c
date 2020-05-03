@@ -24,7 +24,7 @@ static int
 walk_alts(struct ast_alt *alts);
 
 static void
-add_alt(struct ast_alt **alt, const struct txt *t)
+add_alt(int invisible, struct ast_alt **alt, const struct txt *t)
 {
 	struct ast_term *term;
 	struct ast_alt *new;
@@ -37,15 +37,15 @@ add_alt(struct ast_alt **alt, const struct txt *t)
 	/* TODO: move ownership to ast_make_*() and no need to make a new struct txt here */
 	q = xtxtdup(t);
 
-	term = ast_make_literal_term(&q, 0);
+	term = ast_make_literal_term(invisible, &q, 0);
 
-	new = ast_make_alt(term);
+	new = ast_make_alt(invisible, term);
 	new->next = *alt;
 	*alt = new;
 }
 
 static void
-permute_cases(struct ast_alt **alt, const struct txt *t)
+permute_cases(int invisible, struct ast_alt **alt, const struct txt *t)
 {
 	size_t i, j;
 	unsigned long num_alphas, perm_count;
@@ -85,7 +85,7 @@ permute_cases(struct ast_alt **alt, const struct txt *t)
 				: toupper((unsigned char) p[alpha_inds[j]]);
 		}
 		
-		add_alt(alt, t);
+		add_alt(invisible, alt, t);
 	}
 }
 
@@ -113,7 +113,8 @@ rewrite_ci(struct ast_term *term)
 	term->type = TYPE_GROUP;
 	term->u.group = NULL;
 
-	permute_cases(&term->u.group, &tmp);
+	/* invisibility of new alts is inherited from term->invisible itself */
+	permute_cases(term->invisible, &term->u.group, &tmp);
 
 	free((void *) tmp.p);
 }
