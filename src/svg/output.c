@@ -335,6 +335,8 @@ render_tline_inner(struct render_context *ctx, enum tline tline, int rhs)
 	case TLINE_I:
 	case TLINE_i: u[0] = TILE_LINE | TILE_BL_N1; u[1] = TILE_LINE | TILE_BR; break;
 
+	case TLINE_J: u[0] = TILE_LINE;  u[1] = TILE_LINE; break;
+
 	default: u[0] = 0; u[1] = 0; break;
 	}
 
@@ -359,6 +361,7 @@ render_tline_outer(struct render_context *ctx, enum tline tline, int rhs)
 	case TLINE_h: u[0] = TILE_LINE;           u[1] = TILE_LINE; break;
 	case TLINE_I:
 	case TLINE_i: u[0] = TILE_LINE;           u[1] = TILE_LINE; break;
+	case TLINE_J: u[0] = TILE_LINE;           u[1] = TILE_LINE; break;
 
 	default: u[0] = 0; u[1] = 0; break;
 	}

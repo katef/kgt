@@ -224,6 +224,7 @@ render_tline(struct render_context *ctx, enum tline tline, int rhs)
 	case TLINE_G: a = "\001\021"; break; case TLINE_g: a = "\025\032"; break;
 	case TLINE_H: a = "\004\026"; break; case TLINE_h: a = "\020\030"; break;
 	case TLINE_I: a = "\001\021"; break; case TLINE_i: a = "\025\032"; break;
+	case TLINE_J: a = "\022\022"; break;
 
 	default:
 		a = "??";

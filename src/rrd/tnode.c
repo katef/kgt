@@ -645,7 +645,9 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 				int firstalt  = i == 0;
 				int lastalt   = i == new->u.vlist.n - 1;
 
-				if (sameline && new->u.vlist.n > 1 && lastalt) {
+				if (new->u.vlist.n == 1) {
+					z = TLINE_J;
+				} else if (sameline && new->u.vlist.n > 1 && lastalt) {
 					z = rtl ? TLINE_A : TLINE_a;
 				} else if (firstalt && aboveline) {
 					z = TLINE_B;

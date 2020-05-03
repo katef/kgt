@@ -26,7 +26,8 @@ enum tline {
 	TLINE_F,
 	TLINE_G, TLINE_g,
 	TLINE_H, TLINE_h,
-	TLINE_I, TLINE_i
+	TLINE_I, TLINE_i,
+	TLINE_J
 };
 
 /*
