@@ -60,7 +60,7 @@ node_free(struct node *n)
 }
 
 struct node *
-node_create_ci_literal(const struct txt *literal)
+node_create_ci_literal(int invisible, const struct txt *literal)
 {
 	struct node *new;
 
@@ -70,13 +70,15 @@ node_create_ci_literal(const struct txt *literal)
 
 	new->type = NODE_CI_LITERAL;
 
+	new->invisible = invisible;
+
 	new->u.literal = *literal;
 
 	return new;
 }
 
 struct node *
-node_create_cs_literal(const struct txt *literal)
+node_create_cs_literal(int invisible, const struct txt *literal)
 {
 	struct node *new;
 
@@ -86,13 +88,15 @@ node_create_cs_literal(const struct txt *literal)
 
 	new->type = NODE_CS_LITERAL;
 
+	new->invisible = invisible;
+
 	new->u.literal = *literal;
 
 	return new;
 }
 
 struct node *
-node_create_name(const char *name)
+node_create_name(int invisible, const char *name)
 {
 	struct node *new;
 
@@ -102,13 +106,15 @@ node_create_name(const char *name)
 
 	new->type = NODE_RULE;
 
+	new->invisible = invisible;
+
 	new->u.name = name;
 
 	return new;
 }
 
 struct node *
-node_create_prose(const char *prose)
+node_create_prose(int invisible, const char *prose)
 {
 	struct node *new;
 
@@ -118,13 +124,15 @@ node_create_prose(const char *prose)
 
 	new->type = NODE_PROSE;
 
+	new->invisible = invisible;
+
 	new->u.prose = prose;
 
 	return new;
 }
 
 struct node *
-node_create_alt(struct list *alt)
+node_create_alt(int invisible, struct list *alt)
 {
 	struct node *new;
 
@@ -132,13 +140,15 @@ node_create_alt(struct list *alt)
 
 	new->type = NODE_ALT;
 
+	new->invisible = invisible;
+
 	new->u.alt = alt;
 
 	return new;
 }
 
 struct node *
-node_create_alt_skippable(struct list *alt)
+node_create_alt_skippable(int invisible, struct list *alt)
 {
 	struct node *new;
 
@@ -146,13 +156,15 @@ node_create_alt_skippable(struct list *alt)
 
 	new->type = NODE_ALT_SKIPPABLE;
 
+	new->invisible = invisible;
+
 	new->u.alt = alt;
 
 	return new;
 }
 
 struct node *
-node_create_seq(struct list *seq)
+node_create_seq(int invisible, struct list *seq)
 {
 	struct node *new;
 
@@ -160,19 +172,23 @@ node_create_seq(struct list *seq)
 
 	new->type = NODE_SEQ;
 
+	new->invisible = invisible;
+
 	new->u.seq = seq;
 
 	return new;
 }
 
 struct node *
-node_create_loop(struct node *forward, struct node *backward)
+node_create_loop(int invisible, struct node *forward, struct node *backward)
 {
 	struct node *new;
 
 	new = xmalloc(sizeof *new);
 
 	new->type = NODE_LOOP;
+
+	new->invisible = invisible;
 
 	new->u.loop.forward  = forward;
 	new->u.loop.backward = backward;
@@ -184,7 +200,7 @@ node_create_loop(struct node *forward, struct node *backward)
 }
 
 void
-node_make_seq(struct node **n)
+node_make_seq(int invisible, struct node **n)
 {
 	struct list *new;
 
@@ -198,7 +214,7 @@ node_make_seq(struct node **n)
 
 	list_push(&new, *n);
 
-	*n = node_create_seq(new);
+	*n = node_create_seq(invisible, new);
 }
 
 int
@@ -213,6 +229,10 @@ node_compare(const struct node *a, const struct node *b)
 	}
 
 	if (a->type != b->type) {
+		return 0;
+	}
+
+	if (a->invisible != b->invisible) {
 		return 0;
 	}
 

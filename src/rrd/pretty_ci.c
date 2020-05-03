@@ -77,7 +77,7 @@ ci_alt(int *changed, struct node *n)
 
 			t = xtxtdup(&p->node->u.literal);
 			* (char *) t.p = toupper((unsigned char) *t.p);
-			new = node_create_cs_literal(&t);
+			new = node_create_cs_literal(p->node->invisible, &t);
 			list_push(&list, new);
 
 			*changed = 1;

@@ -142,6 +142,8 @@ node_walk(FILE *f, const struct node *n)
 		return;
 	}
 
+	assert(!n->invisible);
+
 	switch (n->type) {
 		const struct list *p;
 

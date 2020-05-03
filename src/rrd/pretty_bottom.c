@@ -64,7 +64,7 @@ bottom_loop(struct node **np)
 		list_push(&new, n);
 		list_push(&new, NULL);
 
-		*np = node_create_alt(new);
+		*np = node_create_alt(n->invisible, new);
 	}
 
 	return 1;

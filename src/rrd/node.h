@@ -23,6 +23,8 @@ struct node {
 		NODE_LOOP
 	} type;
 
+	int invisible;
+
 	union {
 		struct txt literal; /* TODO: point to ast_literal instead */
 		const char *name;   /* TODO: point to ast_rule instead */
@@ -44,31 +46,31 @@ void
 node_free(struct node *);
 
 struct node *
-node_create_ci_literal(const struct txt *literal);
+node_create_ci_literal(int invisible, const struct txt *literal);
 
 struct node *
-node_create_cs_literal(const struct txt *literal);
+node_create_cs_literal(int invisible, const struct txt *literal);
 
 struct node *
-node_create_name(const char *name);
+node_create_name(int invisible, const char *name);
 
 struct node *
-node_create_prose(const char *name);
+node_create_prose(int invisible, const char *name);
 
 struct node *
-node_create_alt(struct list *alt);
+node_create_alt(int invisible, struct list *alt);
 
 struct node *
-node_create_alt_skippable(struct list *alt);
+node_create_alt_skippable(int invisible, struct list *alt);
 
 struct node *
-node_create_seq(struct list *seq);
+node_create_seq(int invisible, struct list *seq);
 
 struct node *
-node_create_loop(struct node *forward, struct node *backward);
+node_create_loop(int invisible, struct node *forward, struct node *backward);
 
 void
-node_make_seq(struct node **n);
+node_make_seq(int invisible, struct node **n);
 
 int
 node_compare(const struct node *a, const struct node *b);

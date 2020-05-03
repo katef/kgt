@@ -235,6 +235,10 @@ tnode_create_alt_list(const struct list *list, int rtl, const struct dim *dim)
 	i = 0;
 	p = list;
 
+/* TODO: how to handle invisible alts? have the corner tiles hidden?
+at the moment we render an empty line, which makes sense in seqs but not in alts
+*/
+
 	while (p != NULL) {
 		unsigned char c;
 
@@ -799,6 +803,33 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 		}
 
 		break;
+	}
+
+/* TODO:
+we make a tnode subtree above, and then if it is invisible, replace the entire thing
+with a regular skip or arrow or whatever
+TODO: option to show invisible nodes
+
+we do this after constructing the node in order to find its width
+*/
+	if (node->invisible) {
+		struct tnode *old;
+
+		old = new;
+
+		new = xmalloc(sizeof *new);
+
+		new->type = TNODE_VLIST;
+		new->w = old->w;
+		new->a = old->a;
+		new->d = old->d;
+
+		new->u.vlist.n = 0;
+		new->u.vlist.o = 0;
+		new->u.vlist.a = NULL;
+		new->u.vlist.b = NULL;
+
+		tnode_free(old);
 	}
 
 	return new;
