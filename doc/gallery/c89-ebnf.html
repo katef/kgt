@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html>
+
+ <head>
+  <style>
+    dl.bnf span.token {
+    	text-transform: uppercase;
+    }
+    
+    dl.bnf span.cat {
+    	margin-right: 0.5ex;
+    }
+    
+    dl.bnf dd > span.pipe {
+    	float: left;
+    	width: 1ex;
+    	margin-left: -1.8ex;
+    	text-align: right;
+    	padding-right: .8ex; /* about the width of a space */
+    }
+    
+    dl.bnf dt {
+    	display: block;
+    	min-width: 8em;
+    	padding-right: 1em;
+    }
+    
+    dl.bnf a.rule {
+    	text-decoration: none;
+    }
+    
+    dl.bnf a.rule:hover {
+    	text-decoration: underline;
+    }
+    
+    /* page stuff */
+    dl.bnf { margin: 2em 4em; }
+    dl.bnf dt { margin: 0.25em 0; }
+    dl.bnf dd { margin-left: 2em; }
+  </style>
+ </head>
+ <body>
+  <dl class='bnf'>
+    <dt><a name='translation_unit'>translation_unit</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#translation_unit' class='rule' data-min='1' data-max='1'>translation_unit</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#external_decl' class='rule' data-min='1' data-max='1'>external_decl</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='external_decl'>external_decl</a>:</dt>
+    <dd>
+      <span class='alt'><a href='#function_definition' class='rule' data-min='1' data-max='1'>function_definition</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><span class='token'>decl</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='function_definition'>function_definition</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#decl_specs' class='rule' data-min='1' data-max='1'>decl_specs</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#declarator' class='rule' data-min='1' data-max='1'>declarator</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#decl_list' class='rule' data-min='1' data-max='1'>decl_list</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#compound_stat' class='rule' data-min='1' data-max='1'>compound_stat</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='decl_list'>decl_list</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#decl_list' class='rule' data-min='1' data-max='1'>decl_list</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#decl_specs' class='rule' data-min='1' data-max='1'>decl_specs</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#init_declarator_list' class='rule' data-min='1' data-max='1'>init_declarator_list</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;;&quot;</tt></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='decl_specs'>decl_specs</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>(</span> <span class='alt'><a href='#storage_class_spec' class='rule' data-min='1' data-max='1'>storage_class_spec</a></span>
+<span class='pipe'> | </span><span class='alt'><a href='#type_spec' class='rule' data-min='1' data-max='1'>type_spec</a></span>
+<span class='pipe'> | </span><span class='alt'><a href='#type_qualifier' class='rule' data-min='1' data-max='1'>type_qualifier</a></span>
+ <span class='rep'>)</span></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#decl_specs' class='rule' data-min='1' data-max='1'>decl_specs</a></span>
+ <span class='rep'>]</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='storage_class_spec'>storage_class_spec</a>:</dt>
+    <dd>
+      <span class='alt'><tt class='literal cs'>&quot;auto&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;register&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;static&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;extern&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;typedef&quot;</tt></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='type_spec'>type_spec</a>:</dt>
+    <dd>
+      <span class='alt'><tt class='literal cs'>&quot;void&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;char&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;short&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;int&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;long&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;float&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;double&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;signed&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;unsigned&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#struct_or_union_spec' class='rule' data-min='1' data-max='1'>struct_or_union_spec</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#enum_spec' class='rule' data-min='1' data-max='1'>enum_spec</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#typedef_name' class='rule' data-min='1' data-max='1'>typedef_name</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='type_qualifier'>type_qualifier</a>:</dt>
+    <dd>
+      <span class='alt'><tt class='literal cs'>&quot;const&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;volatile&quot;</tt></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='struct_or_union_spec'>struct_or_union_spec</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>(</span> <span class='alt'><tt class='literal cs'>&quot;struct&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;union&quot;</tt></span>
+ <span class='rep'>)</span></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>(</span> <span class='alt'><a href='#id' class='rule' data-min='1' data-max='1'>id</a></span>
+<span class='pipe'> | </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#id' class='rule' data-min='1' data-max='1'>id</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;{&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#struct_decl_list' class='rule' data-min='1' data-max='1'>struct_decl_list</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;}&quot;</tt></span>
+ <span class='rep'>)</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='struct_decl_list'>struct_decl_list</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#struct_decl_list' class='rule' data-min='1' data-max='1'>struct_decl_list</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#spec_qualifier_list' class='rule' data-min='1' data-max='1'>spec_qualifier_list</a></span>
+<span class='cat'> </span><span class='alt'><a href='#struct_declarator_list' class='rule' data-min='1' data-max='1'>struct_declarator_list</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;;&quot;</tt></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='init_declarator_list'>init_declarator_list</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#init_declarator_list' class='rule' data-min='1' data-max='1'>init_declarator_list</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;,&quot;</tt></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#declarator' class='rule' data-min='1' data-max='1'>declarator</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><tt class='literal cs'>&quot;=&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#initializer' class='rule' data-min='1' data-max='1'>initializer</a></span>
+ <span class='rep'>]</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='spec_qualifier_list'>spec_qualifier_list</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>(</span> <span class='alt'><a href='#type_spec' class='rule' data-min='1' data-max='1'>type_spec</a></span>
+<span class='pipe'> | </span><span class='alt'><a href='#type_qualifier' class='rule' data-min='1' data-max='1'>type_qualifier</a></span>
+ <span class='rep'>)</span></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#spec_qualifier_list' class='rule' data-min='1' data-max='1'>spec_qualifier_list</a></span>
+ <span class='rep'>]</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='struct_declarator_list'>struct_declarator_list</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#struct_declarator_list' class='rule' data-min='1' data-max='1'>struct_declarator_list</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;,&quot;</tt></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>(</span> <span class='alt'><a href='#declarator' class='rule' data-min='1' data-max='1'>declarator</a></span>
+<span class='pipe'> | </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#declarator' class='rule' data-min='1' data-max='1'>declarator</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;:&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#const_exp' class='rule' data-min='1' data-max='1'>const_exp</a></span>
+ <span class='rep'>)</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='enum_spec'>enum_spec</a>:</dt>
+    <dd>
+      <span class='alt'><tt class='literal cs'>&quot;enum&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>(</span> <span class='alt'><a href='#id' class='rule' data-min='1' data-max='1'>id</a></span>
+<span class='pipe'> | </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#id' class='rule' data-min='1' data-max='1'>id</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;{&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#enumerator_list' class='rule' data-min='1' data-max='1'>enumerator_list</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;}&quot;</tt></span>
+ <span class='rep'>)</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='enumerator_list'>enumerator_list</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#enumerator_list' class='rule' data-min='1' data-max='1'>enumerator_list</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;,&quot;</tt></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><span class='token'>id</span></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><tt class='literal cs'>&quot;=&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#const_exp' class='rule' data-min='1' data-max='1'>const_exp</a></span>
+ <span class='rep'>]</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='declarator'>declarator</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#pointer' class='rule' data-min='1' data-max='1'>pointer</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#direct_declarator' class='rule' data-min='1' data-max='1'>direct_declarator</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='direct_declarator'>direct_declarator</a>:</dt>
+    <dd>
+      <span class='alt'><span class='token'>id</span></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;(&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#declarator' class='rule' data-min='1' data-max='1'>declarator</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;)&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#direct_declarator' class='rule' data-min='1' data-max='1'>direct_declarator</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;[&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#const_exp' class='rule' data-min='1' data-max='1'>const_exp</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;]&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#direct_declarator' class='rule' data-min='1' data-max='1'>direct_declarator</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;(&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#param_type_list' class='rule' data-min='1' data-max='1'>param_type_list</a></span>
+<span class='pipe'> | </span><span class='alt'><a href='#id_list' class='rule' data-min='1' data-max='1'>id_list</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;)&quot;</tt></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='pointer'>pointer</a>:</dt>
+    <dd>
+      <span class='alt'><tt class='literal cs'>&quot;*&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#type_qualifier_list' class='rule' data-min='1' data-max='1'>type_qualifier_list</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#pointer' class='rule' data-min='1' data-max='1'>pointer</a></span>
+ <span class='rep'>]</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='type_qualifier_list'>type_qualifier_list</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#type_qualifier_list' class='rule' data-min='1' data-max='1'>type_qualifier_list</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#type_qualifier' class='rule' data-min='1' data-max='1'>type_qualifier</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='param_type_list'>param_type_list</a>:</dt>
+    <dd>
+      <span class='alt'><a href='#param_list' class='rule' data-min='1' data-max='1'>param_list</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><tt class='literal cs'>&quot;,&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;...&quot;</tt></span>
+ <span class='rep'>]</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='param_list'>param_list</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>{</span> <span class='alt'><a href='#param_decl' class='rule' data-min='1' data-max='1'>param_decl</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;,&quot;</tt></span>
+ <span class='rep'>}</span></span>
+<span class='cat'> </span><span class='alt'><a href='#param_decl' class='rule' data-min='1' data-max='1'>param_decl</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='param_decl'>param_decl</a>:</dt>
+    <dd>
+      <span class='alt'><a href='#decl_specs' class='rule' data-min='1' data-max='1'>decl_specs</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#declarator' class='rule' data-min='1' data-max='1'>declarator</a></span>
+<span class='pipe'> | </span><span class='alt'><a href='#abstract_declarator' class='rule' data-min='1' data-max='1'>abstract_declarator</a></span>
+ <span class='rep'>]</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='id_list'>id_list</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>{</span> <span class='alt'><a href='#id' class='rule' data-min='1' data-max='1'>id</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;,&quot;</tt></span>
+ <span class='rep'>}</span></span>
+<span class='cat'> </span><span class='alt'><span class='token'>id</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='initializer'>initializer</a>:</dt>
+    <dd>
+      <span class='alt'><a href='#assignment_exp' class='rule' data-min='1' data-max='1'>assignment_exp</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;{&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#initializer_list' class='rule' data-min='1' data-max='1'>initializer_list</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;}&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;{&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#initializer_list' class='rule' data-min='1' data-max='1'>initializer_list</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;,&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;}&quot;</tt></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='initializer_list'>initializer_list</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>{</span> <span class='alt'><a href='#initializer' class='rule' data-min='1' data-max='1'>initializer</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;,&quot;</tt></span>
+ <span class='rep'>}</span></span>
+<span class='cat'> </span><span class='alt'><a href='#initializer' class='rule' data-min='1' data-max='1'>initializer</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='type_name'>type_name</a>:</dt>
+    <dd>
+      <span class='alt'><a href='#spec_qualifier_list' class='rule' data-min='1' data-max='1'>spec_qualifier_list</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#abstract_declarator' class='rule' data-min='1' data-max='1'>abstract_declarator</a></span>
+ <span class='rep'>]</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='abstract_declarator'>abstract_declarator</a>:</dt>
+    <dd>
+      <span class='alt'><a href='#pointer' class='rule' data-min='1' data-max='1'>pointer</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#pointer' class='rule' data-min='1' data-max='1'>pointer</a></span>
+<span class='cat'> </span><span class='alt'><a href='#direct_abstract_declarator' class='rule' data-min='1' data-max='1'>direct_abstract_declarator</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#direct_abstract_declarator' class='rule' data-min='1' data-max='1'>direct_abstract_declarator</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='direct_abstract_declarator'>direct_abstract_declarator</a>:</dt>
+    <dd>
+      <span class='alt'><tt class='literal cs'>&quot;(&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#abstract_declarator' class='rule' data-min='1' data-max='1'>abstract_declarator</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;)&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#direct_abstract_declarator' class='rule' data-min='1' data-max='1'>direct_abstract_declarator</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>(</span> <span class='alt'><tt class='literal cs'>&quot;[&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#const_exp' class='rule' data-min='1' data-max='1'>const_exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;]&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;[&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;]&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;(&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#param_type_list' class='rule' data-min='1' data-max='1'>param_type_list</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;)&quot;</tt></span>
+ <span class='rep'>)</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='typedef_name'>typedef_name</a>:</dt>
+    <dd>
+      <span class='alt'><span class='token'>id</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='stat'>stat</a>:</dt>
+    <dd>
+      <span class='alt'><a href='#labeled_stat' class='rule' data-min='1' data-max='1'>labeled_stat</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#exp_stat' class='rule' data-min='1' data-max='1'>exp_stat</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#compound_stat' class='rule' data-min='1' data-max='1'>compound_stat</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#selection_stat' class='rule' data-min='1' data-max='1'>selection_stat</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#iteration_stat' class='rule' data-min='1' data-max='1'>iteration_stat</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#jump_stat' class='rule' data-min='1' data-max='1'>jump_stat</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='labeled_stat'>labeled_stat</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>(</span> <span class='alt'><a href='#id' class='rule' data-min='1' data-max='1'>id</a></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;case&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;default&quot;</tt></span>
+ <span class='rep'>)</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;:&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#stat' class='rule' data-min='1' data-max='1'>stat</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='exp_stat'>exp_stat</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#exp' class='rule' data-min='1' data-max='1'>exp</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;;&quot;</tt></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='compound_stat'>compound_stat</a>:</dt>
+    <dd>
+      <span class='alt'><tt class='literal cs'>&quot;{&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#decl_list' class='rule' data-min='1' data-max='1'>decl_list</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#stat_list' class='rule' data-min='1' data-max='1'>stat_list</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;}&quot;</tt></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='stat_list'>stat_list</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>{</span> <span class='alt'><a href='#stat' class='rule' data-min='1' data-max='1'>stat</a></span>
+ <span class='rep'>}</span></span>
+<span class='cat'> </span><span class='alt'><a href='#stat' class='rule' data-min='1' data-max='1'>stat</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='selection_stat'>selection_stat</a>:</dt>
+    <dd>
+      <span class='alt'><tt class='literal cs'>&quot;if&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;(&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#exp' class='rule' data-min='1' data-max='1'>exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;)&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#stat' class='rule' data-min='1' data-max='1'>stat</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><tt class='literal cs'>&quot;else&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#stat' class='rule' data-min='1' data-max='1'>stat</a></span>
+ <span class='rep'>]</span></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;switch&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;(&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#exp' class='rule' data-min='1' data-max='1'>exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;)&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#stat' class='rule' data-min='1' data-max='1'>stat</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='iteration_stat'>iteration_stat</a>:</dt>
+    <dd>
+      <span class='alt'><tt class='literal cs'>&quot;while&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;(&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#exp' class='rule' data-min='1' data-max='1'>exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;)&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#stat' class='rule' data-min='1' data-max='1'>stat</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;do&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#stat' class='rule' data-min='1' data-max='1'>stat</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;while&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;(&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#exp' class='rule' data-min='1' data-max='1'>exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;)&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;;&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;for&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;(&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#exp' class='rule' data-min='1' data-max='1'>exp</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;;&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#exp' class='rule' data-min='1' data-max='1'>exp</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;;&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#exp' class='rule' data-min='1' data-max='1'>exp</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;)&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#stat' class='rule' data-min='1' data-max='1'>stat</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='jump_stat'>jump_stat</a>:</dt>
+    <dd>
+      <span class='alt'><tt class='literal cs'>&quot;goto&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><span class='token'>id</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;;&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;continue&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;;&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;break&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;;&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;return&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#exp' class='rule' data-min='1' data-max='1'>exp</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;;&quot;</tt></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='exp'>exp</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#exp' class='rule' data-min='1' data-max='1'>exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;,&quot;</tt></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#assignment_exp' class='rule' data-min='1' data-max='1'>assignment_exp</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='assignment_exp'>assignment_exp</a>:</dt>
+    <dd>
+      <span class='alt'><a href='#conditional_exp' class='rule' data-min='1' data-max='1'>conditional_exp</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#unary_exp' class='rule' data-min='1' data-max='1'>unary_exp</a></span>
+<span class='cat'> </span><span class='alt'><a href='#assignment_operator' class='rule' data-min='1' data-max='1'>assignment_operator</a></span>
+<span class='cat'> </span><span class='alt'><a href='#assignment_exp' class='rule' data-min='1' data-max='1'>assignment_exp</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='assignment_operator'>assignment_operator</a>:</dt>
+    <dd>
+      <span class='alt'><tt class='literal cs'>&quot;=&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;*=&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;/=&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;%=&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;+=&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;-=&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;&lt;&lt;=&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;&gt;&gt;=&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;&amp;=&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;^=&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;|=&quot;</tt></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='conditional_exp'>conditional_exp</a>:</dt>
+    <dd>
+      <span class='alt'><a href='#logical_or_exp' class='rule' data-min='1' data-max='1'>logical_or_exp</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><tt class='literal cs'>&quot;?&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#exp' class='rule' data-min='1' data-max='1'>exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;:&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#conditional_exp' class='rule' data-min='1' data-max='1'>conditional_exp</a></span>
+ <span class='rep'>]</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='const_exp'>const_exp</a>:</dt>
+    <dd>
+      <span class='alt'><a href='#conditional_exp' class='rule' data-min='1' data-max='1'>conditional_exp</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='logical_or_exp'>logical_or_exp</a>:</dt>
+    <dd>
+      <span class='alt'><a href='#logical_and_exp' class='rule' data-min='1' data-max='1'>logical_and_exp</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#logical_or_exp' class='rule' data-min='1' data-max='1'>logical_or_exp</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><tt class='literal cs'>&quot;||&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#logical_and_exp' class='rule' data-min='1' data-max='1'>logical_and_exp</a></span>
+ <span class='rep'>]</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='logical_and_exp'>logical_and_exp</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#logical_and_exp' class='rule' data-min='1' data-max='1'>logical_and_exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;&amp;&amp;&quot;</tt></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#inclusive_or_exp' class='rule' data-min='1' data-max='1'>inclusive_or_exp</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='inclusive_or_exp'>inclusive_or_exp</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#inclusive_or_exp' class='rule' data-min='1' data-max='1'>inclusive_or_exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;|&quot;</tt></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#exclusive_or_exp' class='rule' data-min='1' data-max='1'>exclusive_or_exp</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='exclusive_or_exp'>exclusive_or_exp</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#exclusive_or_exp' class='rule' data-min='1' data-max='1'>exclusive_or_exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;^&quot;</tt></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#and_exp' class='rule' data-min='1' data-max='1'>and_exp</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='and_exp'>and_exp</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#and_exp' class='rule' data-min='1' data-max='1'>and_exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;&amp;&quot;</tt></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#equality_exp' class='rule' data-min='1' data-max='1'>equality_exp</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='equality_exp'>equality_exp</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#equality_exp' class='rule' data-min='1' data-max='1'>equality_exp</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>(</span> <span class='alt'><tt class='literal cs'>&quot;==&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;!=&quot;</tt></span>
+ <span class='rep'>)</span></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#relational_exp' class='rule' data-min='1' data-max='1'>relational_exp</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='relational_exp'>relational_exp</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#relational_exp' class='rule' data-min='1' data-max='1'>relational_exp</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>(</span> <span class='alt'><tt class='literal cs'>&quot;&lt;&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;&gt;&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;&lt;=&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;&gt;=&quot;</tt></span>
+ <span class='rep'>)</span></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#shift_expression' class='rule' data-min='1' data-max='1'>shift_expression</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='shift_expression'>shift_expression</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#shift_expression' class='rule' data-min='1' data-max='1'>shift_expression</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>(</span> <span class='alt'><tt class='literal cs'>&quot;&lt;&lt;&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;&gt;&gt;&quot;</tt></span>
+ <span class='rep'>)</span></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#additive_exp' class='rule' data-min='1' data-max='1'>additive_exp</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='additive_exp'>additive_exp</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#additive_exp' class='rule' data-min='1' data-max='1'>additive_exp</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>(</span> <span class='alt'><tt class='literal cs'>&quot;+&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;-&quot;</tt></span>
+ <span class='rep'>)</span></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#mult_exp' class='rule' data-min='1' data-max='1'>mult_exp</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='mult_exp'>mult_exp</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#mult_exp' class='rule' data-min='1' data-max='1'>mult_exp</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>(</span> <span class='alt'><tt class='literal cs'>&quot;*&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;/&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;%&quot;</tt></span>
+ <span class='rep'>)</span></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#cast_exp' class='rule' data-min='1' data-max='1'>cast_exp</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='cast_exp'>cast_exp</a>:</dt>
+    <dd>
+      <span class='alt'><a href='#unary_exp' class='rule' data-min='1' data-max='1'>unary_exp</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;(&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#type_name' class='rule' data-min='1' data-max='1'>type_name</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;)&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#cast_exp' class='rule' data-min='1' data-max='1'>cast_exp</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='unary_exp'>unary_exp</a>:</dt>
+    <dd>
+      <span class='alt'><a href='#postfix_exp' class='rule' data-min='1' data-max='1'>postfix_exp</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><span class='rep'>(</span> <span class='alt'><tt class='literal cs'>&quot;++&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;--&quot;</tt></span>
+ <span class='rep'>)</span></span>
+<span class='cat'> </span><span class='alt'><a href='#unary_exp' class='rule' data-min='1' data-max='1'>unary_exp</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#unary_operator' class='rule' data-min='1' data-max='1'>unary_operator</a></span>
+<span class='cat'> </span><span class='alt'><a href='#cast_exp' class='rule' data-min='1' data-max='1'>cast_exp</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;sizeof&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>(</span> <span class='alt'><a href='#unary_exp' class='rule' data-min='1' data-max='1'>unary_exp</a></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;(&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#type_name' class='rule' data-min='1' data-max='1'>type_name</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;)&quot;</tt></span>
+ <span class='rep'>)</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='unary_operator'>unary_operator</a>:</dt>
+    <dd>
+      <span class='alt'><tt class='literal cs'>&quot;&amp;&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;*&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;+&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;-&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;~&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;!&quot;</tt></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='postfix_exp'>postfix_exp</a>:</dt>
+    <dd>
+      <span class='alt'><a href='#primary_exp' class='rule' data-min='1' data-max='1'>primary_exp</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#postfix_exp' class='rule' data-min='1' data-max='1'>postfix_exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;[&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#exp' class='rule' data-min='1' data-max='1'>exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;]&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#postfix_exp' class='rule' data-min='1' data-max='1'>postfix_exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;(&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#argument_exp_list' class='rule' data-min='1' data-max='1'>argument_exp_list</a></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;)&quot;</tt></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#postfix_exp' class='rule' data-min='1' data-max='1'>postfix_exp</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>(</span> <span class='alt'><tt class='literal cs'>&quot;.&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;-&gt;&quot;</tt></span>
+ <span class='rep'>)</span></span>
+<span class='cat'> </span><span class='alt'><span class='token'>id</span></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#postfix_exp' class='rule' data-min='1' data-max='1'>postfix_exp</a></span>
+<span class='cat'> </span><span class='alt'><span class='rep'>(</span> <span class='alt'><tt class='literal cs'>&quot;++&quot;</tt></span>
+<span class='pipe'> | </span><span class='alt'><tt class='literal cs'>&quot;--&quot;</tt></span>
+ <span class='rep'>)</span></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='primary_exp'>primary_exp</a>:</dt>
+    <dd>
+      <span class='alt'><span class='token'>id</span></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><a href='#const' class='rule' data-min='1' data-max='1'>const</a></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><span class='token'>string</span></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><tt class='literal cs'>&quot;(&quot;</tt></span>
+<span class='cat'> </span><span class='alt'><a href='#exp' class='rule' data-min='1' data-max='1'>exp</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;)&quot;</tt></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='argument_exp_list'>argument_exp_list</a>:</dt>
+    <dd>
+      <span class='alt'><span class='rep'>[</span> <span class='alt'><a href='#argument_exp_list' class='rule' data-min='1' data-max='1'>argument_exp_list</a></span>
+<span class='cat'> </span><span class='alt'><tt class='literal cs'>&quot;,&quot;</tt></span>
+ <span class='rep'>]</span></span>
+<span class='cat'> </span><span class='alt'><a href='#assignment_exp' class='rule' data-min='1' data-max='1'>assignment_exp</a></span>
+    </dd>
+  </dl>
+
+  <dl class='bnf'>
+    <dt><a name='const'>const</a>:</dt>
+    <dd>
+      <span class='alt'><span class='token'>int_const</span></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><span class='token'>char_const</span></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><span class='token'>float_const</span></span>
+<br/>
+      <span class='pipe'> | </span>
+      <span class='alt'><span class='token'>enumeration_const</span></span>
+    </dd>
+  </dl>
+
+ </body>
+</html>

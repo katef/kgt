@@ -1,0 +1,620 @@
+translation-unit:
+    ||-->--------------------------v--||
+        |                          |
+        `-- external-declaration --'
+
+external-declaration:
+    ||--v-- function-definition -->--||
+        |                         |
+        `------ declaration ------'
+
+function-definition:
+                                                ,---------->-----------.
+                                                |                      |
+    ||-- declaration-specifiers -- declarator --^-- declaration-list -->-- compound-statement --||
+
+declaration:
+                                     ,------------>-------------.
+                                     |                          |
+    ||--v-- declaration-specifiers --^-- init-declarator-list -->-- ";" -->--||
+        |                                                                 |
+        >------------------- static-assert-declaration -------------------^
+        |                                                                 |
+        `------------------------------ ";" ------------------------------'
+
+declaration-specifiers:
+    ||-->-- declaration-specifier --v--||
+        |                           |
+        `-------------<-------------'
+
+declaration-specifier:
+    ||--v-- storage-class-specifier -->--||
+        |                             |
+        >------ type-specifier -------^
+        |                             |
+        >------ type-qualifier -------^
+        |                             |
+        >---- function-specifier -----^
+        |                             |
+        `---- alignment-specifier ----'
+
+declarator:
+        ,------>------.
+        |             |
+    ||--^-- pointer -->-- direct-declarator --||
+
+declaration-list:
+    ||-->-- declaration --v--||
+        |                 |
+        `--------<--------'
+
+compound-statement:
+    ||-- "{" -->------------------------------v-- "}" --||
+               |                              |
+               `-- declaration-or-statement --'
+
+declaration-or-statement:
+    ||--v-- declaration -->--||
+        |                 |
+        `--- statement ---'
+
+init-declarator-list:
+    ||-->-- init-declarator --v--||
+        |                     |
+        `-------- "," --------'
+
+init-declarator:
+                      ,----------->------------.
+                      |                        |
+    ||-- declarator --^-- "=" -- initializer -->--||
+
+static-assert-declaration:
+    ||-- "_Static_assert" -- "(" -- constant-expression -- "," -- string-literal -- ")" -- ";" --||
+
+storage-class-specifier:
+    ||--v----- "typedef" ----->--||
+        |                     |
+        >----- "extern" ------^
+        |                     |
+        >----- "static" ------^
+        |                     |
+        >-- "_Thread_local" --^
+        |                     |
+        >------ "auto" -------^
+        |                     |
+        `---- "register" -----'
+
+type-specifier:
+    ||--v----------- "void" ------------>--||
+        |                               |
+        >----------- "char" ------------^
+        |                               |
+        >----------- "short" -----------^
+        |                               |
+        >------------ "int" ------------^
+        |                               |
+        >----------- "long" ------------^
+        |                               |
+        >----------- "float" -----------^
+        |                               |
+        >---------- "double" -----------^
+        |                               |
+        >---------- "signed" -----------^
+        |                               |
+        >--------- "unsigned" ----------^
+        |                               |
+        >----------- "_Bool" -----------^
+        |                               |
+        >--------- "_Complex" ----------^
+        |                               |
+        >-------- "_Imaginary" ---------^
+        |                               |
+        >---- atomic-type-specifier ----^
+        |                               |
+        >-- struct-or-union-specifier --^
+        |                               |
+        >------- enum-specifier --------^
+        |                               |
+        `-------- typedef-name ---------'
+
+typedef-name:
+    ||-- identifier --||
+
+type-qualifier:
+    ||--v--- "const" ---->--||
+        |                |
+        >-- "restrict" --^
+        |                |
+        >-- "volatile" --^
+        |                |
+        `-- "_Atomic" ---'
+
+function-specifier:
+    ||--v--- "inline" ---->--||
+        |                 |
+        `-- "_Noreturn" --'
+
+alignment-specifier:
+    ||--v------- "_Alignas" -- "(" -- type-name -- ")" ------->--||
+        |                                                     |
+        `-- "_Alignas" -- "(" -- constant-expression -- ")" --'
+
+pointer:
+               ,------------>------------.  ,------>------.
+               |                         |  |             |
+    ||-- "*" --^-- type-qualifier-list -->--^-- pointer -->--||
+
+direct-declarator:
+    ||--v--------------------------------------------- identifier ---------------------------------------------->--||
+        |                                                                                                       |
+        >-------------------------------------- "(" -- declarator -- ")" ---------------------------------------^
+        |                                                                                                       |
+        |                                                        ,---->----.                                    |
+        |                                                        |         |                                    |
+        >---------------------------- direct-declarator -- "[" --^-- "*" -->-- "]" -----------------------------^
+        |                                                                                                       |
+        |                                          ,------------>------------.                                  |
+        |                                          |                         |                                  |
+        >-- direct-declarator -- "[" -- "static" --^-- type-qualifier-list -->-- assignment-expression -- "]" --^
+        |                                                                                                       |
+        |                                                                    ,---->----.                        |
+        |                                                                    |         |                        |
+        >----------------- direct-declarator -- "[" -- type-qualifier-list --^-- "*" -->-- "]" -----------------^
+        |                                                                                                       |
+        |                                                     ,------>-------.                                  |
+        |                                                     |              |                                  |
+        >-- direct-declarator -- "[" -- type-qualifier-list --^-- "static" -->-- assignment-expression -- "]" --^
+        |                                                                                                       |
+        >---------------------- direct-declarator -- "[" -- assignment-expression -- "]" -----------------------^
+        |                                                                                                       |
+        >----------------------- direct-declarator -- "(" -- parameter-type-list -- ")" ------------------------^
+        |                                                                                                       |
+        >------------------------- direct-declarator -- "(" -- identifier-list -- ")" --------------------------^
+        |                                                                                                       |
+        `----------------------------------- direct-declarator -- "(" -- ")" -----------------------------------'
+
+identifier-list:
+    ||-->-- identifier --v--||
+        |                |
+        `----- "," ------'
+
+initializer-list:
+    ||-->-- designative-initializer --v--||
+        |                             |
+        `------------ "," ------------'
+
+designative-initializer:
+        ,-------->--------.
+        |                 |
+    ||--^-- designation -->-- initializer --||
+
+initializer:
+                                      ,---->----.
+                                      |         |
+    ||--v-- "{" -- initializer-list --^-- "," -->-- "}" -->--||
+        |                                                 |
+        `------------- assignment-expression -------------'
+
+constant-expression:
+    ||-- conditional-expression --||
+
+atomic-type-specifier:
+    ||-- "_Atomic" -- "(" -- type-name -- ")" --||
+
+struct-or-union-specifier:
+    ||--v------------ struct-or-union -- "{" -- struct-declaration-list -- "}" ------------>--||
+        |                                                                                  |
+        |                                   ,--------------------->---------------------.  |
+        |                                   |                                           |  |
+        `-- struct-or-union -- identifier --^-- "{" -- struct-declaration-list -- "}" -->--'
+
+struct-or-union:
+    ||--v-- "struct" -->--||
+        |              |
+        `-- "union" ---'
+
+struct-declaration-list:
+    ||-->-- struct-declaration --v--||
+        |                        |
+        `-----------<------------'
+
+struct-declaration:
+    ||--v--------------- specifier-qualifier-list -- ";" --------------->--||
+        |                                                               |
+        >-- specifier-qualifier-list -- struct-declarator-list -- ";" --^
+        |                                                               |
+        `------------------ static-assert-declaration ------------------'
+
+enum-specifier:
+                                                         ,---->----.
+                                                         |         |
+    ||--v------------ "enum" -- "{" -- enumerator-list --^-- "," -->-- "}" ------------>--||
+        |                                                                              |
+        |                          ,----------------------->------------------------.  |
+        |                          |                                                |  |
+        |                          |                            ,---->----.         |  |
+        |                          |                            |         |         |  |
+        `-- "enum" -- identifier --^-- "{" -- enumerator-list --^-- "," -->-- "}" -->--'
+
+enumerator-list:
+    ||-->-- enumerator --v--||
+        |                |
+        `----- "," ------'
+
+enumerator:
+                                ,--------------->----------------.
+                                |                                |
+    ||-- enumeration-constant --^-- "=" -- constant-expression -->--||
+
+enumeration-constant:
+    ||-- identifier --||
+
+type-name:
+                                    ,------------>------------.
+                                    |                         |
+    ||-- specifier-qualifier-list --^-- abstract-declarator -->--||
+
+specifier-qualifier-list:
+    ||-->-- specifier-qualifier --v--||
+        |                         |
+        `------------<------------'
+
+specifier-qualifier:
+    ||--v-- type-specifier -->--||
+        |                    |
+        `-- type-qualifier --'
+
+abstract-declarator:
+                      ,--------------->----------------.
+                      |                                |
+    ||--v-- pointer --^-- direct-abstract-declarator -->-->--||
+        |                                                 |
+        `---------- direct-abstract-declarator -----------'
+
+direct-abstract-declarator:
+    ||--v----------------------------------------- "(" -- abstract-declarator -- ")" ------------------------------------------>--||
+        |                                                                                                                      |
+        >----------------------------------------- "(" -- parameter-type-list -- ")" ------------------------------------------^
+        |                                                                                                                      |
+        >----------------------------------------------------- "(" -- ")" -----------------------------------------------------^
+        |                                                                                                                      |
+        |                                                     ,---->----.                                                      |
+        |                                                     |         |                                                      |
+        >---------------------------------------------- "[" --^-- "*" -->-- "]" -----------------------------------------------^
+        |                                                                                                                      |
+        |                                       ,------------>------------.                                                    |
+        |                                       |                         |                                                    |
+        >-------------------- "[" -- "static" --^-- type-qualifier-list -->-- assignment-expression -- "]" --------------------^
+        |                                                                                                                      |
+        |                                               ,---------------------->----------------------.                        |
+        |                                               |                                             |                        |
+        |                                               |  ,------>-------.                           |                        |
+        |                                               |  |              |                           |                        |
+        >----------------- "[" -- type-qualifier-list --^--^-- "static" -->-- assignment-expression -->-- "]" -----------------^
+        |                                                                                                                      |
+        >---------------------------------------- "[" -- assignment-expression -- "]" -----------------------------------------^
+        |                                                                                                                      |
+        |                                                                    ,---->----.                                       |
+        |                                                                    |         |                                       |
+        >------------------------------- direct-abstract-declarator -- "[" --^-- "*" -->-- "]" --------------------------------^
+        |                                                                                                                      |
+        |                                                      ,------------>------------.                                     |
+        |                                                      |                         |                                     |
+        >----- direct-abstract-declarator -- "[" -- "static" --^-- type-qualifier-list -->-- assignment-expression -- "]" -----^
+        |                                                                                                                      |
+        |                                                              ,---------------------->----------------------.         |
+        |                                                              |                                             |         |
+        |                                                              |  ,------>-------.                           |         |
+        |                                                              |  |              |                           |         |
+        >-- direct-abstract-declarator -- "[" -- type-qualifier-list --^--^-- "static" -->-- assignment-expression -->-- "]" --^
+        |                                                                                                                      |
+        >------------------------- direct-abstract-declarator -- "[" -- assignment-expression -- "]" --------------------------^
+        |                                                                                                                      |
+        >-------------------------- direct-abstract-declarator -- "(" -- parameter-type-list -- ")" ---------------------------^
+        |                                                                                                                      |
+        `-------------------------------------- direct-abstract-declarator -- "(" -- ")" --------------------------------------'
+
+struct-declarator-list:
+    ||-->-- struct-declarator --v--||
+        |                       |
+        `--------- "," ---------'
+
+type-qualifier-list:
+    ||-->-- type-qualifier --v--||
+        |                    |
+        `---------<----------'
+
+parameter-type-list:
+                          ,-------->---------.
+                          |                  |
+    ||-- parameter-list --^-- "," -- "..." -->--||
+
+struct-declarator:
+    ||--v------------ ":" -- constant-expression ------------>--||
+        |                                                    |
+        |                ,--------------->----------------.  |
+        |                |                                |  |
+        `-- declarator --^-- ":" -- constant-expression -->--'
+
+assignment-operator:
+    ||--v--- "=" --->--||
+        |           |
+        >-- "*=" ---^
+        |           |
+        >-- "/=" ---^
+        |           |
+        >-- "%=" ---^
+        |           |
+        >-- "+=" ---^
+        |           |
+        >-- "-=" ---^
+        |           |
+        >-- "<<=" --^
+        |           |
+        >-- ">>=" --^
+        |           |
+        >-- "&=" ---^
+        |           |
+        >-- "^=" ---^
+        |           |
+        `-- "|=" ---'
+
+parameter-list:
+    ||-->-- parameter-declaration --v--||
+        |                           |
+        `----------- "," -----------'
+
+parameter-declaration:
+                                  ,------------>------------.
+                                  |                         |
+    ||-- declaration-specifiers --+------ declarator ------->--||
+                                  |                         |
+                                  `-- abstract-declarator --'
+
+expression:
+    ||-->-- assignment-expression --v--||
+        |                           |
+        `----------- "," -----------'
+
+assignment-expression:
+    ||--v----------------------- conditional-expression ----------------------->--||
+        |                                                                      |
+        `-- unary-expression -- assignment-operator -- assignment-expression --'
+
+conditional-expression:
+                                 ,--------------------------->----------------------------.
+                                 |                                                        |
+    ||-- logical-or-expression --^-- "?" -- expression -- ":" -- conditional-expression -->--||
+
+logical-or-expression:
+    ||-->-- logical-and-expression --v--||
+        |                            |
+        `----------- "||" -----------'
+
+logical-and-expression:
+    ||-->-- inclusive-or-expression --v--||
+        |                             |
+        `----------- "&&" ------------'
+
+inclusive-or-expression:
+    ||-->-- exclusive-or-expression --v--||
+        |                             |
+        `------------ "|" ------------'
+
+exclusive-or-expression:
+    ||-->-- and-expression --v--||
+        |                    |
+        `------- "^" --------'
+
+and-expression:
+    ||-->-- equality-expression --v--||
+        |                         |
+        `---------- "&" ----------'
+
+equality-expression:
+    ||-->-- relational-expression --v--||
+        |                           |
+        `-------<-- "==" --v--------'
+                |          |
+                `-- "!=" --'
+
+relational-expression:
+    ||-->-- shift-expression --v--||
+        |                      |
+        `-----<-- "<" ---v-----'
+              |          |
+              ^-- ">" ---<
+              |          |
+              ^-- "<=" --<
+              |          |
+              `-- ">=" --'
+
+shift-expression:
+    ||-->-- additive-expression --v--||
+        |                         |
+        `------<-- "<<" --v-------'
+               |          |
+               `-- ">>" --'
+
+additive-expression:
+    ||-->-- multiplicative-expression --v--||
+        |                               |
+        `----------<-- "+" --v----------'
+                   |         |
+                   `-- "-" --'
+
+multiplicative-expression:
+    ||-->-- cast-expression --v--||
+        |                     |
+        `-----<-- "%" --v-----'
+              |         |
+              ^-- "*" --<
+              |         |
+              `-- "/" --'
+
+cast-expression:
+    ||--v--------------- unary-expression --------------->--||
+        |                                                |
+        `-- "(" -- type-name -- ")" -- cast-expression --'
+
+unary-expression:
+    ||--v----------- postfix-expression ------------>--||
+        |                                           |
+        >-----v-- "++" -->-- unary-expression ------^
+        |     |          |                          |
+        |     `-- "--" --'                          |
+        |                                           |
+        >---- unary-operator -- cast-expression ----^
+        |                                           |
+        >------ "sizeof" -- unary-expression -------^
+        |                                           |
+        >--- "sizeof" -- "(" -- type-name -- ")" ---^
+        |                                           |
+        `-- "_Alignof" -- "(" -- type-name -- ")" --'
+
+postfix-expression:
+    ||--v---------------------------- primary-expression ---------------------------->--||
+        |                                                                            |
+        >-------------- postfix-expression -- "[" -- expression -- "]" --------------^
+        |                                                                            |
+        |                                 ,-------------->---------------.           |
+        |                                 |                              |           |
+        >---- postfix-expression -- "(" --^-- argument-expression-list -->-- ")" ----^
+        |                                                                            |
+        >-------------- postfix-expression --v-- "." --->-- identifier --------------^
+        |                                    |          |                            |
+        |                                    `-- "->" --'                            |
+        |                                                                            |
+        >--------------------- postfix-expression --v-- "++" -->---------------------^
+        |                                           |          |                     |
+        |                                           `-- "--" --'                     |
+        |                                                                            |
+        |                                                        ,---->----.         |
+        |                                                        |         |         |
+        `-- "(" -- type-name -- ")" -- "{" -- initializer-list --^-- "," -->-- "}" --'
+
+unary-operator:
+    ||--v-- "!" -->--||
+        |         |
+        >-- "&" --^
+        |         |
+        >-- "*" --^
+        |         |
+        >-- "+" --^
+        |         |
+        >-- "-" --^
+        |         |
+        `-- "~" --'
+
+primary-expression:
+    ||--v--------- identifier --------->--||
+        |                              |
+        >---------- constant ----------^
+        |                              |
+        >----------- string -----------^
+        |                              |
+        >-- "(" -- expression -- ")" --^
+        |                              |
+        `----- generic-selection ------'
+
+argument-expression-list:
+    ||-->-- assignment-expression --v--||
+        |                           |
+        `----------- "," -----------'
+
+constant:
+    ||--v---- integer-constant ---->--||
+        |                          |
+        >--- character-constant ---^
+        |                          |
+        >--- floating-constant ----^
+        |                          |
+        `-- enumeration-constant --'
+
+string:
+    ||--v-- string-literal -->--||
+        |                    |
+        `---- "__func__" ----'
+
+generic-selection:
+    ||-- "_Generic" -- "(" -- assignment-expression -- "," -- generic-assoc-list -- ")" --||
+
+generic-assoc-list:
+    ||-->-- generic-association --v--||
+        |                         |
+        `---------- "," ----------'
+
+generic-association:
+    ||--v-- type-name -- ":" -- assignment-expression -->--||
+        |                                               |
+        `-- "default" -- ":" -- assignment-expression --'
+
+designation:
+    ||-- designator-list -- "=" --||
+
+designator-list:
+    ||-->-- designator --v--||
+        |                |
+        `-------<--------'
+
+designator:
+    ||--v-- "[" -- constant-expression -- "]" -->--||
+        |                                       |
+        `---------- "." -- identifier ----------'
+
+statement:
+    ||--v--- labeled-statement ---->--||
+        |                          |
+        >--- compound-statement ---^
+        |                          |
+        >-- expression-statement --^
+        |                          |
+        >-- selection-statement ---^
+        |                          |
+        >-- iteration-statement ---^
+        |                          |
+        `----- jump-statement -----'
+
+labeled-statement:
+    ||--v----------- identifier -- ":" -- statement ------------>--||
+        |                                                       |
+        >-- "case" -- constant-expression -- ":" -- statement --^
+        |                                                       |
+        `------------ "default" -- ":" -- statement ------------'
+
+expression-statement:
+        ,------->--------.
+        |                |
+    ||--^-- expression -->-- ";" --||
+
+selection-statement:
+    ||--v-- "if" -- "(" -- expression -- ")" -- statement -- "else" -- statement -->--||
+        |                                                                          |
+        >------------- "if" -- "(" -- expression -- ")" -- statement --------------^
+        |                                                                          |
+        `----------- "switch" -- "(" -- expression -- ")" -- statement ------------'
+
+iteration-statement:
+    ||--v------------------------------- "while" -- "(" -- expression -- ")" -- statement ------------------------------->--||
+        |                                                                                                                |
+        >----------------------- "do" -- statement -- "while" -- "(" -- expression -- ")" -- ";" ------------------------^
+        |                                                                                                                |
+        |                  ,------->--------.         ,------->--------.         ,------->--------.                      |
+        |                  |                |         |                |         |                |                      |
+        >-- "for" -- "(" --^-- expression -->-- ";" --^-- expression -->-- ";" --^-- expression -->-- ")" -- statement --^
+        |                                                                                                                |
+        |                                       ,------->--------.         ,------->--------.                            |
+        |                                       |                |         |                |                            |
+        `-------- "for" -- "(" -- declaration --^-- expression -->-- ";" --^-- expression -->-- ")" -- statement --------'
+
+jump-statement:
+    ||--v------ "goto" -- identifier -- ";" ------>--||
+        |                                         |
+        >----------- "continue" -- ";" -----------^
+        |                                         |
+        >------------ "break" -- ";" -------------^
+        |                                         |
+        |              ,------->--------.         |
+        |              |                |         |
+        `-- "return" --^-- expression -->-- ";" --'
+

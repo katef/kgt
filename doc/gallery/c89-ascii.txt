@@ -1,0 +1,449 @@
+translation_unit:
+        ,---------->-----------.
+        |                      |
+    ||--^-- translation_unit -->-- external_decl --||
+
+external_decl:
+    ||--v-- function_definition -->--||
+        |                         |
+        `--------- decl ----------'
+
+function_definition:
+        ,------->--------.                ,------->-------.
+        |                |                |               |
+    ||--^-- decl_specs -->-- declarator --^-- decl_list -->-- compound_stat --||
+
+decl_list:
+        ,------->-------.                ,------------>-------------.
+        |               |                |                          |
+    ||--^-- decl_list -->-- decl_specs --^-- init_declarator_list -->-- ";" --||
+
+decl_specs:
+                                    ,------->--------.
+                                    |                |
+    ||--v-- storage_class_spec -->--^-- decl_specs -->--||
+        |                        |
+        >------ type_spec -------^
+        |                        |
+        `---- type_qualifier ----'
+
+storage_class_spec:
+    ||--v---- "auto" ---->--||
+        |                |
+        >-- "register" --^
+        |                |
+        >--- "static" ---^
+        |                |
+        >--- "extern" ---^
+        |                |
+        `-- "typedef" ---'
+
+type_spec:
+    ||--v--------- "void" --------->--||
+        |                          |
+        >--------- "char" ---------^
+        |                          |
+        >-------- "short" ---------^
+        |                          |
+        >--------- "int" ----------^
+        |                          |
+        >--------- "long" ---------^
+        |                          |
+        >-------- "float" ---------^
+        |                          |
+        >-------- "double" --------^
+        |                          |
+        >-------- "signed" --------^
+        |                          |
+        >------- "unsigned" -------^
+        |                          |
+        >-- struct_or_union_spec --^
+        |                          |
+        >------- enum_spec --------^
+        |                          |
+        `------ typedef_name ------'
+
+type_qualifier:
+    ||--v--- "const" ---->--||
+        |                |
+        `-- "volatile" --'
+
+struct_or_union_spec:
+    ||--v-- "struct" -->--v---------------------- id ---------------------->--||
+        |              |  |                                                |
+        `-- "union" ---'  |  ,--->----.                                    |
+                          |  |        |                                    |
+                          `--^-- id -->-- "{" -- struct_decl_list -- "}" --'
+
+struct_decl_list:
+        ,---------->-----------.
+        |                      |
+    ||--^-- struct_decl_list -->-- spec_qualifier_list -- struct_declarator_list -- ";" --||
+
+init_declarator_list:
+        ,---------------->----------------.                ,----------->------------.
+        |                                 |                |                        |
+    ||--^-- init_declarator_list -- "," -->-- declarator --^-- "=" -- initializer -->--||
+
+spec_qualifier_list:
+                                ,------------>------------.
+                                |                         |
+    ||--v---- type_spec ----->--^-- spec_qualifier_list -->--||
+        |                    |
+        `-- type_qualifier --'
+
+struct_declarator_list:
+        ,----------------->-----------------.
+        |                                   |
+    ||--^-- struct_declarator_list -- "," -->--v--------------- declarator --------------->--||
+                                               |                                          |
+                                               |  ,------->--------.                      |
+                                               |  |                |                      |
+                                               `--^-- declarator -->-- ":" -- const_exp --'
+
+enum_spec:
+    ||-- "enum" --v--------------------- id ---------------------->--||
+                  |                                               |
+                  |  ,--->----.                                   |
+                  |  |        |                                   |
+                  `--^-- id -->-- "{" -- enumerator_list -- "}" --'
+
+enumerator_list:
+        ,------------->--------------.        ,---------->-----------.
+        |                            |        |                      |
+    ||--^-- enumerator_list -- "," -->-- id --^-- "=" -- const_exp -->--||
+
+declarator:
+        ,------>------.
+        |             |
+    ||--^-- pointer -->-- direct_declarator --||
+
+direct_declarator:
+    ||--v----------------------------- id ----------------------------->--||
+        |                                                              |
+        >------------------ "(" -- declarator -- ")" ------------------^
+        |                                                              |
+        |                                 ,------->-------.            |
+        |                                 |               |            |
+        >----- direct_declarator -- "[" --^-- const_exp -->-- "]" -----^
+        |                                                              |
+        |                              ,---------->----------.         |
+        |                              |                     |         |
+        `-- direct_declarator -- "(" --+-- param_type_list -->-- ")" --'
+                                       |                     |
+                                       `------ id_list ------'
+
+pointer:
+               ,------------>------------.  ,------>------.
+               |                         |  |             |
+    ||-- "*" --^-- type_qualifier_list -->--^-- pointer -->--||
+
+type_qualifier_list:
+        ,------------>------------.
+        |                         |
+    ||--^-- type_qualifier_list -->-- type_qualifier --||
+
+param_type_list:
+                      ,-------->---------.
+                      |                  |
+    ||-- param_list --^-- "," -- "..." -->--||
+
+param_list:
+    ||-->-- param_decl --v--||
+        |                |
+        `----- "," ------'
+
+param_decl:
+                      ,------------>------------.
+                      |                         |
+    ||-- decl_specs --+------ declarator ------->--||
+                      |                         |
+                      `-- abstract_declarator --'
+
+id_list:
+    ||-->-- id ---v--||
+        |         |
+        `-- "," --'
+
+initializer:
+    ||--v------------- assignment_exp -------------->--||
+        |                                           |
+        >----- "{" -- initializer_list -- "}" ------^
+        |                                           |
+        `-- "{" -- initializer_list -- "," -- "}" --'
+
+initializer_list:
+    ||-->-- initializer --v--||
+        |                 |
+        `------ "," ------'
+
+type_name:
+                               ,------------>------------.
+                               |                         |
+    ||-- spec_qualifier_list --^-- abstract_declarator -->--||
+
+abstract_declarator:
+    ||--v----------------- pointer ----------------->--||
+        |                                           |
+        >-- pointer -- direct_abstract_declarator --^
+        |                                           |
+        `------- direct_abstract_declarator --------'
+
+direct_abstract_declarator:
+    ||--v------------------------ "(" -- abstract_declarator -- ")" ------------------------>--||
+        |                                                                                   |
+        |  ,--------------->----------------.                                               |
+        |  |                                |                                               |
+        `--^-- direct_abstract_declarator -->--v-------- "[" -- const_exp -- "]" -------->--'
+                                               |                                         |
+                                               >-------------- "[" -- "]" ---------------^
+                                               |                                         |
+                                               |         ,---------->----------.         |
+                                               |         |                     |         |
+                                               `-- "(" --^-- param_type_list -->-- ")" --'
+
+typedef_name:
+    ||-- id --||
+
+stat:
+    ||--v--- labeled_stat --->--||
+        |                    |
+        >----- exp_stat -----^
+        |                    |
+        >-- compound_stat ---^
+        |                    |
+        >-- selection_stat --^
+        |                    |
+        >-- iteration_stat --^
+        |                    |
+        `---- jump_stat -----'
+
+labeled_stat:
+    ||--v----- id ------>-- ":" -- stat --||
+        |               |
+        >--- "case" ----^
+        |               |
+        `-- "default" --'
+
+exp_stat:
+        ,---->----.
+        |         |
+    ||--^-- exp -->-- ";" --||
+
+compound_stat:
+               ,------->-------.  ,------->-------.
+               |               |  |               |
+    ||-- "{" --^-- decl_list -->--^-- stat_list -->-- "}" --||
+
+stat_list:
+    ||-->-- stat --v--||
+        |          |
+        `----<-----'
+
+selection_stat:
+                                                ,--------->----------.
+                                                |                    |
+    ||--v-- "if" -- "(" -- exp -- ")" -- stat --^-- "else" -- stat -->-->--||
+        |                                                               |
+        `------------ "switch" -- "(" -- exp -- ")" -- stat ------------'
+
+iteration_stat:
+    ||--v------------------------ "while" -- "(" -- exp -- ")" -- stat ------------------------>--||
+        |                                                                                      |
+        >---------------- "do" -- stat -- "while" -- "(" -- exp -- ")" -- ";" -----------------^
+        |                                                                                      |
+        |                  ,---->----.         ,---->----.         ,---->----.                 |
+        |                  |         |         |         |         |         |                 |
+        `-- "for" -- "(" --^-- exp -->-- ";" --^-- exp -->-- ";" --^-- exp -->-- ")" -- stat --'
+
+jump_stat:
+    ||--v------ "goto" -- id -- ";" ------->--||
+        |                                  |
+        >------- "continue" -- ";" --------^
+        |                                  |
+        >--------- "break" -- ";" ---------^
+        |                                  |
+        |              ,---->----.         |
+        |              |         |         |
+        `-- "return" --^-- exp -->-- ";" --'
+
+exp:
+        ,------->--------.
+        |                |
+    ||--^-- exp -- "," -->-- assignment_exp --||
+
+assignment_exp:
+    ||--v------------------- conditional_exp -------------------->--||
+        |                                                        |
+        `-- unary_exp -- assignment_operator -- assignment_exp --'
+
+assignment_operator:
+    ||--v--- "=" --->--||
+        |           |
+        >-- "*=" ---^
+        |           |
+        >-- "/=" ---^
+        |           |
+        >-- "%=" ---^
+        |           |
+        >-- "+=" ---^
+        |           |
+        >-- "-=" ---^
+        |           |
+        >-- "<<=" --^
+        |           |
+        >-- ">>=" --^
+        |           |
+        >-- "&=" ---^
+        |           |
+        >-- "^=" ---^
+        |           |
+        `-- "|=" ---'
+
+conditional_exp:
+                          ,-------------------->---------------------.
+                          |                                          |
+    ||-- logical_or_exp --^-- "?" -- exp -- ":" -- conditional_exp -->--||
+
+const_exp:
+    ||-- conditional_exp --||
+
+logical_or_exp:
+    ||--v------------------ logical_and_exp ------------------>--||
+        |                                                     |
+        |                    ,-------------->--------------.  |
+        |                    |                             |  |
+        `-- logical_or_exp --^-- "||" -- logical_and_exp -->--'
+
+logical_and_exp:
+        ,-------------->--------------.
+        |                             |
+    ||--^-- logical_and_exp -- "&&" -->-- inclusive_or_exp --||
+
+inclusive_or_exp:
+        ,-------------->--------------.
+        |                             |
+    ||--^-- inclusive_or_exp -- "|" -->-- exclusive_or_exp --||
+
+exclusive_or_exp:
+        ,-------------->--------------.
+        |                             |
+    ||--^-- exclusive_or_exp -- "^" -->-- and_exp --||
+
+and_exp:
+        ,--------->----------.
+        |                    |
+    ||--^-- and_exp -- "&" -->-- equality_exp --||
+
+equality_exp:
+        ,--------------->----------------.
+        |                                |
+    ||--^-- equality_exp --v-- "==" -->-->-- relational_exp --||
+                           |          |
+                           `-- "!=" --'
+
+relational_exp:
+        ,---------------->-----------------.
+        |                                  |
+    ||--^-- relational_exp --v-- "<" --->-->-- shift_expression --||
+                             |          |
+                             >-- ">" ---^
+                             |          |
+                             >-- "<=" --^
+                             |          |
+                             `-- ">=" --'
+
+shift_expression:
+        ,----------------->------------------.
+        |                                    |
+    ||--^-- shift_expression --v-- "<<" -->-->-- additive_exp --||
+                               |          |
+                               `-- ">>" --'
+
+additive_exp:
+        ,--------------->---------------.
+        |                               |
+    ||--^-- additive_exp --v-- "+" -->-->-- mult_exp --||
+                           |         |
+                           `-- "-" --'
+
+mult_exp:
+        ,------------->-------------.
+        |                           |
+    ||--^-- mult_exp --v-- "%" -->-->-- cast_exp --||
+                       |         |
+                       >-- "*" --^
+                       |         |
+                       `-- "/" --'
+
+cast_exp:
+    ||--v--------------- unary_exp --------------->--||
+        |                                         |
+        `-- "(" -- type_name -- ")" -- cast_exp --'
+
+unary_exp:
+    ||--v----------------- postfix_exp ----------------->--||
+        |                                               |
+        >-----------v-- "++" -->-- unary_exp -----------^
+        |           |          |                        |
+        |           `-- "--" --'                        |
+        |                                               |
+        >--------- unary_operator -- cast_exp ----------^
+        |                                               |
+        `-- "sizeof" --v--------- unary_exp --------->--'
+                       |                             |
+                       `-- "(" -- type_name -- ")" --'
+
+unary_operator:
+    ||--v-- "!" -->--||
+        |         |
+        >-- "&" --^
+        |         |
+        >-- "*" --^
+        |         |
+        >-- "+" --^
+        |         |
+        >-- "-" --^
+        |         |
+        `-- "~" --'
+
+postfix_exp:
+    ||--v---------------------- primary_exp ----------------------->--||
+        |                                                          |
+        >------------ postfix_exp -- "[" -- exp -- "]" ------------^
+        |                                                          |
+        |                        ,----------->-----------.         |
+        |                        |                       |         |
+        >-- postfix_exp -- "(" --^-- argument_exp_list -->-- ")" --^
+        |                                                          |
+        >------------ postfix_exp --v-- "." --->-- id -------------^
+        |                           |          |                   |
+        |                           `-- "->" --'                   |
+        |                                                          |
+        `--------------- postfix_exp --v-- "++" -->----------------'
+                                       |          |
+                                       `-- "--" --'
+
+primary_exp:
+    ||--v--------- id ---------->--||
+        |                       |
+        >-------- const --------^
+        |                       |
+        >------- string --------^
+        |                       |
+        `-- "(" -- exp -- ")" --'
+
+argument_exp_list:
+        ,-------------->---------------.
+        |                              |
+    ||--^-- argument_exp_list -- "," -->-- assignment_exp --||
+
+const:
+    ||--v------ int_const ------>--||
+        |                       |
+        >----- char_const ------^
+        |                       |
+        >----- float_const -----^
+        |                       |
+        `-- enumeration_const --'
+
