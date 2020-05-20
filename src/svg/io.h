@@ -9,6 +9,7 @@
 
 struct ast_rule;
 
+extern int debug;
 extern int prettify;
 
 void

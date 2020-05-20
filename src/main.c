@@ -39,6 +39,7 @@
 #include "svg/io.h"
 #include "html5/io.h"
 
+int debug = 0;
 int prettify = 1;
 int allow_undefined = 1;
 const char *css_file;
@@ -151,27 +152,17 @@ main(int argc, char *argv[])
 	{
 		int c;
 
-		while (c = getopt(argc, argv, "hw:c:nl:e:u"), c != -1) {
+		while (c = getopt(argc, argv, "hw:c:gnl:e:u"), c != -1) {
 			switch (c) {
 			case 'l': in  = lang(IO_IN,  optarg); break;
 			case 'e': out = lang(IO_OUT, optarg); break;
 
-			case 'c':
-				css_file = optarg;
-				break;
+			case 'c': css_file = optarg; break;
+			case 'w': filter   = optarg; break; /* comma-separated whitelist of rule names */
 
-			case 'w':
-				/* comma-separated whitelist of rule names */
-				filter = optarg;
-				break;
-
-			case 'n':
-				prettify = 0;
-				break;
-
-			case 'u':
-				allow_undefined = 0;
-				break;
+			case 'g': debug           = 1; break;
+			case 'n': prettify        = 0; break;
+			case 'u': allow_undefined = 0; break;
 
 			case '?':
 			default:
