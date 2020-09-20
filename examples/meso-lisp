@@ -1,0 +1,28 @@
+# LISP grammar
+
+Program    ::= Declaration*
+Declaration::= VarDec 
+		| ConstDecl
+		| FunDeclar
+		| UseDecl
+		| PubDecl
+		| MainDecl
+		| Expression;
+
+Expression ::= Atom | "(" Complex ")";
+Complex	   ::= IfForm 
+		| ListForm
+		| QuoteForm
+		| LambdaForm
+		| SetForm 
+		| Call;
+
+IfForm	   ::= "if" Expression Expression Expression?;
+QuoteForm  ::= "quote" Expression;
+ListForm   ::= "ls" Expression*;
+LambdaForm ::= "lmb" "("SYMBOL*")" Expression;
+Setform    ::= "set" SYMBOL Expression;
+
+Call	   ::= SYMBOL Expression*;
+
+Atom       ::= NUMBER | STRING | SYMBOL | "true" | "false";
