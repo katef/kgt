@@ -1,0 +1,7 @@
+Script 	:= Item* EOF;
+Item 	:= Text | Command | Interprolate | Special Char;
+Command	:= "<" Name ("=" Args)? ">";
+Args	:= Arg ("," Arg)*;
+Arg	:= Number | Color | Name;
+Number	:= \d+(\.\d+)?(p|r)?;
+Text 	:= [^$\@\^_]+;
