@@ -1,0 +1,56 @@
+;;; Augmented Bauckus-Naur Form
+;; IRC-message specification
+;; Header is <message>
+;; Fixing for special ABNF froms
+message    =  [ ":" prefix SP ] command [ params ] CRLF
+prefix     =  servername / ( nickname [ [ "!" user ] "@" host ] )
+command    =  1*ALPHA / 3DIGIT
+params     =  *14( SP middle ) [ SP ":" trailing ]
+           =/ 14( SP middle ) [ SP [ ":" ] trailing ]
+
+nospcrlfcl =  %x01-09 / %x0B-0C / %x0E-1F / %x21-39 / %x3B-FF ; any octet except NUL, CR, LF, " " and ":"
+middle     =  nospcrlfcl *( ":" / nospcrlfcl )
+trailing   =  *( ":" / " " / nospcrlfcl )
+;; Left for posterity
+SPACE      =  %x20        ; space character
+crlf       =  %x0D %x0A   ; "carriage return" "linefeed"
+
+
+
+
+;; Message particular format
+target     =  nickname / server
+msgtarget  =  msgto *( "," msgto )
+msgto      =  channel / ( user [ "%" host ] "@" servername )
+msgto      =/ ( user "%" host ) / targetmask
+msgto      =/ nickname / ( nickname "!" user "@" host )
+channel    =  ( "#" / "+" / ( "!" chanstring [ ":" chanstring ]
+servername =  hostname
+host       =  hostname / hostaddr
+hostname   =  shortname *( "." shortname )
+shortname  =  ( ALPHA / DIGIT ) *( ALPHA / DIGIT / "-" )
+     *( ALPHA / DIGIT ) ; as specified in RFC 1123 [HNAME]
+hostaddr   =  ip4addr / ip6addr
+ip4addr    =  1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT
+ip6addr    =  1*HEXDIG 7( ":" 1*HEXDIG )
+ip6addr    =/ "0:0:0:0:0:" ( "0" / "FFFF" ) ":" ip4addr
+nickname   =  ( ALPHA / special ) *8( ALPHA / DIGIT / special / "-" )
+targetmask =  ( "$" / "#" ) mask
+      ; see details on allowed masks in section 3.3.1
+chanstring =  %x01-07 / %x08-09 / %x0B-0C / %x0E-1F / %x21-2B
+chanstring =/ %x2D-39 / %x3B-FF; any octet except NUL, BELL, CR, LF, " ", "," and ":"
+channelid  = 5( %x41-5A / digit )   ; 5( A-Z / 0-9 )
+
+
+
+
+
+;; other paramters syntaxes
+user       =  1*( %x01-09 / %x0B-0C / %x0E-1F / %x21-3F / %x41-FF ) ; any octet except NUL, CR, LF, " " and "@"
+key        =  1*23( %x01-05 / %x07-08 / %x0C / %x0E-1F /               %x21-7F ) ; any 7-bit US_ASCII character,
+          ; except NUL, CR, LF, FF, h/v TABs, and " "
+letter     =  %x41-5A / %x61-7A       ; A-Z / a-z
+digit      =  %x30-39                 ; 0-9
+hexdigit   =  digit / "A" / "B" / "C" / "D" / "E" / "F"
+special    =  %x5B-60 / %x7B-7D
+              ; "[", "]", "\", "`", "_", "^", "{", "|", "}"
