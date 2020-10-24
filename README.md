@@ -86,6 +86,8 @@ Building depends on:
 
  * Any BSD make. This includes OpenBSD, FreeBSD and NetBSD make(1)
    and sjg's portable bmake (also packaged as pmake).
+   
+ * [`sid`](https://github.com/tendra/tendra/tree/main/sid)
 
  * A C compiler. Any should do, but GCC and clang are best supported.
 
