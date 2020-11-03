@@ -216,11 +216,7 @@ main(int argc, char *argv[])
 
 			next = p->next;
 
-			tmp = strdup(filter);
-			if (tmp == NULL) {
-				perror("strdup");
-				exit(EXIT_FAILURE);
-			}
+			tmp = xstrdup(filter);
 
 			for (t = strtok_r(tmp, ",", &save); t != NULL; t = strtok_r(NULL, ",", &save)) {
 				if (0 == strcmp(p->name, t)) {
