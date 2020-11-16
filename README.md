@@ -45,7 +45,7 @@ examples for each dialect. kgt can't parse them all yet.
 kgt reads from _stdin_ in dialect `-l ...` and writes to _stdout_
 in format `-e ...`:
 
-    ; kgt -l bnf -e rrutf8 < examples.expr.bnf
+    ; kgt -l bnf -e rrutf8 < examples/expr.bnf
     expr:
         │├──╮── term ── "+" ── expr ──╭──┤│
             │                         │
