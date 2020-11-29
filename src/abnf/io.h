@@ -7,6 +7,8 @@
 #ifndef KGT_ABNF_IO_H
 #define KGT_ABNF_IO_H
 
+#include "../compiler_specific.h"
+
 struct ast_rule;
 
 /*
@@ -17,7 +19,8 @@ struct ast_rule;
 struct ast_rule *
 abnf_input(int (*f)(void *opaque), void *opaque);
 
-void
+WARN_UNUSED_RESULT
+int
 abnf_output(const struct ast_rule *grammar);
 
 #endif

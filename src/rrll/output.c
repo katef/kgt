@@ -24,6 +24,7 @@
 #include "../rrd/rewrite.h"
 #include "../rrd/node.h"
 #include "../rrd/list.h"
+#include "../compiler_specific.h"
 
 #include "io.h"
 
@@ -225,7 +226,8 @@ node_walk(FILE *f, const struct node *n)
 	}
 }
 
-void
+WARN_UNUSED_RESULT
+int
 rrll_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
@@ -235,7 +237,7 @@ rrll_output(const struct ast_rule *grammar)
 
 		if (!ast_to_rrd(p, &rrd)) {
 			perror("ast_to_rrd");
-			return;
+			return 0;
 		}
 
 		if (prettify) {
@@ -243,7 +245,8 @@ rrll_output(const struct ast_rule *grammar)
 		}
 
 		/* TODO: pass in unsupported bitmap */
-		rewrite_rrd_ci_literals(rrd);
+		if (!rewrite_rrd_ci_literals(rrd))
+			return 0;
 
 		printf("[`");
 		escputs(p->name, stdout);
@@ -254,5 +257,6 @@ rrll_output(const struct ast_rule *grammar)
 
 		node_free(rrd);
 	}
+	return 1;
 }
 

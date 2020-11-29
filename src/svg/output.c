@@ -801,7 +801,8 @@ struct dim svg_dim = {
 	0
 };
 
-void
+WARN_UNUSED_RESULT
+int
 svg_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
@@ -831,7 +832,7 @@ svg_output(const struct ast_rule *grammar)
 
 		if (!ast_to_rrd(p, &rrd)) {
 			perror("ast_to_rrd");
-			return;
+			return 0;
 		}
 
 		if (prettify) {
@@ -908,5 +909,6 @@ svg_output(const struct ast_rule *grammar)
 	free(a);
 
 	printf("</svg>\n");
+	return 1;
 }
 

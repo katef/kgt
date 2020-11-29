@@ -14,7 +14,8 @@ struct ast_rule;
 
 extern int prettify;
 
-void
+WARN_UNUSED_RESULT
+int
 rrparcon_output(const struct ast_rule *);
 
 #endif

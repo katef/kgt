@@ -47,7 +47,7 @@ const char *css_file;
 struct io {
 	const char *name;
 	struct ast_rule *(*in)(int (*f)(void *), void *);
-	void (*out)(const struct ast_rule *);
+	int (*out)(const struct ast_rule *);
 	enum ast_features ast_unsupported;
 	enum rrd_features rrd_unsupported;
 } io[] = {
@@ -190,13 +190,16 @@ main(int argc, char *argv[])
 			/* TODO: expose these rewritings as CLI options too; set as bits in v */
 			/* TODO: option to query if output is possible without rewriting */
 			switch (v & -v) {
-			case FEATURE_AST_CI_LITERAL: rewrite_ci_literals(g); break;
+			case FEATURE_AST_CI_LITERAL:
+			  if (!rewrite_ci_literals(g)) {
+				return EXIT_FAILURE;
+			  }
+			  break;
 			case FEATURE_AST_INVISIBLE:  rewrite_invisible(g);   break;
 
 			case FEATURE_AST_BINARY:
 				if (ast_binary(g)) {
 					fprintf(stderr, "Binary strings not supported for this output language\n");
-					exit(EXIT_FAILURE);
 				}
 				break;
 			}
@@ -234,10 +237,11 @@ main(int argc, char *argv[])
 		g = new;
 	}
 
-	out->out(g);
+	if (out->out(g))
+	  return EXIT_SUCCESS;
+	else
+	  return EXIT_FAILURE;
 
 	/* TODO: free ast */
-
-	return EXIT_SUCCESS;
 }
 

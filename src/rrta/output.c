@@ -142,7 +142,8 @@ normal(const struct list *list)
 	return 0;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 node_walk(FILE *f, const struct node *n, int depth)
 {
 	assert(f != NULL);
@@ -150,8 +151,7 @@ node_walk(FILE *f, const struct node *n, int depth)
 	if (n == NULL) {
 		print_indent(f, depth);
 		fprintf(f, "Skip()");
-
-		return;
+		return 1;
 	}
 
 	switch (n->type) {
@@ -159,7 +159,7 @@ node_walk(FILE *f, const struct node *n, int depth)
 
 	case NODE_CI_LITERAL:
 		fprintf(stderr, "unimplemented\n");
-		exit(EXIT_FAILURE);
+		return 0;
 
 	case NODE_CS_LITERAL:
 		print_indent(f, depth);
@@ -179,7 +179,7 @@ node_walk(FILE *f, const struct node *n, int depth)
 
 	case NODE_PROSE:
 		fprintf(stderr, "unimplemented\n");
-		exit(EXIT_FAILURE);
+		return 0;
 
 	case NODE_ALT:
 	case NODE_ALT_SKIPPABLE:
@@ -192,7 +192,8 @@ node_walk(FILE *f, const struct node *n, int depth)
 		}
 
 		for (p = n->u.alt; p != NULL; p = p->next) {
-			node_walk(f, p->node, depth + 1);
+			if (!node_walk(f, p->node, depth + 1))
+				return 0;
 			if (p->next != NULL) {
 				fprintf(f, ",");
 				fprintf(f, "\n");
@@ -206,7 +207,8 @@ node_walk(FILE *f, const struct node *n, int depth)
 		print_indent(f, depth);
 		fprintf(f, "Sequence(\n");
 		for (p = n->u.seq; p != NULL; p = p->next) {
-			node_walk(f, p->node, depth + 1);
+			if (!node_walk(f, p->node, depth + 1))
+				return 0;
 			if (p->next != NULL) {
 				fprintf(f, ",");
 				fprintf(f, "\n");
@@ -220,17 +222,22 @@ node_walk(FILE *f, const struct node *n, int depth)
 		print_indent(f, depth);
 		fprintf(f, "%s(\n", n->u.loop.min == 0 ? "ZeroOrMore" : "OneOrMore");
 
-		node_walk(f, n->u.loop.forward, depth + 1);
+		if (!node_walk(f, n->u.loop.forward, depth + 1))
+			return 0;
 		fprintf(f, ",\n");
 
-		node_walk(f, n->u.loop.backward, depth + 1);
+		if (!node_walk(f, n->u.loop.backward, depth + 1))
+			return 0;
 		fprintf(f, ")");
 
 		break;
 	}
+	return 1;
+	return 1;
 }
 
-void
+WARN_UNUSED_RESULT
+int
 rrta_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
@@ -240,7 +247,7 @@ rrta_output(const struct ast_rule *grammar)
 
 		if (!ast_to_rrd(p, &rrd)) {
 			perror("ast_to_rrd");
-			return;
+			return 0;
 		}
 
 		if (prettify) {
@@ -248,17 +255,20 @@ rrta_output(const struct ast_rule *grammar)
 		}
 
 		/* TODO: pass in unsupported bitmap */
-		rewrite_rrd_ci_literals(rrd);
+		if (!rewrite_rrd_ci_literals(rrd))
+			return 0;
 
 		printf("add('");
 		escputs(p->name, stdout);
 		printf("', Diagram(\n");
 
-		node_walk(stdout, rrd, 1);
+		if (!node_walk(stdout, rrd, 1))
+			return 0;
 		printf("));\n");
 		printf("\n");
 
 		node_free(rrd);
 	}
+	return 1;
 }
 

@@ -23,6 +23,7 @@
 #include "../rrd/rewrite.h"
 #include "../rrd/node.h"
 #include "../rrd/list.h"
+#include "../compiler_specific.h"
 
 static void
 add_alt(int invisible, struct list **list, const struct txt *t)
@@ -42,7 +43,8 @@ add_alt(int invisible, struct list **list, const struct txt *t)
 }
 
 /* TODO: centralise */
-static void
+WARN_UNUSED_RESULT
+static int
 permute_cases(int invisible, struct list **list, const struct txt *t)
 {
 	size_t i, j;
@@ -69,7 +71,7 @@ permute_cases(int invisible, struct list **list, const struct txt *t)
 				"\"%.*s\", max is %u\n",
 				(int) t->n, t->p,
 				(unsigned) (sizeof alpha_inds / sizeof *alpha_inds));
-			exit(EXIT_FAILURE);
+			return 0;
 		}
 
 
@@ -86,9 +88,11 @@ permute_cases(int invisible, struct list **list, const struct txt *t)
 
 		add_alt(invisible, list, t);
 	}
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 rewrite_ci(struct node *n)
 {
 	struct txt tmp;
@@ -113,23 +117,27 @@ rewrite_ci(struct node *n)
 	n->u.alt = NULL;
 
 	/* invisibility of new alts is inherited from n->invisible itself */
-	permute_cases(n->invisible, &n->u.alt, &tmp);
+	if (!permute_cases(n->invisible, &n->u.alt, &tmp))
+		return 0;
 
 	free((void *) tmp.p);
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 node_walk(struct node *n)
 {
 	if (n == NULL) {
-		return;
+		return 1;
 	}
 
 	switch (n->type) {
 		const struct list *p;
 
 	case NODE_CI_LITERAL:
-		rewrite_ci(n);
+		if (!rewrite_ci(n))
+			return 0;
 
 		break;
 
@@ -142,29 +150,35 @@ node_walk(struct node *n)
 	case NODE_ALT:
 	case NODE_ALT_SKIPPABLE:
 		for (p = n->u.alt; p != NULL; p = p->next) {
-			node_walk(p->node);
+			if (!node_walk(p->node))
+				return 0;
 		}
 
 		break;
 
 	case NODE_SEQ:
 		for (p = n->u.seq; p != NULL; p = p->next) {
-			node_walk(p->node);
+			if (!node_walk(p->node))
+				return 0;
 		}
 
 		break;
 
 	case NODE_LOOP:
-		node_walk(n->u.loop.forward);
-		node_walk(n->u.loop.backward);
+		if (!node_walk(n->u.loop.forward))
+			return 0;
+		if (!node_walk(n->u.loop.backward))
+			return 0;
 
 		break;
 	}
+	return 1;
 }
 
-void
+WARN_UNUSED_RESULT
+int
 rewrite_rrd_ci_literals(struct node *n)
 {
-	node_walk(n);
+	return node_walk(n);
 }
 

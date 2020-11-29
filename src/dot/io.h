@@ -7,9 +7,12 @@
 #ifndef KGT_DOT_IO_H
 #define KGT_DOT_IO_H
 
+#include "../compiler_specific.h"
+
 struct ast_rule;
 
-void
+WARN_UNUSED_RESULT
+int
 dot_output(const struct ast_rule *grammar);
 
 #endif

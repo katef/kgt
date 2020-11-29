@@ -7,6 +7,8 @@
 #ifndef KGT_RRLL_IO_H
 #define KGT_RRLL_IO_H
 
+#include "../compiler_specific.h"
+
 struct ast_rule;
 
 #define rrll_ast_unsupported (FEATURE_AST_BINARY | FEATURE_AST_INVISIBLE)
@@ -14,7 +16,8 @@ struct ast_rule;
 
 extern int prettify;
 
-void
+WARN_UNUSED_RESULT
+int
 rrll_output(const struct ast_rule *grammar);
 
 #endif

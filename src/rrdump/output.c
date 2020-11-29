@@ -14,6 +14,7 @@
 
 #include "../txt.h"
 #include "../ast.h"
+#include "../compiler_specific.h"
 
 #include "../rrd/rrd.h"
 #include "../rrd/pretty.h"
@@ -127,7 +128,8 @@ node_walk(FILE *f, const struct node *n, int depth)
 	}
 }
 
-void
+WARN_UNUSED_RESULT
+int
 rrdump_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
@@ -137,7 +139,7 @@ rrdump_output(const struct ast_rule *grammar)
 
 		if (!ast_to_rrd(p, &rrd)) {
 			perror("ast_to_rrd");
-			return;
+			return 0;
 		}
 
 		if (!prettify) {
@@ -158,5 +160,6 @@ rrdump_output(const struct ast_rule *grammar)
 
 		node_free(rrd);
 	}
+	return 1;
 }
 

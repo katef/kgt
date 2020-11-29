@@ -21,10 +21,12 @@
 
 #include "../txt.h"
 #include "../ast.h"
+#include "../compiler_specific.h"
 
 #include "io.h"
 
-static void output_term(const struct ast_term *term);
+WARN_UNUSED_RESULT
+static int output_term(const struct ast_term *term);
 
 int
 blab_escputc(FILE *f, char c)
@@ -50,28 +52,34 @@ blab_escputc(FILE *f, char c)
 	return fprintf(f, "%c", c);
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_group_alt(const struct ast_alt *alt)
 {
 	const struct ast_term *term;
 
 	for (term = alt->terms; term != NULL; term = term->next) {
-		output_term(term);
+		if (!output_term(term))
+			return 0;
 	}
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_group(const struct ast_alt *group)
 {
 	const struct ast_alt *alt;
 
 	for (alt = group; alt != NULL; alt = alt->next) {
-		output_group_alt(alt);
+		if (!output_group_alt(alt))
+			return 0;
 
 		if (alt->next != NULL) {
 			printf(" |");
 		}
 	}
+	return 1;
 }
 
 static void
@@ -119,7 +127,8 @@ atomic(const struct ast_term *term)
 	assert(!"unreached");
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_term(const struct ast_term *term)
 {
 	int a;
@@ -191,10 +200,11 @@ output_term(const struct ast_term *term)
 
 	case TYPE_PROSE:
 		fprintf(stderr, "unimplemented\n");
-		exit(EXIT_FAILURE);
+		return 0;
 
 	case TYPE_GROUP:
-		output_group(term->u.group);
+		if (!output_group(term->u.group))
+			return 0;
 		break;
 	}
 
@@ -203,9 +213,11 @@ output_term(const struct ast_term *term)
 	}
 
 	output_repetition(term->min, term->max);
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_alt(const struct ast_alt *alt)
 {
 	const struct ast_term *term;
@@ -213,22 +225,26 @@ output_alt(const struct ast_alt *alt)
 	assert(!alt->invisible);
 
 	for (term = alt->terms; term != NULL; term = term->next) {
-		output_term(term);
+		if (!output_term(term))
+			return 0;
 
 		if (term->next) {
 			putc(' ', stdout);
 		}
 	}
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_rule(const struct ast_rule *rule)
 {
 	const struct ast_alt *alt;
 
 	printf("%s =", rule->name);
 	for (alt = rule->alts; alt != NULL; alt = alt->next) {
-		output_alt(alt);
+		if (!output_alt(alt))
+			return 0;
 
 		if (alt->next != NULL) {
 			printf("\n\t|");
@@ -237,15 +253,19 @@ output_rule(const struct ast_rule *rule)
 
 	printf("\n");
 	printf("\n");
+	return 1;
 }
 
-void
+WARN_UNUSED_RESULT
+int
 blab_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
 
 	for (p = grammar; p != NULL; p = p->next) {
-		output_rule(p);
+		if (!output_rule(p))
+			return 0;
 	}
+	return 1;
 }
 
