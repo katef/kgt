@@ -14,10 +14,12 @@
 #include "../ast.h"
 #include "../bitmap.h"
 #include "../rrd/node.h"
+#include "../compiler_specific.h"
 
 #include "io.h"
 
-static void output_term(const struct ast_term *term);
+WARN_UNUSED_RESULT
+static int output_term(const struct ast_term *term);
 
 static void
 output_byte(char c)
@@ -69,7 +71,8 @@ needesc(int c)
 	}
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_string(char prefix, const struct txt *t)
 {
 	size_t i;
@@ -78,12 +81,12 @@ output_string(char prefix, const struct txt *t)
 
 	if (t->n == 1 && needesc(*t->p)) {
 		output_byte(*t->p);
-		return;
+		return 1;
 	}
 
 	if (txthas(t, needesc)) {
 		fprintf(stderr, "unsupported: escaping special characters within a literal\n");
-		exit(EXIT_FAILURE);
+		return 0;
 	}
 
 	if (txthas(t, isalpha)) {
@@ -99,6 +102,7 @@ output_string(char prefix, const struct txt *t)
 	}
 
 	putc('\"', stdout);
+	return 1;
 }
 
 static int
@@ -145,21 +149,25 @@ collate_ranges(struct bm *bm, const struct ast_alt *alts)
 	}
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_terms(const struct ast_term *terms)
 {
 	const struct ast_term *term;
 
 	for (term = terms; term != NULL; term = term->next) {
-		output_term(term);
+		if (!output_term(term))
+			return 0;
 
 		if (term->next) {
 			putc(' ', stdout);
 		}
 	}
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_alts(const struct ast_alt *alts)
 {
 	const struct ast_alt *p;
@@ -185,7 +193,8 @@ output_alts(const struct ast_alt *alts)
 				first = 0;
 			}
 
-			output_terms(p->terms);
+			if (!output_terms(p->terms))
+				return 0;
 			p = p->next;
 			continue;
 		}
@@ -231,7 +240,8 @@ output_alts(const struct ast_alt *alts)
 				a[0] = (unsigned char) lo;
 				t.p = a;
 				t.n = sizeof a / sizeof *a;
-				output_string('s', &t);
+				if (!output_string('s', &t))
+					return 0;
 			}
 			bm_unset(&bm, lo);
 
@@ -248,20 +258,24 @@ output_alts(const struct ast_alt *alts)
 			break;
 		}
 	}
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_group(const struct ast_alt *group)
 {
 	if (group->next != NULL) {
 		printf("(");
 	}
 
-	output_alts(group);
+	if (!output_alts(group))
+		return 0;
 
 	if (group->next != NULL) {
 		printf(")");
 	}
+	return 1;
 }
 
 static void
@@ -317,7 +331,8 @@ atomic(const struct ast_term *term)
 	assert(!"unreached");
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_term(const struct ast_term *term)
 {
 	int a;
@@ -346,11 +361,13 @@ output_term(const struct ast_term *term)
 		break;
 
 	case TYPE_CI_LITERAL:
-		output_string('i', &term->u.literal);
+		if (!output_string('i', &term->u.literal))
+			return 0;
 		break;
 
 	case TYPE_CS_LITERAL:
-		output_string('s', &term->u.literal);
+		if (!output_string('s', &term->u.literal))
+			return 0;
 		break;
 
 	case TYPE_TOKEN:
@@ -363,7 +380,8 @@ output_term(const struct ast_term *term)
 		break;
 
 	case TYPE_GROUP:
-		output_group(term->u.group);
+		if (!output_group(term->u.group))
+			return 0;
 		break;
 	}
 
@@ -372,26 +390,33 @@ output_term(const struct ast_term *term)
 	} else if (!a) {
 		printf(" )");
 	}
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_rule(const struct ast_rule *rule)
 {
 	printf("%s = ", rule->name);
 
-	output_alts(rule->alts);
+	if (!output_alts(rule->alts))
+		return 0;
 
 	printf("\n");
 	printf("\n");
+	return 1;
 }
 
-void
+WARN_UNUSED_RESULT
+int
 abnf_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
 
 	for (p = grammar; p != NULL; p = p->next) {
-		output_rule(p);
+		if (!output_rule(p))
+			return 0;
 	}
+	return 1;
 }
 

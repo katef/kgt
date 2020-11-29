@@ -20,9 +20,11 @@
 
 #include "io.h"
 
-static void output_alt(const struct ast_alt *alt);
+WARN_UNUSED_RESULT
+static int output_alt(const struct ast_alt *alt);
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_term(const struct ast_term *term)
 {
 	const char *s, *e;
@@ -35,7 +37,7 @@ output_term(const struct ast_term *term)
 		const char *e;
 	} a[] = {
 		{ 1, 1, " ( ", " )" },
-		{ 1, 1, "",    ""   },
+		{ 1, 1, ""   ,""    },
 		{ 0, 1, " [ ", " ]" },
 		{ 0, 0, " { ", " }" }
 	};
@@ -79,7 +81,7 @@ output_term(const struct ast_term *term)
 
 	case TYPE_CI_LITERAL:
 		fprintf(stderr, "unimplemented\n");
-		exit(EXIT_FAILURE);
+		return 0;
 
 	case TYPE_CS_LITERAL: {
 			size_t i;
@@ -102,17 +104,20 @@ output_term(const struct ast_term *term)
 
 	case TYPE_PROSE:
 		fprintf(stderr, "unimplemented\n");
-		exit(EXIT_FAILURE);
+		return 0;
 
 	case TYPE_GROUP:
-		output_alt(term->u.group);
+		if (!output_alt(term->u.group))
+			return 0;
 		break;
 	}
 
 	printf("%s", e);
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_alt(const struct ast_alt *alt)
 {
 	const struct ast_term *term;
@@ -121,34 +126,43 @@ output_alt(const struct ast_alt *alt)
 	assert(!alt->invisible);
 
 	for (term = alt->terms; term != NULL; term = term->next) {
-		output_term(term);
+		if (!output_term(term))
+			return 0;
 	}
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_rule(const struct ast_rule *rule)
 {
 	const struct ast_alt *alt;
 
 	alt = rule->alts;
 	printf("%s =", rule->name);
-	output_alt(alt);
+	if (!output_alt(alt))
+		return 0;
 
 	for (alt = alt->next; alt != NULL; alt = alt->next) {
 		printf("\n\t|");
-		output_alt(alt);
+		if (!output_alt(alt))
+			return 0;
 	}
 
 	printf(" .\n\n");
+	return 1;
 }
 
-void
+WARN_UNUSED_RESULT
+int
 wsn_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
 
 	for (p = grammar; p != NULL; p = p->next) {
-		output_rule(p);
+		if (!output_rule(p))
+			return 0;
 	}
+	return 1;
 }
 

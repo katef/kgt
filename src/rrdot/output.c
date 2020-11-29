@@ -15,6 +15,7 @@
 
 #include "../txt.h"
 #include "../ast.h"
+#include "../compiler_specific.h"
 
 #include "../rrd/rrd.h"
 #include "../rrd/pretty.h"
@@ -226,7 +227,8 @@ rrd_print_dot(const char *prefix, const void *parent, const char *port,
 	}
 }
 
-void
+WARN_UNUSED_RESULT
+int
 rrdot_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
@@ -240,7 +242,7 @@ rrdot_output(const struct ast_rule *grammar)
 
 		if (!ast_to_rrd(p, &rrd)) {
 			perror("ast_to_rrd");
-			return;
+			return 0;
 		}
 
 		if (prettify) {
@@ -258,5 +260,6 @@ rrdot_output(const struct ast_rule *grammar)
 
 	printf("}\n");
 	printf("\n");
+	return 1;
 }
 

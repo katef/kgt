@@ -7,14 +7,18 @@
 #ifndef KGT_RRTEXT_IO_H
 #define KGT_RRTEXT_IO_H
 
+#include "../compiler_specific.h"
+
 struct ast_rule;
 
 extern int prettify;
 
-void
+WARN_UNUSED_RESULT
+int
 rrutf8_output(const struct ast_rule *);
 
-void
+WARN_UNUSED_RESULT
+int
 rrtext_output(const struct ast_rule *);
 
 #endif

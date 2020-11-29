@@ -41,7 +41,8 @@ void svg_render_rule(const struct tnode *node, const char *base,
 
 extern const char *css_file;
 
-void
+WARN_UNUSED_RESULT
+int
 cat(const char *in, const char *indent)
 {
 	FILE *f;
@@ -51,7 +52,7 @@ cat(const char *in, const char *indent)
 	f = fopen(in, "r");
 	if (f == NULL) {
 		perror(in);
-		exit(EXIT_FAILURE);
+		return 0;
 	}
 
 	fputs(indent, stdout);
@@ -71,9 +72,11 @@ cat(const char *in, const char *indent)
 	}
 
 	(void) fclose(f);
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output(const struct ast_rule *grammar, int xml)
 {
 	const struct ast_rule *p;
@@ -98,7 +101,8 @@ output(const struct ast_rule *grammar, int xml)
 	printf("      svg { margin-left: 30px; }\n");
 
 	if (css_file != NULL) {
-		cat(css_file, "      ");
+		if (!cat(css_file, "      "))
+			return 0;
 	}
 
 	printf("  </style>\n");
@@ -115,7 +119,7 @@ output(const struct ast_rule *grammar, int xml)
 
 		if (!ast_to_rrd(p, &rrd)) {
 			perror("ast_to_rrd");
-			return;
+			return 0;
 		}
 
 		if (prettify) {
@@ -148,21 +152,26 @@ output(const struct ast_rule *grammar, int xml)
 	}
 
 	printf(" </body>\n");
+	return 1;
 }
 
-void
+WARN_UNUSED_RESULT
+int
 html5_output(const struct ast_rule *grammar)
 {
 	printf("<!DOCTYPE html>\n");
 	printf("<html>\n");
 	printf("\n");
 
-	output(grammar, 0);
+	if (!output(grammar, 0))
+		return 0;
 
 	printf("</html>\n");
+	return 1;
 }
 
-void
+WARN_UNUSED_RESULT
+int
 xhtml5_output(const struct ast_rule *grammar)
 {
 	printf("<?xml version='1.0' encoding='utf-8'?>\n");
@@ -172,8 +181,10 @@ xhtml5_output(const struct ast_rule *grammar)
 	printf("  xmlns:xlink='http://www.w3.org/1999/xlink'>\n");
 	printf("\n");
 
-	output(grammar, 1);
+	if (!output(grammar, 1))
+		return 0;
 
 	printf("</html>\n");
+	return 1;
 }
 

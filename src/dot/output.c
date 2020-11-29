@@ -245,7 +245,8 @@ output_rule(const struct ast_rule *grammar,
 	output_alts(grammar, rule, rule->alts);
 }
 
-void
+WARN_UNUSED_RESULT
+int
 dot_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
@@ -259,5 +260,6 @@ dot_output(const struct ast_rule *grammar)
 	}
 
 	printf("}\n");
+	return 1;
 }
 

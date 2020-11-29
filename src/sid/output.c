@@ -20,10 +20,12 @@
 #include "../txt.h"
 #include "../ast.h"
 #include "../xalloc.h"
+#include "../compiler_specific.h"
 
 #include "io.h"
 
-static void output_alt(const struct ast_alt *);
+WARN_UNUSED_RESULT
+static int output_alt(const struct ast_alt *);
 
 static void
 output_section(const char *section)
@@ -43,7 +45,8 @@ output_literal(const struct txt *t)
 	printf("%c%.*s%c; ", c, (int) t->n, t->p, c);
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_basic(const struct ast_term *term)
 {
 	assert(term != NULL);
@@ -60,7 +63,7 @@ output_basic(const struct ast_term *term)
 
 	case TYPE_CI_LITERAL:
 		fprintf(stderr, "unimplemented\n");
-		exit(EXIT_FAILURE);
+		return 0;
 
 	case TYPE_CS_LITERAL:
 		output_literal(&term->u.literal);
@@ -72,16 +75,19 @@ output_basic(const struct ast_term *term)
 
 	case TYPE_PROSE:
 		fprintf(stderr, "unimplemented\n");
-		exit(EXIT_FAILURE);
+		return 0;
 
 	case TYPE_GROUP:
 		fputs("{ ", stdout);
-		output_alt(term->u.group);
+		if (!output_alt(term->u.group))
+			return 0;
 		fputs("}; ", stdout);
 	}
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_term(const struct ast_term *term)
 {
 	assert(term != NULL);
@@ -96,14 +102,17 @@ output_term(const struct ast_term *term)
 		fputs("{ $$; || ", stdout);
 	}
 
-	output_basic(term);
+	if (!output_basic(term))
+		return 0;
 
 	if (term->min == 0) {
 		fputs("}; ", stdout);
 	}
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_alt(const struct ast_alt *alt)
 {
 	const struct ast_term *term;
@@ -112,11 +121,14 @@ output_alt(const struct ast_alt *alt)
 	assert(!alt->invisible);
 
 	for (term = alt->terms; term != NULL; term = term->next) {
-		output_term(term);
+		if (!output_term(term))
+			return 0;
 	}
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_rule(const struct ast_rule *rule)
 {
 	const struct ast_alt *alt;
@@ -124,7 +136,8 @@ output_rule(const struct ast_rule *rule)
 	printf("\t%s = {\n\t\t", rule->name);
 
 	for (alt = rule->alts; alt != NULL; alt = alt->next) {
-		output_alt(alt);
+		if (!output_alt(alt))
+			return 0;
 
 		printf("\n");
 
@@ -134,6 +147,7 @@ output_rule(const struct ast_rule *rule)
 	}
 
 	printf("\t};\n\n");
+	return 1;
 }
 
 static int
@@ -145,21 +159,22 @@ is_equal(const struct ast_term *a, const struct ast_term *b)
 
 	switch (a->type) {
 	case TYPE_EMPTY:      return 1;
-	case TYPE_RULE:       return 0 == strcmp(a->u.rule->name,    b->u.rule->name);
-	case TYPE_CI_LITERAL: return 0 == txtcasecmp(&a->u.literal, &b->u.literal);
-	case TYPE_CS_LITERAL: return 0 == txtcmp(&a->u.literal,     &b->u.literal);
-	case TYPE_TOKEN:      return 0 == strcmp(a->u.token,         b->u.token);
-	case TYPE_PROSE:      return 0 == strcmp(a->u.prose,         b->u.prose);
+	case TYPE_RULE:       return 0 == strcmp(a->u.rule->name   , b->u.rule->name);
+	case TYPE_CI_LITERAL: return 0 == txtcasecmp(&a->u.literal , &b->u.literal);
+	case TYPE_CS_LITERAL: return 0 == txtcmp(&a->u.literal     , &b->u.literal);
+	case TYPE_TOKEN:      return 0 == strcmp(a->u.token        , b->u.token);
+	case TYPE_PROSE:      return 0 == strcmp(a->u.prose        , b->u.prose);
 
 	case TYPE_GROUP:
-		/* unimplemented */
-		return 0;
+	/* unimplemented */
+	return 0;
 	}
 
 	assert(!"unreached");
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_terminals(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
@@ -223,14 +238,17 @@ output_terminals(const struct ast_rule *grammar)
 		for (t = found; t != NULL; t = next) {
 			next = t->next;
 			printf("\t");
-			output_basic(t);
+			if (!output_basic(t))
+				return 0;
 			printf("\n");
 			free(t);
 		}
 	}
+	return 1;
 }
 
-void
+WARN_UNUSED_RESULT
+int
 sid_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
@@ -239,18 +257,20 @@ sid_output(const struct ast_rule *grammar)
 
 	output_section("terminals");
 
-	output_terminals(grammar);
+	if (!output_terminals(grammar))
+		return 0;
 
 	output_section("rules");
 
 	/* TODO list rule declartations */
 
 	for (p = grammar; p != NULL; p = p->next) {
-		output_rule(p);
+		if (!output_rule(p))
+			return 0;
 	}
 
 	output_section("entry");
 
 	printf("\t%s;\n\n", grammar->name);
+	return 1;
 }
-

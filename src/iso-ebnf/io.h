@@ -7,6 +7,8 @@
 #ifndef KGT_ISO_EBNF_IO_H
 #define KGT_ISO_EBNF_IO_H
 
+#include "../compiler_specific.h"
+
 struct ast_rule;
 
 /*
@@ -19,7 +21,8 @@ struct ast_rule;
 struct ast_rule *
 iso_ebnf_input(int (*f)(void *opaque), void *opaque);
 
-void
+WARN_UNUSED_RESULT
+int
 iso_ebnf_output(const struct ast_rule *grammar);
 
 #endif

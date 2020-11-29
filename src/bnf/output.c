@@ -20,7 +20,8 @@
 
 #include "io.h"
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_term(const struct ast_term *term)
 {
 	assert(term->type != TYPE_GROUP);
@@ -42,7 +43,7 @@ output_term(const struct ast_term *term)
 
 	case TYPE_CI_LITERAL:
 		fprintf(stderr, "unimplemented\n");
-		exit(EXIT_FAILURE);
+		return 0;
 
 	case TYPE_CS_LITERAL: {
 			char c;
@@ -58,14 +59,16 @@ output_term(const struct ast_term *term)
 
 	case TYPE_PROSE:
 		fprintf(stderr, "unimplemented\n");
-		exit(EXIT_FAILURE);
+		return 0;
 
 	case TYPE_GROUP:
 		break;
 	}
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_alt(const struct ast_alt *alt)
 {
 	const struct ast_term *term;
@@ -73,13 +76,16 @@ output_alt(const struct ast_alt *alt)
 	assert(!alt->invisible);
 
 	for (term = alt->terms; term != NULL; term = term->next) {
-		output_term(term);
+		if (!output_term(term))
+			return 0;
 	}
 
 	printf("\n");
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output_rule(const struct ast_rule *rule)
 {
 	const struct ast_alt *alt;
@@ -87,7 +93,8 @@ output_rule(const struct ast_rule *rule)
 	printf("<%s> ::=", rule->name);
 
 	for (alt = rule->alts; alt != NULL; alt = alt->next) {
-		output_alt(alt);
+		if (!output_alt(alt))
+			return 0;
 
 		if (alt->next != NULL) {
 			printf("\t|");
@@ -95,15 +102,19 @@ output_rule(const struct ast_rule *rule)
 	}
 
 	printf("\n");
+	return 1;
 }
 
-void
+WARN_UNUSED_RESULT
+int
 bnf_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
 
 	for (p = grammar; p != NULL; p = p->next) {
-		output_rule(p);
+		if (!output_rule(p))
+			return 0;
 	}
+	return 1;
 }
 

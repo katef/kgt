@@ -7,14 +7,18 @@
 #ifndef KGT_HTML5_IO_H
 #define KGT_HTML5_IO_H
 
+#include "../compiler_specific.h"
+
 struct ast_rule;
 
 extern int prettify;
 
-void
+WARN_UNUSED_RESULT
+int
 html5_output(const struct ast_rule *);
 
-void
+WARN_UNUSED_RESULT
+int
 xhtml5_output(const struct ast_rule *);
 
 #endif

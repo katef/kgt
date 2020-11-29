@@ -327,7 +327,8 @@ output(const struct ast_rule *grammar, int xml)
 	printf(" </body>\n");
 }
 
-void
+WARN_UNUSED_RESULT
+int
 ebnf_html5_output(const struct ast_rule *grammar)
 {
 	printf("<!DOCTYPE html>\n");
@@ -337,9 +338,11 @@ ebnf_html5_output(const struct ast_rule *grammar)
 	output(grammar, 0);
 
 	printf("</html>\n");
+	return 1;
 }
 
-void
+WARN_UNUSED_RESULT
+int
 ebnf_xhtml5_output(const struct ast_rule *grammar)
 {
 	printf("<?xml version='1.0' encoding='utf-8'?>\n");
@@ -352,5 +355,6 @@ ebnf_xhtml5_output(const struct ast_rule *grammar)
 	output(grammar, 1);
 
 	printf("</html>\n");
+	return 1;
 }
 

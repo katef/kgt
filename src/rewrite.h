@@ -7,9 +7,12 @@
 #ifndef KGT_REWRITE_H
 #define KGT_REWRITE_H
 
+#include "compiler_specific.h"
+
 struct ast_rule;
 
-void
+WARN_UNUSED_RESULT
+int
 rewrite_ci_literals(struct ast_rule *g);
 
 void

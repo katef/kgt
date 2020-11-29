@@ -24,6 +24,7 @@
 #include "../txt.h"
 #include "../ast.h"
 #include "../xalloc.h"
+#include "../compiler_specific.h"
 
 #include "../rrd/rrd.h"
 #include "../rrd/pretty.h"
@@ -547,7 +548,8 @@ rr_output(const struct ast_rule *grammar, struct dim *dim, int utf8)
 	}
 }
 
-void
+WARN_UNUSED_RESULT
+int
 rrutf8_output(const struct ast_rule *grammar)
 {
 	struct dim dim = {
@@ -562,9 +564,11 @@ rrutf8_output(const struct ast_rule *grammar)
 	};
 
 	rr_output(grammar, &dim, 1);
+	return 1;
 }
 
-void
+WARN_UNUSED_RESULT
+int
 rrtext_output(const struct ast_rule *grammar)
 {
 	struct dim dim = {
@@ -579,5 +583,6 @@ rrtext_output(const struct ast_rule *grammar)
 	};
 
 	rr_output(grammar, &dim, 0);
+	return 1;
 }
 

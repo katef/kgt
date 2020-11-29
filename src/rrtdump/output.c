@@ -20,6 +20,7 @@
 #include "../rrd/node.h"
 #include "../rrd/list.h"
 #include "../rrd/tnode.h"
+#include "../compiler_specific.h"
 
 #include "io.h"
 
@@ -168,7 +169,8 @@ dim_mono_string(const char *s, unsigned *w, unsigned *a, unsigned *d)
 	*d = 1;
 }
 
-void
+WARN_UNUSED_RESULT
+int
 rrtdump_output(const struct ast_rule *grammar)
 {
 	const struct ast_rule *p;
@@ -190,7 +192,7 @@ rrtdump_output(const struct ast_rule *grammar)
 
 		if (!ast_to_rrd(p, &rrd)) {
 			perror("ast_to_rrd");
-			return;
+			return 0;
 		}
 
 		tnode = rrd_to_tnode(rrd, &dim);
@@ -218,5 +220,6 @@ rrtdump_output(const struct ast_rule *grammar)
 		tnode_free(tnode);
 		node_free(rrd);
 	}
+	return 1;
 }
 

@@ -19,6 +19,7 @@
 #include "ast.h"
 #include "rewrite.h"
 #include "xalloc.h"
+#include "compiler_specific.h"
 
 static int
 walk_alts(struct ast_alt *alts);
@@ -44,7 +45,8 @@ add_alt(int invisible, struct ast_alt **alt, const struct txt *t)
 	*alt = new;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 permute_cases(int invisible, struct ast_alt **alt, const struct txt *t)
 {
 	size_t i, j;
@@ -71,7 +73,7 @@ permute_cases(int invisible, struct ast_alt **alt, const struct txt *t)
 				"\"%.*s\", max is %u\n",
 				(int) t->n, t->p,
 				(unsigned) (sizeof alpha_inds / sizeof *alpha_inds));
-			exit(EXIT_FAILURE);
+			return 0;
 		}
 
 		alpha_inds[num_alphas++] = i;
@@ -87,9 +89,11 @@ permute_cases(int invisible, struct ast_alt **alt, const struct txt *t)
 		
 		add_alt(invisible, alt, t);
 	}
+	return 1;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 rewrite_ci(struct ast_term *term)
 {
 	struct txt tmp;
@@ -114,12 +118,14 @@ rewrite_ci(struct ast_term *term)
 	term->u.group = NULL;
 
 	/* invisibility of new alts is inherited from term->invisible itself */
-	permute_cases(term->invisible, &term->u.group, &tmp);
+	int success = permute_cases(term->invisible, &term->u.group, &tmp);
 
 	free((void *) tmp.p);
+	return success;
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 walk_term(struct ast_term *term)
 {
 	assert(term != NULL);
@@ -133,18 +139,18 @@ walk_term(struct ast_term *term)
 
 	case TYPE_GROUP:
 		walk_alts(term->u.group);
-		break;
+		return 1;
 
 	case TYPE_RULE:
 		/* (struct ast_term).u.rule is just for the name; don't recurr into it */
-		break;
+		return 1;
 
 	case TYPE_CI_LITERAL:
-		rewrite_ci(term);
-		break;
+		return rewrite_ci(term);
 	}
 }
 
+WARN_UNUSED_RESULT
 static int
 walk_alts(struct ast_alt *alts)
 {
@@ -153,20 +159,24 @@ walk_alts(struct ast_alt *alts)
 
 	for (alt = alts; alt != NULL; alt = alt->next) {
 		for (term = alt->terms; term != NULL; term = term->next) {
-			walk_term(term);
+			if (!walk_term(term))
+				return 0;
 		}
 	}
 
-	return 0;
+	return 1;
 }
 
-void
+WARN_UNUSED_RESULT
+int
 rewrite_ci_literals(struct ast_rule *grammar)
 {
 	struct ast_rule *rule;
 
 	for (rule = grammar; rule != NULL; rule = rule->next) {
-		walk_alts(rule->alts);
+		if (!walk_alts(rule->alts))
+			return 0;
 	}
+	return 1;
 }
 
