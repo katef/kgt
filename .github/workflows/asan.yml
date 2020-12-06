@@ -29,5 +29,6 @@ jobs:
 
     - name: test
       # I don't want to build SID just for sake of its -l test
-      run: ${{ matrix.make }} -r -j 2 ASAN=1 DEBUG=1 PKGCONF=pkg-config SID='true; echo sid' CC=${{ matrix.cc }} LX=./build/bin/lx test
+      # Same for lx
+      run: ${{ matrix.make }} -r -j 2 ASAN=1 DEBUG=1 PKGCONF=pkg-config SID='true; echo sid' LX='true; echo lx' CC=${{ matrix.cc }} test
 
