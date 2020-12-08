@@ -38,7 +38,8 @@
 
 extern const char *css_file;
 
-void
+WARN_UNUSED_RESULT
+int
 cat(const char *in, const char *indent);
 
 struct render_context {
@@ -880,7 +881,9 @@ svg_output(const struct ast_rule *grammar)
 	printf("    path.arrow { fill: black; }\n");
 
 	if (css_file != NULL) {
-		cat(css_file, "    ");
+		if (!cat(css_file, "    ")) {
+			return 0;
+		}
 	}
 
 	printf("  </style>\n");

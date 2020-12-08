@@ -26,7 +26,8 @@
 
 extern const char *css_file;
 
-void
+WARN_UNUSED_RESULT
+int
 cat(const char *in, const char *indent);
 
 static void output_alt(const struct ast_alt *alt);
@@ -263,7 +264,8 @@ output_rule(const struct ast_rule *rule)
 	printf("\n");
 }
 
-static void
+WARN_UNUSED_RESULT
+static int
 output(const struct ast_rule *grammar, int xml)
 {
 	const struct ast_rule *p;
@@ -311,7 +313,9 @@ output(const struct ast_rule *grammar, int xml)
 	printf("    dl.bnf dd { margin-left: 2em; }\n");
 
 	if (css_file != NULL) {
-		cat(css_file, "    ");
+		if (!cat(css_file, "    ")) {
+			return 0;
+		}
 	}
 
 	printf("  </style>\n");
@@ -325,6 +329,7 @@ output(const struct ast_rule *grammar, int xml)
 	}
 
 	printf(" </body>\n");
+	return 1;
 }
 
 WARN_UNUSED_RESULT
@@ -335,7 +340,9 @@ ebnf_html5_output(const struct ast_rule *grammar)
 	printf("<html>\n");
 	printf("\n");
 
-	output(grammar, 0);
+	if (!output(grammar, 0)) {
+		return 0;
+	}
 
 	printf("</html>\n");
 	return 1;
@@ -352,7 +359,9 @@ ebnf_xhtml5_output(const struct ast_rule *grammar)
 	printf("  xmlns:xlink='http://www.w3.org/1999/xlink'>\n");
 	printf("\n");
 
-	output(grammar, 1);
+	if (!output(grammar, 1)) {
+		return 0;
+	}
 
 	printf("</html>\n");
 	return 1;
