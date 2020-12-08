@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        cc: [ clang ] # UBSan is currently clang only
+        cc: [ clang, gcc ]
         make: [ bmake ]
     
     steps:
