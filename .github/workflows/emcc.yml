@@ -18,11 +18,15 @@ jobs:
       with:
         submodules: recursive
 
+    # the xenial emscripten package is old (and doesn't support wasm);
+    # this brings in emsdk which is more recent, and does.
+    - uses: mymindstorm/setup-emsdk@v7
+
     - name: dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install bmake emscripten
-        emcc -v # first run to generate ~/.emscripten
+        sudo apt-get install bmake
+        # emcc -v # first run to generate ~/.emscripten only needed for system package
         emcc -v # informational
 
     - name: make
