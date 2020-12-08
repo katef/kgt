@@ -12,7 +12,6 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         cc: [ clang ] # MSan is currently clang only
-        make: [ bmake ]
     
     steps:
     - uses: actions/checkout@v1
@@ -25,10 +24,10 @@ jobs:
         sudo apt-get install bmake
 
     - name: make
-      run: ${{ matrix.make }} -r -j 2 MSAN=1 DEBUG=1 PKGCONF=pkg-config CC=${{ matrix.cc }}
+      run: bmake -r -j 2 MSAN=1 DEBUG=1 PKGCONF=pkg-config CC=${{ matrix.cc }}
 
     - name: test
       # I don't want to build SID just for sake of its -l test
       # Same for lx
-      run: ${{ matrix.make }} -r -j 2 MSAN=1 DEBUG=1 PKGCONF=pkg-config SID='true; echo sid' LX='true; echo lx' CC=${{ matrix.cc }} test
+      run: bmake -r -j 2 MSAN=1 DEBUG=1 PKGCONF=pkg-config SID='true; echo sid' LX='true; echo lx' CC=${{ matrix.cc }} test
 
