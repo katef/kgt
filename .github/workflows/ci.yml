@@ -10,17 +10,33 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest ]
+        os: [ ubuntu-latest, macos-latest ]
         cc: [ clang, gcc ]
         make: [ bmake, pmake ]
+        exclude:
+          - os: macos-latest
+            make: pmake
+          - os: macos-latest
+            cc: gcc # it's clang anyway
     
     steps:
     - uses: actions/checkout@v1
       with:
         submodules: recursive
 
-    - name: dependencies
-      run: sudo apt-get install pmake bmake
+    - name: dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        uname -a
+        sudo apt-get install pmake bmake
+        ${{ matrix.cc }} --version
+
+    - name: dependencies (MacOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        uname -a
+        brew install bmake
+        ${{ matrix.cc }} --version
 
     - name: make
       run: ${{ matrix.make }} -r -j 2 PKGCONF=pkg-config CC=${{ matrix.cc }}
