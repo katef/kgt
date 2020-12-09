@@ -25,10 +25,24 @@ jobs:
     - name: dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install bmake
+        sudo apt-get install bmake # wabt is not in xenial
         # emcc -v # first run to generate ~/.emscripten only needed for system package
         emcc -v # informational
+        curl https://wasmtime.dev/install.sh -sSf | bash # not packaged for ubuntu
+        # . ~/.bashrc for the paths added by wasmtime's installation does not work here
+        # I can't figure out why, so I'm just setting the paths by hand.
+        export WASMTIME_HOME="$HOME/.wasmtime"
+        export PATH="$WASMTIME_HOME/bin:$PATH"
+        wasmtime --version
 
     - name: make
       run: bmake -r -j 2 DEBUG=1 PKGCONF=pkg-config CC=${{ matrix.cc }}
+
+    - name: test
+      # I don't want to build SID or lx just for sake of their -l test
+      # and wasm-validate is not packaged for xenial
+      run: |
+        export WASMTIME_HOME="$HOME/.wasmtime"
+        export PATH="$WASMTIME_HOME/bin:$PATH"
+        bmake -r -j 2 PKGCONF=pkg-config SID='true; echo sid' LX='true; echo lx' WASM_VALIDATE='true; echo wasm-validate' CC=${{ matrix.cc }} test
 
