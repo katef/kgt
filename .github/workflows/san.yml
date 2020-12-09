@@ -1,24 +1,29 @@
+# testing different sanitizers
+# the goal here is testing different sanitizers
+# these are also run for non-debug mode to test optimisations
+
 name: Sanitizers
 
 on: [push]
 
 jobs:
   build:
-
-    runs-on: ${{ matrix.os }}
+    name: "${{ matrix.san }} ${{ matrix.cc }} ${{ matrix.os }} ${{ matrix.debug }}"
+    runs-on: ${{ matrix.os }}-latest
 
     strategy:
       fail-fast: false
       matrix:
         san: [ ASAN, UBSAN, MSAN, EFENCE ]
-        os: [ ubuntu-latest, macos-latest ]
+        os: [ ubuntu, macos ]
         cc: [ clang, gcc ]
+        debug: [ DEBUG, RELEASE ] # RELEASE=1 is a no-op
         exclude:
-          - os: macos-latest
+          - os: macos
             cc: gcc # it's clang anyway
-          - os: macos-latest
+          - os: macos
             san: EFENCE # not packaged
-          - os: macos-latest
+          - os: macos
             san: MSAN # not supported
     
     steps:
@@ -27,24 +32,24 @@ jobs:
         submodules: recursive
 
     - name: dependencies (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu'
       run: |
         uname -a
         sudo apt-get install bmake electric-fence
         ${{ matrix.cc }} --version
 
     - name: dependencies (MacOS)
-      if: matrix.os == 'macos-latest'
+      if: matrix.os == 'macos'
       run: |
         uname -a
         brew install bmake
         ${{ matrix.cc }} --version
 
     - name: make
-      run: bmake -r -j 2 ${{ matrix.san }}=1 DEBUG=1 PKGCONF=pkg-config CC=${{ matrix.cc }}
+      run: bmake -r -j 2 ${{ matrix.san }}=1 ${{ matrix.debug }}=1 PKGCONF=pkg-config CC=${{ matrix.cc }}
 
     - name: test
       # I don't want to build SID just for sake of its -l test
       # Same for lx
-      run: bmake -r -j 2 ${{ matrix.san }}=1 DEBUG=1 PKGCONF=pkg-config SID='true; echo sid' LX='true; echo lx' CC=${{ matrix.cc }} test
+      run: bmake -r -j 2 ${{ matrix.san }}=1 ${{ matrix.debug }}=1 PKGCONF=pkg-config SID='true; echo sid' LX='true; echo lx' CC=${{ matrix.cc }} test
 
