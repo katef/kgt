@@ -9,9 +9,10 @@ install:: all
 clean::
 
 # things to override
-CC     ?= gcc
-BUILD  ?= build
-PREFIX ?= /usr/local
+CC       ?= gcc
+BUILD    ?= build
+PREFIX   ?= /usr/local
+WASMTIME ?= wasmtime
 
 # layout
 SUBDIR += src/bnf
@@ -47,4 +48,9 @@ SUBDIR += src
 .include <mkdir.mk>
 .include <install.mk>
 .include <clean.mk>
+
+test::
+.if ${CC:T:Memcc}
+	echo 'hello = world.' | ${WASMTIME} ${BUILD}/bin/kgt.wasm -- -l wsn -e rrutf8
+.endif
 
