@@ -27,3 +27,9 @@ jobs:
 
     - name: install
       run: ${{ matrix.make }} -r -j 2 PKGCONF=pkg-config PREFIX=/tmp/p install
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: kgt-${{ github.sha }}
+        path: /tmp/p/
+
