@@ -49,6 +49,6 @@ jobs:
     - name: artifact
       uses: actions/upload-artifact@v2
       with:
-        name: kgt.wasm
+        name: kgt-${{ github.sha }}.wasm
         path: build/bin/kgt.wasm
 

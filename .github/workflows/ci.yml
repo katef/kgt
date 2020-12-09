@@ -31,6 +31,6 @@ jobs:
     - name: artifact
       uses: actions/upload-artifact@v2
       with:
-        name: kgt.zip
+        name: kgt-${{ github.sha }}
         path: /tmp/p/
 
