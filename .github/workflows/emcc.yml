@@ -46,3 +46,9 @@ jobs:
         export PATH="$WASMTIME_HOME/bin:$PATH"
         bmake -r -j 2 PKGCONF=pkg-config SID='true; echo sid' LX='true; echo lx' WASM_VALIDATE='true; echo wasm-validate' CC=${{ matrix.cc }} test
 
+    - name: artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: kgt.wasm
+        path: build/bin/kgt.wasm
+
