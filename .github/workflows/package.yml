@@ -1,0 +1,58 @@
+# packaging for release builds
+
+name: Package
+
+on: [push]
+
+jobs:
+  build:
+    name: "${{ matrix.pkg }}"
+    runs-on: ${{ matrix.os }}-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # others: cpan, gem, npm, osxpkg, p5p, pacman, pear, pkgin, pleaserun, puppet, python, snap, solaris, virtualenv ]
+        pkg: [ apk, deb, dir, freebsd, rpm, sh, tar, zip ]
+        os: [ ubuntu ]
+        cc: [ gcc ]
+    
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: recursive
+
+    - name: dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu'
+      run: |
+        uname -a
+        sudo apt-get install bmake
+        ${{ matrix.cc }} --version
+
+    - name: make
+      run: |
+        find . -name 'parser.?' -exec touch '{}' \; # workaround for git checkout timestamps
+        find . -name 'lexer.?' -exec touch '{}' \; # workaround for git checkout timestamps
+        bmake -r -j 2 PKGCONF=pkg-config CC=${{ matrix.cc }}
+
+    - name: test
+      # I don't want to build SID just for sake of its -l test
+      # Same for lx
+      run: bmake -r -j 2 PKGCONF=pkg-config SID='true; echo sid' LX='true; echo lx' CC=${{ matrix.cc }} test
+
+    - name: install
+      run: |
+        bmake -r -j 2 PKGCONF=pkg-config CC=${{ matrix.cc }} PREFIX=prefix install
+        mkdir pkg
+
+    - name: Package
+      uses: bpicode/github-action-fpm@master
+      with:
+        fpm_args: 'prefix'
+        fpm_opts: '-p pkg/ -n kgt -t ${{ matrix.pkg }} -v 0.${{ github.sha }} -m kate@elide.org -s dir'
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: kgt-${{ matrix.pkg }}
+        path: pkg/* # single file here (because this is a matrix build), name format differs per package type     
+
