@@ -42,7 +42,10 @@ jobs:
         ${{ matrix.cc }} --version
 
     - name: make
-      run: ${{ matrix.make }} -r -j 2 ${{ matrix.debug }}=1 PKGCONF=pkg-config CC=${{ matrix.cc }}
+      run: |
+        find . -name 'parser.?' -exec touch '{}' \; # workaround for git checkout timestamps
+        find . -name 'lexer.?' -exec touch '{}' \; # workaround for git checkout timestamps
+        ${{ matrix.make }} -r -j 2 ${{ matrix.debug }}=1 PKGCONF=pkg-config CC=${{ matrix.cc }}
 
     - name: test
       # I don't want to build SID just for sake of its -l test
