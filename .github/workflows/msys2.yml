@@ -1,0 +1,48 @@
+name: MSYS2
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-2016, windows-2019 ]
+        cc: [ clang, gcc ]
+        debug: [ DEBUG, RELEASE ] # RELEASE=1 is a no-op
+        msystem: [MINGW32, MINGW64]
+    defaults:
+      run:
+        shell: msys2 {0}
+    
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: recursive
+
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{ matrix.msystem }}
+        install: make
+
+    - run: pacman --noconfirm -S gcc
+      if: ${{ matrix.compiler == 'gcc' }}
+    - run: pacman --noconfirm -S mingw-w64-x86_64-clang
+      if: ${{ (matrix.msystem == 'MINGW64') && (matrix.cc == 'clang') }}
+    - run: pacman --noconfirm -S mingw-w64-i686-clang
+      if: ${{ (matrix.msystem == 'MINGW32') && (matrix.cc == 'clang') }}
+
+    - name: make
+      run: |
+        # note: lexer.h first, because parser.? depends on it
+        find . -name 'lexer.?' -exec touch '{}' \; # workaround for git checkout timestamps
+        find . -name 'parser.?' -exec touch '{}' \; # workaround for git checkout timestamps
+        bmake -r -j 2 ${{ matrix.san }}=1 ${{ matrix.debug }}=1 PKGCONF=pkg-config CC=${{ matrix.cc }}
+
+    - name: test
+      # I don't want to build SID just for sake of its -l test
+      # Same for lx
+      run: bmake -r -j 2 ${{ matrix.san }}=1 ${{ matrix.debug }}=1 PKGCONF=pkg-config SID='true; echo sid' LX='true; echo lx' CC=${{ matrix.cc }} test
+
