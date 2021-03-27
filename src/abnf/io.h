@@ -8,7 +8,7 @@
 #define KGT_ABNF_IO_H
 
 #include "../compiler_specific.h"
-
+#include "../parsing_error.h"
 struct ast_rule;
 
 /*
@@ -17,7 +17,7 @@ struct ast_rule;
  */
 
 struct ast_rule *
-abnf_input(int (*f)(void *opaque), void *opaque);
+abnf_input(int (*f)(void *opaque), void *opaque, parsing_error_queue* errors);
 
 WARN_UNUSED_RESULT
 int

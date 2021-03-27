@@ -40,6 +40,7 @@
 	#include <errno.h>
 	#include <ctype.h>
 
+	#include "../parsing_error.h"
 	#include "../txt.h"
 	#include "../ast.h"
 	#include "../xalloc.h"
@@ -97,6 +98,8 @@
 		/* TODO: use lx's generated conveniences for the pattern buffer */
 		char a[512];
 		char *p;
+
+		parsing_error_queue errors;
 	};
 
 	#define CURRENT_TERMINAL (act_state->lex_tok)
@@ -107,27 +110,6 @@
 	#define RESTORE_LEXER    do { act_state->lex_tok = act_state->lex_tok_save; } while (0)
 
 	extern int allow_undefined;
-
-	static const char *
-	pattern_buffer(struct lex_state *lex_state)
-	{
-		const char *s;
-
-		assert(lex_state != NULL);
-
-		/* TODO */
-		*lex_state->p++ = '\0';
-
-		s = xstrdup(lex_state->a);
-		if (s == NULL) {
-			perror("xstrdup");
-			exit(EXIT_FAILURE);
-		}
-
-		lex_state->p = lex_state->a;
-
-		return s;
-	}
 
 	static const char *
 	prefix(int base)
@@ -278,32 +260,52 @@
 	}
 
 	static void
-	err(const struct lex_state *lex_state, const char *fmt, ...)
+	err(struct lex_state *lex_state, const char *fmt, ...)
 	{
+		assert(lex_state != NULL);
+
+		parsing_error error;
+		error.line = lex_state->lx.start.line;
+		error.column= lex_state->lx.start.col;
 		va_list ap;
+		va_start(ap, fmt);
+		vsnprintf(error.description, PARSING_ERROR_DESCRIPTION_SIZE, fmt, ap);
+		va_end(ap);
+
+		parsing_error_queue_push(&(lex_state->errors), error);
+	}
+
+	static void
+	err_expected(struct lex_state *lex_state, const char *token)
+	{
+		err(lex_state, "Syntax error: expected %s", token);
+	}
+
+	static void
+	err_unimplemented(struct lex_state *lex_state, const char *s)
+	{
+		err(lex_state, "Unimplemented: %s", s);
+	}
+
+	static const char *
+	pattern_buffer(struct lex_state *lex_state)
+	{
+		const char *s;
 
 		assert(lex_state != NULL);
 
-		va_start(ap, fmt);
-		fprintf(stderr, "%u:%u: ",
-			lex_state->lx.start.line, lex_state->lx.start.col);
-		vfprintf(stderr, fmt, ap);
-		fprintf(stderr, "\n");
-		va_end(ap);
-	}
+		/* TODO */
+		*lex_state->p++ = '\0';
 
-	static void
-	err_expected(const struct lex_state *lex_state, const char *token)
-	{
-		err(lex_state, "Syntax error: expected %s", token);
-		exit(EXIT_FAILURE);
-	}
+		s = xstrdup(lex_state->a);
+		if (s == NULL) {
+			perror("xstrdup");
+			exit(EXIT_FAILURE);
+		}
 
-	static void
-	err_unimplemented(const struct lex_state *lex_state, const char *s)
-	{
-		err(lex_state, "Unimplemented: %s", s);
-		exit(EXIT_FAILURE);
+		lex_state->p = lex_state->a;
+
+		return s;
 	}
 
 @}, @{
@@ -686,10 +688,8 @@
 
 	<add-rule-to-list>: (l :ast_rule, r :ast_rule) -> () = @{
 		if (ast_find_rule(@l, @r->name)) {
-			fprintf(stderr, "production rule <%s> already exists\n", @r->name);
-			/* TODO: print location of this and previous definition */
-			/* TODO: handle as warning; add rule anyway, and bail out at end */
-			exit(EXIT_FAILURE);
+      err(lex_state, "production rule <%s> already exists", @r->name);
+			return;
 		}
 
 		assert(@r->next == NULL);
@@ -697,7 +697,7 @@
 	@};
 
 	<current-rules>: () -> (l :ast_rule) = @{
-		fprintf(stderr, "unimplemented\n");
+    err(lex_state, "unimplemented");
 		@l = NULL;
 		@!;
 	@};
@@ -709,7 +709,7 @@
 	@};
 
 	<add-alts>: (r :ast_rule, a :ast_alt) -> () = @{
-		fprintf(stderr, "unimplemented\n");
+		err(lex_state, "Unimplemented");
 		@!;
 	@};
 
@@ -753,7 +753,7 @@
 	}
 
 	struct ast_rule *
-	FORM_INPUT(int (*f)(void *opaque), void *opaque)
+	FORM_INPUT(int (*f)(void *opaque), void *opaque, parsing_error_queue* errors)
 	{
 		struct act_state  act_state_s;
 		struct act_state *act_state;
@@ -777,6 +777,7 @@
 
 		lex_state    = &lex_state_s;
 		lex_state->p = lex_state->a;
+		lex_state->errors = NULL;
 
 		lx = &lex_state->lx;
 
@@ -797,8 +798,8 @@
 		lx->clear      = CAT(LX_PREFIX, _dynclear);
 		lx->free       = CAT(LX_PREFIX, _dynfree);
 
-	/* XXX */
-	lx->free = NULL;
+		/* XXX */
+		lx->free = NULL;
 
 		/* This is a workaround for ADVANCE_LEXER assuming a pointer */
 		act_state = &act_state_s;
@@ -816,9 +817,6 @@
 			const struct ast_alt *q;
 			struct ast_term *t;
 			struct ast_rule *r;
-			int ok;
-
-			ok = 1;
 
 			for (p = g; p != NULL; p = p->next) {
 				for (q = p->alts; q != NULL; q = q->next) {
@@ -836,11 +834,8 @@
 						}
 
 						if (!allow_undefined) {
-							fprintf(stderr, "production rule <%s> not defined\n", t->u.rule->name);
-							/* TODO: print location of this and previous definition */
+							err(lex_state, "production rule <%s> not defined", t->u.rule->name);
 							/* XXX: would leak the ast_rule here */
-
-							ok = 0;
 							continue;
 						}
 
@@ -857,16 +852,12 @@
 					}
 				}
 			}
-
-			if (!ok) {
-				exit(EXIT_FAILURE);
-			}
 		}
 
+		*errors = lex_state->errors;
 		return g;
 	}
 
 @}, @{
 
 @};
-

@@ -16,6 +16,7 @@
 
 #include "txt.h"
 #include "ast.h"
+#include "parsing_error.h"
 #include "rewrite.h"
 #include "xalloc.h"
 #include "rrd/node.h"
@@ -55,7 +56,7 @@ void __wait(int a, int b, int c, int d) { }
 
 struct io {
 	const char *name;
-	struct ast_rule *(*in)(int (*f)(void *), void *);
+	struct ast_rule *(*in)(int (*f)(void *), void *, parsing_error_queue*);
 	int (*out)(const struct ast_rule *);
 	enum ast_features ast_unsupported;
 	enum rrd_features rrd_unsupported;
@@ -190,7 +191,22 @@ main(int argc, char *argv[])
 	assert(io->in  != NULL);
 	assert(io->out != NULL);
 
-	g = in->in(kgt_fgetc, stdin);
+	parsing_error_queue errors = NULL;
+	g = in->in(kgt_fgetc, stdin, &errors);
+
+	int error_count = 0;
+	while(errors) {
+		error_count += 1;
+		parsing_error error;
+		parsing_error_queue_pop(&errors, &error);
+
+		fprintf(stderr, "%u:%u: %s\n", error.line, error.column,
+						error.description);
+	}
+	if (error_count != 0) {
+		fprintf(stderr, "KGT: Exiting. %d errors reported\n", error_count);
+		exit(EXIT_FAILURE);
+	}
 
 	{
 		unsigned v;
@@ -253,4 +269,3 @@ main(int argc, char *argv[])
 
 	/* TODO: free ast */
 }
-
