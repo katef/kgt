@@ -122,4 +122,3 @@ int
 ast_binary(const struct ast_rule *ast);
 
 #endif
-

@@ -4,6 +4,7 @@ SRC += src/ast.c
 SRC += src/ast_binary.c
 SRC += src/bitmap.c
 SRC += src/main.c
+SRC += src/parsing_error.c
 SRC += src/rewrite_ci.c
 SRC += src/rewrite_invisible.c
 SRC += src/txt.c
@@ -22,6 +23,7 @@ ${BUILD}/bin/kgt: ${BUILD}/src/ast.o
 ${BUILD}/bin/kgt: ${BUILD}/src/ast_binary.o
 ${BUILD}/bin/kgt: ${BUILD}/src/bitmap.o
 ${BUILD}/bin/kgt: ${BUILD}/src/main.o
+${BUILD}/bin/kgt: ${BUILD}/src/parsing_error.o
 ${BUILD}/bin/kgt: ${BUILD}/src/rewrite_ci.o
 ${BUILD}/bin/kgt: ${BUILD}/src/rewrite_invisible.o
 ${BUILD}/bin/kgt: ${BUILD}/src/txt.o

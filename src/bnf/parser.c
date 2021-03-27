@@ -9,7 +9,7 @@
 
 /* BEGINNING OF HEADER */
 
-#line 103 "src/parser.act"
+#line 32 "src/parser.act"
 
 
 	#include <assert.h>
@@ -21,6 +21,7 @@
 	#include <errno.h>
 	#include <ctype.h>
 
+	#include "../parsing_error.h"
 	#include "../txt.h"
 	#include "../ast.h"
 	#include "../xalloc.h"
@@ -78,6 +79,8 @@
 		/* TODO: use lx's generated conveniences for the pattern buffer */
 		char a[512];
 		char *p;
+
+		parsing_error_queue errors;
 	};
 
 	#define CURRENT_TERMINAL (act_state->lex_tok)
@@ -88,27 +91,6 @@
 	#define RESTORE_LEXER    do { act_state->lex_tok = act_state->lex_tok_save; } while (0)
 
 	extern int allow_undefined;
-
-	static const char *
-	pattern_buffer(struct lex_state *lex_state)
-	{
-		const char *s;
-
-		assert(lex_state != NULL);
-
-		/* TODO */
-		*lex_state->p++ = '\0';
-
-		s = xstrdup(lex_state->a);
-		if (s == NULL) {
-			perror("xstrdup");
-			exit(EXIT_FAILURE);
-		}
-
-		lex_state->p = lex_state->a;
-
-		return s;
-	}
 
 	static const char *
 	prefix(int base)
@@ -259,35 +241,55 @@
 	}
 
 	static void
-	err(const struct lex_state *lex_state, const char *fmt, ...)
+	err(struct lex_state *lex_state, const char *fmt, ...)
 	{
+		assert(lex_state != NULL);
+
+		parsing_error error;
+		error.line = lex_state->lx.start.line;
+		error.column= lex_state->lx.start.col;
 		va_list ap;
+		va_start(ap, fmt);
+		vsnprintf(error.description, PARSING_ERROR_DESCRIPTION_SIZE, fmt, ap);
+		va_end(ap);
+
+		parsing_error_queue_push(&(lex_state->errors), error);
+	}
+
+	static void
+	err_expected(struct lex_state *lex_state, const char *token)
+	{
+		err(lex_state, "Syntax error: expected %s", token);
+	}
+
+	static void
+	err_unimplemented(struct lex_state *lex_state, const char *s)
+	{
+		err(lex_state, "Unimplemented: %s", s);
+	}
+
+	static const char *
+	pattern_buffer(struct lex_state *lex_state)
+	{
+		const char *s;
 
 		assert(lex_state != NULL);
 
-		va_start(ap, fmt);
-		fprintf(stderr, "%u:%u: ",
-			lex_state->lx.start.line, lex_state->lx.start.col);
-		vfprintf(stderr, fmt, ap);
-		fprintf(stderr, "\n");
-		va_end(ap);
+		/* TODO */
+		*lex_state->p++ = '\0';
+
+		s = xstrdup(lex_state->a);
+		if (s == NULL) {
+			perror("xstrdup");
+			exit(EXIT_FAILURE);
+		}
+
+		lex_state->p = lex_state->a;
+
+		return s;
 	}
 
-	static void
-	err_expected(const struct lex_state *lex_state, const char *token)
-	{
-		err(lex_state, "Syntax error: expected %s", token);
-		exit(EXIT_FAILURE);
-	}
-
-	static void
-	err_unimplemented(const struct lex_state *lex_state, const char *s)
-	{
-		err(lex_state, "Unimplemented: %s", s);
-		exit(EXIT_FAILURE);
-	}
-
-#line 291 "src/bnf/parser.c"
+#line 293 "src/bnf/parser.c"
 
 
 #ifndef ERROR_TERMINAL
@@ -427,13 +429,13 @@ ZL2_body:;
 					case (TOK_CHAR):
 						/* BEGINNING OF EXTRACT: CHAR */
 						{
-#line 341 "src/parser.act"
+#line 340 "src/parser.act"
 
 		assert(strlen(lex_state->buf.a) == 1);
 
 		ZIc = lex_state->buf.a[0];
 	
-#line 437 "src/bnf/parser.c"
+#line 439 "src/bnf/parser.c"
 						}
 						/* END OF EXTRACT: CHAR */
 						break;
@@ -451,14 +453,14 @@ ZL2_body:;
 		/* TODO */
 		*lex_state->p++ = (ZIc);
 	
-#line 455 "src/bnf/parser.c"
+#line 457 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: pattern-char */
 			/* BEGINNING OF INLINE: body */
 			goto ZL2_body;
 			/* END OF INLINE: body */
 		}
-		/*UNREACHED*/
+		/* UNREACHED */
 	case (ERROR_TERMINAL):
 		return;
 	default:
@@ -490,21 +492,21 @@ ZL1:;
 	{
 		/* BEGINNING OF ACTION: make-empty-rule */
 		{
-#line 673 "src/parser.act"
+#line 674 "src/parser.act"
 
 		(ZIl) = NULL;
 	
-#line 498 "src/bnf/parser.c"
+#line 500 "src/bnf/parser.c"
 		}
 		/* END OF ACTION: make-empty-rule */
 		/* BEGINNING OF ACTION: err-syntax */
 		{
-#line 720 "src/parser.act"
+#line 717 "src/parser.act"
 
 		err(lex_state, "Syntax error");
 		exit(EXIT_FAILURE);
 	
-#line 508 "src/bnf/parser.c"
+#line 510 "src/bnf/parser.c"
 		}
 		/* END OF ACTION: err-syntax */
 	}
@@ -523,11 +525,11 @@ prod_term(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-empty-term */
 			{
-#line 579 "src/parser.act"
+#line 580 "src/parser.act"
 
 		(ZIt) = ast_make_empty_term(act_state->invisible);
 	
-#line 531 "src/bnf/parser.c"
+#line 533 "src/bnf/parser.c"
 			}
 			/* END OF ACTION: make-empty-term */
 		}
@@ -572,11 +574,11 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 		case (TOK_NAME):
 			/* BEGINNING OF EXTRACT: NAME */
 			{
-#line 368 "src/parser.act"
+#line 369 "src/parser.act"
 
 		ZIs = pattern_buffer(lex_state);
 	
-#line 580 "src/bnf/parser.c"
+#line 582 "src/bnf/parser.c"
 			}
 			/* END OF EXTRACT: NAME */
 			break;
@@ -603,11 +605,11 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			{
 				/* BEGINNING OF ACTION: err-expected-equals */
 				{
-#line 732 "src/parser.act"
+#line 730 "src/parser.act"
 
 		err_expected(lex_state, "production rule assignment");
 	
-#line 611 "src/bnf/parser.c"
+#line 613 "src/bnf/parser.c"
 				}
 				/* END OF ACTION: err-expected-equals */
 			}
@@ -621,11 +623,11 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 		}
 		/* BEGINNING OF ACTION: make-rule */
 		{
-#line 669 "src/parser.act"
+#line 670 "src/parser.act"
 
 		(ZIr) = ast_make_rule((ZIs), (ZIa));
 	
-#line 629 "src/bnf/parser.c"
+#line 631 "src/bnf/parser.c"
 		}
 		/* END OF ACTION: make-rule */
 		/* BEGINNING OF INLINE: 83 */
@@ -649,11 +651,11 @@ prod_rule(lex_state lex_state, act_state act_state, map_rule *ZOr)
 			{
 				/* BEGINNING OF ACTION: err-expected-sep */
 				{
-#line 728 "src/parser.act"
+#line 726 "src/parser.act"
 
 		err_expected(lex_state, "production rule separator");
 	
-#line 657 "src/bnf/parser.c"
+#line 659 "src/bnf/parser.c"
 				}
 				/* END OF ACTION: err-expected-sep */
 			}
@@ -684,13 +686,11 @@ prod_90(lex_state lex_state, act_state act_state, map_rule *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-rule-to-list */
 			{
-#line 688 "src/parser.act"
+#line 689 "src/parser.act"
 
 		if (ast_find_rule((ZIr), (*ZIl)->name)) {
-			fprintf(stderr, "production rule <%s> already exists\n", (*ZIl)->name);
-			/* TODO: print location of this and previous definition */
-			/* TODO: handle as warning; add rule anyway, and bail out at end */
-			exit(EXIT_FAILURE);
+      err(lex_state, "production rule <%s> already exists", (*ZIl)->name);
+			return;
 		}
 
 		assert((*ZIl)->next == NULL);
@@ -738,7 +738,7 @@ prod_91(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 				{
 					/* BEGINNING OF ACTION: err-expected-alt */
 					{
-#line 724 "src/parser.act"
+#line 722 "src/parser.act"
 
 		err_expected(lex_state, "alternative separator");
 	
@@ -756,7 +756,7 @@ prod_91(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 			}
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 665 "src/parser.act"
+#line 666 "src/parser.act"
 
 		(ZIl) = ast_make_alt(act_state->invisible, (*ZIt));
 	
@@ -765,7 +765,7 @@ prod_91(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 			/* END OF ACTION: make-alt */
 			/* BEGINNING OF ACTION: add-alt-to-list */
 			{
-#line 683 "src/parser.act"
+#line 684 "src/parser.act"
 
 		assert((ZIl)->next == NULL);
 		(ZIl)->next = (ZIa);
@@ -779,7 +779,7 @@ prod_91(lex_state lex_state, act_state act_state, map_term *ZIt, map_alt *ZOl)
 		{
 			/* BEGINNING OF ACTION: make-alt */
 			{
-#line 665 "src/parser.act"
+#line 666 "src/parser.act"
 
 		(ZIl) = ast_make_alt(act_state->invisible, (*ZIt));
 	
@@ -814,7 +814,7 @@ prod_92(lex_state lex_state, act_state act_state, map_term *ZIl)
 			}
 			/* BEGINNING OF ACTION: add-term-to-list */
 			{
-#line 678 "src/parser.act"
+#line 679 "src/parser.act"
 
 		assert((*ZIl)->next == NULL);
 		(*ZIl)->next = (ZIt);
@@ -847,7 +847,7 @@ prod_93(lex_state lex_state, act_state act_state, map_term *ZOt)
 
 			/* BEGINNING OF EXTRACT: CS_LITERAL */
 			{
-#line 377 "src/parser.act"
+#line 378 "src/parser.act"
 
 		ZIx.p = pattern_buffer(lex_state);
 		ZIx.n = strlen(ZIx.p);
@@ -858,7 +858,7 @@ prod_93(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-cs-literal-term */
 			{
-#line 612 "src/parser.act"
+#line 613 "src/parser.act"
 
 		(ZIt) = ast_make_literal_term(act_state->invisible, &(ZIx), 0);
 	
@@ -873,7 +873,7 @@ prod_93(lex_state lex_state, act_state act_state, map_term *ZOt)
 
 			/* BEGINNING OF EXTRACT: NAME */
 			{
-#line 368 "src/parser.act"
+#line 369 "src/parser.act"
 
 		ZIs = pattern_buffer(lex_state);
 	
@@ -883,7 +883,7 @@ prod_93(lex_state lex_state, act_state act_state, map_term *ZOt)
 			ADVANCE_LEXER;
 			/* BEGINNING OF ACTION: make-rule-term */
 			{
-#line 591 "src/parser.act"
+#line 584 "src/parser.act"
 
 		struct ast_rule *r;
 
@@ -921,7 +921,7 @@ ZL0:;
 
 /* BEGINNING OF TRAILER */
 
-#line 869 "src/parser.act"
+#line 738 "src/parser.act"
 
 
 	static int
@@ -940,7 +940,7 @@ ZL0:;
 	}
 
 	struct ast_rule *
-	FORM_INPUT(int (*f)(void *opaque), void *opaque)
+	FORM_INPUT(int (*f)(void *opaque), void *opaque, parsing_error_queue* errors)
 	{
 		struct act_state  act_state_s;
 		struct act_state *act_state;
@@ -964,6 +964,7 @@ ZL0:;
 
 		lex_state    = &lex_state_s;
 		lex_state->p = lex_state->a;
+		lex_state->errors = NULL;
 
 		lx = &lex_state->lx;
 
@@ -984,8 +985,8 @@ ZL0:;
 		lx->clear      = CAT(LX_PREFIX, _dynclear);
 		lx->free       = CAT(LX_PREFIX, _dynfree);
 
-	/* XXX */
-	lx->free = NULL;
+		/* XXX */
+		lx->free = NULL;
 
 		/* This is a workaround for ADVANCE_LEXER assuming a pointer */
 		act_state = &act_state_s;
@@ -1003,9 +1004,6 @@ ZL0:;
 			const struct ast_alt *q;
 			struct ast_term *t;
 			struct ast_rule *r;
-			int ok;
-
-			ok = 1;
 
 			for (p = g; p != NULL; p = p->next) {
 				for (q = p->alts; q != NULL; q = q->next) {
@@ -1023,11 +1021,8 @@ ZL0:;
 						}
 
 						if (!allow_undefined) {
-							fprintf(stderr, "production rule <%s> not defined\n", t->u.rule->name);
-							/* TODO: print location of this and previous definition */
+							err(lex_state, "production rule <%s> not defined", t->u.rule->name);
 							/* XXX: would leak the ast_rule here */
-
-							ok = 0;
 							continue;
 						}
 
@@ -1044,15 +1039,12 @@ ZL0:;
 					}
 				}
 			}
-
-			if (!ok) {
-				exit(EXIT_FAILURE);
-			}
 		}
 
+		*errors = lex_state->errors;
 		return g;
 	}
 
-#line 1057 "src/bnf/parser.c"
+#line 1049 "src/bnf/parser.c"
 
 /* END OF FILE */

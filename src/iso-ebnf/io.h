@@ -8,7 +8,7 @@
 #define KGT_ISO_EBNF_IO_H
 
 #include "../compiler_specific.h"
-
+#include "../parsing_error.h"
 struct ast_rule;
 
 /*
@@ -19,7 +19,7 @@ struct ast_rule;
 #define iso_ebnf_ast_unsupported (FEATURE_AST_CI_LITERAL | FEATURE_AST_PROSE | FEATURE_AST_BINARY)
 
 struct ast_rule *
-iso_ebnf_input(int (*f)(void *opaque), void *opaque);
+iso_ebnf_input(int (*f)(void *opaque), void *opaque, parsing_error_queue* errors);
 
 WARN_UNUSED_RESULT
 int

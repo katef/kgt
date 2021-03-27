@@ -239,4 +239,3 @@ ast_free_term(struct ast_term *term)
 	/* XXX: free contents */
 	free(term);
 }
-
