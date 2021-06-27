@@ -34,7 +34,7 @@ ${BUILD}/bin/kgt: ${BUILD}/src/xalloc.o
 	${PART:Mebnfhtml5} \
 	${PART:Mrrd} ${PART:Mrrdot} ${PART:Mrrdump} ${PART:Mrrtdump} \
 	${PART:Mrrparcon} ${PART:Mrrll} ${PART:Mrrta} ${PART:Mrrtext} \
-	${PART:Msvg} ${PART:Mhtml5}
+	${PART:Msvg} ${PART:Mhtml5} ${PART:Mjson}
 ${BUILD}/bin/kgt: ${BUILD}/lib/${part}.o
 .endfor
 
