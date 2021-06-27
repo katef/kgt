@@ -39,6 +39,7 @@
 #include "rrtext/io.h"
 #include "svg/io.h"
 #include "html5/io.h"
+#include "json/io.h"
 
 int debug = 0;
 int prettify = 1;
@@ -81,7 +82,8 @@ struct io {
 	{ "rrutf8",   NULL,           rrutf8_output,   0, 0 },
 	{ "svg",      NULL,           svg_output,      0, 0 },
 	{ "html5",    NULL,           html5_output,    0, 0 },
-	{ "xhtml5",   NULL,           xhtml5_output,   0, 0 }
+	{ "xhtml5",   NULL,           xhtml5_output,   0, 0 },
+    { "json",       NULL,           json_output,        json_ast_unsupported, 0 }
 };
 
 enum io_dir {

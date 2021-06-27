@@ -34,6 +34,7 @@ SUBDIR += src/rrtext
 SUBDIR += src/rrdot
 SUBDIR += src/svg
 SUBDIR += src/html5
+SUBDIR += src/json
 SUBDIR += src
 
 .include <subdir.mk>
