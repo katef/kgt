@@ -8,21 +8,34 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include "../txt.h"
 #include "../ast.h"
 
 #include "io.h"
 
-static void output_string(const char *string) {
+int
+escputc(char c)
+{
+    /*
+     A simple way to deal with all escaped characters:
+        '0020' . '10FFFF' - '"' - '\'
+     is to convert them all to the valid '\u' hex hex hex hex format.
+     */
+    
+    if ((unsigned char) c == '\"' || (unsigned char) c == '\\' || (unsigned char) c < ' ') {
+        return printf("\\u00%02x", (unsigned char) c);
+    }
+    
+    return printf("%c", c);
+}
+
+void output_string(const char *string) {
     fputs("\"", stdout);
 
     for(; *string ; string++) {
-        if (*string == '\"') {
-            fputs("\\\"", stdout);
-        } else {
-            putc(*string, stdout);
-        }
+        escputc(*string);
     }
 
     fputs("\"", stdout);
@@ -32,11 +45,7 @@ void output_txt(const struct txt t) {
 	size_t i;
 	fputs("\"", stdout);
 	for (i = 0; i < t.n; i++) {
-		if (t.p[i] == '\"') {
-			fputs("\\\"", stdout);
-		} else {
-			putc(t.p[i], stdout);
-		}
+        escputc(t.p[i]);
 	}
 	fputs("\"", stdout);
 }
