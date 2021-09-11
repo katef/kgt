@@ -243,12 +243,14 @@
 	static void
 	err(struct lex_state *lex_state, const char *fmt, ...)
 	{
+		parsing_error error;
+		va_list ap;
+
 		assert(lex_state != NULL);
 
-		parsing_error error;
 		error.line = lex_state->lx.start.line;
-		error.column= lex_state->lx.start.col;
-		va_list ap;
+		error.col  = lex_state->lx.start.col;
+
 		va_start(ap, fmt);
 		vsnprintf(error.description, PARSING_ERROR_DESCRIPTION_SIZE, fmt, ap);
 		va_end(ap);

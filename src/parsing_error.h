@@ -11,7 +11,7 @@
 
 struct parsing_error {
 	int line;
-	int column;
+	int col;
 	char description[PARSING_ERROR_DESCRIPTION_SIZE];
 };
 
@@ -27,4 +27,4 @@ typedef parsing_error_queue_element* parsing_error_queue;
 void parsing_error_queue_push(parsing_error_queue* queue, parsing_error error);
 int parsing_error_queue_pop(parsing_error_queue* queue, parsing_error* error);
 
-#endif // KGT_PARSING_ERROR_H
+#endif

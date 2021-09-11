@@ -156,6 +156,7 @@ main(int argc, char *argv[])
 	struct ast_rule *g;
 	struct io *in, *out;
 	const char *filter;
+	parsing_error_queue errors = NULL;
 
 	in  = lang(IO_IN, "bnf");
 	out = in;
@@ -193,21 +194,23 @@ main(int argc, char *argv[])
 	assert(io->in  != NULL);
 	assert(io->out != NULL);
 
-	parsing_error_queue errors = NULL;
 	g = in->in(kgt_fgetc, stdin, &errors);
 
-	int error_count = 0;
-	while(errors) {
-		error_count += 1;
-		parsing_error error;
-		parsing_error_queue_pop(&errors, &error);
+	{
+		int error_count = 0;
 
-		fprintf(stderr, "%u:%u: %s\n", error.line, error.column,
-						error.description);
-	}
-	if (error_count != 0) {
-		fprintf(stderr, "KGT: Exiting. %d errors reported\n", error_count);
-		exit(EXIT_FAILURE);
+		while (errors) {
+			parsing_error error;
+			parsing_error_queue_pop(&errors, &error);
+
+			fprintf(stderr, "%u:%u: %s\n", error.line, error.col, error.description);
+			error_count += 1;
+		}
+
+		if (error_count != 0) {
+			fprintf(stderr, "KGT: Exiting. %d errors reported\n", error_count);
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	{
@@ -264,10 +267,11 @@ main(int argc, char *argv[])
 		g = new;
 	}
 
-	if (out->out(g))
-	  return EXIT_SUCCESS;
-	else
-	  return EXIT_FAILURE;
+	if (!out->out(g)) {
+		return EXIT_FAILURE;
+	}
 
 	/* TODO: free ast */
+
+	return EXIT_SUCCESS;
 }
