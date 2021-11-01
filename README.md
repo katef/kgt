@@ -70,6 +70,8 @@ and the same grammar output as SVG instead:
 
 ![expr.svg](examples/expr.svg)
 
+### Building from source
+
 Clone with submodules (contains required .mk files):
 
     ; git clone --recursive https://github.com/katef/kgt.git
