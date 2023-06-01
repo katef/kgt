@@ -1,5 +1,10 @@
 .MAKEFLAGS: -r -m share/mk
 
+.MAIN: all
+
+.SYSPATH:
+.SYSPATH: $(.CURDIR)/share/mk
+
 # targets
 all::  mkdir .WAIT dep .WAIT prog
 dep::
