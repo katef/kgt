@@ -81,7 +81,7 @@ rrd_pretty(struct node **rrd)
 		do {
 			changed = 0;
 			node_walk(f[i], &changed, rrd);
-		} while (changed && !limit--);
+		} while (changed && limit--);
 	}
 }
 
