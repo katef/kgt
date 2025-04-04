@@ -38,7 +38,7 @@
 struct render_context {
 	char **lines;
 	char *scratch;
-        size_t scratch_size;
+	size_t scratch_size;
 	unsigned x, y; /* in character indicies */
 };
 
