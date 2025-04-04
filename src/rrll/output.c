@@ -110,21 +110,21 @@ escputt(const struct txt *t, FILE *f)
 
 /* TODO: centralise */
 static size_t
-loop_label(unsigned min, unsigned max, char *s)
+loop_label(unsigned min, unsigned max, char *s, size_t buf_size)
 {
 	assert(max >= min);
 	assert(s != NULL);
 
 	if (max == 1 && min == 1) {
-		return sprintf(s, "(exactly once)");
+		return snprintf(s, buf_size, "(exactly once)");
 	} else if (max == 0 && min > 0) {
-		return sprintf(s, "(at least %u times)", min);
+		return snprintf(s, buf_size, "(at least %u times)", min);
 	} else if (max > 0 && min == 0) {
-		return sprintf(s, "(up to %d times)", max);
+		return snprintf(s, buf_size, "(up to %d times)", max);
 	} else if (max > 0 && min == max) {
-		return sprintf(s, "(%u times)", max);
+		return snprintf(s, buf_size, "(%u times)", max);
 	} else if (max > 1 && min > 1) {
-		return sprintf(s, "(%u-%u times)", min, max);
+		return snprintf(s, buf_size, "(%u-%u times)", min, max);
 	}
 
 	*s = '\0';
@@ -209,7 +209,7 @@ node_walk(FILE *f, const struct node *n)
 			char s[128]; /* XXX */
 			size_t r;
 
-			r = loop_label(n->u.loop.min, n->u.loop.max, s);
+			r = loop_label(n->u.loop.min, n->u.loop.max, s, 128);
 
 			node_walk(f, n->u.loop.forward);
 			fprintf(f, "*");

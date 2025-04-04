@@ -38,6 +38,7 @@
 struct render_context {
 	char **lines;
 	char *scratch;
+        size_t scratch_size;
 	unsigned x, y; /* in character indicies */
 };
 
@@ -71,7 +72,7 @@ bprintf(struct render_context *ctx, const char *fmt, ...)
 	assert(ctx->scratch != NULL);
 
 	va_start(ap, fmt);
-	n = vsprintf(ctx->scratch, fmt, ap);
+	n = vsnprintf(ctx->scratch, ctx->scratch_size, fmt, ap);
 	va_end(ap);
 
 	memcpy(ctx->lines[ctx->y] + ctx->x, ctx->scratch, n);
@@ -432,6 +433,7 @@ render_rule(const struct tnode *node, int utf8)
 	ctx.x = 0;
 	ctx.y = 0;
 	ctx.scratch = xmalloc(w + 1);
+	ctx.scratch_size = w + 1;
 
 	ctx.y = node->a;
 	bprintf(&ctx, "\017\023\022\022");
