@@ -18,7 +18,7 @@ jobs:
         cc: [ gcc ]
     
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
 
@@ -70,7 +70,7 @@ jobs:
         cc: [ emcc ]
     
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
 
