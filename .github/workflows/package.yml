@@ -76,7 +76,7 @@ jobs:
 
     # the xenial emscripten package is old (and doesn't support wasm);
     # this brings in emsdk which is more recent, and does.
-    - uses: mymindstorm/setup-emsdk@v7
+    - uses: mymindstorm/setup-emsdk@v14
 
     - name: dependencies
       run: |
