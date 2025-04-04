@@ -395,7 +395,7 @@ times(unsigned n)
 }
 
 static size_t
-loop_label(unsigned min, unsigned max, char *s)
+loop_label(unsigned min, unsigned max, char *s, size_t buf_size)
 {
 	const char *h;
 
@@ -409,29 +409,29 @@ loop_label(unsigned min, unsigned max, char *s)
 
 	if (max == min) {
 		if (h = times(max), h != NULL) {
-			return sprintf(s, "(%s only)", h);
+			return snprintf(s, buf_size, "(%s only)", h);
 		} else {
-			return sprintf(s, "(%u times)", max);
+			return snprintf(s, buf_size, "(%u times)", max);
 		}
 	}
 
 	if (min == 0) {
 		if (h = times(max), h != NULL) {
-			return sprintf(s, "(%s at most)", h);
+			return snprintf(s, buf_size, "(%s at most)", h);
 		} else {
-			return sprintf(s, "(%u times at most)", max);
+			return snprintf(s, buf_size, "(%u times at most)", max);
 		}
 	}
 
 	if (max == 0) {
 		if (h = times(min), h != NULL) {
-			return sprintf(s, "(at least %s)", h);
+			return snprintf(s, buf_size, "(at least %s)", h);
 		} else {
-			return sprintf(s, "(at least %u times)", min);
+			return snprintf(s, buf_size, "(at least %u times)", min);
 		}
 	}
 
-	return sprintf(s, "(%u-%u times)", min, max);
+	return snprintf(s, buf_size, "(%u-%u times)", min, max);
 }
 
 static struct tnode *
@@ -796,7 +796,7 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 			char s[128]; /* XXX */
 			const char *label;
 
-			loop_label(node->u.loop.min, node->u.loop.max, s);
+			loop_label(node->u.loop.min, node->u.loop.max, s, 128);
 			label = xstrdup(s);
 
 			if (strlen(label) != 0) {

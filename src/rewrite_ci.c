@@ -135,7 +135,7 @@ walk_term(struct ast_term *term)
 	case TYPE_CS_LITERAL:
 	case TYPE_TOKEN:
 	case TYPE_PROSE:
-		break;
+		return 1;
 
 	case TYPE_GROUP:
 		walk_alts(term->u.group);
@@ -148,6 +148,8 @@ walk_term(struct ast_term *term)
 	case TYPE_CI_LITERAL:
 		return rewrite_ci(term);
 	}
+
+	return 0;
 }
 
 WARN_UNUSED_RESULT

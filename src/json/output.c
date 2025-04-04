@@ -100,7 +100,6 @@ output_term_group(const struct ast_alt *group) {
 WARN_UNUSED_RESULT
 static int
 output_term_literal(const struct txt literal) {
-	size_t i;
 	fputs(",", stdout);
 	output_string("literal");
 	fputs(":", stdout);
