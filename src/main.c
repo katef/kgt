@@ -46,15 +46,6 @@ int prettify = 1;
 int allow_undefined = 1;
 const char *css_file;
 
-/*
- * emscripten's musl will call __wait from getopt() (via getopt_msg and
- * then flockfile), which is not present for standalone wasm because that
- * has no pthread support, and so a definition for __wait is not included.
- */
-#ifdef __EMSCRIPTEN__
-void __wait(int a, int b, int c, int d) { }
-#endif
-
 struct io {
 	const char *name;
 	struct ast_rule *(*in)(int (*f)(void *), void *, parsing_error_queue*);
