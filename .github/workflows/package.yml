@@ -52,7 +52,7 @@ jobs:
         mkdir pkg
         fpm -C prefix -p pkg/ -n kgt -t ${{ matrix.pkg }} -v 0.${{ github.sha }} -m kate@elide.org -s dir
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: ${{ github.sha }} ${{ matrix.pkg }}
         path: pkg/* # single file here (because this is a matrix build), name format differs per package type     
@@ -106,7 +106,7 @@ jobs:
         export PATH="$WASMTIME_HOME/bin:$PATH"
         bmake -r -j 2 PKGCONF=pkg-config SID='true; echo sid' LX='true; echo lx' WASM_VALIDATE='true; echo wasm-validate' CC=${{ matrix.cc }} test
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: ${{ github.sha }} wasm
         path: build/bin/*.wasm
