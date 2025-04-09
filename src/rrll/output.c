@@ -209,7 +209,7 @@ node_walk(FILE *f, const struct node *n)
 			char s[128]; /* XXX */
 			size_t r;
 
-			r = loop_label(n->u.loop.min, n->u.loop.max, s, 128);
+			r = loop_label(n->u.loop.min, n->u.loop.max, s, sizeof s);
 
 			node_walk(f, n->u.loop.forward);
 			fprintf(f, "*");
