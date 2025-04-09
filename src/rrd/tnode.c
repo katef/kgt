@@ -796,7 +796,7 @@ tnode_create_node(const struct node *node, int rtl, const struct dim *dim)
 			char s[128]; /* XXX */
 			const char *label;
 
-			loop_label(node->u.loop.min, node->u.loop.max, s, 128);
+			loop_label(node->u.loop.min, node->u.loop.max, s, sizeof s);
 			label = xstrdup(s);
 
 			if (strlen(label) != 0) {
